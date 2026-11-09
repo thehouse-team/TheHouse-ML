@@ -1,0 +1,15 @@
+# Datos y modelos (constitution §6 y §7): nunca en git
+data/raw/
+data/processed/
+models/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
