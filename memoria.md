@@ -16,21 +16,27 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Justificación:** herramientas estándar de ML, gratuitas y con exportación a ONNX, que el backend .NET puede cargar.
 - **Impacto:** el backend agrega `Microsoft.ML.OnnxRuntime` en NV-23 en lugar de entrenar con ML.NET.
 
-## M-ML-003 — Fuentes de datos permitidas
+## M-ML-003 — Fuentes de datos: bases nacionales y calibración regional
 
-- **Decisión:**
+- **Decisión:** los datos se trabajan en dos niveles. **Nacional** para obtener bases y proporciones con muestra suficiente; **regional** para calibrarlas a los 7 municipios de las universidades del seed (Hidalgo: Tula de Allende, Tepeji del Río de Ocampo, Tlahuelilpan, Atotonilco de Tula y Mixquiahuala de Juárez; Estado de México: Jilotepec y Villa del Carbón), con respaldo municipio → estado → nacional cuando la muestra no alcanza.
 
 | Fuente | Uso | Licencia y condiciones | Estado |
 | --- | --- | --- | --- |
-| Inside Airbnb — Ciudad de México (`listings`) | Distribuciones realistas de servicios (amenities), tipo de cuarto, precio relativo y ubicación de los cuartos | CC BY 4.0 según terceros; su página de políticas pide descargar solo lo necesario, no hacer scraping del sitio y no republicar los datos. Se verifica la licencia en la propia página antes de descargar | PENDIENTE de verificación |
-| OpenStreetMap | Coordenadas de los campus de las 10 universidades regionales y puntos de interés | ODbL: atribución y obras derivadas bajo la misma licencia | PROPUESTO |
-| Seed de TheHouse (12 propiedades, 10 universidades) | Rangos regionales de precio y ubicación (Tula–Tepeji–Jilotepec) para reescalar | Datos propios | PROPUESTO |
-| Estudiantes sintéticos | Perfiles generados desde el esquema de NV-11 | Propios, con distribuciones documentadas | PROPUESTO |
+| INEGI — Censo de Población y Vivienda 2020, muestra del cuestionario ampliado | Tenencia (rentada), servicios de la vivienda y monto de renta si el diccionario confirma la variable; niveles nacional, estatal y municipal | Términos de libre uso de la información del INEGI: copiar, adaptar y publicar citando a INEGI como autor y el producto; no sugerir respaldo de INEGI | PROPUESTO |
+| INEGI — Encuesta Nacional de Vivienda (ENVI) 2020 (con Infonavit y SHF) | Monto y motivo de renta, gasto en vivienda; niveles nacional y estatal | Términos de libre uso de INEGI | PROPUESTO |
+| INEGI — ENIGH 2022 | Validación del gasto en renta de inquilinos; no se usa el alquiler imputado a propietarios | Términos de libre uso de INEGI | PROPUESTO |
+| INEGI — DENUE (edición vigente) | Establecimientos con coordenadas alrededor de cada campus (factor de extras) | Términos de libre uso de INEGI | PROPUESTO |
+| INEGI — INPC | Actualizar montos de 2020 a pesos del año de ejecución | Términos de libre uso de INEGI | PROPUESTO |
+| Inside Airbnb — Ciudad de México (`listings`) | Atributos a nivel cuarto: servicios, tipo de cuarto, precio relativo | CC BY 4.0 según la fuente; su política pide descargar solo lo necesario, sin scraping y sin republicar. Se verifica en su página antes de descargar | PENDIENTE de verificación |
+| OpenStreetMap | Verificar coordenadas de campus, en especial las 3 aproximadas del seed (UAEH-ESTL, UMB-VDC, UCAN) | ODbL: atribución y misma licencia para bases derivadas | PROPUESTO |
+| Seed de TheHouse (NV-07, NV-08, NV-11) | Universidades y rangos de referencia de la región | Datos propios | PROPUESTO |
+| ANUIES — matrícula por institución | Posible ponderación de universidades | Licencia no verificada | PENDIENTE |
 | Señales reales de TheHouse (favoritos y visitas) | Etiquetas reales de interés | Exportación anonimizada definida por una spec del backend | PENDIENTE |
 
-- **Estado:** PROPUESTO.
-- **Justificación:** no existe un dataset público de estudiantes, preferencias e interés en cuartos en México; se combinan datos reales de inmuebles con perfiles sintéticos y, cuando existan, señales reales de la app.
-- **Impacto:** los datos crudos nunca se suben al repositorio (constitution §7).
+- **Reglas:** toda estimación de encuesta usa su factor de expansión; una estimación municipal solo se usa con al menos 30 viviendas rentadas en la muestra y coeficiente de variación ≤ 30 %; solo se usan productos de descarga pública (no el laboratorio de microdatos); ninguna variable se usa sin confirmarla en el diccionario oficial.
+- **Estado:** PROPUESTO — pedido de Victor (2026-11-10): «que los datos sean a nivel México para sacar el porcentaje o las bases del proyecto y para el final solo se base en una sola área». Se aprueba junto con ML-02.
+- **Justificación:** en pocos municipios las encuestas tienen muy pocas viviendas; usar lo nacional como base y lo regional como ajuste da estimaciones estables y a la vez locales. INEGI describe viviendas, no cuartos, por eso se conserva una fuente a nivel cuarto.
+- **Impacto:** ML-02 1.0.0-borrador revisada el 2026-11-10 (9 requisitos, 9 tasks). Los datos crudos nunca se suben al repositorio (constitution §7).
 
 ## M-ML-004 — Fuentes descartadas
 
@@ -59,7 +65,7 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 ## M-ML-007 — Costo
 
 - **Decisión:** $0: CPU local y GitHub Actions en repositorio público; sin servicios de ML administrados ni GPU en la nube.
-- **Estado:** APROBADO con la constitution 1.0.0 (§15). El repositorio `thehouse-team/TheHouse-ML` se creó **privado** el 2026-11-09; mientras sea privado, el CI usa la cuota gratuita de 2,000 minutos al mes de GitHub Actions del plan Free. Hacerlo público como `TheHouse-Backend` y `TheHouse-Mobile` es decisión del responsable.
+- **Estado:** APROBADO con la constitution 1.0.0 (§15). El repositorio `thehouse-team/TheHouse-ML` se creó privado el 2026-11-09 y Victor lo hizo **público** el 2026-11-10 («si haslo publico»), igual que `TheHouse-Backend` y `TheHouse-Mobile`: CI sin límite de minutos y ruleset de `main` disponible en el plan Free.
 
 ## M-ML-008 — Separación con TheHouse-GenAI
 
@@ -67,3 +73,10 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — coherente con el Artículo 2 de la constitución de `TheHouse-GenAI` y con la constitution 1.0.0 §2 de este repositorio.
 - **Fecha:** 2026-11-09.
 - **Impacto:** la spec NV-24 del backend debe ajustarse para consumir `TheHouse-GenAI` (decisión del backend, pendiente).
+
+## M-ML-009 — ML-01 aprobada: base del proyecto y licencia MIT
+
+- **Decisión:** aprobar ML-01 1.0.0 (paquete con `uv`, CLI de cinco etapas, ruff, mypy estricto, pytest con cobertura ≥ 80 %, pip-audit, gitleaks, CI en Linux y Windows y ruleset de `main`) y licenciar el código con MIT. La licencia no cubre los datos de terceros, que conservan la suya.
+- **Estado:** APROBADO — Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA»: ML-01 1.0.0 con licencia MIT; tasks T01–T05; rutas `pyproject.toml`, `uv.lock`, `.python-version`, `LICENSE`, `src/`, `tests/`, `.github/workflows/`, `README.md`, `INSTALACION.txt` y `specs/ml-01-foundation/`; ruleset de `main`).
+- **Fecha:** 2026-11-10.
+- **Impacto:** el repositorio pasa de solo documentos a un paquete instalable; ML-02 puede ejecutarse cuando se aprueben ella y las fuentes de M-ML-003.
