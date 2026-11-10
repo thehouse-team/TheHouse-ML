@@ -16,7 +16,15 @@ Las explicaciones en lenguaje natural del puntaje son de [`TheHouse-GenAI`](http
 - **Cómo se trabaja (SDD, ramas, pruebas, evidencia, definición de terminado):** [`CONTRIBUTING.md`](CONTRIBUTING.md).
 - **Qué hace el proyecto y qué lleva cada spec:** [`specs/ARQUITECTURA.md`](specs/ARQUITECTURA.md).
 
-El código de Python todavía no existe: lo crea la spec ML-01 cuando se apruebe y se autorice con «EJECUTA».
+Uso rápido (Python 3.12 y [uv](https://docs.astral.sh/uv/)):
+
+```bash
+uv sync --frozen
+uv run python -m thehouse_ml --help
+uv run pytest
+```
+
+El código está bajo licencia MIT ([`LICENSE`](LICENSE)); los datos de terceros conservan su propia licencia.
 
 ## Documentos
 

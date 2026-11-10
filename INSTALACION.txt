@@ -9,17 +9,13 @@ Repositorio: https://github.com/thehouse-team/TheHouse-ML
  ESTADO ACTUAL (leer primero)
 ---------------------------------------------------------------------
 
-Hoy el repositorio solo tiene documentos: constitution, AGENTS,
-memoria, guia (CONTRIBUTING.md) y las specs ML-01 a ML-07.
+ML-01 (base del proyecto) esta implementada: paquete de Python,
+comando con las 5 etapas, pruebas y CI. Las etapas todavia estan
+vacias: cada una dice que spec la implementa (ML-02 en adelante).
 
-Todavia NO existe el codigo de Python ni pyproject.toml. Crearlos es
-el trabajo de la spec ML-01, que se ejecuta cuando el responsable
-(Victor) la apruebe y de «EJECUTA».
-
-Por eso:
-  - La PARTE A (herramientas y descarga) funciona desde hoy.
-  - La PARTE B (instalar dependencias y correr pruebas) funciona
-    en cuanto ML-01 este mezclada en main.
+  - PARTE A: herramientas y descarga del proyecto.
+  - PARTE B: instalar dependencias y verificar. Funciona en cuanto
+    el pull request de ML-01 este mezclado en main.
 
 ---------------------------------------------------------------------
  PARTE A - Preparar la computadora y descargar el proyecto (hoy)
