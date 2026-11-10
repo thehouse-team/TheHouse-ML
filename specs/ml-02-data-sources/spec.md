@@ -6,8 +6,8 @@
 | Documento | `spec.md` |
 | Versión | 1.0.0-borrador |
 | Fecha | 2026-11-10 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («pues si te apruebo que revises si el censo trae lo de las rentas, pues la region si esta bien, pues si en el municipio creo que hay varias rentas las suficientes y si se usa airbnb usa la licencia y lo demas tambien en pocas palabras si a todo»): ML-02 1.0.0 y sus decisiones de la §10 |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0-borrador |
@@ -15,7 +15,7 @@
 | Precondición | ML-01 completa; fuentes de M-ML-003 aprobadas |
 | Relación con el backend | Verifica las coordenadas de las 10 universidades del seed de NV-11 (3 están aproximadas al centro del municipio) y entrega las correcciones |
 
-Spec en borrador para revisión humana. No autoriza código, descargas de datos, dependencias ni cambios en GitHub: la ejecución requiere aprobación y «EJECUTA».
+Spec aprobada. No autoriza código ni descargas hasta recibir «EJECUTA» con tasks y rutas.
 
 ## 1. Contexto
 
@@ -29,14 +29,14 @@ Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servi
 
 1. ML-01 completa.
 2. Fuentes y licencias registradas como APROBADO en M-ML-003 (términos de libre uso de INEGI, Inside Airbnb, OpenStreetMap).
-3. Variables confirmadas en los diccionarios oficiales antes de escribir código (decisiones de la §10).
+3. Variables confirmadas en los diccionarios oficiales antes de escribir código; las del Censo 2020 ya se confirmaron (§10).
 4. Autorización «EJECUTA».
 
 ## 4. Alcance
 
 1. Registro de fuentes: URL, edición, fecha, licencia, atribución y variables usadas de cada fuente, en `data/sources.toml` (en git).
 2. `download`: descarga reproducible de cada fuente con manifiesto SHA-256 en `data/manifests/`.
-3. Bases nacionales (INEGI): Censo de Población y Vivienda 2020, muestra del cuestionario ampliado (tenencia, servicios y, si el diccionario lo confirma, monto de renta); Encuesta Nacional de Vivienda (ENVI) 2020 (monto y motivo de renta); ENIGH 2022 solo como validación del gasto en vivienda de inquilinos.
+3. Bases nacionales (INEGI): Censo de Población y Vivienda 2020, muestra del cuestionario ampliado (`Viviendas_CA`: `TENENCIA`, servicios, `FACTOR` y `MUN`), que **no** pregunta el monto de renta; Encuesta Nacional de Vivienda (ENVI) 2020 como fuente del monto y motivo de renta; ENIGH 2022 solo como validación del gasto en vivienda de inquilinos.
 4. Calibración regional: estimaciones de los 7 municipios (Hidalgo: Tula de Allende, Tepeji del Río de Ocampo, Tlahuelilpan, Atotonilco de Tula y Mixquiahuala de Juárez; Estado de México: Jilotepec y Villa del Carbón) con respaldo jerárquico municipio → estado → nacional cuando la muestra no alcanza.
 5. Entorno de las universidades: conteos del DENUE por categoría SCIAN (abarrotes, lavanderías, farmacias, papelerías, transporte, comida) en radios de 1, 2 y 5 km de cada campus.
 6. Catálogo de cuartos: Inside Airbnb Ciudad de México (una instantánea) para atributos a nivel cuarto, sin datos personales y mapeado a NV-11.
@@ -56,7 +56,7 @@ Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servi
 - **Regla de suficiencia:** una estimación municipal se usa solo si tiene al menos 30 viviendas rentadas en la muestra y coeficiente de variación ≤ 30 %; si no, se usa la del estado, y si tampoco alcanza, la nacional. Cada valor guarda de qué nivel salió.
 - **Bases nacionales (salida `national_baselines.parquet`):** percentiles de renta mensual (p10, p25, p50, p75, p90) por tipo de vivienda y tamaño de localidad; proporción de viviendas rentadas; prevalencia y co-ocurrencia de servicios (agua entubada, drenaje, electricidad, internet, gas); todo con fecha de la fuente.
 - **Actualización de montos:** las rentas de 2020 se llevan a pesos del año de ejecución con el INPC de INEGI; el índice y la fecha quedan en el manifiesto.
-- **Calibración regional (salida `regional_calibration.parquet`):** mismos indicadores para los 7 municipios con su nivel de respaldo; el modelo usa la forma nacional reescalada a la mediana regional.
+- **Calibración regional (salida `regional_calibration.parquet`):** para los 7 municipios, proporción de viviendas rentadas y servicios desde el Censo (nivel municipal con respaldo); el monto de renta solo existe a nivel estatal (ENVI: Hidalgo y Estado de México), así que la renta regional usa la forma nacional reescalada a la mediana estatal y se contrasta con el seed de TheHouse. Cada valor guarda su nivel.
 - **Entorno DENUE (salida `campus_context.parquet`):** conteos por categoría y radio para cada universidad; alimenta el factor de extras en ML-03.
 - **Cuartos (salida `rooms.parquet`):** columnas conservadas de Inside Airbnb `room_type`, `property_type`, `accommodates`, `bedrooms`, `bathrooms_text`, `amenities`, `price`, `latitude`, `longitude`; se eliminan nombres, descripciones, URLs, fotos y todo dato del anfitrión; coordenadas redondeadas a 3 decimales; precio por noche convertido a percentil dentro de su tipo y luego a renta mensual con la calibración regional (nunca se usa el precio por noche como renta).
 - Mapeo de `amenities` al catálogo de NV-11 (`wifi`, `water`, `electricity`, `gas`, `hot_water`, `laundry`, `kitchen`, `furnished`, `parking`, `security`, `cleaning`) y de `room_type`/`property_type` a `placeType` y `propertyTypes`; tablas de mapeo versionadas en `src/thehouse_ml/data/mappings/`.
@@ -67,12 +67,12 @@ Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servi
 
 | Fuente | Editor | Uso | Nivel | Licencia |
 | --- | --- | --- | --- | --- |
-| Censo de Población y Vivienda 2020, muestra (cuestionario ampliado) | INEGI | Tenencia, servicios y monto de renta si existe la variable | Nacional, estatal, municipal | Términos de libre uso de INEGI: citar la fuente |
+| Censo de Población y Vivienda 2020, muestra (cuestionario ampliado, tabla `Viviendas_CA`) | INEGI | Tenencia (`TENENCIA`), servicios, factor de expansión (`FACTOR`) y municipio (`MUN`); no incluye monto de renta | Nacional, estatal, municipal | Términos de libre uso de INEGI: citar la fuente |
 | Encuesta Nacional de Vivienda (ENVI) 2020 | INEGI, Infonavit, SHF | Monto y motivo de renta, gasto en vivienda | Nacional, estatal | Términos de libre uso de INEGI |
 | ENIGH 2022 | INEGI | Validación del gasto en renta de inquilinos (no el alquiler imputado a propietarios) | Nacional, estatal | Términos de libre uso de INEGI |
 | DENUE (edición vigente) | INEGI | Establecimientos con coordenadas alrededor de cada campus | Hasta localidad | Términos de libre uso de INEGI |
 | INPC | INEGI | Actualizar montos de 2020 a pesos del año de ejecución | Nacional | Términos de libre uso de INEGI |
-| Inside Airbnb, Ciudad de México | Inside Airbnb | Atributos a nivel cuarto | Ciudad | CC BY 4.0 según la fuente; verificar antes de descargar |
+| Inside Airbnb, Ciudad de México (instantánea 2026-09-23, `listings.csv.gz`) | Inside Airbnb | Atributos a nivel cuarto | Ciudad | CC BY 4.0, verificada el 2026-11-10; cita formal de dataset, una descarga, sin scraping ni republicar |
 | OpenStreetMap | Colaboradores de OSM | Verificar coordenadas de campus | Punto | ODbL: atribución y misma licencia para bases derivadas |
 | Seed de TheHouse (NV-07, NV-08, NV-11) | Propio | Universidades, rangos de referencia | Región | Propio |
 
@@ -126,12 +126,12 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
-| Variable de monto de renta en el Censo 2020 (muestra) | Confirmar en el diccionario del cuestionario ampliado; si no existe, la renta sale de ENVI 2020 (nivel estatal) y el Censo aporta tenencia y servicios | PENDIENTE |
-| Región | Los 7 municipios de las universidades del seed (Hidalgo: Tula de Allende, Tepeji del Río de Ocampo, Tlahuelilpan, Atotonilco de Tula y Mixquiahuala de Juárez; Estado de México: Jilotepec y Villa del Carbón) | PROPUESTO |
-| Regla de suficiencia | ≥ 30 viviendas rentadas en muestra y CV ≤ 30 %; si no, respaldo estado → país | PROPUESTO |
-| Edición del DENUE | La vigente al ejecutar (basada en los Censos Económicos más recientes) | PROPUESTO |
-| Instantánea de Inside Airbnb | La más reciente de la Ciudad de México al ejecutar; licencia verificada en su página | PENDIENTE |
-| Datos de matrícula (ANUIES) | Evaluar si su licencia permite usar matrícula por institución para ponderar universidades; no se usa hasta verificarla | PENDIENTE |
+| Monto de renta en el Censo 2020 (muestra) | Verificado el 2026-11-10: el cuestionario ampliado solo pregunta tenencia (pregunta 23) y el diccionario de `Viviendas_CA` (83 variables) no tiene monto. La renta sale de ENVI 2020 (estatal y nacional); el Censo aporta tenencia y servicios por municipio | RESUELTO |
+| Región | Los 7 municipios de las universidades del seed (Hidalgo: Tula de Allende, Tepeji del Río de Ocampo, Tlahuelilpan, Atotonilco de Tula y Mixquiahuala de Juárez; Estado de México: Jilotepec y Villa del Carbón) | APROBADO |
+| Regla de suficiencia | ≥ 30 viviendas rentadas en muestra y CV ≤ 30 %; si no, respaldo estado → país | APROBADO |
+| Edición del DENUE | La vigente al ejecutar (basada en los Censos Económicos más recientes) | APROBADO |
+| Inside Airbnb | Instantánea de Ciudad de México del 2026-09-23 (17.2 MB); CC BY 4.0 verificada el 2026-11-10; cita formal de dataset; sin republicar ni subir el CSV | APROBADO |
+| Datos de matrícula (ANUIES) | Usarlos solo si su licencia lo permite; se verifica en la T01 y, si no, no se usan | APROBADO con condición |
 
 ## 11. Costo — COST-001
 
@@ -144,7 +144,7 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | ID | Riesgo | Impacto | Mitigación |
 | --- | --- | --- | --- |
 | ML-02-RK01 | Muestra municipal insuficiente | Estimaciones regionales inestables | Regla de suficiencia con respaldo estado → país y reporte del nivel usado |
-| ML-02-RK02 | Variable de renta inexistente en el Censo | Sin renta a nivel municipal | Usar ENVI estatal y calibrar con el seed y, después, con cuartos reales |
+| ML-02-RK02 | Sin renta a nivel municipal (el Censo 2020 no la pregunta) | La renta regional es estatal, no municipal | Usar ENVI estatal, contrastar con el seed de TheHouse y, después, con cuartos reales (ML-07) |
 | ML-02-RK03 | Datos de 2020 desactualizados | Rentas bajas respecto a hoy | Actualizar con INPC y validar contra el seed de TheHouse |
 | ML-02-RK04 | La Ciudad de México no representa a la región | Atributos de cuarto sesgados | Usar solo formas relativas de Inside Airbnb y calibrar montos con INEGI regional |
 | ML-02-RK05 | Coordenadas equivocadas | Distancias erróneas en backend y modelo | Verificación punto por punto contra OSM |
@@ -164,7 +164,7 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
+| Estado documental | **✅ APROBADA** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
 ## 15. Aprobación pendiente
