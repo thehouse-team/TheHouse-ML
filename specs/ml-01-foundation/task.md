@@ -5,7 +5,7 @@
 | ID | ML-01 |
 | Documento | `task.md` |
 | Versión | 1.0.0-borrador |
-| Fecha | 2026-11-07 |
+| Fecha | 2026-11-09 |
 | Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
 | Aprobación humana | Pendiente |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |

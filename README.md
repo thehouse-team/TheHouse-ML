@@ -17,6 +17,7 @@ Las explicaciones en lenguaje natural del puntaje son de [`TheHouse-GenAI`](http
 | [`constitution.md`](constitution.md) | Reglas de fondo: alcance, stack, datos, evaluación, equidad, contrato del artefacto y costo $0 |
 | [`AGENTS.md`](AGENTS.md) | Cómo trabajan los agentes: autorizaciones, flujo, datos y cierre |
 | [`memoria.md`](memoria.md) | Decisiones `M-ML-XXX` (fuentes de datos, stack, método) |
+| [`specs/ARQUITECTURA.md`](specs/ARQUITECTURA.md) | Qué hace el proyecto, relación con el backend y GenAI, pipeline, estructura del código y qué lleva cada spec |
 | [`specs/README.md`](specs/README.md) | Índice y orden de las specs ML-01 a ML-07 |
 
 ## Datos y atribución

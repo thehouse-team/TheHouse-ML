@@ -2,6 +2,8 @@
 
 Orden de bloques (mismo criterio que el backend): base → datos → modelo → integración → señales reales. Cada spec requiere su propia aprobación y «EJECUTA».
 
+Para entender el proyecto completo (qué hace, cómo se conecta con el backend y con `TheHouse-GenAI`, el pipeline, la estructura del código y qué lleva cada spec) lee primero [`ARQUITECTURA.md`](ARQUITECTURA.md).
+
 ## 1. Mapa de specs
 
 | ID | Spec | Estado documental | Estado de ejecución | Tasks |
