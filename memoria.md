@@ -73,3 +73,10 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — coherente con el Artículo 2 de la constitución de `TheHouse-GenAI` y con la constitution 1.0.0 §2 de este repositorio.
 - **Fecha:** 2026-11-09.
 - **Impacto:** la spec NV-24 del backend debe ajustarse para consumir `TheHouse-GenAI` (decisión del backend, pendiente).
+
+## M-ML-009 — ML-01 aprobada: base del proyecto y licencia MIT
+
+- **Decisión:** aprobar ML-01 1.0.0 (paquete con `uv`, CLI de cinco etapas, ruff, mypy estricto, pytest con cobertura ≥ 80 %, pip-audit, gitleaks, CI en Linux y Windows y ruleset de `main`) y licenciar el código con MIT. La licencia no cubre los datos de terceros, que conservan la suya.
+- **Estado:** APROBADO — Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA»: ML-01 1.0.0 con licencia MIT; tasks T01–T05; rutas `pyproject.toml`, `uv.lock`, `.python-version`, `LICENSE`, `src/`, `tests/`, `.github/workflows/`, `README.md`, `INSTALACION.txt` y `specs/ml-01-foundation/`; ruleset de `main`).
+- **Fecha:** 2026-11-10.
+- **Impacto:** el repositorio pasa de solo documentos a un paquete instalable; ML-02 puede ejecutarse cuando se aprueben ella y las fuentes de M-ML-003.

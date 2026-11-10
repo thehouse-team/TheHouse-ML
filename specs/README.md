@@ -8,7 +8,7 @@ Para entender el proyecto completo (qué hace, cómo se conecta con el backend y
 
 | ID | Spec | Estado documental | Estado de ejecución | Tasks |
 | --- | --- | --- | --- | --- |
-| ML-01 | [Base del proyecto](ml-01-foundation/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/5 |
+| ML-01 | [Base del proyecto](ml-01-foundation/spec.md) | **✅ APROBADA** | **🟡 EN EJECUCIÓN — T01–T05 autorizadas** | 0/5 |
 | ML-02 | [Datos: bases nacionales, calibración regional y licencias](ml-02-data-sources/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
 | ML-03 | [Esquema de features y estudiantes sintéticos](ml-03-feature-schema/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/6 |
 | ML-04 | [Modelo base por reglas](ml-04-baseline-model/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/5 |

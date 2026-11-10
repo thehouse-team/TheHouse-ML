@@ -5,17 +5,17 @@
 | ID | ML-01 |
 | Documento | `spec.md` |
 | Versión | 1.0.0-borrador |
-| Fecha | 2026-11-09 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Fecha | 2026-11-10 |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA»: ML-01 1.0.0 con licencia MIT; tasks T01–T05; rutas `pyproject.toml`, `uv.lock`, `.python-version`, `LICENSE`, `src/`, `tests/`, `.github/workflows/`, `README.md`, `INSTALACION.txt` y `specs/ml-01-foundation/`; ruleset de `main`) |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T05 autorizadas** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
 | Precondición | Constitution y AGENTS 1.0.0 aprobadas (M-ML-001, 2026-11-09) ✅ |
 | Relación con el backend | Ninguna directa; fija las reglas que usan ML-02 a ML-07 |
 
-Spec en borrador para revisión humana. No autoriza código, descargas de datos, dependencias ni cambios en GitHub: la ejecución requiere aprobación y «EJECUTA».
+Spec aprobada y autorizada para ejecutar T01–T05 (2026-11-10).
 
 ## 1. Contexto
 
@@ -30,7 +30,7 @@ Dejar un repositorio Python reproducible, con calidad y seguridad automáticas e
 1. Constitution y AGENTS 1.0.0 aprobadas. ✅ 2026-11-09.
 2. Repositorio `thehouse-team/TheHouse-ML` creado con permiso explícito. ✅ 2026-11-09.
 3. Repositorio público, necesario para el ruleset de la T04. ✅ 2026-11-10.
-4. Autorización «EJECUTA».
+4. Autorización «EJECUTA». ✅ 2026-11-10.
 
 ## 4. Alcance
 
@@ -86,7 +86,7 @@ uv run ruff check . && uv run mypy src && uv run pytest
 
 1. Ningún archivo de datos o modelo entra al repositorio.
 2. Las dependencias solo se agregan por decisión M-ML o la tabla de la constitution.
-3. Licencia del código: decisión pendiente (§10).
+3. Licencia del código: MIT (§10); no cubre datos de terceros.
 
 ## 8. Seguridad, datos y privacidad
 
@@ -110,7 +110,7 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Tema | Propuesta | Estado |
 | --- | --- | --- |
 | Gestor de entorno | `uv` | APROBADO (constitution 1.0.0 §5, M-ML-002) |
-| Licencia del código | MIT: permisiva y simple; aplica solo al código, no a los datos de terceros | PENDIENTE |
+| Licencia del código | MIT: permisiva y simple; aplica solo al código, no a los datos de terceros | APROBADO — Victor, 2026-11-10 |
 | Nombre del repositorio | `thehouse-team/TheHouse-ML` | APROBADO (creado el 2026-11-09) |
 | Visibilidad del repositorio | **Público**, como `TheHouse-Backend` y `TheHouse-Mobile`: permite el ruleset de `main` gratis y el CI sin límite de minutos. No contiene secretos ni datos | APROBADO — Victor, 2026-11-10 («si haslo publico») |
 
@@ -141,8 +141,8 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 0 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado documental | **✅ APROBADA** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01–T05 autorizadas** |
 
 ## 15. Aprobación pendiente
 
