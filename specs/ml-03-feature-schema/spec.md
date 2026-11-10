@@ -12,7 +12,7 @@
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0-borrador |
 | Tasks | `task.md` 1.0.0-borrador |
-| Precondición | ML-02 completa; NV-11 1.1.0 aprobada en el backend |
+| Precondición | ML-02 completa; NV-11 1.1.0 del backend completa ✅ (2026-11-07) |
 | Relación con el backend | El esquema de preferencias de NV-11 es la entrada del modelo; `feature_schema.json` es el contrato con NV-23 |
 
 Spec en borrador para revisión humana. No autoriza código, descargas de datos, dependencias ni cambios en GitHub: la ejecución requiere aprobación y «EJECUTA».

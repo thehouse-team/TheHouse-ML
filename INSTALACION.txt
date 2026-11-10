@@ -1,0 +1,143 @@
+=====================================================================
+ TheHouse-ML - Instalacion y primeros pasos
+=====================================================================
+
+Proyecto de Machine Learning de Smart Match (Python 3.12).
+Repositorio: https://github.com/thehouse-team/TheHouse-ML
+
+---------------------------------------------------------------------
+ ESTADO ACTUAL (leer primero)
+---------------------------------------------------------------------
+
+Hoy el repositorio solo tiene documentos: constitution, AGENTS,
+memoria, guia (CONTRIBUTING.md) y las specs ML-01 a ML-07.
+
+Todavia NO existe el codigo de Python ni pyproject.toml. Crearlos es
+el trabajo de la spec ML-01, que se ejecuta cuando el responsable
+(Victor) la apruebe y de «EJECUTA».
+
+Por eso:
+  - La PARTE A (herramientas y descarga) funciona desde hoy.
+  - La PARTE B (instalar dependencias y correr pruebas) funciona
+    en cuanto ML-01 este mezclada en main.
+
+---------------------------------------------------------------------
+ PARTE A - Preparar la computadora y descargar el proyecto (hoy)
+---------------------------------------------------------------------
+
+Comandos para Windows (PowerShell). En Linux/macOS hay equivalentes
+en la documentacion de cada herramienta.
+
+1) Instalar Git
+     winget install -e --id Git.Git
+
+2) Instalar uv (maneja Python y las dependencias del proyecto)
+     winget install -e --id astral-sh.uv
+
+   Cierra y vuelve a abrir la terminal, y verifica:
+     uv --version
+
+3) Instalar Python 3.12 con uv
+     uv python install 3.12
+
+4) (Opcional) GitHub CLI para pull requests desde la terminal
+     winget install -e --id GitHub.cli
+     gh auth login
+
+5) Descargar el proyecto
+     cd $HOME\source\repos
+     git clone https://github.com/thehouse-team/TheHouse-ML.git
+     cd TheHouse-ML
+
+6) Leer, en este orden:
+     README.md
+     specs\ARQUITECTURA.md
+     CONTRIBUTING.md
+     constitution.md
+     AGENTS.md
+     memoria.md
+     specs\README.md
+
+---------------------------------------------------------------------
+ PARTE B - Instalar dependencias y verificar (despues de ML-01)
+---------------------------------------------------------------------
+
+1) Actualizar el proyecto
+     git checkout main
+     git pull
+
+2) Crear el entorno e instalar las dependencias exactas de uv.lock
+     uv sync --frozen
+
+3) Verificar que todo funciona. RESULTADOS ESPERADOS:
+
+   uv run python -m thehouse_ml --help
+     -> muestra las 5 etapas: download, prepare, train, evaluate, export
+
+   uv run python -m thehouse_ml download
+     -> con ML-01 sola: "download: pendiente de ML-02" y termina sin error
+
+   uv run ruff check .
+     -> "All checks passed!"
+
+   uv run mypy src
+     -> "Success: no issues found"
+
+   uv run pytest
+     -> todas las pruebas en verde (passed), 0 failed
+
+   uv run pytest --cov=thehouse_ml --cov-report=term-missing
+     -> cobertura total de 80 % o mas
+
+Si alguno de estos resultados no coincide, no sigas: avisa al equipo
+con el comando y la salida completa (sin tokens ni contrasenas).
+
+---------------------------------------------------------------------
+ PARTE C - Como empezar a trabajar una spec
+---------------------------------------------------------------------
+
+1) Confirma que la spec esta APROBADA y que tienes «EJECUTA» con las
+   tasks y rutas permitidas (lo da el responsable).
+2) Crea tu rama desde main:
+     git checkout main
+     git pull
+     git checkout -b feat/ml-02-datos
+3) Trabaja task por task: implementar -> probar -> revisar coherencia
+   -> revisar seguridad y licencias. Marca [x] solo con evidencia.
+4) Antes del pull request corre:
+     uv run ruff format --check .
+     uv run ruff check .
+     uv run mypy src
+     uv run pytest --cov=thehouse_ml
+     uv run pip-audit
+5) Escribe evidence.md con la plantilla de specs\_plantilla\.
+6) Sube la rama y abre el PR con la plantilla. Otra persona lo aprueba.
+     git push -u origin feat/ml-02-datos
+     gh pr create
+
+---------------------------------------------------------------------
+ REGLAS QUE NO SE ROMPEN
+---------------------------------------------------------------------
+
+- Nunca subir data\raw, data\processed ni models (ya estan en .gitignore).
+- Nunca programar sin «EJECUTA».
+- Nunca hacer commit directo a main.
+- Nunca descargar una fuente que no este aprobada en memoria.md.
+- Nunca subir secretos, tokens ni contrasenas.
+
+---------------------------------------------------------------------
+ PROBLEMAS COMUNES
+---------------------------------------------------------------------
+
+"uv" no se reconoce como comando
+  -> cierra y abre la terminal despues de instalarlo.
+
+"No pyproject.toml found" al correr uv sync
+  -> ML-01 todavia no esta implementada (ver ESTADO ACTUAL).
+
+Avisos "LF will be replaced by CRLF"
+  -> el archivo .gitattributes del repo normaliza los finales de linea;
+     si aparecen, ejecuta: git add --renormalize .
+
+Fallas de pip-audit por una vulnerabilidad
+  -> no la ignores: reportala en el PR y en la evidencia.

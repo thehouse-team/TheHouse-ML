@@ -9,7 +9,7 @@ Para entender el proyecto completo (qué hace, cómo se conecta con el backend y
 | ID | Spec | Estado documental | Estado de ejecución | Tasks |
 | --- | --- | --- | --- | --- |
 | ML-01 | [Base del proyecto](ml-01-foundation/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/5 |
-| ML-02 | [Datos: fuentes, licencias y preparación](ml-02-data-sources/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/7 |
+| ML-02 | [Datos: bases nacionales, calibración regional y licencias](ml-02-data-sources/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/9 |
 | ML-03 | [Esquema de features y estudiantes sintéticos](ml-03-feature-schema/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/6 |
 | ML-04 | [Modelo base por reglas](ml-04-baseline-model/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/5 |
 | ML-05 | [Modelo entrenado y evaluación](ml-05-trained-model/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/6 |
@@ -21,7 +21,7 @@ Para entender el proyecto completo (qué hace, cómo se conecta con el backend y
 | Prioridad | Specs | Motivo |
 | --- | --- | --- |
 | 1 | ML-01 | Base del proyecto: estructura, herramientas y CI |
-| 2 | ML-02, ML-03 | Datos con licencia y esquema de features compartido con NV-11 |
+| 2 | ML-02, ML-03 | Bases nacionales de INEGI, calibración regional y esquema de features compartido con NV-11 |
 | 3 | ML-04 | Modelo base por reglas: referencia y respaldo |
 | 4 | ML-05, ML-06 | Modelo entrenado, evaluación y artefacto ONNX para el backend |
 | 5 | ML-07 | Señales reales de TheHouse cuando haya usuarios |
