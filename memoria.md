@@ -59,7 +59,7 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 ## M-ML-007 — Costo
 
 - **Decisión:** $0: CPU local y GitHub Actions en repositorio público; sin servicios de ML administrados ni GPU en la nube.
-- **Estado:** APROBADO con la constitution 1.0.0 (§15). El repositorio `thehouse-team/TheHouse-ML` se creó **privado** el 2026-11-09; mientras sea privado, el CI usa la cuota gratuita de 2,000 minutos al mes de GitHub Actions del plan Free. Hacerlo público como `TheHouse-Backend` y `TheHouse-Mobile` es decisión del responsable.
+- **Estado:** APROBADO con la constitution 1.0.0 (§15). El repositorio `thehouse-team/TheHouse-ML` se creó privado el 2026-11-09 y Victor lo hizo **público** el 2026-11-10 («si haslo publico»), igual que `TheHouse-Backend` y `TheHouse-Mobile`: CI sin límite de minutos y ruleset de `main` disponible en el plan Free.
 
 ## M-ML-008 — Separación con TheHouse-GenAI
 

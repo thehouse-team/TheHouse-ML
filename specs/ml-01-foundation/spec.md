@@ -28,8 +28,8 @@ Dejar un repositorio Python reproducible, con calidad y seguridad automáticas e
 ## 3. Precondiciones
 
 1. Constitution y AGENTS 1.0.0 aprobadas. ✅ 2026-11-09.
-2. Repositorio `thehouse-team/TheHouse-ML` creado con permiso explícito. ✅ 2026-11-09, privado.
-3. Visibilidad del repositorio decidida (§10): el ruleset de la T04 lo necesita.
+2. Repositorio `thehouse-team/TheHouse-ML` creado con permiso explícito. ✅ 2026-11-09.
+3. Repositorio público, necesario para el ruleset de la T04. ✅ 2026-11-10.
 4. Autorización «EJECUTA».
 
 ## 4. Alcance
@@ -51,7 +51,7 @@ Dejar un repositorio Python reproducible, con calidad y seguridad automáticas e
 - `uv` fija Python 3.12 y todas las dependencias.
 - CLI con `argparse` (sin dependencias extra); cada etapa lee y escribe rutas configurables.
 - CI: `uv sync --frozen`, ruff, mypy, pytest con cobertura, pip-audit y gitleaks; corrida del pipeline con datos de muestra cuando existan.
-- Ruleset de `main` con checks obligatorios, una aprobación de otra persona y sin bypass, igual que el backend. En el plan Free de GitHub los rulesets solo funcionan en repositorios **públicos**; con el repositorio privado la T04 queda BLOCKED hasta resolver la §10.
+- Ruleset de `main` con checks obligatorios, una aprobación de otra persona y sin bypass, igual que el backend. En el plan Free de GitHub los rulesets solo funcionan en repositorios públicos; el repositorio es público desde el 2026-11-10.
 
 ## 6.1 Estructura que deja esta spec
 
@@ -112,7 +112,7 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Gestor de entorno | `uv` | APROBADO (constitution 1.0.0 §5, M-ML-002) |
 | Licencia del código | MIT: permisiva y simple; aplica solo al código, no a los datos de terceros | PENDIENTE |
 | Nombre del repositorio | `thehouse-team/TheHouse-ML` | APROBADO (creado el 2026-11-09) |
-| Visibilidad del repositorio | **Público**, como `TheHouse-Backend` y `TheHouse-Mobile`: permite el ruleset de `main` gratis y el CI sin límite de minutos. No contiene secretos ni datos | PENDIENTE — si queda privado, la T04 se cierra sin ruleset y se registra como advertencia |
+| Visibilidad del repositorio | **Público**, como `TheHouse-Backend` y `TheHouse-Mobile`: permite el ruleset de `main` gratis y el CI sin límite de minutos. No contiene secretos ni datos | APROBADO — Victor, 2026-11-10 («si haslo publico») |
 
 ## 11. Costo — COST-001
 
@@ -126,7 +126,7 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | --- | --- | --- | --- |
 | ML-01-RK01 | Diferencias Windows/Linux | Pipeline no reproducible | CI en Linux y pruebas locales en Windows |
 | ML-01-RK02 | Datos subidos por error | Violación de licencias | `.gitignore` y prueba de árbol de git |
-| ML-01-RK03 | Repositorio privado sin ruleset | Commits directos a `main` sin revisión | Hacerlo público (§10) o, mientras tanto, trabajar solo por PR por regla de la constitution §19 |
+| ML-01-RK03 | Ruleset sin activar antes de la T04 | Commits directos a `main` sin revisión | Trabajar solo por PR (constitution §19) hasta que la T04 active el ruleset |
 
 ## 13. Dependencias
 
