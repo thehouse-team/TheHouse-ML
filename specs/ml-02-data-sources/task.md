@@ -6,8 +6,8 @@
 | Documento | `task.md` |
 | Versión | 1.0.0-borrador |
 | Fecha | 2026-11-10 |
-| Estado documental | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** |
-| Aprobación humana | Pendiente |
+| Estado documental | **✅ APROBADA** |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («pues si te apruebo que revises si el censo trae lo de las rentas, pues la region si esta bien, pues si en el municipio creo que hay varias rentas las suficientes y si se usa airbnb usa la licencia y lo demas tambien en pocas palabras si a todo»): ML-02 1.0.0 y sus decisiones de la §10 |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 9 |

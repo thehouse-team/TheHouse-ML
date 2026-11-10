@@ -22,19 +22,19 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 
 | Fuente | Uso | Licencia y condiciones | Estado |
 | --- | --- | --- | --- |
-| INEGI — Censo de Población y Vivienda 2020, muestra del cuestionario ampliado | Tenencia (rentada), servicios de la vivienda y monto de renta si el diccionario confirma la variable; niveles nacional, estatal y municipal | Términos de libre uso de la información del INEGI: copiar, adaptar y publicar citando a INEGI como autor y el producto; no sugerir respaldo de INEGI | PROPUESTO |
-| INEGI — Encuesta Nacional de Vivienda (ENVI) 2020 (con Infonavit y SHF) | Monto y motivo de renta, gasto en vivienda; niveles nacional y estatal | Términos de libre uso de INEGI | PROPUESTO |
-| INEGI — ENIGH 2022 | Validación del gasto en renta de inquilinos; no se usa el alquiler imputado a propietarios | Términos de libre uso de INEGI | PROPUESTO |
-| INEGI — DENUE (edición vigente) | Establecimientos con coordenadas alrededor de cada campus (factor de extras) | Términos de libre uso de INEGI | PROPUESTO |
-| INEGI — INPC | Actualizar montos de 2020 a pesos del año de ejecución | Términos de libre uso de INEGI | PROPUESTO |
-| Inside Airbnb — Ciudad de México (`listings`) | Atributos a nivel cuarto: servicios, tipo de cuarto, precio relativo | CC BY 4.0 según la fuente; su política pide descargar solo lo necesario, sin scraping y sin republicar. Se verifica en su página antes de descargar | PENDIENTE de verificación |
-| OpenStreetMap | Verificar coordenadas de campus, en especial las 3 aproximadas del seed (UAEH-ESTL, UMB-VDC, UCAN) | ODbL: atribución y misma licencia para bases derivadas | PROPUESTO |
-| Seed de TheHouse (NV-07, NV-08, NV-11) | Universidades y rangos de referencia de la región | Datos propios | PROPUESTO |
-| ANUIES — matrícula por institución | Posible ponderación de universidades | Licencia no verificada | PENDIENTE |
+| INEGI — Censo de Población y Vivienda 2020, muestra del cuestionario ampliado (`Viviendas_CA`) | Tenencia (`TENENCIA`), servicios, factor de expansión (`FACTOR`) y municipio (`MUN`). No pregunta el monto de renta (verificado el 2026-11-10) | Términos de libre uso de la información del INEGI: copiar, adaptar y publicar citando a INEGI como autor y el producto; no sugerir respaldo de INEGI | APROBADO |
+| INEGI — Encuesta Nacional de Vivienda (ENVI) 2020 (con Infonavit y SHF) | Monto y motivo de renta, gasto en vivienda; niveles nacional y estatal | Términos de libre uso de INEGI | APROBADO |
+| INEGI — ENIGH 2022 | Validación del gasto en renta de inquilinos; no se usa el alquiler imputado a propietarios | Términos de libre uso de INEGI | APROBADO |
+| INEGI — DENUE (edición vigente) | Establecimientos con coordenadas alrededor de cada campus (factor de extras) | Términos de libre uso de INEGI | APROBADO |
+| INEGI — INPC | Actualizar montos de 2020 a pesos del año de ejecución | Términos de libre uso de INEGI | APROBADO |
+| Inside Airbnb — Ciudad de México (`listings.csv.gz`, instantánea 2026-09-23) | Atributos a nivel cuarto: servicios, tipo de cuarto, precio relativo | CC BY 4.0, verificada el 2026-11-10 en su página de políticas: cita formal de dataset con ciudad y fecha, descargar una sola vez, sin scraping, sin republicar los datos (se publican solo agregados con atribución); los datos archivados requieren solicitud | APROBADO |
+| OpenStreetMap | Verificar coordenadas de campus, en especial las 3 aproximadas del seed (UAEH-ESTL, UMB-VDC, UCAN) | ODbL: atribución y misma licencia para bases derivadas | APROBADO |
+| Seed de TheHouse (NV-07, NV-08, NV-11) | Universidades y rangos de referencia de la región | Datos propios | APROBADO |
+| ANUIES — matrícula por institución | Posible ponderación de universidades | Se usa solo si su licencia lo permite; se verifica en la T01 de ML-02 | APROBADO con condición |
 | Señales reales de TheHouse (favoritos y visitas) | Etiquetas reales de interés | Exportación anonimizada definida por una spec del backend | PENDIENTE |
 
 - **Reglas:** toda estimación de encuesta usa su factor de expansión; una estimación municipal solo se usa con al menos 30 viviendas rentadas en la muestra y coeficiente de variación ≤ 30 %; solo se usan productos de descarga pública (no el laboratorio de microdatos); ninguna variable se usa sin confirmarla en el diccionario oficial.
-- **Estado:** PROPUESTO — pedido de Victor (2026-11-10): «que los datos sean a nivel México para sacar el porcentaje o las bases del proyecto y para el final solo se base en una sola área». Se aprueba junto con ML-02.
+- **Estado:** APROBADO — Victor Manuel Jose Jose — 2026-11-10 («pues si te apruebo que revises si el censo trae lo de las rentas, pues la region si esta bien, pues si en el municipio creo que hay varias rentas las suficientes y si se usa airbnb usa la licencia y lo demas tambien en pocas palabras si a todo»): ML-02 1.0.0 y sus decisiones de la §10. Pedido original de Victor (2026-11-10): «que los datos sean a nivel México para sacar el porcentaje o las bases del proyecto y para el final solo se base en una sola área».
 - **Justificación:** en pocos municipios las encuestas tienen muy pocas viviendas; usar lo nacional como base y lo regional como ajuste da estimaciones estables y a la vez locales. INEGI describe viviendas, no cuartos, por eso se conserva una fuente a nivel cuarto.
 - **Impacto:** ML-02 1.0.0-borrador revisada el 2026-11-10 (9 requisitos, 9 tasks). Los datos crudos nunca se suben al repositorio (constitution §7).
 
@@ -45,7 +45,7 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
   - Scraping de Inmuebles24, Vivanuncios, Propiedades.com o Pincali: sus términos no lo autorizan.
   - Properati: licencia y cobertura de rentas en México no confirmadas.
   - Datasets de citas o perfiles personales (por ejemplo OkCupid): datos personales sensibles.
-- **Estado:** PROPUESTO.
+- **Estado:** APROBADO — Victor, 2026-11-10, junto con ML-02 (M-ML-010).
 - **Justificación:** licencias, privacidad o acceso incompatibles con la constitution §7.
 
 ## M-ML-005 — Método de etiquetas y evaluación
@@ -80,3 +80,11 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — Victor Manuel Jose Jose — 2026-11-10 («Apruebo y EJECUTA»: ML-01 1.0.0 con licencia MIT; tasks T01–T05; rutas `pyproject.toml`, `uv.lock`, `.python-version`, `LICENSE`, `src/`, `tests/`, `.github/workflows/`, `README.md`, `INSTALACION.txt` y `specs/ml-01-foundation/`; ruleset de `main`).
 - **Fecha:** 2026-11-10.
 - **Impacto:** el repositorio pasa de solo documentos a un paquete instalable; ML-02 puede ejecutarse cuando se aprueben ella y las fuentes de M-ML-003.
+
+## M-ML-010 — ML-02 aprobada: datos nacionales de INEGI y calibración regional
+
+- **Decisión:** aprobar ML-02 1.0.0 con sus decisiones: región de 7 municipios; regla de suficiencia (≥ 30 viviendas rentadas y CV ≤ 30 %, respaldo estado → país); DENUE vigente; Inside Airbnb Ciudad de México 2026-09-23 bajo CC BY 4.0; ANUIES solo si su licencia lo permite.
+- **Verificaciones del 2026-11-10:** el Censo 2020 (muestra) no pregunta el monto de renta: la pregunta 23 «Tenencia» solo pregunta si se paga renta y el diccionario de `Viviendas_CA` (83 variables) no tiene monto; sí tiene `TENENCIA`, `FACTOR` y `MUN`. Por eso la renta sale de ENVI 2020 (estatal) y el Censo aporta la proporción de renta y los servicios por municipio. Inside Airbnb publica bajo CC BY 4.0 y su instantánea de Ciudad de México del 2026-09-23 está disponible (17.2 MB).
+- **Estado:** APROBADO — Victor Manuel Jose Jose — 2026-11-10 («pues si te apruebo que revises si el censo trae lo de las rentas, pues la region si esta bien, pues si en el municipio creo que hay varias rentas las suficientes y si se usa airbnb usa la licencia y lo demas tambien en pocas palabras si a todo»): ML-02 1.0.0 y sus decisiones de la §10. La ejecución requiere «EJECUTA».
+- **Fecha:** 2026-11-10.
+- **Impacto:** la renta regional queda a nivel estatal, no municipal; se contrasta con el seed de TheHouse y, más adelante, con cuartos reales (ML-07).
