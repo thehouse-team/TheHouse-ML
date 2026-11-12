@@ -1,0 +1,166 @@
+# Registro de fuentes de datos para ML-02 (T01).
+# Campos obligatorios por fuente: url, edition, date, license, attribution, variables_used,
+# dictionary_url y variables_status ("pending" | "confirmed").
+# Las variables se registran en T01 y se confirman automáticamente en T02 contra el diccionario
+# o las columnas del archivo descargado (M-ML-012).
+
+[[sources]]
+id = "inegi_censo_2020_viviendas_ca"
+name = "INEGI — Censo de Población y Vivienda 2020, muestra del cuestionario ampliado (Viviendas_CA)"
+url = "https://www.inegi.org.mx/programas/ccpv/2020/#microdatos"
+edition = "Censo 2020, muestra del cuestionario ampliado, tabla Viviendas_CA"
+date = "2020"
+license = "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
+attribution = "Fuente: INEGI, Censo de Población y Vivienda 2020, muestra del cuestionario ampliado."
+dictionary_url = "https://www.inegi.org.mx/rnm/index.php/catalog/632/data-dictionary"
+variables_status = "pending"
+# TENENCIA, FACTOR y MUN ya están verificadas en M-ML-010.
+variables_used = [
+  "TENENCIA",
+  "FACTOR",
+  "MUN",
+  "ENT",
+  "AGUA_ENT",
+  "DRENAJE",
+  "ELECTRICIDAD",
+  "INTERNET",
+  "COMBUSTIBLE",
+]
+
+[[sources]]
+id = "inegi_envi_2020"
+name = "INEGI — Encuesta Nacional de Vivienda (ENVI) 2020"
+url = "https://www.inegi.org.mx/programas/envi/2020/"
+edition = "ENVI 2020 (INEGI, Infonavit, SHF)"
+date = "2020"
+license = "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
+attribution = "Fuente: INEGI, Encuesta Nacional de Vivienda (ENVI) 2020."
+dictionary_url = "https://www.inegi.org.mx/rnm/index.php/catalog/695/data-dictionary"
+variables_status = "pending"
+# Tabla: TVIVIENDA. FACTOR y ENT existen en todas las tablas.
+# Tenencia y renta están en las secciones IV y V (P4_*, P5_*), con los códigos exactos por confirmar.
+variables_used = [
+  "factor",
+  "entidad",
+  "monto_renta_mensual",
+  "motivo_renta",
+  "gasto_vivienda",
+]
+
+[[sources]]
+id = "inegi_enigh_2022"
+name = "INEGI — Encuesta Nacional de Ingresos y Gastos de los Hogares (ENIGH) 2022"
+url = "https://www.inegi.org.mx/programas/enigh/nc/2022/"
+edition = "ENIGH 2022"
+date = "2022"
+license = "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
+attribution = "Fuente: INEGI, Encuesta Nacional de Ingresos y Gastos de los Hogares (ENIGH) 2022."
+dictionary_url = "https://www.inegi.org.mx/programas/enigh/nc/2022/"
+variables_status = "pending"
+variables_used = [
+  "factor",
+  "entidad",
+  "gasto_renta_inquilinos",
+  "clave_gasto_vivienda",
+]
+
+[[sources]]
+id = "inegi_denue_vigente"
+name = "INEGI — Directorio Estadístico Nacional de Unidades Económicas (DENUE)"
+url = "https://www.inegi.org.mx/app/descarga/?ti=6"
+edition = "DENUE, edición vigente al ejecutar ML-02 (basada en Censos Económicos más recientes)"
+date = "vigente_al_ejecutar"
+license = "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
+attribution = "Fuente: INEGI, Directorio Estadístico Nacional de Unidades Económicas (DENUE)."
+dictionary_url = "https://www.inegi.org.mx/app/descarga/?ti=6"
+variables_status = "pending"
+variables_used = [
+  "id",
+  "clee",
+  "nom_estab",
+  "codigo_act",
+  "nombre_act",
+  "per_ocu",
+  "latitud",
+  "longitud",
+  "cve_ent",
+  "cve_mun",
+  "cve_loc",
+]
+
+[[sources]]
+id = "inegi_inpc"
+name = "INEGI — Índice Nacional de Precios al Consumidor (INPC)"
+url = "https://www.inegi.org.mx/programas/inpc/2018/"
+edition = "INPC base segunda quincena de julio de 2018 = 100 (serie vigente)"
+date = "2020-actual"
+license = "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
+attribution = "Fuente: INEGI, Índice Nacional de Precios al Consumidor (INPC)."
+dictionary_url = "https://www.inegi.org.mx/programas/inpc/2018/"
+variables_status = "pending"
+variables_used = [
+  "indice_mensual",
+  "fecha",
+]
+
+[[sources]]
+id = "inside_airbnb_cdmx_2026_09_23"
+name = "Inside Airbnb — Ciudad de México (listings)"
+url = "https://data.insideairbnb.com/mexico/df/mexico-city/2026-09-23/data/listings.csv.gz"
+edition = "Instantánea Ciudad de México 2026-09-23"
+date = "2026-09-23"
+license = "Creative Commons Attribution 4.0 International (CC BY 4.0); una descarga, sin scraping ni republicar microdatos"
+attribution = "Fuente: Inside Airbnb, Mexico City, listings (2026-09-23), http://insideairbnb.com/get-the-data/ (CC BY 4.0)."
+dictionary_url = "https://insideairbnb.com/get-the-data/"
+variables_status = "confirmed"
+# Columnas confirmadas en spec §6.
+variables_used = [
+  "room_type",
+  "property_type",
+  "accommodates",
+  "bedrooms",
+  "bathrooms_text",
+  "amenities",
+  "price",
+  "latitude",
+  "longitude",
+]
+
+[[sources]]
+id = "openstreetmap"
+name = "OpenStreetMap"
+url = "https://www.openstreetmap.org/"
+edition = "Datos colaborativos vigentes al momento de verificación de campus"
+date = "vigente_al_verificar"
+license = "Open Database License (ODbL) 1.0; atribución y compartir-igual para bases derivadas"
+attribution = "© OpenStreetMap contributors (ODbL)."
+dictionary_url = "https://wiki.openstreetmap.org/wiki/Elements"
+variables_status = "pending"
+# Se confirma en la T07.
+variables_used = [
+  "osm_id",
+  "osm_type",
+  "lat",
+  "lon",
+  "name",
+]
+
+[[sources]]
+id = "thehouse_seed_nv07_nv08_nv11"
+name = "Seed de TheHouse (NV-07, NV-08, NV-11)"
+url = "https://github.com/thehouse-team/TheHouse-Backend"
+edition = "Seed de universidades y rangos de referencia definido en NV-07, NV-08 y NV-11 del backend"
+date = "2026"
+license = "Datos propios del proyecto TheHouse"
+attribution = "TheHouse (repositorio TheHouse-Backend, specs NV-07, NV-08, NV-11)."
+dictionary_url = "https://github.com/thehouse-team/TheHouse-Backend"
+variables_status = "pending"
+# Se confirma contra NV-11 del backend.
+variables_used = [
+  "university_code",
+  "university_name",
+  "latitude",
+  "longitude",
+  "budget_ranges",
+  "preference_catalogs",
+]
