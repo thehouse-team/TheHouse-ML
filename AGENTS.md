@@ -2,11 +2,11 @@
 
 | Campo | Valor |
 | --- | --- |
-| Versión | 1.0.0 |
-| Fecha | 2026-11-09 |
+| Versión | 1.1.0 |
+| Fecha | 2026-11-11 |
 | Estado | **✅ APROBADO** |
-| Aprobación humana | Victor Manuel Jose Jose — 2026-11-09 («si crealo», en respuesta a «¿Creo el repo TheHouse-ML con la constitución 1.0.0?») |
-| Decisión | M-ML-001 |
+| Aprobación humana | Victor Manuel Jose Jose — 2026-11-11 (M-ML-011) |
+| Decisión | M-ML-011 |
 
 ## Autoridad y lectura obligatoria
 
@@ -14,8 +14,8 @@ Antes de cada tarea, leer en este orden: `constitution.md` → `AGENTS.md` → `
 
 ## Estado vigente
 
-- Constitution y AGENTS 1.0.0 aprobados (2026-11-09). Solo hay documentación de gobierno y specs en borrador; no hay código, datos ni modelos.
-- Ninguna spec está aprobada; todas están en **⛔ NO EJECUTAR HASTA «EJECUTA»**.
+- Constitution 1.0.0 aprobada (2026-11-09, M-ML-001). AGENTS 1.1.0 aprobado (2026-11-11, M-ML-011). El responsable de `TheHouse-ML` es César Yael López Trujillo.
+- ML-01 está **completa**. ML-02 está **aprobada sin ejecutar** (**⛔ NO EJECUTAR HASTA «EJECUTA»**). El resto de specs sigue en borrador y no autorizadas para ejecución.
 - Relación con el backend: `TheHouse-Backend` consume el artefacto ONNX en NV-23; el esquema de entrada viene de NV-11.
 - Relación con `TheHouse-GenAI`: ese servicio explica el puntaje y su desglose; nunca lo calcula. Este repositorio no llama a ningún LLM.
 

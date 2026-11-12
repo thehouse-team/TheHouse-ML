@@ -4,14 +4,14 @@
 | --- | --- |
 | ID | ML-02 |
 | Documento | `spec.md` |
-| Versión | 1.0.0-borrador |
+| Versión | 1.0.0 |
 | Fecha | 2026-11-10 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | Victor Manuel Jose Jose — 2026-11-10 («pues si te apruebo que revises si el censo trae lo de las rentas, pues la region si esta bien, pues si en el municipio creo que hay varias rentas las suficientes y si se usa airbnb usa la licencia y lo demas tambien en pocas palabras si a todo»): ML-02 1.0.0 y sus decisiones de la §10 |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
-| Plan | `plan.md` 1.0.0-borrador |
-| Tasks | `task.md` 1.0.0-borrador |
+| Plan | `plan.md` 1.0.0 |
+| Tasks | `task.md` 1.0.0 |
 | Precondición | ML-01 completa; fuentes de M-ML-003 aprobadas |
 | Relación con el backend | Verifica las coordenadas de las 10 universidades del seed de NV-11 (3 están aproximadas al centro del municipio) y entrega las correcciones |
 
