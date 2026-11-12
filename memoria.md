@@ -88,3 +88,10 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — Victor Manuel Jose Jose — 2026-11-10 («pues si te apruebo que revises si el censo trae lo de las rentas, pues la region si esta bien, pues si en el municipio creo que hay varias rentas las suficientes y si se usa airbnb usa la licencia y lo demas tambien en pocas palabras si a todo»): ML-02 1.0.0 y sus decisiones de la §10. La ejecución requiere «EJECUTA».
 - **Fecha:** 2026-11-10.
 - **Impacto:** la renta regional queda a nivel estatal, no municipal; se contrasta con el seed de TheHouse y, más adelante, con cuartos reales (ML-07).
+
+## M-ML-011 — Cambio de responsable
+
+- **Decisión:** César Yael López Trujillo pasa a ser el responsable de `TheHouse-ML` (aprueba specs, da «EJECUTA» y aprueba releases). Victor Manuel Jose Jose queda como revisor.
+- **Estado:** APROBADO — Victor Manuel Jose Jose — 2026-11-11. Aprobación humana por WhatsApp el 2026-11-11 a las 23:06–23:11. A la pregunta «¿te parece si me pasas el rol de responsable del repo? Lo registro en memoria.md como M-ML-011 y actualizo CONTRIBUTING y AGENTS» respondió: «simon» y «a eso solo dile a tu claude mandale un mensaje que yo los apruebo».
+- **Fecha:** 2026-11-11.
+- **Impacto:** el responsable vigente pasa a ser César Yael López Trujillo para aprobaciones, autorizaciones de ejecución y releases; Victor Manuel Jose Jose queda como revisor. Las aprobaciones anteriores de Victor siguen vigentes. Se actualizan `AGENTS.md` y `CONTRIBUTING.md`.
