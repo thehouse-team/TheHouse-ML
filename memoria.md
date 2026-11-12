@@ -30,7 +30,7 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 | Inside Airbnb — Ciudad de México (`listings.csv.gz`, instantánea 2026-09-23) | Atributos a nivel cuarto: servicios, tipo de cuarto, precio relativo | CC BY 4.0, verificada el 2026-11-10 en su página de políticas: cita formal de dataset con ciudad y fecha, descargar una sola vez, sin scraping, sin republicar los datos (se publican solo agregados con atribución); los datos archivados requieren solicitud | APROBADO |
 | OpenStreetMap | Verificar coordenadas de campus, en especial las 3 aproximadas del seed (UAEH-ESTL, UMB-VDC, UCAN) | ODbL: atribución y misma licencia para bases derivadas | APROBADO |
 | Seed de TheHouse (NV-07, NV-08, NV-11) | Universidades y rangos de referencia de la región | Datos propios | APROBADO |
-| ANUIES — matrícula por institución | Posible ponderación de universidades | Se usa solo si su licencia lo permite; se verifica en la T01 de ML-02 | APROBADO con condición |
+| ANUIES — matrícula por institución | Posible ponderación de universidades | Licencia no verificada y fuente no indispensable por ahora | DESCARTADO (M-ML-012) |
 | Señales reales de TheHouse (favoritos y visitas) | Etiquetas reales de interés | Exportación anonimizada definida por una spec del backend | PENDIENTE |
 
 - **Reglas:** toda estimación de encuesta usa su factor de expansión; una estimación municipal solo se usa con al menos 30 viviendas rentadas en la muestra y coeficiente de variación ≤ 30 %; solo se usan productos de descarga pública (no el laboratorio de microdatos); ninguna variable se usa sin confirmarla en el diccionario oficial.
@@ -95,3 +95,10 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — Victor Manuel Jose Jose — 2026-11-11. Aprobación humana por WhatsApp el 2026-11-11 a las 23:06–23:11. A la pregunta «¿te parece si me pasas el rol de responsable del repo? Lo registro en memoria.md como M-ML-011 y actualizo CONTRIBUTING y AGENTS» respondió: «simon» y «a eso solo dile a tu claude mandale un mensaje que yo los apruebo».
 - **Fecha:** 2026-11-11.
 - **Impacto:** el responsable vigente pasa a ser César Yael López Trujillo para aprobaciones, autorizaciones de ejecución y releases; Victor Manuel Jose Jose queda como revisor. Las aprobaciones anteriores de Victor siguen vigentes. Se actualizan `AGENTS.md` y `CONTRIBUTING.md`.
+
+## M-ML-012 — Verificación automática de variables y retiro de ANUIES
+
+- **Decisión:** (a) en la T01 cada variable queda registrada con `variables_status = "pending"` y `dictionary_url`; en la T02 una prueba falla si alguna variable registrada no existe en el archivo descargado, y solo entonces pasa a `"confirmed"`. (b) ANUIES queda **DESCARTADO** por ahora, porque no es indispensable y su licencia no está verificada.
+- **Estado:** APROBADO — César Yael López Trujillo — 2026-11-12.
+- **Fecha:** 2026-11-12.
+- **Impacto:** la confirmación de variables se automatiza en T02 contra el diccionario o las columnas de los archivos descargados; se actualiza M-ML-003 y se retira ANUIES de ML-02 1.0.1.
