@@ -21,9 +21,9 @@ Para instalar: [`INSTALACION.txt`](INSTALACION.txt).
 
 | Rol | Quién | Qué hace |
 | --- | --- | --- |
-| Responsable | Victor Manuel Jose Jose | Aprueba specs y decisiones («Apruebo X.Y.Z»), autoriza ejecución («EJECUTA»), aprueba releases de modelos |
+| Responsable | César Yael López Trujillo | Aprueba specs y decisiones («Apruebo X.Y.Z»), autoriza ejecución («EJECUTA»), aprueba releases de modelos |
 | Implementador | Quien tome la spec | Implementa las tasks autorizadas en una rama, con pruebas y evidencia |
-| Revisor | Otra persona del equipo | Revisa y aprueba el pull request; nadie aprueba su propio PR |
+| Revisor | Victor Manuel Jose Jose o Isai Axel Paniagua Francisco | Revisa y aprueba el pull request; nadie aprueba su propio PR |
 
 ## 3. Flujo SDD, paso a paso
 
