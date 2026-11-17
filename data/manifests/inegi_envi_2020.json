@@ -1,0 +1,21 @@
+{
+  "source_id": "inegi_envi_2020",
+  "files": [
+    {
+      "url": "https://www.inegi.org.mx/contenidos/programas/envi/2020/microdatos/envi_2020_base_de_datos_csv.zip",
+      "filename": "envi_2020_base_de_datos_csv.zip",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 7322530,
+      "sha256": "36b8e3d04f37722974e0d48edb2b4708b4a5e55c9c3faa551b9b75fda95cc40b",
+      "license": "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
+    },
+    {
+      "url": "https://www.inegi.org.mx/contenidos/programas/envi/2020/microdatos/envi_2020_fd.xlsx",
+      "filename": "envi_2020_fd.xlsx",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 242100,
+      "sha256": "208fc3d2c70a4cc2b346479813fd98c0481fa5c490d5c8bc2ca8970694befbcf",
+      "license": "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
+    }
+  ]
+}

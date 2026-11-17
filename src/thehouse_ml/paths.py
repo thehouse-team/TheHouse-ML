@@ -38,6 +38,11 @@ class ProjectPaths:
         return self.root / "data" / "manifests"
 
     @property
+    def sources_toml(self) -> Path:
+        """Registro de fuentes y variables (en git)."""
+        return self.root / "data" / "sources.toml"
+
+    @property
     def models(self) -> Path:
         """Artefactos de modelo (fuera de git)."""
         return self.root / "models"

@@ -1,13 +1,15 @@
 """Etapas del pipeline (constitution §9).
 
-En ML-01 todas están vacías: informan qué spec las implementa y terminan
-sin error. Cada spec posterior reemplaza la suya por la implementación real.
+Las etapas aún no implementadas informan qué spec las cubre y terminan sin
+error. Cada spec posterior reemplaza la suya por la implementación real:
+ML-02 T02 implementa ``download``.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
+from thehouse_ml.download import Fetcher, run_download
 from thehouse_ml.paths import ProjectPaths
 
 
@@ -39,11 +41,14 @@ def get_stage(name: str) -> Stage:
     raise KeyError(name)
 
 
-def run_stage(name: str, paths: ProjectPaths) -> str:
+def run_stage(name: str, paths: ProjectPaths, source: str | None = None, fetcher: Fetcher | None = None) -> str:
     """Ejecuta una etapa y devuelve el mensaje para la consola.
 
-    `paths` se recibe desde ahora para que las etapas reales no cambien su firma.
+    ``source`` filtra la descarga por id; ``fetcher`` permite inyectar la red
+    en las pruebas (la CLI usa el valor por defecto).
     """
     stage = get_stage(name)
-    del paths  # Las etapas vacías no leen ni escriben archivos.
+    if name == "download":
+        return run_download(paths, source_id=source, fetcher=fetcher)
+    del source, fetcher  # Las etapas vacías no leen ni escriben archivos.
     return f"{stage.name}: pendiente de {stage.spec}"

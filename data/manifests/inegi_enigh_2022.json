@@ -1,0 +1,13 @@
+{
+  "source_id": "inegi_enigh_2022",
+  "files": [
+    {
+      "url": "https://www.inegi.org.mx/contenidos/programas/enigh/nc/2022/microdatos/enigh2022_ns_viviendas_csv.zip",
+      "filename": "enigh2022_ns_viviendas_csv.zip",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 1712569,
+      "sha256": "6ebd189feb30657dda1ebc95ab8815d13717dac4022d95672ec17ccf56095bd4",
+      "license": "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
+    }
+  ]
+}

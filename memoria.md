@@ -102,3 +102,12 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — César Yael López Trujillo — 2026-11-12.
 - **Fecha:** 2026-11-12.
 - **Impacto:** la confirmación de variables se automatiza en T02 contra el diccionario o las columnas de los archivos descargados; se actualiza M-ML-003 y se retira ANUIES de ML-02 1.0.1.
+
+## M-ML-013 — Variables de ENVI y ENIGH confirmadas
+
+- **Decisión:** confirmar, abriendo los archivos oficiales el 2026-11-17, las variables que se usarán de dos fuentes:
+  - **ENVI 2020** (tabla `Bases de datos/TVIVIENDA.csv`, codificación latin-1): `P5_1` (tenencia; 1 = rentada), `P5_2` (cuánto se paga al mes), `P5_5` (motivo de renta), `ENT`, `TLOC`, `FACTOR`, `EST_DIS` y `UPM_DIS`. Queda **excluida** `P5_8` (renta imputada si se rentara), porque no es una renta efectivamente pagada. INEGI reemplazó `TVIVIENDA` el 2024-04-03 por una corrección de `P4_25_6`.
+  - **ENIGH 2022** (tabla `viviendas.csv`, UTF-8 con BOM): `tenencia`, `renta`, `factor`, `ubica_geo`, `tam_loc`, `est_dis`, `upm`, `disp_agua`, `drenaje`, `disp_elect` y `combustible`. No se usa el alquiler imputado a propietarios.
+- **Estado:** APROBADO — César Yael López Trujillo — 2026-11-17. Verificación realizada por el responsable abriendo los archivos oficiales; registrada en `data/sources.toml` con `variables_status = "confirmed"`.
+- **Fecha:** 2026-11-17.
+- **Impacto:** T02 descarga los dos ZIP y el diccionario oficial de ENVI (`envi_2020_fd.xlsx`), verifica SHA-256 y contrasta los encabezados de los CSV; una variable confirmada ausente hace fallar el comando. El Censo 2020 se descargará **solo para Hidalgo (13) y Estado de México (15)**; Censo, DENUE e INPC quedan con `download_url` vacío hasta tener URL directa y hash verificados.
