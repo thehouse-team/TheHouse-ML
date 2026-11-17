@@ -11,13 +11,14 @@ from thehouse_ml.sources import SourceRegistryError, SourceSpec, load_sources, s
 REPO_ROOT = Path(__file__).resolve().parents[2]
 SOURCES_PATH = REPO_ROOT / "data" / "sources.toml"
 
-ENVI_VARIABLES = ("P5_1", "P5_2", "P5_5", "ENT", "TLOC", "FACTOR", "EST_DIS", "UPM_DIS")
+ENVI_VARIABLES = ("P5_1", "P5_2", "P5_5", "P4_3", "ENT", "TLOC", "FACTOR", "EST_DIS", "UPM_DIS")
 ENIGH_VARIABLES = (
     "tenencia",
     "renta",
     "factor",
     "ubica_geo",
     "tam_loc",
+    "tipo_viv",
     "est_dis",
     "upm",
     "disp_agua",
@@ -68,7 +69,21 @@ def test_enigh_registers_one_verified_zip_with_bom() -> None:
     assert files[0].encoding == "utf-8-sig"
 
 
-@pytest.mark.parametrize("source_id", ["inegi_censo_2020_viviendas_ca", "inegi_denue_vigente", "inegi_inpc"])
+def test_inpc_registers_the_verified_general_index_file() -> None:
+    inpc = _by_id()["inegi_inpc"]
+
+    assert inpc.variables_status == "confirmed"
+    assert inpc.variables_used == ("FECHA", "CONCEPTO", "VALOR")
+    files = inpc.download_url
+    assert len(files) == 1
+    assert files[0].filename == "inpc_indicador_mensual_csv.zip"
+    assert files[0].size_bytes == 33_157
+    assert files[0].sha256 == "dc1aeb86aed8bfcbbc4661a3da385b67fb074f8d5c62bd53df22752d54ae24af"
+    assert files[0].table == "conjunto_de_datos/conjunto_de_datos_inpc_mensual.csv"
+    assert files[0].encoding == "utf-8"
+
+
+@pytest.mark.parametrize("source_id", ["inegi_censo_2020_viviendas_ca", "inegi_denue_vigente"])
 def test_pending_sources_have_no_download_url(source_id: str) -> None:
     source = _by_id()[source_id]
 

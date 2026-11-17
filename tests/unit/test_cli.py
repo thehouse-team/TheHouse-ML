@@ -12,8 +12,8 @@ from thehouse_ml import __version__
 from thehouse_ml.cli import build_parser, main
 from thehouse_ml.stages import STAGE_NAMES, STAGES, Stage
 
-# ML-02 T02 implementa `download`; el resto sigue vacío (ML-01).
-EMPTY_STAGES = tuple(stage for stage in STAGES if stage.name != "download")
+# ML-02 T02 implementa `download` y T03 implementa `prepare`; el resto sigue vacío.
+EMPTY_STAGES = tuple(stage for stage in STAGES if stage.name not in {"download", "prepare"})
 
 
 def test_help_lists_the_five_stages_in_pipeline_order(capsys: pytest.CaptureFixture[str]) -> None:

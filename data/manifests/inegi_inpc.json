@@ -1,0 +1,13 @@
+{
+  "source_id": "inegi_inpc",
+  "files": [
+    {
+      "url": "https://www.inegi.org.mx/contenidos/programas/inpc/2018/datosabiertos/inpc_indicador_mensual_csv.zip",
+      "filename": "inpc_indicador_mensual_csv.zip",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 33157,
+      "sha256": "dc1aeb86aed8bfcbbc4661a3da385b67fb074f8d5c62bd53df22752d54ae24af",
+      "license": "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
+    }
+  ]
+}
