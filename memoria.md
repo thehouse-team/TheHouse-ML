@@ -111,3 +111,13 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — César Yael López Trujillo — 2026-11-17. Verificación realizada por el responsable abriendo los archivos oficiales; registrada en `data/sources.toml` con `variables_status = "confirmed"`.
 - **Fecha:** 2026-11-17.
 - **Impacto:** T02 descarga los dos ZIP y el diccionario oficial de ENVI (`envi_2020_fd.xlsx`), verifica SHA-256 y contrasta los encabezados de los CSV; una variable confirmada ausente hace fallar el comando. El Censo 2020 se descargará **solo para Hidalgo (13) y Estado de México (15)**; Censo, DENUE e INPC quedan con `download_url` vacío hasta tener URL directa y hash verificados.
+
+## M-ML-014 — Pesos de julio de 2024, deflactor INPC y alcance de la T03
+
+- **Decisión:**
+  - **(a)** Las rentas se expresan en **pesos de julio de 2024**, último mes disponible en el INPC de datos abiertos; es una **limitación documentada** (si la serie se actualiza, se cambia el mes de referencia en una versión nueva).
+  - **(b)** El deflactor es el **INPC general** (la fila cuyo `CONCEPTO` termina en «Precios al Consumidor (INPC)», no la subyacente). ENVI 2020 usa el **promedio oct-dic 2020** (levantamiento del 26-oct al 18-dic-2020); ENIGH 2022 usa el **promedio ago-nov 2022** (levantamiento del 21-ago al 28-nov-2022). Factor = `INPC(2024-07) / promedio del periodo`. El archivo `inpc_indicador_mensual_csv.zip` tiene SHA-256 verificado y, aunque su diccionario dice que `VALOR` es «variación porcentual anual», los valores son niveles del índice base 2Q jul 2018 = 100 (2024-07 = 136.003).
+  - **(c)** La prevalencia de servicios por municipio sale del **Censo 2020 en la T04**; la **T03 cubre renta y proporción de viviendas rentadas** (percentiles ponderados por entidad, tamaño de localidad y clase/tipo de vivienda).
+- **Estado:** APROBADO — César Yael López Trujillo — 2026-11-17.
+- **Fecha:** 2026-11-17.
+- **Impacto:** `inegi_inpc` queda registrado en `data/sources.toml` con URL, hash y `variables_status = "confirmed"`; se agregan `P4_3` a ENVI y `tipo_viv` a ENIGH. La etapa `prepare` genera `national_baselines.parquet` y su reporte; la calibración regional (T04) queda para después.
