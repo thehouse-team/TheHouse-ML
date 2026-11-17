@@ -3,12 +3,17 @@
 from __future__ import annotations
 
 import argparse
+import sys
 from collections.abc import Sequence
 from pathlib import Path
 
 from thehouse_ml import __version__
+from thehouse_ml.download import DownloadError
+from thehouse_ml.manifests import ManifestError
 from thehouse_ml.paths import ROOT_ENV_VAR, ProjectPaths
+from thehouse_ml.sources import SourceRegistryError
 from thehouse_ml.stages import STAGES, run_stage
+from thehouse_ml.variables import VariableCheckError
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -26,7 +31,14 @@ def build_parser() -> argparse.ArgumentParser:
     )
     subparsers = parser.add_subparsers(dest="stage", required=True, metavar="etapa", title="etapas")
     for stage in STAGES:
-        subparsers.add_parser(stage.name, help=f"{stage.description} ({stage.spec})")
+        sub = subparsers.add_parser(stage.name, help=f"{stage.description} ({stage.spec})")
+        if stage.name == "download":
+            sub.add_argument(
+                "--source",
+                metavar="ID",
+                default=None,
+                help="Descarga y verifica solo la fuente con este id.",
+            )
     return parser
 
 
@@ -34,5 +46,12 @@ def main(argv: Sequence[str] | None = None) -> int:
     """Punto de entrada. Devuelve el código de salida."""
     args = build_parser().parse_args(argv)
     paths = ProjectPaths.resolve(args.root)
-    print(run_stage(args.stage, paths))
+    raw_source = getattr(args, "source", None)
+    source = raw_source if isinstance(raw_source, str) else None
+    try:
+        message = run_stage(args.stage, paths, source=source)
+    except (DownloadError, ManifestError, SourceRegistryError, VariableCheckError) as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 1
+    print(message)
     return 0

@@ -1,8 +1,12 @@
-# Registro de fuentes de datos para ML-02 (T01).
+# Registro de fuentes de datos para ML-02 (T01, ampliado en T02).
 # Campos obligatorios por fuente: url, edition, date, license, attribution, variables_used,
 # dictionary_url y variables_status ("pending" | "confirmed").
-# Las variables se registran en T01 y se confirman automáticamente en T02 contra el diccionario
-# o las columnas del archivo descargado (M-ML-012).
+# download_url: lista de archivos a descargar. Cada archivo es una tabla con:
+#   url (obligatoria), filename, size_bytes, sha256, kind ("data" | "dictionary"),
+#   table (CSV dentro del ZIP, si aplica) y encoding.
+# Una fuente con download_url = [] se salta con el aviso "download_url pendiente".
+# Las variables de ENVI y ENIGH se confirmaron abriendo los archivos oficiales el 2026-11-17
+# (M-ML-013); las del Censo 2020 ya se confirmaron el 2026-11-10 (M-ML-010).
 
 [[sources]]
 id = "inegi_censo_2020_viviendas_ca"
@@ -15,6 +19,8 @@ attribution = "Fuente: INEGI, Censo de Población y Vivienda 2020, muestra del c
 dictionary_url = "https://www.inegi.org.mx/rnm/index.php/catalog/632/data-dictionary"
 variables_status = "pending"
 # TENENCIA, FACTOR y MUN ya están verificadas en M-ML-010.
+# El Censo se descargará solo para Hidalgo (13) y Estado de México (15), según M-ML-013.
+download_url = []  # Pendiente: falta la URL directa y su hash verificado.
 variables_used = [
   "TENENCIA",
   "FACTOR",
@@ -36,15 +42,24 @@ date = "2020"
 license = "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
 attribution = "Fuente: INEGI, Encuesta Nacional de Vivienda (ENVI) 2020."
 dictionary_url = "https://www.inegi.org.mx/rnm/index.php/catalog/695/data-dictionary"
-variables_status = "pending"
-# Tabla: TVIVIENDA. FACTOR y ENT existen en todas las tablas.
-# Tenencia y renta están en las secciones IV y V (P4_*, P5_*), con los códigos exactos por confirmar.
+variables_status = "confirmed"  # Verificado abriendo los archivos oficiales el 2026-11-17 (M-ML-013).
+download_url = [
+  { url = "https://www.inegi.org.mx/contenidos/programas/envi/2020/microdatos/envi_2020_base_de_datos_csv.zip", filename = "envi_2020_base_de_datos_csv.zip", size_bytes = 7322530, sha256 = "36b8e3d04f37722974e0d48edb2b4708b4a5e55c9c3faa551b9b75fda95cc40b", kind = "data", table = "Bases de datos/TVIVIENDA.csv", encoding = "latin-1" },
+  { url = "https://www.inegi.org.mx/contenidos/programas/envi/2020/microdatos/envi_2020_fd.xlsx", filename = "envi_2020_fd.xlsx", size_bytes = 242100, sha256 = "208fc3d2c70a4cc2b346479813fd98c0481fa5c490d5c8bc2ca8970694befbcf", kind = "dictionary" },
+]
+# Tabla: "Bases de datos/TVIVIENDA.csv" (codificación latin-1); el XLSX es el diccionario oficial.
+# P5_1: tenencia (1 = rentada); P5_2: cuánto se paga al mes; P5_5: motivo de renta.
+# P5_8 (renta imputada si se rentara) queda EXCLUIDA (M-ML-013).
+# INEGI reemplazó TVIVIENDA el 2024-04-03 por una corrección de P4_25_6.
 variables_used = [
-  "factor",
-  "entidad",
-  "monto_renta_mensual",
-  "motivo_renta",
-  "gasto_vivienda",
+  "P5_1",
+  "P5_2",
+  "P5_5",
+  "ENT",
+  "TLOC",
+  "FACTOR",
+  "EST_DIS",
+  "UPM_DIS",
 ]
 
 [[sources]]
@@ -56,12 +71,23 @@ date = "2022"
 license = "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
 attribution = "Fuente: INEGI, Encuesta Nacional de Ingresos y Gastos de los Hogares (ENIGH) 2022."
 dictionary_url = "https://www.inegi.org.mx/programas/enigh/nc/2022/"
-variables_status = "pending"
+variables_status = "confirmed"  # Verificado abriendo los archivos oficiales el 2026-11-17 (M-ML-013).
+download_url = [
+  { url = "https://www.inegi.org.mx/contenidos/programas/enigh/nc/2022/microdatos/enigh2022_ns_viviendas_csv.zip", filename = "enigh2022_ns_viviendas_csv.zip", size_bytes = 1712569, sha256 = "6ebd189feb30657dda1ebc95ab8815d13717dac4022d95672ec17ccf56095bd4", kind = "data", table = "viviendas.csv", encoding = "utf-8-sig" },
+]
+# Tabla: viviendas.csv (UTF-8 con BOM). No se usa el alquiler imputado a propietarios.
 variables_used = [
+  "tenencia",
+  "renta",
   "factor",
-  "entidad",
-  "gasto_renta_inquilinos",
-  "clave_gasto_vivienda",
+  "ubica_geo",
+  "tam_loc",
+  "est_dis",
+  "upm",
+  "disp_agua",
+  "drenaje",
+  "disp_elect",
+  "combustible",
 ]
 
 [[sources]]
@@ -74,6 +100,7 @@ license = "Términos de libre uso de la información del INEGI (citar a INEGI co
 attribution = "Fuente: INEGI, Directorio Estadístico Nacional de Unidades Económicas (DENUE)."
 dictionary_url = "https://www.inegi.org.mx/app/descarga/?ti=6"
 variables_status = "pending"
+download_url = []  # Pendiente: falta la URL directa y su hash verificado.
 variables_used = [
   "id",
   "clee",
@@ -98,6 +125,7 @@ license = "Términos de libre uso de la información del INEGI (citar a INEGI co
 attribution = "Fuente: INEGI, Índice Nacional de Precios al Consumidor (INPC)."
 dictionary_url = "https://www.inegi.org.mx/programas/inpc/2018/"
 variables_status = "pending"
+download_url = []  # Pendiente: falta la URL directa y su hash verificado.
 variables_used = [
   "indice_mensual",
   "fecha",
@@ -113,6 +141,7 @@ license = "Creative Commons Attribution 4.0 International (CC BY 4.0); una desca
 attribution = "Fuente: Inside Airbnb, Mexico City, listings (2026-09-23), http://insideairbnb.com/get-the-data/ (CC BY 4.0)."
 dictionary_url = "https://insideairbnb.com/get-the-data/"
 variables_status = "confirmed"
+download_url = []  # Pendiente: falta el hash verificado del archivo de esta instantánea.
 # Columnas confirmadas en spec §6.
 variables_used = [
   "room_type",
@@ -136,6 +165,7 @@ license = "Open Database License (ODbL) 1.0; atribución y compartir-igual para 
 attribution = "© OpenStreetMap contributors (ODbL)."
 dictionary_url = "https://wiki.openstreetmap.org/wiki/Elements"
 variables_status = "pending"
+download_url = []  # Pendiente: la verificación de campus es una consulta, no una descarga de archivo.
 # Se confirma en la T07.
 variables_used = [
   "osm_id",
@@ -155,6 +185,7 @@ license = "Datos propios del proyecto TheHouse"
 attribution = "TheHouse (repositorio TheHouse-Backend, specs NV-07, NV-08, NV-11)."
 dictionary_url = "https://github.com/thehouse-team/TheHouse-Backend"
 variables_status = "pending"
+download_url = []  # Pendiente: dato propio del backend, se entrega por spec, no por descarga.
 # Se confirma contra NV-11 del backend.
 variables_used = [
   "university_code",

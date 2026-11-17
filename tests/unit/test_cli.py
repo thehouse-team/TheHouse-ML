@@ -12,6 +12,9 @@ from thehouse_ml import __version__
 from thehouse_ml.cli import build_parser, main
 from thehouse_ml.stages import STAGE_NAMES, STAGES, Stage
 
+# ML-02 T02 implementa `download`; el resto sigue vacío (ML-01).
+EMPTY_STAGES = tuple(stage for stage in STAGES if stage.name != "download")
+
 
 def test_help_lists_the_five_stages_in_pipeline_order(capsys: pytest.CaptureFixture[str]) -> None:
     with pytest.raises(SystemExit) as exit_info:
@@ -24,7 +27,7 @@ def test_help_lists_the_five_stages_in_pipeline_order(capsys: pytest.CaptureFixt
     assert STAGE_NAMES == ("download", "prepare", "train", "evaluate", "export")
 
 
-@pytest.mark.parametrize("stage", STAGES, ids=lambda stage: stage.name)
+@pytest.mark.parametrize("stage", EMPTY_STAGES, ids=lambda stage: stage.name)
 def test_each_empty_stage_reports_its_spec_and_exits_zero(
     stage: Stage, tmp_path: Path, capsys: pytest.CaptureFixture[str]
 ) -> None:
@@ -35,8 +38,8 @@ def test_each_empty_stage_reports_its_spec_and_exits_zero(
 
 
 def test_empty_stages_do_not_create_files(tmp_path: Path) -> None:
-    for name in STAGE_NAMES:
-        main(["--root", str(tmp_path), name])
+    for stage in EMPTY_STAGES:
+        main(["--root", str(tmp_path), stage.name])
 
     assert list(tmp_path.iterdir()) == []
 
@@ -68,10 +71,24 @@ def test_cli_text_is_printable_on_a_windows_cp1252_console() -> None:
     # Hallazgo de ML-01 (RK01): la consola de Windows usa cp1252; un carácter
     # fuera de esa página (por ejemplo «→») rompe `--help` con UnicodeEncodeError.
     help_text = build_parser().format_help()
-    messages = [f"{stage.name}: pendiente de {stage.spec}" for stage in STAGES]
+    messages = [f"{stage.name}: pendiente de {stage.spec}" for stage in EMPTY_STAGES]
+    messages.append("download_url pendiente")
 
     for text in [help_text, *messages]:
         text.encode("cp1252")
+
+
+def test_download_accepts_a_source_filter() -> None:
+    args = build_parser().parse_args(["download", "--source", "inegi_envi_2020"])
+
+    assert args.stage == "download"
+    assert args.source == "inegi_envi_2020"
+
+
+def test_download_source_filter_is_optional() -> None:
+    args = build_parser().parse_args(["download"])
+
+    assert args.source is None
 
 
 def test_module_entry_point_runs_main(monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]) -> None:
