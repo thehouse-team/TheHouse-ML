@@ -15,7 +15,7 @@ no se carga el cuerpo de los microdatos. Una variable confirmada ausente hace fa
 
 - estado: `confirmed`
 - verificado: si
-- variables encontradas: `P5_1`, `P5_2`, `P5_5`, `ENT`, `TLOC`, `FACTOR`, `EST_DIS`, `UPM_DIS`
+- variables encontradas: `P5_1`, `P5_2`, `P5_5`, `P4_3`, `ENT`, `TLOC`, `FACTOR`, `EST_DIS`, `UPM_DIS`
 - variables faltantes: (ninguna)
 - nota: -
 
@@ -23,7 +23,7 @@ no se carga el cuerpo de los microdatos. Una variable confirmada ausente hace fa
 
 - estado: `confirmed`
 - verificado: si
-- variables encontradas: `tenencia`, `renta`, `factor`, `ubica_geo`, `tam_loc`, `est_dis`, `upm`, `disp_agua`, `drenaje`, `disp_elect`, `combustible`
+- variables encontradas: `tenencia`, `renta`, `factor`, `ubica_geo`, `tam_loc`, `tipo_viv`, `est_dis`, `upm`, `disp_agua`, `drenaje`, `disp_elect`, `combustible`
 - variables faltantes: (ninguna)
 - nota: -
 
@@ -37,11 +37,11 @@ no se carga el cuerpo de los microdatos. Una variable confirmada ausente hace fa
 
 ## inegi_inpc
 
-- estado: `pending`
-- verificado: no
-- variables encontradas: (ninguna)
-- variables faltantes: (sin verificar)
-- nota: download_url pendiente (sin verificar)
+- estado: `confirmed`
+- verificado: si
+- variables encontradas: `FECHA`, `CONCEPTO`, `VALOR`
+- variables faltantes: (ninguna)
+- nota: -
 
 ## inside_airbnb_cdmx_2026_09_23
 

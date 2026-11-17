@@ -3,67 +3,92 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-02 1.0.1 |
-| Task ejecutada | T02 · Descarga verificable (R02) |
-| Autorización | «EJECUTA ML-02 1.0.1, task T02, en la rama feat/ml-02-descarga» — César Yael López Trujillo, 2026-11-17 |
-| Rama | `feat/ml-02-descarga` |
+| Tareas ejecutadas | T02 · Descarga verificable (R02); **T03 · Bases nacionales ponderadas (R03)** |
+| Autorización T02 | «EJECUTA ML-02 1.0.1, task T02, en la rama feat/ml-02-descarga» — César Yael López Trujillo, 2026-11-17 |
+| Autorización T03 | «Apruebo M-ML-014 y EJECUTA ML-02 1.0.1, task T03, en la rama feat/ml-02-bases» — César Yael López Trujillo, 2026-11-17 |
+| Rama | `feat/ml-02-bases` |
 | Commit | Ninguno: el responsable pidió explícitamente no hacer commit |
-| Fecha de ejecución | 2026-11-17 |
+| Fecha de ejecución T03 | 2026-11-17 |
 
-## Qué se hizo
+## T03 · Bases nacionales ponderadas
 
-1. `data/sources.toml`: campo `download_url` por fuente con URL, nombre, tamaño, SHA-256, tipo, tabla CSV dentro del ZIP y codificación. ENVI y ENIGH quedaron con `variables_status = "confirmed"` y comentario de verificación del 2026-11-17; `P5_8` excluida. Censo, DENUE e INPC quedaron con `download_url = []`.
-2. `src/thehouse_ml/`: módulos `sources.py` (registro), `manifests.py` (manifiestos), `download.py` (descarga, modo manual, verificación de hash) y `variables.py` (encabezados de CSV dentro de ZIP y reporte). La CLI acepta `download --source <id>` y devuelve código 1 con mensaje claro si falla un hash o una variable confirmada.
-3. `memoria.md`: decisión M-ML-013.
-4. Pruebas sin red con fixtures sintéticos en `tests/fixtures/`.
+### Qué se hizo
 
-## Comandos y resultados
+1. `data/sources.toml`: `inegi_inpc` con `download_url` verificado (33157 bytes, SHA-256 `dc1aeb86…24af`, tabla `conjunto_de_datos/conjunto_de_datos_inpc_mensual.csv`, UTF-8), `variables_used = ["FECHA", "CONCEPTO", "VALOR"]` y `variables_status = "confirmed"`. Se agregaron `P4_3` a ENVI y `tipo_viv` a ENIGH.
+2. `memoria.md`: decisión M-ML-014 (pesos de julio 2024, deflactor del INPC general, alcance de la T03 frente a la T04).
+3. `src/thehouse_ml/`: `percentiles.py` (percentil ponderado documentado), `inpc.py` (índice general y deflactores), `csvio.py` (CSV dentro de ZIP sin perder ceros a la izquierda) y `national.py` (normalización ENVI/ENIGH, niveles, Parquet y reporte). `prepare` quedó conectado a la CLI y `PrepareError` se reporta con código 1.
+4. `pyproject.toml` / `uv.lock`: `uv add pandas pyarrow` (únicas dependencias directas nuevas, permitidas por la constitution §5).
+5. Pruebas sin red: `tests/unit/test_percentiles.py`, `test_inpc.py`, `test_national.py` y `tests/integration/test_prepare_stage.py` con ZIPs inventados dentro de `tmp_path`.
+
+### Comandos y resultados
 
 | Comando | Resultado |
 | --- | --- |
-| `uv run python -m thehouse_ml download --source inegi_envi_2020` | `inegi_envi_2020: descargado - 2 archivo(s) verificados` |
-| `uv run python -m thehouse_ml download --source inegi_enigh_2022` | `inegi_enigh_2022: descargado - 1 archivo(s) verificados` |
-| `uv run python -m thehouse_ml download` | 2 fuentes en modo `manual` (sin red, solo verificación) y 6 con `download_url pendiente`; termina con código 0 |
-| `uv run ruff format --check .` | 57 archivos ya formateados |
+| `uv add pandas pyarrow` | `+ pandas==3.1.0`, `+ pyarrow==26.0.0` (transitivas: numpy 2.5.4, python-dateutil, six, tzdata) |
+| `uv run python -m thehouse_ml download --source inegi_inpc` | `inegi_inpc: descargado - 1 archivo(s) verificados` |
+| `uv run python -m thehouse_ml prepare` | `prepare: .../data/processed/national_baselines.parquet (87 filas) - .../reports/national_baselines.md` |
+| `uv run ruff format --check .` | 67 files already formatted |
 | `uv run ruff check .` | All checks passed |
-| `uv run mypy src` | Success: no issues found in 9 source files |
-| `uv run pytest --cov=thehouse_ml` | 86 passed; cobertura total 91.30 % (mínimo 80 %) |
+| `uv run mypy src` | Success: no issues found in 13 source files |
+| `uv run pytest --cov=thehouse_ml` | **110 passed**; cobertura total **89.26 %** (mínimo 80 %) |
 
-## Evidencia de datos
+### Evidencia de datos reales
 
-`data/manifests/inegi_envi_2020.json` y `data/manifests/inegi_enigh_2022.json` registran los tres archivos con fecha 2026-11-17, tamaño y SHA-256. Los valores coinciden con los verificados por el responsable:
+`data/processed/national_baselines.parquet` (fuera de git) tiene 87 filas: 44 de ENVI 2020 y 43 de ENIGH 2022. Niveles: 2 nacional, 64 entidad, 8 tamaño de localidad y 13 clase/tipo de vivienda. Ningún grupo quedó sin fila por falta de renta válida o de peso.
 
-| Archivo | Tamaño | SHA-256 |
-| --- | --- | --- |
-| `envi_2020_base_de_datos_csv.zip` | 7,322,530 | `36b8e3d04f37722974e0d48edb2b4708b4a5e55c9c3faa551b9b75fda95cc40b` |
-| `envi_2020_fd.xlsx` | 242,100 | `208fc3d2c70a4cc2b346479813fd98c0481fa5c490d5c8bc2ca8970694befbcf` |
-| `enigh2022_ns_viviendas_csv.zip` | 1,712,569 | `6ebd189feb30657dda1ebc95ab8815d13717dac4022d95672ec17ccf56095bd4` |
+Índice general INPC 2024-07 = 136.003. Promedio oct-dic 2020 = 108.967 → deflactor ENVI = 1.248112. Promedio ago-nov 2022 = 124.912 → deflactor ENIGH = 1.088793.
 
-`reports/variables_check.md` muestra, sobre los archivos oficiales, las 8 variables confirmadas de ENVI y las 11 de ENIGH, sin faltantes. Las fuentes sin `download_url` aparecen como `verificado: no` y no se cuentan como fallo.
+Medianas de la renta mensual (pondéradas con factor de expansión):
 
-## Trazabilidad requisito → prueba
+| Fuente | Ámbito | p50 en pesos del año | p50 en pesos de jul-2024 | % rentadas | n_muestra | Σ factores |
+| --- | --- | ---: | ---: | ---: | ---: | ---: |
+| ENVI 2020 | Nacional | 2,000 | 2,496.224 | 16.4 % | 8,170 | 5,619,414 |
+| ENVI 2020 | Hidalgo (13) | 1,500 | 1,872.168 | 9.9 % | 164 | 81,275 |
+| ENVI 2020 | Estado de México (15) | 2,000 | 2,496.224 | 16.3 % | 271 | 739,380 |
+| ENIGH 2022 | Nacional | 2,000 | 2,177.585 | 15.1 % | 11,437 | 5,566,173 |
+| ENIGH 2022 | Hidalgo (13) | 2,000 | 2,177.585 | 9.9 % | 213 | 88,536 |
+| ENIGH 2022 | Estado de México (15) | 2,000 | 2,177.585 | 14.7 % | 387 | 706,980 |
+
+La tabla completa (p10, p25, p50, p75 y p90 en ambos pesos) está en `reports/national_baselines.md`.
+
+Definición aplicada: ordenar por renta, agrupar empatados y tomar el menor valor cuya suma acumulada de factores alcanza `q * (suma total de factores)`. `n_muestra` y `Σ factores` corresponden a las viviendas rentadas con renta válida; la proporción de rentadas usa como denominador todas las viviendas del grupo, también ponderadas.
+
+### Trazabilidad requisito → prueba
 
 | Requisito | Prueba |
 | --- | --- |
-| R02 · descarga y manifiesto | `tests/unit/test_download.py`, `tests/integration/test_download_stage.py` |
-| R02 · hash distinto falla | `test_wrong_sha256_in_registry_fails_clearly`, `test_manifest_hash_mismatch_fails_clearly`, `test_cli_fails_when_the_hash_does_not_match` |
-| R02 · fuente sin URL se salta | `test_source_with_empty_download_url_is_skipped`, `test_confirmed_source_without_url_is_skipped_not_failed` |
-| R02 · modo manual | `test_manual_mode_uses_local_file_without_fetching`, `test_second_run_uses_manual_mode_without_network` |
-| R02 · variable faltante | `tests/unit/test_variables_check.py`, `test_cli_fails_when_a_confirmed_variable_is_missing` |
-| R01 · registro ampliado | `tests/unit/test_sources_loader.py` |
+| R03 · percentil contra cálculo a mano | `tests/unit/test_percentiles.py::test_weighted_quantile_matches_hand_calculation`, `test_tied_values_are_grouped_before_accumulating` |
+| R03 · orden p10 ≤ … ≤ p90 | `test_weighted_percentiles_are_ordered`, `tests/integration/test_prepare_stage.py::test_percentiles_are_ordered_and_shares_are_in_range` |
+| R03 · exclusión de códigos especiales | `tests/unit/test_national.py::test_envi_excludes_special_rent_codes_and_blanks`, `test_envi_accepts_the_upper_bound_of_the_valid_range`, `test_enigh_uses_only_positive_rents_of_renters` |
+| R03 · proporciones en [0, 1] | `test_rented_share_is_weighted_and_between_zero_and_one`, `test_groups_without_valid_rent_are_skipped` |
+| R03 · deflactor con INPC inventado | `tests/unit/test_inpc.py::test_deflactor_uses_period_average_and_reference_month`, `test_deflactor_reports_missing_months` |
+| R03 · fila del índice general | `test_only_the_general_concept_row_is_used`, `test_inpc_registers_the_verified_general_index_file` |
+| R03 · esquema del Parquet | `tests/integration/test_prepare_stage.py::test_prepare_writes_parquet_with_documented_schema`, `test_national_and_state_medians_use_the_invented_data` |
+| R03 · etapa y CLI | `test_cli_prepare_returns_zero`, `test_cli_prepare_fails_clearly_when_a_file_is_missing`, `test_run_stage_dispatches_prepare`, `test_prepare_report_has_reference_month_note_and_summary_rows` |
+| R01/R02 · registro ampliado | `tests/unit/test_sources_loader.py` (14 pruebas, incluye INPC y las variables nuevas) |
+
+## T02 · Descarga verificable (registro histórico)
+
+- `data/sources.toml` quedó con `download_url`, nombre, tamaño, SHA-256, tipo, tabla y codificación por archivo; ENVI y ENIGH en `confirmed`, `P5_8` excluida.
+- `download` verifica el hash y el encabezado de cada CSV dentro del ZIP, escribe manifiestos y `reports/variables_check.md`.
+- Manifiestos verificados el 2026-11-17: `envi_2020_base_de_datos_csv.zip` (7,322,530 B, `36b8e3d0…40b`), `envi_2020_fd.xlsx` (242,100 B, `208fc3d2…fbcf`), `enigh2022_ns_viviendas_csv.zip` (1,712,569 B, `6ebd189f…5bd4`). El de INPC se agregó en T03 (`data/manifests/inegi_inpc.json`).
+- En T02: 86 pruebas, cobertura 91.30 %, ruff y mypy sin errores.
 
 ## Hallazgos y desviaciones
 
-1. **openpyxl no se agregó.** No está en la tabla de stack de la constitution §5. T02 solo lee encabezados de CSV dentro de ZIP; el XLSX de ENVI se descarga y se verifica por SHA-256, sin leerse. No hizo falta solicitar autorización para agregarlo.
-2. **Inside Airbnb está `confirmed` desde T01 pero no tiene `download_url` verificado.** La primera corrida completa marcó sus variables como faltantes; se ajustó el verificador para no fallar fuentes omitidas (`verificado: no`). Debe recibir URL y hash antes de usar sus variables.
-3. Censo 2020, DENUE, INPC, Inside Airbnb, OpenStreetMap y seed siguen sin descarga: fuera del alcance de esta autorización o a la espera de URL/hash verificados. El Censo se descargará solo para Hidalgo (13) y Estado de México (15), según M-ML-013.
-4. Datos crudos quedaron en `data/raw/` (ignorado por git); solo manifiestos y reporte son versionables. Sin commit ni PR por instrucción del responsable.
+1. **Servicios en T04, no en T03.** La redacción de R03 en la spec menciona «servicios ponderados», pero el responsable acotó la T03 a renta y proporción de viviendas rentadas y asignó la prevalencia de servicios por municipio al Censo 2020 de la T04 (M-ML-014(c) y autorización de ejecución). No se reporta como PASS una salida de servicios que no se generó.
+2. **pandas sin stubs de tipo.** `pandas` no publica `py.typed` y `pandas-stubs` no está en la tabla de la constitution §5, así que no se agregó. Se configuró en `pyproject.toml` un override de mypy `ignore_missing_imports` **solo para `pandas`/`pandas.*`**; el resto del código sigue en modo estricto.
+3. **INPC: valor semántico.** El diccionario del ZIP describe `VALOR` como «variación porcentual anual», pero el responsable verificó que son niveles del índice base 2Q jul 2018 = 100 (2024-07 = 136.003). Se documentó en `data/sources.toml`, el reporte y el código; se filtra solo el concepto general.
+4. **Definición de `n_muestra`.** Se adoptó como el conteo sin ponderar de viviendas rentadas con renta válida (la muestra que produce los percentiles); la proporción de rentadas usa todas las viviendas del grupo. Queda explicado en el reporte.
+5. **Sin commit ni PR** por instrucción explícita del responsable. La aprobación de otro humano en GitHub sigue pendiente.
+6. Censo 2020, DENUE, Inside Airbnb, OpenStreetMap y seed siguen sin descarga: fuera de esta autorización (T04–T09).
 
 ## Revisión
 
-- **Constitución:** se respetan §5 (sin dependencias nuevas), §7 (licencia INEGI registrada, sin datos personales en salidas, SHA-256 en manifiesto), §9 (descarga reproducible) y §16/§17 (ruff, mypy, pytest con cobertura).
-- **AGENTS / memoria:** autorización EJECUTA vigente (M-ML-011), fuentes aprobadas en M-ML-003, verificación automática de M-ML-012 y variables confirmadas en M-ML-013.
-- **Seguridad y licencias:** sin secretos, sin scraping, sin servicios de pago; solo productos públicos de INEGI citados como fuente, sin sugerir respaldo.
+- **Constitución:** §5 (solo pandas y pyarrow, añadidos como dependencias directas), §6 y §7 (Parquet fuera de git; INEGI citado como fuente sin sugerir respaldo), §7 (SHA-256 verificado antes de usar el ZIP; sin datos personales en las salidas), §9 (misma entrada → mismo Parquet), §16 (pruebas sin red, cobertura 89.26 %).
+- **AGENTS / memoria:** «EJECUTA» vigente de M-ML-011 y M-ML-014; fuentes aprobadas en M-ML-003; decisiones M-ML-010, M-ML-012, M-ML-013 aplicadas; M-ML-014 registrada con aprobación del responsable.
+- **Seguridad y licencias:** sin secretos, sin scraping, sin servicios de pago; solo productos públicos de INEGI citados como autor; ningún dato crudo o procesado versionado (verificado por `tests/test_repo_hygiene.py`).
 
 ## Resultado
 
-**PASS WITH WARNINGS.** T02 cumple su criterio de aceptación para las fuentes con URL verificada. Quedan pendientes los `download_url` de las demás fuentes y la revisión de otro humano en el pull request (no se hizo commit ni PR).
+**PASS WITH WARNINGS.** T03 cumple su criterio de aceptación con evidencia reproducible. Advertencias: los servicios quedan para T04 por decisión del responsable (hallazgo 1), el override de mypy para pandas (hallazgo 2) y la ausencia de commit/PR por instrucción (hallazgo 5).

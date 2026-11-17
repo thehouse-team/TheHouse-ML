@@ -9,7 +9,10 @@ license-files = ["LICENSE"]
 authors = [{ name = "TheHouse team" }]
 # ML-01 no necesita dependencias de ejecución: cada spec agrega las suyas
 # desde la tabla de la constitution §5.
-dependencies = []
+dependencies = [
+    "pandas>=3.1.0",
+    "pyarrow>=26.0.0",
+]
 
 [project.scripts]
 thehouse-ml = "thehouse_ml.cli:main"
@@ -59,6 +62,13 @@ select = [
 python_version = "3.12"
 strict = true
 files = ["src"]
+
+# pandas no publica py.typed y pandas-stubs no está en la tabla de stack de la
+# constitution §5. Se ignoran solo sus importes; el código propio sigue en modo
+# estricto (ML-02 T03).
+[[tool.mypy.overrides]]
+module = ["pandas", "pandas.*"]
+ignore_missing_imports = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
