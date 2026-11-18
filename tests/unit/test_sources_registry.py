@@ -67,6 +67,16 @@ def test_censo_dictionary_url_points_to_the_official_amplified_dictionary() -> N
     )
 
 
+def test_denue_registration_follows_m_ml_018() -> None:
+    denue = next(source for source in _load_sources() if source.get("id") == "inegi_denue_vigente")
+
+    assert denue["edition"] == "DENUE 05/2026"
+    assert denue["date"] == "2026-05-20"
+    assert denue["license"] == "Términos de Libre Uso de la Información del INEGI"
+    assert denue["attribution"] == "Fuente: INEGI, DENUE 05/2026"
+    assert denue["variables_status"] == "confirmed"
+
+
 def test_variables_status_is_valid() -> None:
     for source in _load_sources():
         source_id = source.get("id", "<sin id>")

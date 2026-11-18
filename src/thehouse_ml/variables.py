@@ -13,6 +13,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Protocol
 
+from thehouse_ml.csvio import CsvReadError, resolve_zip_members
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.sources import SourceSpec
 from thehouse_ml.universities import OSM_SOURCE, osm_headers
@@ -136,23 +137,19 @@ def verify_sources(sources: Sequence[SourceSpec], paths: ProjectPaths) -> Variab
 
 
 def read_zip_header(archive: Path, member: str | None, encoding: str = "utf-8") -> list[str]:
-    """Lee solo el encabezado de un CSV dentro de un ZIP."""
+    """Lee solo el encabezado de un CSV (o de todos los que coincidan) dentro de un ZIP."""
     try:
         with zipfile.ZipFile(archive) as bundle:
             names = sorted(bundle.namelist())
-            chosen: str
-            if member is None:
-                candidates = [name for name in names if name.lower().endswith(".csv")]
-                if len(candidates) != 1:
-                    raise VariableCheckError(f"{archive.name}: se esperaba un CSV y se encontraron {len(candidates)}")
-                chosen = candidates[0]
-            else:
-                resolved = _resolve_member(names, member)
-                if resolved is None:
-                    raise VariableCheckError(f"{archive.name}: no contiene el miembro {member!r}")
-                chosen = resolved
-            with bundle.open(chosen) as stream:
-                return _first_row(stream, encoding)
+            try:
+                chosen_members = resolve_zip_members(names, member)
+            except CsvReadError as exc:
+                raise VariableCheckError(f"{archive.name}: {exc}") from exc
+            headers: list[str] = []
+            for chosen in chosen_members:
+                with bundle.open(chosen) as stream:
+                    headers.extend(_first_row(stream, encoding))
+            return headers
     except zipfile.BadZipFile as exc:
         raise VariableCheckError(f"{archive.name}: no es un ZIP válido") from exc
     except (OSError, UnicodeError) as exc:
@@ -172,18 +169,6 @@ def write_variables_report(path: Path, report: VariablesReport) -> None:
     """Escribe el reporte Markdown en ``reports/`` con finales de línea LF."""
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(report.render(), encoding="utf-8", newline="\n")
-
-
-def _resolve_member(names: list[str], member: str) -> str | None:
-    if member in names:
-        return member
-    wanted = member.lower().replace("\\", "/")
-    normalized = [(name, name.lower().replace("\\", "/")) for name in names]
-    exact = [name for name, value in normalized if value == wanted]
-    if len(exact) == 1:
-        return exact[0]
-    suffix = [name for name, value in normalized if value.endswith("/" + wanted) or value == wanted]
-    return suffix[0] if len(suffix) == 1 else None
 
 
 def _first_row(stream: _BinaryLineReader, encoding: str) -> list[str]:

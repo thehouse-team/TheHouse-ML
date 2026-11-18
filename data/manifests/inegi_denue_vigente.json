@@ -1,0 +1,29 @@
+{
+  "source_id": "inegi_denue_vigente",
+  "files": [
+    {
+      "url": "https://www.inegi.org.mx/contenidos/masiva/denue/denue_13_csv.zip",
+      "filename": "denue_13_csv.zip",
+      "downloaded_at": "2026-11-18",
+      "size_bytes": 15059273,
+      "sha256": "d0747958bc364177ea8d281047334cffd4d3505247f43967e08da2ca9c1d9ca5",
+      "license": "Términos de Libre Uso de la Información del INEGI"
+    },
+    {
+      "url": "https://www.inegi.org.mx/contenidos/masiva/denue/denue_15_1_csv.zip",
+      "filename": "denue_15_1_csv.zip",
+      "downloaded_at": "2026-11-18",
+      "size_bytes": 50572588,
+      "sha256": "23021fc24a2046e1aa3ad8c21137ca57988ded26b6f293ec0c929f59dd2cb1ae",
+      "license": "Términos de Libre Uso de la Información del INEGI"
+    },
+    {
+      "url": "https://www.inegi.org.mx/contenidos/masiva/denue/denue_15_2_csv.zip",
+      "filename": "denue_15_2_csv.zip",
+      "downloaded_at": "2026-11-18",
+      "size_bytes": 30236017,
+      "sha256": "ad53e5fb65f15b491e140a80e79b207b95eb0320e4a69822d5a3cefb7652bc20",
+      "license": "Términos de Libre Uso de la Información del INEGI"
+    }
+  ]
+}

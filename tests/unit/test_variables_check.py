@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import zipfile
 from pathlib import Path
 
 import pytest
@@ -45,6 +46,20 @@ def test_read_zip_header_strips_utf8_bom(tmp_path: Path) -> None:
     header = read_zip_header(archive, "viviendas.csv", "utf-8-sig")
 
     assert header[0] == "tenencia"
+
+
+def test_read_zip_header_joins_every_csv_matching_a_glob(tmp_path: Path) -> None:
+    archive = tmp_path / "denue_15.zip"
+    with zipfile.ZipFile(archive, "w", zipfile.ZIP_DEFLATED) as bundle:
+        bundle.writestr(
+            "conjunto_de_datos/denue_inegi_15_.csv", "id,codigo_act,latitud\n1,722111,20.0\n".encode("latin-1")
+        )
+        bundle.writestr("conjunto_de_datos/otro.csv", "id,codigo_act,longitud\n2,522110,-99.6\n".encode("latin-1"))
+        bundle.writestr("catalogos/no.csv", "x,y\n".encode("latin-1"))
+
+    header = read_zip_header(archive, "conjunto_de_datos/*.csv", "latin-1")
+
+    assert set(header) == {"id", "codigo_act", "latitud", "longitud"}
 
 
 def test_read_zip_header_rejects_unknown_member(tmp_path: Path) -> None:

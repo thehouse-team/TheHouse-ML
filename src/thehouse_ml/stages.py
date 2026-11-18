@@ -1,14 +1,16 @@
 """Etapas del pipeline (constitution §9).
 
 Las etapas aún no implementadas informan qué spec las cubre y terminan sin
-error. ML-02 T02 implementa ``download``; T03, T04 y T07 implementan ``prepare``
-(bases nacionales, calibración regional y universidades verificadas).
+error. ML-02 T02 implementa ``download``; T03, T04, T05 y T07 implementan
+``prepare`` (bases nacionales, calibración regional, entorno DENUE de los campus
+y universidades verificadas).
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 
+from thehouse_ml.denue import run_denue
 from thehouse_ml.download import Fetcher, run_download
 from thehouse_ml.national import run_prepare
 from thehouse_ml.paths import ProjectPaths
@@ -55,6 +57,6 @@ def run_stage(name: str, paths: ProjectPaths, source: str | None = None, fetcher
         return run_download(paths, source_id=source, fetcher=fetcher)
     if name == "prepare":
         del source, fetcher  # La etapa prepare no usa red ni filtro de fuente.
-        return f"{run_prepare(paths)}\n{run_regional(paths)}\n{run_universities(paths)}"
+        return f"{run_prepare(paths)}\n{run_regional(paths)}\n{run_universities(paths)}\n{run_denue(paths)}"
     del source, fetcher  # Las etapas vacías no leen ni escriben archivos.
     return f"{stage.name}: pendiente de {stage.spec}"

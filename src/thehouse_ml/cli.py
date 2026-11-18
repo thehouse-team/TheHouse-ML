@@ -8,6 +8,7 @@ from collections.abc import Sequence
 from pathlib import Path
 
 from thehouse_ml import __version__
+from thehouse_ml.denue import DenueError
 from thehouse_ml.download import DownloadError
 from thehouse_ml.manifests import ManifestError
 from thehouse_ml.national import PrepareError
@@ -54,6 +55,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     try:
         message = run_stage(args.stage, paths, source=source)
     except (
+        DenueError,
         DownloadError,
         ManifestError,
         OsmError,

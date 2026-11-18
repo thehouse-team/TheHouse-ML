@@ -3,19 +3,87 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-02 1.0.1 |
-| Tareas ejecutadas | T02 · Descarga verificable (R02); T03 · Bases nacionales ponderadas (R03); T04 · Calibración regional con respaldo (R04); **T07 · Universidades verificadas (R07)** |
+| Tareas ejecutadas | T02 · Descarga verificable (R02); T03 · Bases nacionales ponderadas (R03); T04 · Calibración regional con respaldo (R04); T07 · Universidades verificadas (R07); **T05 · Entorno de campus (R05)** |
 | Autorización T02 | «EJECUTA ML-02 1.0.1, task T02, en la rama feat/ml-02-descarga» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T03 | «Apruebo M-ML-014 y EJECUTA ML-02 1.0.1, task T03, en la rama feat/ml-02-bases» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T04 | «Apruebo M-ML-015 y EJECUTA ML-02 1.0.1, task T04, en la rama feat/ml-02-regional» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T07 | «Apruebo M-ML-016 y EJECUTA ML-02 1.0.1, task T07 (antes que T05, porque T05 necesita coordenadas verificadas), en la rama feat/ml-02-universidades» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T07 (amplíación) | «Apruebo M-ML-017 y continúa T07 de ML-02 1.0.1 en la rama feat/ml-02-universidades» — César Yael López Trujillo, 2026-11-18 |
+| Autorización T05 | «Apruebo M-ML-018 y EJECUTA ML-02 1.0.1, task T05, en la rama feat/ml-02-denue. Rutas permitidas: src/thehouse_ml/, tests/, data/sources.toml, data/manifests/, reports/, memoria.md y specs/ml-02-data-sources/. Sin dependencias nuevas» — César Yael López Trujillo, 2026-11-18 |
 | Rama (T02–T04) | `feat/ml-02-descarga`, `feat/ml-02-bases`, `feat/ml-02-regional` |
 | Rama (T07) | `feat/ml-02-universidades` |
-| Commit | `46c9d4f` (T07 M-ML-016, hecho por el responsable). La ampliación M-ML-017 se entrega sin commit, por instrucción explícita |
+| Rama (T05) | `feat/ml-02-denue` |
+| Commit | `46c9d4f` (T07 M-ML-016, hecho por el responsable). Las ampliaciones M-ML-017 y M-ML-018 (T05) se entregan sin commit, por instrucción explícita |
 | Fecha de ejecución T03 | 2026-11-17 |
 | Fecha de ejecución T04 | 2026-11-17 |
 | Fecha de ejecución T07 | 2026-11-17 |
 | Fecha de ampliación T07 (M-ML-017) | 2026-11-18 |
+| Fecha de ejecución T05 | 2026-11-18 |
+
+## T05 · Entorno de campus (DENUE 05/2026)
+
+### Qué se hizo
+
+1. `data/sources.toml`: `inegi_denue_vigente` pasó de `download_url = []` y `variables_status = "pending"` a **confirmed**, edición **DENUE 05/2026** (modificado 2026-05-20), licencia «Términos de Libre Uso de la Información del INEGI» y atribución «Fuente: INEGI, DENUE 05/2026». Variables permitidas: `id`, `codigo_act`, `per_ocu`, `cve_ent`, `cve_mun`, `latitud`, `longitud` y `fecha_alta`. Se eliminaron del registro `clee`, `nom_estab`, `nombre_act`, `cve_loc` y demás caminos de dirección.
+2. `src/thehouse_ml/csvio.py`: `resolve_zip_members` acepta patrones `conjunto_de_datos/*.csv` y `iter_zip_csv` lee por chunks con `usecols`; `variables.py::read_zip_header` usa el mismo resolvedor para verificar los encabezados de todos los CSV del ZIP sin cargar los datos.
+3. `src/thehouse_ml/denue.py` (nuevo): constantes únicas `RADII_M = (1000, 2000, 5000)` y `CATEGORIES` (10 categorías SCIAN, `total` = todos); lectura exclusiva de las 8 variables con `usecols`; haversine reutilizado de `universities.py`; conteos agregados por campus/radio/categoría; Parquet y reporte con sección aparte para `seed_sin_verificar`. `prepare` lo despacha y `DenueError` se reporta con código 1.
+4. `memoria.md`: decisión M-ML-018 (APROBADA). `spec.md`, `plan.md` y `task.md`: T05 marcada COMPLETA (6 de 9 tasks).
+5. Pruebas sin red: `tests/unit/test_denue.py` (26), `tests/integration/test_denue_stage.py` (5), plus ampliaciones en `test_sources_loader.py`, `test_sources_registry.py`, `test_variables_check.py` y `test_prepare_stage.py`.
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | 80 files already formatted |
+| `uv run ruff check .` | All checks passed |
+| `uv run mypy src` | Success: no issues found in 16 source files |
+| `uv run pytest --cov=thehouse_ml` | **208 passed**; cobertura total **91.15 %** (mínimo 80 %), `denue.py` 90 % |
+| `uv run python -m thehouse_ml download --source inegi_denue_vigente` | `inegi_denue_vigente: mixto - 3 archivo(s) verificados`; `variables_check` sin fallas |
+| `uv run python -m thehouse_ml prepare` | `denue: data/processed/campus_context.parquet (300 filas, 981,519 establecimientos) - reports/denue_campus.md` |
+
+### Desviación aprobada: URL de Edomex corregida
+
+La URL indicada en la autorización, `https://www.inegi.org.mx/contenidos/masiva/denue/denue_15_csv.zip`, **devuelve una página 404 de INEGI** (HTML de 2,263 bytes). El catálogo oficial de descarga masiva del DENUE 05/2026 publica el Estado de México en **dos ZIP**: `denue_15_1_csv.zip` y `denue_15_2_csv.zip`. Se registraron esas dos URL (misma fuente, misma edición), se descargaron y se leyeron todos los CSV dentro de `conjunto_de_datos/` de cada una. El archivo inválido de 404 se eliminó de `data/raw`. **Aprobado por César Yael López Trujillo el 2026-11-18: adenda a M-ML-018 en `memoria.md`.**
+
+Tamaños y SHA-256 registrados por `download` en `data/manifests/inegi_denue_vigente.json` y confirmados con `Get-FileHash`:
+
+| Archivo | Tamaño (bytes) | SHA-256 |
+| --- | ---: | --- |
+| `denue_13_csv.zip` (registrado de antemano) | 15,059,273 | `d0747958bc364177ea8d281047334cffd4d3505247f43967e08da2ca9c1d9ca5` |
+| `denue_15_1_csv.zip` | 50,572,588 | `23021fc24a2046e1aa3ad8c21137ca57988ded26b6f293ec0c929f59dd2cb1ae` |
+| `denue_15_2_csv.zip` | 30,236,017 | `ad53e5fb65f15b491e140a80e79b207b95eb0320e4a69822d5a3cefb7652bc20` |
+
+### Evidencia de datos reales
+
+`data/processed/campus_context.parquet` (fuera de git, nombre de la spec §6.2) tiene 300 filas: 10 universidades × 3 radios × 10 categorías, con columnas `code`, `radius_m`, `category`, `count` y `final_status`. Se procesaron 981,519 establecimientos de los dos estados (Hidalgo y Estado de México); `reports/denue_campus.md` contiene la tabla a 2 km, una tabla por universidad, la atribución y la sección `seed_sin_verificar` con TESJI, UMB-VDC y UCAN. El ZIP de Hidalgo contiene 160,666 filas en `conjunto_de_datos/denue_inegi_13_.csv`, según el registro.
+
+`reports/variables_check.md` cambió **solo en la sección `inegi_denue_vigente`** (de `pending`/sin verificar a `confirmed`/verificado, 8 variables encontradas, nota `-`); las siete secciones restantes quedaron byte por byte iguales (`git diff -- reports/variables_check.md`).
+
+### Verificación de los conteos bajos de Jilotepec
+
+Conteos del Parquet para las tres universidades solicitadas (categorías `total`, `comida` y `abarrotes_super`):
+
+| Universidad | 1 km (total / comida / abarrotes) | 2 km (total / comida / abarrotes) | 5 km (total / comida / abarrotes) |
+| --- | --- | --- | --- |
+| TESJI (`seed_sin_verificar`) | 1 / 0 / 0 | 1 / 0 / 0 | 68 / 5 / 10 |
+| UMB-JILO (`ok_manual`) | 1 / 0 / 0 | 1 / 0 / 0 | 10 / 0 / 1 |
+| UTTT (`ok_osm`) | 1 / 0 / 0 | 197 / 27 / 54 | 2,830 / 390 / 630 |
+
+Los dos ZIP de Edomex se leyeron íntegramente: `denue_15_1_csv.zip` 520,000 filas y `denue_15_2_csv.zip` 300,853 filas (820,853 en total), de las cuales **3,241 tienen `cve_ent = 15` y `cve_mun = 045` (Jilotepec)**. Por tanto los valores bajos de TESJI y UMB-JILO no se deben a un error de lectura: sus coordenadas finales caen en una zona rural con muy pocos establecimientos (a 5 km solo 68 y 10). El mismo proceso cuenta 1,366 negocios a 2 km en UMB-VDC (Villa del Carbón, también Edomex) y 2,830 a 5 km en UTTT (Hidalgo). TESJI conserva coordenada `seed_sin_verificar` (M-ML-017), así que su conteo es orientativo.
+
+### Trazabilidad requisito → prueba
+
+| Requisito | Prueba |
+| --- | --- |
+| R05 · radios y categorías en una sola constante | `tests/unit/test_denue.py::test_categories_and_radii_are_declared_in_one_constant` |
+| R05 · clasificación por prefijo SCIAN | `test_categorize_matches_scian_prefixes`, `test_prefix_does_not_match_a_longer_scian_code`, `test_total_counts_every_business_even_with_a_blank_code` |
+| R05 · frontera exacta del radio | `test_radius_boundary_is_inclusive` |
+| R05 · privacidad (nunca leer columnas prohibidas) | `test_reader_uses_only_usecols_and_never_surfaces_private_columns`, `tests/integration/test_denue_stage.py::test_final_status_is_copied_to_every_row` |
+| R05 · varios CSV dentro del ZIP | `test_reader_reads_every_csv_inside_the_folder`, `tests/unit/test_variables_check.py::test_read_zip_header_joins_every_csv_matching_a_glob` |
+| R05 · separación de `seed_sin_verificar` | `test_render_report_separates_unverified_campuses`, `test_denue_stage.py::test_report_has_attribution_a_table_per_campus_and_the_warning` |
+| R05 · ambos estados y conteos crecientes | `test_denue_stage.py::test_counts_are_monotonic_and_use_both_states` |
+| R05 · esquema del Parquet y despacho | `test_denue_stage.py::test_prepare_writes_the_denue_parquet_with_the_documented_schema`, `test_run_stage_dispatches_the_denue_stage`, `tests/integration/test_prepare_stage.py::test_run_stage_dispatches_prepare` |
+| R01/R02 · registro DENUE | `test_sources_loader.py::test_denue_registers_two_states_and_only_public_variables`, `test_sources_registry.py::test_denue_registration_follows_m_ml_018`, `test_denue.py::test_real_registry_declares_the_two_states_and_confirmed_variables` |
 
 ## T07 · Universidades verificadas
 
@@ -267,6 +335,9 @@ Definición aplicada: ordenar por renta, agrupar empatados y tomar el menor valo
 13. **Sin commit ni PR por instrucción explícita del responsable.** La aprobación de otro humano en GitHub sigue pendiente.
 14. **Reporte de variables filtrado (detectado y corregido).** `run_download` usaba la lista devuelta por `select_sources` tanto para descargar como para verificar, de modo que `download --source openstreetmap` reescribía `reports/variables_check.md` con una sola sección. Se separaron las dos responsabilidades: `--source` limita solo la descarga y `verify_sources` recibe siempre todas las fuentes del registro. El reporte se escribe con finales LF. Pruebas: `test_download_stage.py::test_source_filter_limits_the_download_but_not_the_report` y `test_universities_stage.py::test_filtered_download_keeps_every_source_in_the_variables_report`.
 15. **CI en máquina vacía (detectado y corregido).** El job `quality` fallaba en «CLI con las cinco etapas»: un `download` sin filtro incluía OpenStreetMap y consultaba Nominatim (prohibido por M-ML-016 en CI), y un `prepare` sin respuestas en `data/raw/openstreetmap/` fallaba con `OsmError`. Ahora OSM es fuente bajo demanda: sin `--source` se omite con `openstreetmap: omitido - ejecute download --source openstreetmap` y no se llama al fetcher; solo `download --source openstreetmap` consulta. `prepare` sin respuestas conserva `data/universities.csv` y `reports/universities_check.md` versionados y reporta `universities: omitido (sin respuestas OSM; se conserva data/universities.csv versionado)`. Pruebas sin red: `test_download_stage.py::test_download_without_source_omits_osm_and_never_calls_the_fetcher` y `test_universities_stage.py::test_prepare_without_osm_responses_keeps_the_versioned_files`. Sin dependencias nuevas ni consultas nuevas a Nominatim.
+16. **URL de Edomex 404 (resuelto el 2026-11-18).** `denue_15_csv.zip` devuelve una página HTML de 2,263 bytes. El catálogo de descarga masiva del DENUE 05/2026 publica Edomex en dos ZIP (`denue_15_1_csv.zip`, `denue_15_2_csv.zip`); se usaron esos dos archivos y sus hashes quedaron en el manifiesto. El responsable aprobó el cambio y se registró como adenda de M-ML-018 en `memoria.md` (ver sección T05).
+17. **Nombre de salida (resuelto el 2026-11-18).** La spec 1.0.1 describe `campus_context.parquet` en §6 y §6.2; la autorización de T05 pidió inicialmente `denue_campus.parquet`. El responsable aprobó usar el nombre de la spec: la salida se renombró a `data/processed/campus_context.parquet` en código, pruebas, reporte, `task.md` y esta evidencia. El reporte conserva su nombre `reports/denue_campus.md`.
+18. **Reescritura de `data/universities.csv` por fin de línea (resuelto el 2026-11-18).** `prepare` reescribía el CSV versionado porque `csv.DictWriter` usa CRLF por omisión en Windows. Ahora `write_universities_csv` genera el contenido con `lineterminator="\n"`, compara con el archivo existente (normalizando CRLF→LF) y no escribe si el contenido no cambia. Se restauró el archivo con `git checkout -- data/universities.csv`; `prepare` ya no lo modifica. Prueba: `tests/unit/test_universities.py::test_write_universities_csv_uses_lf_and_does_not_rewrite_unchanged_content`.
 
 ## Revisión
 
@@ -274,8 +345,11 @@ Definición aplicada: ordenar por renta, agrupar empatados y tomar el menor valo
 - **AGENTS / memoria:** «EJECUTA» vigente de M-ML-011, M-ML-014 y M-ML-015; fuentes aprobadas en M-ML-003; decisiones M-ML-010, M-ML-012, M-ML-013, M-ML-014 y M-ML-015 aplicadas; la T04 no modifica `constitution.md` ni `AGENTS.md`.
 - **Seguridad y licencias:** sin secretos, sin scraping, sin servicios de pago; solo productos públicos de INEGI citados como autor; ningún dato crudo o procesado versionado (verificado por `tests/test_repo_hygiene.py`); el Censo se descargó solo para las dos entidades autorizadas.
 - **T07 (M-ML-016):** sin dependencias nuevas (HTTP y JSON de la biblioteca estándar); solo 10 consultas a Nominatim con User-Agent propio y ≤ 1 req/s; sin scraping; respuestas crudas fuera de git y SHA-256 en `data/manifests/openstreetmap.json`; atribución ODbL en el reporte y en `sources.toml`; sin datos personales; se ejecutó antes que T05 según lo autorizado; no se modifica `constitution.md` ni `AGENTS.md`.
+- **T05 (M-ML-018):** constitución §7 (solo fuente INEGI con licencia registrada, sin republicar microdatos; `usecols` impide leer nombres, teléfonos, correos ni direcciones; solo agregados en el Parquet y el reporte), §9 (misma entrada → mismos conteos) y §16 (cobertura 91.23 %, pruebas sin red con CSV latin-1 inventado); AGENTS/memoria: autorización vigente, M-ML-018 APROBADA, sin dependencias nuevas (pandas, pyarrow y biblioteca estándar), sin tocar `constitution.md` ni `AGENTS.md`. El ZIP de Edomex se sustituyó por los dos del catálogo oficial por un 404 (hallazgo 16, pendiente de confirmación).
 
 ## Resultado
+
+**PASS.** T05 cumple su criterio de aceptación con evidencia reproducible: `data/processed/campus_context.parquet` tiene 300 filas (10 universidades × 3 radios × 10 categorías), los conteos son no negativos y crecientes con el radio, se procesaron 981,519 establecimientos de ambos estados, `reports/denue_campus.md` incluye la tabla a 2 km, una tabla por campus y la sección aparte de `seed_sin_verificar`, y `reports/variables_check.md` solo cambió en la sección de DENUE. Advertencia resuelta: la URL de Edomex autorizada estaba caída y se sustituyó por los dos ZIP del catálogo oficial (hallazgo 16, **aprobado por el responsable el 2026-11-18**). Hallazgos 17 y 18 resueltos el 2026-11-18. Sin commit, por instrucción explícita.
 
 **PASS WITH WARNINGS.** T07 cumple su criterio de aceptación con evidencia reproducible: `data/universities.csv` tiene las 10 universidades con id OSM (cuando hay coincidencia), distancia haversine, estado y fecha de verificación; las 3 aproximadas del seed quedaron registradas y los 8 casos dudosos se reportan para NV-11. Advertencias: 7 `sin_coincidencia` y 1 `revisar` requieren confirmación humana en openstreetmap.org antes de T05 (hallazgos 10 y 11), reescritura de reportes por fin de línea (hallazgo 12) y ausencia de commit/PR por instrucción (hallazgo 13).
 
