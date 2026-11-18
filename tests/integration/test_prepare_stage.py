@@ -21,6 +21,22 @@ ENVI_ZIP = "envi_de_prueba.zip"
 ENIGH_ZIP = "enigh_de_prueba.zip"
 INPC_ZIP = "inpc_de_prueba.zip"
 
+CENSO_HGO_ZIP = "censo_hgo_de_prueba.zip"
+CENSO_MEX_ZIP = "censo_mex_de_prueba.zip"
+CENSO_COLUMNS = [
+    "ENT",
+    "MUN",
+    "FACTOR",
+    "ESTRATO",
+    "UPM",
+    "TENENCIA",
+    "AGUA_ENTUBADA",
+    "DRENAJE",
+    "ELECTRICIDAD",
+    "INTERNET",
+    "COMBUSTIBLE",
+]
+
 GENERAL = "Índice nacional de precios al consumidor, Resumen, Precios al Consumidor (INPC)"
 SUBYACENTE = "Índice nacional de precios al consumidor, Resumen, Subyacente"
 
@@ -64,6 +80,28 @@ filename = "{ENIGH_ZIP}"
 kind = "data"
 table = "viviendas.csv"
 encoding = "utf-8-sig"
+
+[[sources]]
+id = "inegi_censo_2020_viviendas_ca"
+name = "Censo de prueba"
+license = "Términos de libre uso de INEGI"
+attribution = "INEGI"
+variables_status = "confirmed"
+variables_used = {CENSO_COLUMNS!r}
+
+[[sources.download_url]]
+url = "https://example.test/{CENSO_HGO_ZIP}"
+filename = "{CENSO_HGO_ZIP}"
+kind = "data"
+table = "Viviendas13.CSV"
+encoding = "latin-1"
+
+[[sources.download_url]]
+url = "https://example.test/{CENSO_MEX_ZIP}"
+filename = "{CENSO_MEX_ZIP}"
+kind = "data"
+table = "Viviendas15.CSV"
+encoding = "latin-1"
 
 [[sources]]
 id = "inegi_inpc"
@@ -119,6 +157,19 @@ encoding = "utf-8"
     _write_zip(raw / ENVI_SOURCE / ENVI_ZIP, "Bases de datos/TVIVIENDA.csv", "latin-1", envi_rows)
     _write_zip(raw / ENIGH_SOURCE / ENIGH_ZIP, "viviendas.csv", "utf-8-sig", enigh_rows)
     _write_zip(raw / "inegi_inpc" / INPC_ZIP, "conjunto_de_datos/inpc.csv", "utf-8", inpc_rows)
+
+    censo_raw = raw / "inegi_censo_2020_viviendas_ca"
+    hidalgo = [CENSO_COLUMNS]
+    for index in range(40):
+        hidalgo.append(["13", "070", "10", "1", "A" if index % 2 == 0 else "B", "2", "1", "1", "1", "7", "2"])
+    for mun in ("013", "041", "063", "076"):
+        hidalgo.append(["13", mun, "10", "1", "A", "1", "3", "5", "3", "8", "5"])
+    mexico = [CENSO_COLUMNS]
+    for index in range(40):
+        mexico.append(["15", "045", "10", "1", "A" if index % 2 == 0 else "B", "2", "1", "1", "1", "7", "2"])
+    mexico.append(["15", "112", "10", "1", "A", "1", "3", "5", "3", "8", "5"])
+    _write_zip(censo_raw / CENSO_HGO_ZIP, "Viviendas13.CSV", "latin-1", hidalgo)
+    _write_zip(censo_raw / CENSO_MEX_ZIP, "Viviendas15.CSV", "latin-1", mexico)
 
 
 def _frame(tmp_path: Path) -> pd.DataFrame:

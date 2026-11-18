@@ -5,11 +5,11 @@ no se carga el cuerpo de los microdatos. Una variable confirmada ausente hace fa
 
 ## inegi_censo_2020_viviendas_ca
 
-- estado: `pending`
-- verificado: no
-- variables encontradas: (ninguna)
-- variables faltantes: (sin verificar)
-- nota: download_url pendiente (sin verificar)
+- estado: `confirmed`
+- verificado: si
+- variables encontradas: `ENT`, `MUN`, `FACTOR`, `ESTRATO`, `UPM`, `TENENCIA`, `AGUA_ENTUBADA`, `DRENAJE`, `ELECTRICIDAD`, `INTERNET`, `COMBUSTIBLE`
+- variables faltantes: (ninguna)
+- nota: -
 
 ## inegi_envi_2020
 

@@ -12,6 +12,7 @@ from thehouse_ml.download import DownloadError
 from thehouse_ml.manifests import ManifestError
 from thehouse_ml.national import PrepareError
 from thehouse_ml.paths import ROOT_ENV_VAR, ProjectPaths
+from thehouse_ml.regional import RegionalError
 from thehouse_ml.sources import SourceRegistryError
 from thehouse_ml.stages import STAGES, run_stage
 from thehouse_ml.variables import VariableCheckError
@@ -51,7 +52,7 @@ def main(argv: Sequence[str] | None = None) -> int:
     source = raw_source if isinstance(raw_source, str) else None
     try:
         message = run_stage(args.stage, paths, source=source)
-    except (DownloadError, ManifestError, PrepareError, SourceRegistryError, VariableCheckError) as exc:
+    except (DownloadError, ManifestError, PrepareError, RegionalError, SourceRegistryError, VariableCheckError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
     print(message)

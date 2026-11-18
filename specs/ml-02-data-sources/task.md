@@ -8,10 +8,10 @@
 | Fecha | 2026-11-12 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-12 (M-ML-012): aprueba ML-02 1.0.1 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T04 completas; T05–T09 sin ejecutar** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 9 |
-| Tasks completadas | 3 |
+| Tasks completadas | 4 |
 
 ## Reglas de esta lista
 
@@ -28,7 +28,7 @@
 
 - [x] **T02 · Descarga verificable** — Requisito: ML-02-R02 · Aceptación: `download` obtiene cada fuente registrada, guarda su SHA-256 en `data/manifests/` y falla si el hash no coincide en descargas posteriores; verifica que cada variable registrada exista en el archivo descargado y la marca `confirmed`.
 - [x] **T03 · Bases nacionales ponderadas** — Requisito: ML-02-R03 · Aceptación: `national_baselines.parquet` con percentiles de renta, proporción de renta y servicios ponderados con el factor de expansión y actualizados con el INPC; pruebas de esquema y de orden de percentiles.
-- [ ] **T04 · Calibración regional con respaldo** — Requisito: ML-02-R04 · Aceptación: `regional_calibration.parquet` con los 7 municipios; cada indicador indica si salió del municipio, del estado o del país según la regla de suficiencia; prueba de la regla.
+- [x] **T04 · Calibración regional con respaldo** — Requisito: ML-02-R04 · Aceptación: `regional_calibration.parquet` con los 7 municipios; cada indicador indica si salió del municipio, del estado o del país según la regla de suficiencia; prueba de la regla.
 - [ ] **T05 · Entorno de campus** — Requisito: ML-02-R05 · Aceptación: `campus_context.parquet` con conteos del DENUE por categoría SCIAN para las 10 universidades en radios de 1, 2 y 5 km; prueba de consistencia de radios.
 - [ ] **T06 · Catálogo de cuartos sin datos personales** — Requisito: ML-02-R06 · Aceptación: `rooms.parquet` sin columnas prohibidas (prueba automática), con coordenadas redondeadas, servicios y tipos mapeados a NV-11 y renta mensual calibrada; los valores no mapeados se cuentan y se reportan.
 
@@ -48,7 +48,7 @@
 | T01 | R01 | F1 | COMPLETA |
 | T02 | R02 | F2 | COMPLETA |
 | T03 | R03 | F2 | COMPLETA |
-| T04 | R04 | F2 | ABIERTA |
+| T04 | R04 | F2 | COMPLETA |
 | T05 | R05 | F2 | ABIERTA |
 | T06 | R06 | F2 | ABIERTA |
 | T07 | R07 | F3 | ABIERTA |

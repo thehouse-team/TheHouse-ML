@@ -121,3 +121,18 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — César Yael López Trujillo — 2026-11-17.
 - **Fecha:** 2026-11-17.
 - **Impacto:** `inegi_inpc` queda registrado en `data/sources.toml` con URL, hash y `variables_status = "confirmed"`; se agregan `P4_3` a ENVI y `tipo_viv` a ENIGH. La etapa `prepare` genera `national_baselines.parquet` y su reporte; la calibración regional (T04) queda para después.
+
+## M-ML-015 — Censo 2020: fuente, archivos y códigos confirmados para la T04
+
+- **Decisión:** registrar y descargar la fuente `inegi_censo_2020_viviendas_ca` del Censo de Población y Vivienda 2020, muestra del cuestionario ampliado, **solo para Hidalgo (13) y Estado de México (15)** y solo la tabla `Viviendas`, con cuatro archivos verificados por el responsable el 2026-11-17 abriendo los archivos oficiales:
+  - `Censo2020_CA_hgo_csv.zip` (17,225,011 bytes, SHA-256 `5d0ff2b338acb93f8558ef2fed0500c1b4af004cdfc5ee34fb1fec7faa21e865`, tabla `Viviendas13.CSV`, latin-1);
+  - `Censo2020_CA_mex_csv.zip` (41,189,169 bytes, SHA-256 `178a2a5c3a0b7b08a1ac878a5e94ca4e6c9b9d5851d98b8b07fe2f9d35672c2b`, tabla `Viviendas15.CSV`, latin-1);
+  - `diccionario_cuestionario_ampliado_cpv2020.xlsx` (95,642 bytes, SHA-256 `e728cdac1872be856ba15c2902a77fb6c03e60c2d98619b7ae8988cc82afb6dc`, diccionario oficial);
+  - `Censo2020_clasificaciones_CPV.xlsx` (210,951 bytes, SHA-256 `64c7d6974392132258d77b8697e92cb9f39ba4cd303fc5a9c0f32861f174f381`, catálogos oficiales).
+- **Variables usadas:** `ENT`, `MUN`, `FACTOR`, `ESTRATO`, `UPM`, `TENENCIA`, `AGUA_ENTUBADA`, `DRENAJE`, `ELECTRICIDAD`, `INTERNET`, `COMBUSTIBLE`. Se retira `AGUA_ENT` (no existe en el diccionario) y se confirman las anteriores con `variables_status = "confirmed"` y `dictionary_url` apuntando al diccionario ampliado.
+- **Códigos confirmados con el diccionario oficial:** `TENENCIA` 2 = «se paga renta» (1 propia, 3 prestada, 4 otra); `INTERNET` 7 sí / 8 no; `ELECTRICIDAD` 1 sí / 3 no; `AGUA_ENTUBADA` 1 dentro, 2 solo patio, 3 no tiene; `DRENAJE` 1–4 tiene / 5 no tiene; `COMBUSTIBLE` 1 leña o carbón, 2 gas, 3 electricidad, 4 otro, 5 no cocinan. El código 9 y el blanco significan «no especificado» y se excluyen del denominador de cada indicador.
+- **Claves de los 7 municipios (catálogo oficial):** Hidalgo 013 Atotonilco de Tula, 041 Mixquiahuala de Juárez, 063 Tepeji del Río de Ocampo, 070 Tlahuelilpan, 076 Tula de Allende; Estado de México 045 Jilotepec, 112 Villa del Carbón.
+- **Renta regional:** el Censo no trae monto. Para cada municipio se copian los percentiles p10–p90 de renta en pesos de julio-2024 de su estado según ENVI 2020 (de `national_baselines`, T03), con `level = "estado"` y `source = ENVI`.
+- **Estado:** APROBADO — César Yael López Trujillo — 2026-11-17.
+- **Fecha:** 2026-11-17.
+- **Impacto:** habilita la T04 (calibración regional con respaldo municipio → estado → nacional) y confirma la fuente y los códigos del Censo en `data/sources.toml`. La varianza usa linealización de Taylor para razón con UPM con reemplazo dentro de cada estrato. Se mantiene la licencia de libre uso de INEGI citando al autor y el producto, sin sugerir respaldo de INEGI.
