@@ -14,18 +14,24 @@ from thehouse_ml.universities import (
     NOMINATIM_URL,
     RESULT_LIMIT,
     USER_AGENT,
+    ManualVerification,
     OsmCandidate,
     OsmError,
+    UniversityRow,
     UniversitySeed,
+    apply_manual,
     build_query_url,
     build_rows,
+    finalize_row,
     haversine_m,
+    load_manual,
     load_seed,
     parse_candidates,
     select_candidate,
 )
 
 SEED_PATH = REPO_ROOT / "data" / "seed" / "universities_seed.csv"
+MANUAL_PATH = REPO_ROOT / "data" / "seed" / "universities_manual.csv"
 
 
 def _seed(lat: str = "20.0", lon: str = "-99.0", code: str = "UTTT") -> UniversitySeed:
@@ -180,3 +186,107 @@ def test_load_seed_rejects_a_missing_column(tmp_path: Path) -> None:
 def test_load_seed_rejects_a_missing_file(tmp_path: Path) -> None:
     with pytest.raises(OsmError, match="No se puede leer el seed"):
         load_seed(tmp_path / "no_existe.csv")
+
+
+def _manual(status: str, lat: str = "", lon: str = "", osm_ref: str = "") -> ManualVerification:
+    return ManualVerification(
+        code="UTTT",
+        manual_status=status,
+        lat=lat,
+        lon=lon,
+        osm_ref=osm_ref,
+        verified_by="César Yael López Trujillo",
+        verified_at="2026-11-18",
+        note="Nota de prueba",
+    )
+
+
+def _row(status: str = "sin_coincidencia") -> UniversityRow:
+    return UniversityRow(
+        code="UTTT",
+        name="Universidad de prueba",
+        seed_lat="20.00903",
+        seed_lon="-99.34471",
+        osm_type="way",
+        osm_id="386380501",
+        osm_lat="20.0084106",
+        osm_lon="-99.3449608",
+        status=status,
+    )
+
+
+def test_final_status_ok_osm_uses_the_osm_coordinates() -> None:
+    row = finalize_row(_row("ok"), {})
+
+    assert (row.final_lat, row.final_lon) == ("20.0084106", "-99.3449608")
+    assert row.final_status == "ok_osm"
+    assert row.final_source == "osm:way/386380501"
+
+
+def test_final_status_ok_manual_uses_the_seed_coordinates() -> None:
+    row = finalize_row(_row(), {"UTTT": _manual("ok_seed")})
+
+    assert (row.final_lat, row.final_lon) == ("20.00903", "-99.34471")
+    assert row.final_status == "ok_manual"
+    assert row.final_source == "seed"
+
+
+def test_final_status_corregida_manual_uses_the_human_coordinates() -> None:
+    entry = _manual("corregida", "20.132062", "-99.235535", "way/550950316")
+
+    row = finalize_row(_row("revisar"), {"UTTT": entry})
+
+    assert (row.final_lat, row.final_lon) == ("20.132062", "-99.235535")
+    assert row.final_status == "corregida_manual"
+    assert row.final_source == "way/550950316"
+
+
+def test_final_status_seed_sin_verificar_uses_the_seed_coordinates() -> None:
+    row = finalize_row(_row(), {"UTTT": _manual("no_localizada")})
+
+    assert (row.final_lat, row.final_lon) == ("20.00903", "-99.34471")
+    assert row.final_status == "seed_sin_verificar"
+    assert row.final_source == "seed"
+
+
+def test_apply_manual_keeps_the_original_columns() -> None:
+    (row,) = apply_manual([_row("ok")], {})
+
+    assert row.seed_lat == "20.00903"
+    assert row.osm_id == "386380501"
+    assert row.status == "ok"
+    assert row.distance_m == ""
+
+
+def test_load_manual_reads_the_eight_human_decisions() -> None:
+    manual = load_manual(MANUAL_PATH)
+
+    assert len(manual) == 8
+    assert manual["ITSOEH"].manual_status == "corregida"
+    assert manual["ITSOEH"].osm_ref == "nominatim T07"
+    assert manual["UAEH-ESTL"].osm_ref == "way/550950316"
+    assert manual["UCAN"].osm_ref == ""
+    assert "Instituto Canadiense A.C." in manual["UCAN"].note
+    assert manual["UAEH-ESTE"].verified_at == "2026-11-18"
+
+
+def test_load_manual_rejects_an_unknown_status(tmp_path: Path) -> None:
+    path = tmp_path / "manual.csv"
+    path.write_text(
+        "code,manual_status,lat,lon,osm_ref,verified_by,verified_at,note\nUTTT,desconocido,,,,César,2026-11-18,nota\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(OsmError, match="manual_status inválido"):
+        load_manual(path)
+
+
+def test_load_manual_rejects_a_correction_without_coordinates(tmp_path: Path) -> None:
+    path = tmp_path / "manual.csv"
+    path.write_text(
+        "code,manual_status,lat,lon,osm_ref,verified_by,verified_at,note\nUTTT,corregida,,,,César,2026-11-18,nota\n",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(OsmError, match="necesita lat y lon"):
+        load_manual(path)

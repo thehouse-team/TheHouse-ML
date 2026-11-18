@@ -1,11 +1,11 @@
-code,name,seed_lat,seed_lon,osm_type,osm_id,osm_name,osm_lat,osm_lon,distance_m,status,verified_at
-UTTT,Universidad Tecnológica de Tula-Tepeji,20.00903,-99.34471,way,386380501,Universidad Tecnológica de Tula-Tepeji,20.0084106,-99.3449608,73.69,ok,2026-11-17
-UAEH-ESTE,"Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Tepeji del Río",19.91703,-99.36116,,,,,,,sin_coincidencia,2026-11-17
-UAEH-ESTL,"Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Tlahuelilpan",20.12991,-99.23041,,,,,,,sin_coincidencia,2026-11-17
-UAEH-ESAT,"Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Atotonilco de Tula",20.01584,-99.23601,,,,,,,sin_coincidencia,2026-11-17
-ITSOEH,Instituto Tecnológico Superior del Occidente del Estado de Hidalgo,20.20551,-99.22178,node,10868093436,Instituto Tecnológico Superior del Occidente del Estado de Hidalgo,20.2333739,-99.2096330,3347.54,revisar,2026-11-17
-TESJI,Tecnológico de Estudios Superiores de Jilotepec,19.91953,-99.57719,,,,,,,sin_coincidencia,2026-11-17
-UMB-JILO,"Universidad Mexiquense del Bicentenario, Unidad de Estudios Superiores Jilotepec",19.91248,-99.57849,,,,,,,sin_coincidencia,2026-11-17
-UMB-VDC,"Universidad Mexiquense del Bicentenario, Unidad de Estudios Superiores Villa del Carbón",19.72791,-99.46312,,,,,,,sin_coincidencia,2026-11-17
-UCAN,Universidad Canadiense,20.0517,-99.34507,,,,,,,sin_coincidencia,2026-11-17
-UNE-TULA,Universidad del Nuevo México,20.03108,-99.33629,way,458178077,Universidad del Nuevo México,20.0310934,-99.3363626,7.73,ok,2026-11-17
+code,name,seed_lat,seed_lon,osm_type,osm_id,osm_name,osm_lat,osm_lon,distance_m,status,verified_at,final_lat,final_lon,final_status,final_source
+UTTT,Universidad Tecnológica de Tula-Tepeji,20.00903,-99.34471,way,386380501,Universidad Tecnológica de Tula-Tepeji,20.0084106,-99.3449608,73.69,ok,2026-11-18,20.0084106,-99.3449608,ok_osm,osm:way/386380501
+UAEH-ESTE,"Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Tepeji del Río",19.91703,-99.36116,,,,,,,sin_coincidencia,2026-11-18,19.91703,-99.36116,ok_manual,seed
+UAEH-ESTL,"Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Tlahuelilpan",20.12991,-99.23041,,,,,,,sin_coincidencia,2026-11-18,20.132062,-99.235535,corregida_manual,way/550950316
+UAEH-ESAT,"Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Atotonilco de Tula",20.01584,-99.23601,,,,,,,sin_coincidencia,2026-11-18,20.01584,-99.23601,ok_manual,seed
+ITSOEH,Instituto Tecnológico Superior del Occidente del Estado de Hidalgo,20.20551,-99.22178,node,10868093436,Instituto Tecnológico Superior del Occidente del Estado de Hidalgo,20.2333739,-99.2096330,3347.54,revisar,2026-11-18,20.2333739,-99.2096330,corregida_manual,nominatim T07
+TESJI,Tecnológico de Estudios Superiores de Jilotepec,19.91953,-99.57719,,,,,,,sin_coincidencia,2026-11-18,19.91953,-99.57719,seed_sin_verificar,seed
+UMB-JILO,"Universidad Mexiquense del Bicentenario, Unidad de Estudios Superiores Jilotepec",19.91248,-99.57849,,,,,,,sin_coincidencia,2026-11-18,19.91248,-99.57849,ok_manual,seed
+UMB-VDC,"Universidad Mexiquense del Bicentenario, Unidad de Estudios Superiores Villa del Carbón",19.72791,-99.46312,,,,,,,sin_coincidencia,2026-11-18,19.72791,-99.46312,seed_sin_verificar,seed
+UCAN,Universidad Canadiense,20.0517,-99.34507,,,,,,,sin_coincidencia,2026-11-18,20.0517,-99.34507,seed_sin_verificar,seed
+UNE-TULA,Universidad del Nuevo México,20.03108,-99.33629,way,458178077,Universidad del Nuevo México,20.0310934,-99.3363626,7.73,ok,2026-11-18,20.0310934,-99.3363626,ok_osm,osm:way/458178077

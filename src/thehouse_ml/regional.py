@@ -320,7 +320,7 @@ def run_regional(paths: ProjectPaths) -> str:
 
     report_path = paths.reports / "regional_calibration.md"
     report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(render_report(rows), encoding="utf-8")
+    report_path.write_text(render_report(rows), encoding="utf-8", newline="\n")
     return f"prepare regional: {parquet_path.as_posix()} ({len(rows)} filas) - {report_path.as_posix()}"
 
 

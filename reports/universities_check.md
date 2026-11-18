@@ -34,3 +34,34 @@ Las coincidencias dudosas se confirman en openstreetmap.org antes de usarlas en 
 - `UMB-JILO` — Universidad Mexiquense del Bicentenario, Unidad de Estudios Superiores Jilotepec: **sin_coincidencia** (sin candidato educativo).
 - `UMB-VDC` — Universidad Mexiquense del Bicentenario, Unidad de Estudios Superiores Villa del Carbón: **sin_coincidencia** (sin candidato educativo).
 - `UCAN` — Universidad Canadiense: **sin_coincidencia** (sin candidato educativo).
+
+## Verificación humana (openstreetmap.org)
+
+Revisión del 2026-11-18 registrada en `data/seed/universities_manual.csv` (M-ML-017).
+Solo se guardan coordenadas tomadas de OpenStreetMap; nunca de Google Maps, por su licencia.
+`final_source` indica el origen de la coordenada final: `osm:<tipo>/<id>` si salió de Nominatim,
+`seed` si se conserva la del backend o la referencia anotada por el revisor.
+
+| Código | Decisión | Coordenada final | Referencia OSM | Nota |
+| --- | --- | --- | --- | --- |
+| `UAEH-ESTE` | ok_seed | 19.91703, -99.36116 | — | El marcador del seed cae sobre "Escuela Superior de Tepeji del Río UAEH" en OSM |
+| `UAEH-ESTL` | corregida | 20.132062, -99.235535 | way/550950316 | Edificio "Universidad Autonoma Del Estado de Hidalgo" junto a AREA VERDE UAEH; el seed está a ~590 m |
+| `UAEH-ESAT` | ok_seed | 20.01584, -99.23601 | — | El marcador del seed cae sobre "UAEH Plantel Atotonilco de Tula" en OSM |
+| `ITSOEH` | corregida | 20.2333739, -99.2096330 | nominatim T07 | Se confirma el candidato de Nominatim; el seed del backend está a ~3.3 km |
+| `TESJI` | no_localizada | 19.91953, -99.57719 | — | Sin resultados en Nominatim ni elemento visible en el mapa |
+| `UMB-JILO` | ok_seed | 19.91248, -99.57849 | — | El marcador del seed cae sobre "Unidad de Estudios Superiores Jilotepec" en OSM |
+| `UMB-VDC` | no_localizada | 19.72791, -99.46312 | — | Sin resultados; el seed cae en Plaza Hidalgo (centro del municipio) |
+| `UCAN` | no_localizada | 20.0517, -99.34507 | — | Sin elemento en OSM; posiblemente sea "Instituto Canadiense A.C." (carretera Tepetitlán–Tula, El Tesoro); el nombre debe confirmarlo el equipo del backend |
+
+## Correcciones para NV-11 (backend)
+
+Sustituye la detección automática de la sección anterior por las decisiones humanas definitivas:
+
+- `UAEH-ESTL` — Universidad Autónoma del Estado de Hidalgo, Escuela Superior de Tlahuelilpan: **corregida**. usar `20.132062, -99.235535` (way/550950316). Edificio "Universidad Autonoma Del Estado de Hidalgo" junto a AREA VERDE UAEH; el seed está a ~590 m
+- `ITSOEH` — Instituto Tecnológico Superior del Occidente del Estado de Hidalgo: **corregida**. usar `20.2333739, -99.2096330` (nominatim T07). Se confirma el candidato de Nominatim; el seed del backend está a ~3.3 km
+- `TESJI` — Tecnológico de Estudios Superiores de Jilotepec: **no_localizada**. mantener el seed `19.91953, -99.57719` marcado `seed_sin_verificar`. Sin resultados en Nominatim ni elemento visible en el mapa
+- `UMB-VDC` — Universidad Mexiquense del Bicentenario, Unidad de Estudios Superiores Villa del Carbón: **no_localizada**. mantener el seed `19.72791, -99.46312` marcado `seed_sin_verificar`. Sin resultados; el seed cae en Plaza Hidalgo (centro del municipio)
+- `UCAN` — Universidad Canadiense: **no_localizada**. mantener el seed `20.0517, -99.34507` marcado `seed_sin_verificar`. Sin elemento en OSM; posiblemente sea "Instituto Canadiense A.C." (carretera Tepetitlán–Tula, El Tesoro); el nombre debe confirmarlo el equipo del backend
+
+T05 debe reportar por separado las universidades `seed_sin_verificar` y no usarlas como coordenadas
+verificadas hasta que el backend confirme el nombre y la ubicación (en particular `UCAN`).

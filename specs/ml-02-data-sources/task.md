@@ -34,7 +34,7 @@
 
 ## F3 — Calidad, seguridad y datos
 
-- [x] **T07 · Universidades verificadas** — Requisito: ML-02-R07 · Aceptación: `data/universities.csv` con las 10 universidades, id OSM y fecha de verificación; las 3 aproximadas revisadas; diferencias mayores a 200 m reportadas para el backend.
+- [x] **T07 · Universidades verificadas** — Requisito: ML-02-R07 · Aceptación: `data/universities.csv` con las 10 universidades, id OSM y fecha de verificación; las 3 aproximadas revisadas; diferencias mayores a 200 m reportadas para el backend. **Ampliada el 2026-11-18 con M-ML-017:** verificación humana en `data/seed/universities_manual.csv` y columnas `final_lat`, `final_lon`, `final_status` y `final_source`.
 - [ ] **T08 · Data card** — Requisito: ML-02-R08 · Aceptación: `reports/data_card.md` con fuentes, licencias, atribuciones, ponderación, niveles de respaldo, tamaños de muestra, histogramas y limitaciones.
 
 ## F4 — Evidencia

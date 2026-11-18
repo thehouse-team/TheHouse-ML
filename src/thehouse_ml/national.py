@@ -136,7 +136,7 @@ def run_prepare(paths: ProjectPaths) -> str:
 
     report_path = paths.reports / "national_baselines.md"
     report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(render_report(rows, deflators, index), encoding="utf-8")
+    report_path.write_text(render_report(rows, deflators, index), encoding="utf-8", newline="\n")
     return f"prepare: {parquet_path.as_posix()} ({len(rows)} filas) - {report_path.as_posix()}"
 
 

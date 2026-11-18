@@ -88,6 +88,8 @@ def write_osm_project(root: Path, *, with_responses: bool = True) -> tuple[str, 
     seed_local = root / "data" / "seed" / "universities_seed.csv"
     seed_local.parent.mkdir(parents=True, exist_ok=True)
     seed_local.write_bytes(seed_source.read_bytes())
+    manual_source = REPO_ROOT / "data" / "seed" / "universities_manual.csv"
+    (root / "data" / "seed" / "universities_manual.csv").write_bytes(manual_source.read_bytes())
 
     with seed_source.open("r", encoding="utf-8", newline="") as stream:
         seeds = list(csv.DictReader(stream))
@@ -101,23 +103,28 @@ def write_osm_project(root: Path, *, with_responses: bool = True) -> tuple[str, 
         code = str(row["code"])
         lat = float(str(row["latitude"]))
         lon = float(str(row["longitude"]))
-        category, kind = "amenity", "university"
-        if code == "UMB-VDC":
-            lat += 0.005  # ~556 m al norte: fuera del umbral de 200 m.
-        if code == "UCAN":
-            category, kind = "building", "university"  # No es educativo segun la regla de la T07.
-        payload = [
-            {
-                "place_id": 1000 + index,
-                "osm_type": "node",
-                "osm_id": 2000 + index,
-                "lat": f"{lat:.5f}",
-                "lon": f"{lon:.5f}",
-                "name": str(row["name"]),
-                "display_name": str(row["name"]),
-                "class": category,
-                "type": kind,
-            }
-        ]
+        if code in {"UAEH-ESTE", "UAEH-ESTL", "UAEH-ESAT", "TESJI", "UMB-JILO"}:
+            payload: list[dict[str, object]] = []  # sin coincidencia, como en los datos reales
+        else:
+            category, kind = "amenity", "university"
+            if code == "UMB-VDC":
+                lat += 0.005  # ~556 m al norte: fuera del umbral de 200 m.
+            if code == "ITSOEH":
+                lat += 0.03  # ~3.3 km, como en los datos reales.
+            if code == "UCAN":
+                category, kind = "building", "university"  # No es educativo segun la regla de la T07.
+            payload = [
+                {
+                    "place_id": 1000 + index,
+                    "osm_type": "node",
+                    "osm_id": 2000 + index,
+                    "lat": f"{lat:.5f}",
+                    "lon": f"{lon:.5f}",
+                    "name": str(row["name"]),
+                    "display_name": str(row["name"]),
+                    "class": category,
+                    "type": kind,
+                }
+            ]
         (folder / f"{code}.json").write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     return codes

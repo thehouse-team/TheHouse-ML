@@ -1,0 +1,9 @@
+code,manual_status,lat,lon,osm_ref,verified_by,verified_at,note
+UAEH-ESTE,ok_seed,19.91703,-99.36116,,César Yael López Trujillo,2026-11-18,El marcador del seed cae sobre "Escuela Superior de Tepeji del Río UAEH" en OSM
+UAEH-ESAT,ok_seed,20.01584,-99.23601,,César Yael López Trujillo,2026-11-18,El marcador del seed cae sobre "UAEH Plantel Atotonilco de Tula" en OSM
+UMB-JILO,ok_seed,19.91248,-99.57849,,César Yael López Trujillo,2026-11-18,El marcador del seed cae sobre "Unidad de Estudios Superiores Jilotepec" en OSM
+ITSOEH,corregida,20.2333739,-99.2096330,nominatim T07,César Yael López Trujillo,2026-11-18,Se confirma el candidato de Nominatim; el seed del backend está a ~3.3 km
+UAEH-ESTL,corregida,20.132062,-99.235535,way/550950316,César Yael López Trujillo,2026-11-18,Edificio "Universidad Autonoma Del Estado de Hidalgo" junto a AREA VERDE UAEH; el seed está a ~590 m
+TESJI,no_localizada,,,,César Yael López Trujillo,2026-11-18,Sin resultados en Nominatim ni elemento visible en el mapa
+UMB-VDC,no_localizada,,,,César Yael López Trujillo,2026-11-18,Sin resultados; el seed cae en Plaza Hidalgo (centro del municipio)
+UCAN,no_localizada,,,,César Yael López Trujillo,2026-11-18,"Sin elemento en OSM; posiblemente sea ""Instituto Canadiense A.C."" (carretera Tepetitlán–Tula, El Tesoro); el nombre debe confirmarlo el equipo del backend"

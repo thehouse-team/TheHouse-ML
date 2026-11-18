@@ -147,3 +147,14 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — César Yael López Trujillo — 2026-11-17. Autorización: «Apruebo M-ML-016 y EJECUTA ML-02 1.0.1, task T07 (antes que T05, porque T05 necesita coordenadas verificadas), en la rama feat/ml-02-universidades».
 - **Fecha:** 2026-11-17.
 - **Impacto:** habilita la T07 y entrega a `TheHouse-Backend` (NV-11) la tabla de coordenadas y la lista de universidades a corregir en `reports/universities_check.md`. Sin dependencias nuevas: HTTP y JSON con la biblioteca estándar.
+
+## M-ML-017 — Verificación humana de coordenadas y correcciones a NV-11
+
+- **Decisión:** continuar la T07 con la revisión humana de los casos dudosos, hecha en **openstreetmap.org el 2026-11-18** por César Yael López Trujillo y registrada en `data/seed/universities_manual.csv` (en git): 3 `ok_seed` (el marcador del seed cae sobre el nombre correcto en OSM), 2 `corregida` (ITSOEH y UAEH-ESTL) y 3 `no_localizada` (TESJI, UMB-VDC y UCAN).
+- **Origen de coordenadas:** solo se guardan coordenadas tomadas de **OpenStreetMap** (Nominatim o referencia `way/…`), nunca de Google Maps, por su licencia. Las filas `corregida` conservan la referencia OSM que anotó el revisor en `osm_ref`.
+- **Reglas de la coordenada final en `data/universities.csv`:** `ok` de T07 → coordenada OSM y `final_status = ok_osm`; fila manual `ok_seed` → coordenada del seed y `final_status = ok_manual`; `corregida` → lat/lon manuales y `final_status = corregida_manual`; `no_localizada` → coordenada del seed marcada `final_status = seed_sin_verificar`. Se conservan las columnas originales de la T07 y se agregan `final_lat`, `final_lon`, `final_status` y `final_source`.
+- **No localizadas:** TESJI, UMB-VDC y UCAN conservan el seed como `seed_sin_verificar`. **T05 debe reportarlas por separado** y no tratarlas como coordenadas verificadas. En particular, el nombre de **UCAN** es dudoso: no hay elemento en OSM y posiblemente corresponda a «Instituto Canadiense A.C.» (carretera Tepetitlán–Tula, El Tesoro); debe confirmarlo el equipo del backend.
+- **Aviso al backend:** hay que enviar a NV-11 las correcciones de `ITSOEH` (20.2333739, -99.2096330) y `UAEH-ESTL` (20.132062, -99.235535), la confirmación de `UAEH-ESTE`, `UAEH-ESAT` y `UMB-JILO`, y la duda de `UCAN`. La lista definitiva está en `reports/universities_check.md`.
+- **Estado:** APROBADO — César Yael López Trujillo — 2026-11-18. Autorización: «Apruebo M-ML-017 y continúa T07 de ML-02 1.0.1 en la rama feat/ml-02-universidades».
+- **Fecha:** 2026-11-18.
+- **Impacto:** cierra la verificación de coordenadas de la T07 sin consultas nuevas a Nominatim y sin dependencias nuevas; habilita a T05 para usar coordenadas finales y a `TheHouse-Backend` para corregir NV-11.

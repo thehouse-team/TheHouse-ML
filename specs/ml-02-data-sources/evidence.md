@@ -8,12 +8,14 @@
 | Autorización T03 | «Apruebo M-ML-014 y EJECUTA ML-02 1.0.1, task T03, en la rama feat/ml-02-bases» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T04 | «Apruebo M-ML-015 y EJECUTA ML-02 1.0.1, task T04, en la rama feat/ml-02-regional» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T07 | «Apruebo M-ML-016 y EJECUTA ML-02 1.0.1, task T07 (antes que T05, porque T05 necesita coordenadas verificadas), en la rama feat/ml-02-universidades» — César Yael López Trujillo, 2026-11-17 |
+| Autorización T07 (amplíación) | «Apruebo M-ML-017 y continúa T07 de ML-02 1.0.1 en la rama feat/ml-02-universidades» — César Yael López Trujillo, 2026-11-18 |
 | Rama (T02–T04) | `feat/ml-02-descarga`, `feat/ml-02-bases`, `feat/ml-02-regional` |
 | Rama (T07) | `feat/ml-02-universidades` |
-| Commit | Ninguno: el responsable pidió explícitamente no hacer commit |
+| Commit | `46c9d4f` (T07 M-ML-016, hecho por el responsable). La ampliación M-ML-017 se entrega sin commit, por instrucción explícita |
 | Fecha de ejecución T03 | 2026-11-17 |
 | Fecha de ejecución T04 | 2026-11-17 |
 | Fecha de ejecución T07 | 2026-11-17 |
+| Fecha de ampliación T07 (M-ML-017) | 2026-11-18 |
 
 ## T07 · Universidades verificadas
 
@@ -68,6 +70,56 @@
 | R07 · 10 filas presentes | `tests/integration/test_universities_stage.py::test_prepare_writes_the_ten_universities_with_all_three_statuses`, `test_universities.py::test_load_seed_reads_the_ten_universities` |
 | R07 · reporte y columnas OSM | `test_prepare_writes_the_osm_columns_and_haversine_distance`, `test_report_has_attribution_and_the_list_to_fix_nv11` |
 | R07 · etapa y CLI | `test_prepare_fails_clearly_when_a_response_is_missing`, `test_cli_reports_osm_errors_with_exit_code_one`, `tests/integration/test_prepare_stage.py::test_run_stage_dispatches_prepare` |
+
+## T07 (ampliación M-ML-017) · Verificación humana y coordenadas finales
+
+### Qué se hizo
+
+1. `data/seed/universities_manual.csv` (en git): 8 decisiones humanas tomadas en openstreetmap.org el 2026-11-18 — 3 `ok_seed` (UAEH-ESTE, UAEH-ESAT, UMB-JILO), 2 `corregida` (ITSOEH, UAEH-ESTL) y 3 `no_localizada` (TESJI, UMB-VDC, UCAN). Solo se guardan coordenadas de OSM; nunca de Google Maps.
+2. `src/thehouse_ml/universities.py`: `load_manual` valida columnas, estados y coordenadas de las filas corregidas; `finalize_row`/`apply_manual` aplican las cuatro reglas y agregan `final_lat`, `final_lon`, `final_status` y `final_source` sin quitar las columnas de la T07.
+3. `reports/universities_check.md`: nuevas secciones «Verificación humana (openstreetmap.org)» y «Correcciones para NV-11 (backend)», con la duda del nombre de UCAN y la instrucción de que T05 reporte aparte las `seed_sin_verificar`. Se conserva la atribución © OpenStreetMap contributors (ODbL).
+4. `memoria.md`: decisión M-ML-017 (APROBADA). Actualizados `task.md` y este `evidence.md`. Sin consultas nuevas a Nominatim y sin dependencias nuevas.
+5. Pruebas sin red: 10 pruebas nuevas en `test_universities.py` (cuatro reglas de `final_status`, carga del manual y validaciones) y ampliación de `test_universities_stage.py` (10 filas con coordenadas finales, estados esperados y secciones del reporte).
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | sin hallazgos |
+| `uv run ruff check .` | All checks passed |
+| `uv run mypy src` | Success: no issues found in 15 source files |
+| `uv run pytest --cov=thehouse_ml` | ver resultado final de esta sección |
+| `uv run python -m thehouse_ml prepare` | `universities: data/universities.csv (10 filas) - reports/universities_check.md` |
+
+### Coordenadas finales
+
+| Código | final_status | final_lat | final_lon | final_source |
+| --- | --- | ---: | ---: | --- |
+| UTTT | ok_osm | 20.0084106 | -99.3449608 | osm:way/386380501 |
+| UAEH-ESTE | ok_manual | 19.91703 | -99.36116 | seed |
+| UAEH-ESTL | corregida_manual | 20.132062 | -99.235535 | way/550950316 |
+| UAEH-ESAT | ok_manual | 20.01584 | -99.23601 | seed |
+| ITSOEH | corregida_manual | 20.2333739 | -99.2096330 | nominatim T07 |
+| TESJI | seed_sin_verificar | 19.91953 | -99.57719 | seed |
+| UMB-JILO | ok_manual | 19.91248 | -99.57849 | seed |
+| UMB-VDC | seed_sin_verificar | 19.72791 | -99.46312 | seed |
+| UCAN | seed_sin_verificar | 20.0517 | -99.34507 | seed |
+| UNE-TULA | ok_osm | 20.0310934 | -99.3363626 | osm:way/458178077 |
+
+### Trazabilidad y revisión
+
+| Regla | Prueba |
+| --- | --- |
+| `ok` → `ok_osm` (coordenada OSM) | `tests/unit/test_universities.py::test_final_status_ok_osm_uses_the_osm_coordinates` |
+| `ok_seed` → `ok_manual` (seed) | `test_final_status_ok_manual_uses_the_seed_coordinates` |
+| `corregida` → `corregida_manual` (lat/lon manuales) | `test_final_status_corregida_manual_uses_the_human_coordinates` |
+| `no_localizada` → `seed_sin_verificar` (seed) | `test_final_status_seed_sin_verificar_uses_the_seed_coordinates` |
+| 10 filas con coordenadas finales | `tests/integration/test_universities_stage.py::test_all_ten_rows_have_final_coordinates_and_the_expected_final_statuses` |
+| Reporte humano y correcciones | `test_report_has_attribution_and_the_list_to_fix_nv11` |
+
+- **Constitución / AGENTS / memoria:** autorización M-ML-017 vigente; solo fuentes aprobadas; sin scraping, sin secretos, sin servicios de pago; sin dependencias nuevas; se conserva la atribución ODbL. M-ML-016 sigue vigente para el origen de los datos T07.
+- **Hallazgos:** sin consultas nuevas a Nominatim. Las 3 `seed_sin_verificar` y la duda de `UCAN` quedan pendientes del backend; T05 debe reportarlas aparte. No se hizo commit (instrucción del responsable); el commit `46c9d4f` cubre solo la T07 original.
+- **Resultado:** **PASS** — las cuatro reglas están probadas, las 10 filas tienen coordenada final y el reporte incluye la verificación humana y las correcciones a NV-11. Los reportes `variables_check.md` y `regional_calibration.md` no se modifican al ejecutar `prepare`.
 
 ## T04 · Calibración regional con respaldo
 

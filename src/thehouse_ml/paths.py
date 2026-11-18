@@ -53,6 +53,11 @@ class ProjectPaths:
         return self.root / "data" / "universities.csv"
 
     @property
+    def manual_seed(self) -> Path:
+        """Verificación humana de coordenadas en openstreetmap.org (en git, M-ML-017)."""
+        return self.root / "data" / "seed" / "universities_manual.csv"
+
+    @property
     def models(self) -> Path:
         """Artefactos de modelo (fuera de git)."""
         return self.root / "models"

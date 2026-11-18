@@ -27,7 +27,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 from collections.abc import Callable, Mapping, Sequence
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, replace
 from datetime import date
 from pathlib import Path
 
@@ -47,6 +47,9 @@ EARTH_RADIUS_M = 6_371_000.0
 EDUCATIONAL_TYPES = frozenset({"university", "college", "school"})
 
 SEED_COLUMNS = ("code", "name", "city", "latitude", "longitude")
+MANUAL_COLUMNS = ("code", "manual_status", "lat", "lon", "osm_ref", "verified_by", "verified_at", "note")
+MANUAL_STATUSES = frozenset({"ok_seed", "corregida", "no_localizada"})
+FINAL_COLUMNS = ("final_lat", "final_lon", "final_status", "final_source")
 UNIVERSITY_COLUMNS = (
     "code",
     "name",
@@ -60,6 +63,7 @@ UNIVERSITY_COLUMNS = (
     "distance_m",
     "status",
     "verified_at",
+    *FINAL_COLUMNS,
 )
 
 OsmFetcher = Callable[[str, Path], None]
@@ -123,6 +127,20 @@ class OsmCandidate:
 
 
 @dataclass(frozen=True)
+class ManualVerification:
+    """Decisión humana tomada en openstreetmap.org (M-ML-017)."""
+
+    code: str
+    manual_status: str
+    lat: str
+    lon: str
+    osm_ref: str
+    verified_by: str
+    verified_at: str
+    note: str
+
+
+@dataclass(frozen=True)
 class UniversityRow:
     """Una fila de ``data/universities.csv``."""
 
@@ -138,6 +156,10 @@ class UniversityRow:
     distance_m: str = ""
     status: str = ""
     verified_at: str = ""
+    final_lat: str = ""
+    final_lon: str = ""
+    final_status: str = ""
+    final_source: str = ""
 
 
 def haversine_m(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
@@ -175,6 +197,65 @@ def load_seed(path: Path) -> tuple[UniversitySeed, ...]:
     if not seeds:
         raise OsmError(f"{path.name}: el seed no tiene universidades")
     return seeds
+
+
+def load_manual(path: Path) -> dict[str, ManualVerification]:
+    """Lee la verificación humana; valida columnas, estados y coordenadas corregidas."""
+    manual: dict[str, ManualVerification] = {}
+    try:
+        with path.open("r", encoding="utf-8-sig", newline="") as stream:
+            reader = csv.DictReader(stream)
+            missing = set(MANUAL_COLUMNS) - set(reader.fieldnames or ())
+            if missing:
+                raise OsmError(f"{path.name}: faltan columnas {', '.join(sorted(missing))}")
+            for row in reader:
+                code = (row.get("code") or "").strip()
+                if not code:
+                    continue
+                status = (row.get("manual_status") or "").strip()
+                if status not in MANUAL_STATUSES:
+                    raise OsmError(f"{code}: manual_status inválido {status!r}")
+                if code in manual:
+                    raise OsmError(f"{code}: fila manual duplicada")
+                entry = ManualVerification(
+                    code=code,
+                    manual_status=status,
+                    lat=(row.get("lat") or "").strip(),
+                    lon=(row.get("lon") or "").strip(),
+                    osm_ref=(row.get("osm_ref") or "").strip(),
+                    verified_by=(row.get("verified_by") or "").strip(),
+                    verified_at=(row.get("verified_at") or "").strip(),
+                    note=(row.get("note") or "").strip(),
+                )
+                if status == "corregida" and (not entry.lat or not entry.lon):
+                    raise OsmError(f"{code}: una fila corregida necesita lat y lon")
+                manual[code] = entry
+    except OSError as exc:
+        raise OsmError(f"No se puede leer la verificación humana {path}: {exc}") from exc
+    return manual
+
+
+def finalize_row(row: UniversityRow, manual: Mapping[str, ManualVerification]) -> UniversityRow:
+    """Aplica las reglas de M-ML-017 y devuelve la fila con las columnas finales."""
+    osm_source = f"osm:{row.osm_type}/{row.osm_id}" if row.osm_type and row.osm_id else "osm"
+    if row.status == "ok":
+        return _with_final(row, row.osm_lat, row.osm_lon, "ok_osm", osm_source)
+
+    entry = manual.get(row.code)
+    if entry is None:
+        if row.osm_lat and row.osm_lon:
+            return _with_final(row, row.osm_lat, row.osm_lon, row.status, osm_source)
+        return _with_final(row, row.seed_lat, row.seed_lon, row.status, "seed")
+    if entry.manual_status == "ok_seed":
+        return _with_final(row, row.seed_lat, row.seed_lon, "ok_manual", "seed")
+    if entry.manual_status == "corregida":
+        return _with_final(row, entry.lat, entry.lon, "corregida_manual", entry.osm_ref or "manual")
+    return _with_final(row, row.seed_lat, row.seed_lon, "seed_sin_verificar", "seed")
+
+
+def apply_manual(rows: Sequence[UniversityRow], manual: Mapping[str, ManualVerification]) -> tuple[UniversityRow, ...]:
+    """Agrega las columnas finales a todas las filas."""
+    return tuple(finalize_row(row, manual) for row in rows)
 
 
 def build_query_url(seed: UniversitySeed) -> str:
@@ -351,8 +432,8 @@ def write_universities_csv(path: Path, rows: Sequence[UniversityRow]) -> None:
         writer.writerows(asdict(row) for row in rows)
 
 
-def render_report(rows: Sequence[UniversityRow]) -> str:
-    """Reporte con la tabla de las 10 universidades y los casos a corregir."""
+def render_report(rows: Sequence[UniversityRow], manual: Mapping[str, ManualVerification] | None = None) -> str:
+    """Reporte con la tabla T07, la verificación humana y las correcciones a NV-11."""
     lines = [
         "# Verificación de coordenadas de universidades — ML-02 T07",
         "",
@@ -385,6 +466,55 @@ def render_report(rows: Sequence[UniversityRow]) -> str:
     else:
         lines.append("- Ninguna: todas las distancias están dentro del umbral.")
     lines.append("")
+
+    lines.extend(
+        [
+            "## Verificación humana (openstreetmap.org)",
+            "",
+            "Revisión del 2026-11-18 registrada en `data/seed/universities_manual.csv` (M-ML-017).",
+            "Solo se guardan coordenadas tomadas de OpenStreetMap; nunca de Google Maps, por su licencia.",
+            "`final_source` indica el origen de la coordenada final: `osm:<tipo>/<id>` si salió de Nominatim,",
+            "`seed` si se conserva la del backend o la referencia anotada por el revisor.",
+            "",
+            "| Código | Decisión | Coordenada final | Referencia OSM | Nota |",
+            "| --- | --- | --- | --- | --- |",
+        ]
+    )
+    for row in rows:
+        entry = (manual or {}).get(row.code)
+        if entry is None:
+            continue
+        coords = f"{row.final_lat}, {row.final_lon}" if row.final_lat and row.final_lon else "—"
+        ref = entry.osm_ref or "—"
+        lines.append(f"| `{row.code}` | {entry.manual_status} | {coords} | {ref} | {entry.note} |")
+
+    corrections = [
+        (row, (manual or {})[row.code])
+        for row in rows
+        if row.code in (manual or {}) and (manual or {})[row.code].manual_status in {"corregida", "no_localizada"}
+    ]
+    lines.extend(["", "## Correcciones para NV-11 (backend)", ""])
+    lines.append("Sustituye la detección automática de la sección anterior por las decisiones humanas definitivas:")
+    lines.append("")
+    if corrections:
+        for row, entry in corrections:
+            if entry.manual_status == "corregida":
+                detail = f"usar `{row.final_lat}, {row.final_lon}` ({entry.osm_ref or 'OSM'}). {entry.note}"
+            else:
+                detail = (
+                    f"mantener el seed `{row.final_lat}, {row.final_lon}` marcado `seed_sin_verificar`. {entry.note}"
+                )
+            lines.append(f"- `{row.code}` — {row.name}: **{entry.manual_status}**. {detail}")
+    else:
+        lines.append("- Ninguna.")
+    lines.extend(
+        [
+            "",
+            "T05 debe reportar por separado las universidades `seed_sin_verificar` y no usarlas como coordenadas",
+            "verificadas hasta que el backend confirme el nombre y la ubicación (en particular `UCAN`).",
+            "",
+        ]
+    )
     return "\n".join(lines)
 
 
@@ -393,6 +523,7 @@ def run_universities(paths: ProjectPaths, today: str | None = None) -> str:
     seeds = load_seed(paths.data_seed)
     if len(seeds) != EXPECTED_UNIVERSITIES:
         raise OsmError(f"El seed debe tener {EXPECTED_UNIVERSITIES} universidades; se encontraron {len(seeds)}")
+    manual = load_manual(paths.manual_seed)
     responses: dict[str, tuple[OsmCandidate, ...]] = {}
     for seed in seeds:
         payload_path = paths.data_raw / OSM_SOURCE / f"{seed.code}.json"
@@ -404,11 +535,11 @@ def run_universities(paths: ProjectPaths, today: str | None = None) -> str:
             raise OsmError(f"No se puede leer {payload_path.name}: {exc}") from exc
         responses[seed.code] = parse_candidates(payload, seed.code)
 
-    rows = build_rows(seeds, responses, today or date.today().isoformat())
+    rows = apply_manual(build_rows(seeds, responses, today or date.today().isoformat()), manual)
     write_universities_csv(paths.universities_csv, rows)
     report_path = paths.reports / "universities_check.md"
     report_path.parent.mkdir(parents=True, exist_ok=True)
-    report_path.write_text(render_report(rows), encoding="utf-8")
+    report_path.write_text(render_report(rows, manual), encoding="utf-8", newline="\n")
     return f"universities: {paths.universities_csv.as_posix()} ({len(rows)} filas) - {report_path.as_posix()}"
 
 
@@ -427,6 +558,16 @@ def osm_headers(paths: ProjectPaths) -> tuple[set[str], bool]:
                 if isinstance(item, dict):
                     headers.update(str(key) for key in item)
     return headers, bool(files)
+
+
+def _with_final(row: UniversityRow, lat: str, lon: str, status: str, source: str) -> UniversityRow:
+    return replace(
+        row,
+        final_lat=lat,
+        final_lon=lon,
+        final_status=status,
+        final_source=source,
+    )
 
 
 def _as_float(value: str, code: str, field: str) -> float:
@@ -474,6 +615,9 @@ __all__ = [
     "DISTANCE_THRESHOLD_M",
     "EDUCATIONAL_TYPES",
     "EXPECTED_UNIVERSITIES",
+    "FINAL_COLUMNS",
+    "MANUAL_COLUMNS",
+    "MANUAL_STATUSES",
     "NOMINATIM_URL",
     "OSM_SOURCE",
     "RATE_LIMIT_SECONDS",
@@ -481,16 +625,20 @@ __all__ = [
     "UNIVERSITY_COLUMNS",
     "USER_AGENT",
     "VIEWBOX_DEGREES",
+    "ManualVerification",
     "OsmCandidate",
     "OsmError",
     "OsmOutcome",
     "UniversityRow",
     "UniversitySeed",
+    "apply_manual",
     "build_query_url",
     "build_rows",
     "download_osm",
     "fetch_osm",
+    "finalize_row",
     "haversine_m",
+    "load_manual",
     "load_seed",
     "osm_headers",
     "parse_candidates",
