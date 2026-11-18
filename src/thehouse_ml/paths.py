@@ -43,6 +43,16 @@ class ProjectPaths:
         return self.root / "data" / "sources.toml"
 
     @property
+    def data_seed(self) -> Path:
+        """Seed de universidades de TheHouse-Backend (en git, ML-02 T07)."""
+        return self.root / "data" / "seed" / "universities_seed.csv"
+
+    @property
+    def universities_csv(self) -> Path:
+        """Universidades verificadas contra OSM (en git, ML-02 T07)."""
+        return self.root / "data" / "universities.csv"
+
+    @property
     def models(self) -> Path:
         """Artefactos de modelo (fuera de git)."""
         return self.root / "models"

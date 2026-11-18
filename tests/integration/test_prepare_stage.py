@@ -10,6 +10,7 @@ from pathlib import Path
 import pandas as pd
 import pytest
 
+from conftest import write_osm_project
 from thehouse_ml.cli import main
 from thehouse_ml.national import BASELINE_COLUMNS, ENIGH_SOURCE, ENVI_SOURCE, run_prepare
 from thehouse_ml.paths import ProjectPaths
@@ -171,6 +172,8 @@ encoding = "utf-8"
     _write_zip(censo_raw / CENSO_HGO_ZIP, "Viviendas13.CSV", "latin-1", hidalgo)
     _write_zip(censo_raw / CENSO_MEX_ZIP, "Viviendas15.CSV", "latin-1", mexico)
 
+    write_osm_project(tmp_path)  # ML-02 T07: seed y respuestas OSM para la etapa completa.
+
 
 def _frame(tmp_path: Path) -> pd.DataFrame:
     return pd.read_parquet(tmp_path / "data" / "processed" / "national_baselines.parquet")
@@ -275,3 +278,4 @@ def test_run_stage_dispatches_prepare(tmp_path: Path) -> None:
     output = run_stage("prepare", ProjectPaths(root=tmp_path))
 
     assert output.startswith("prepare: ")
+    assert "universities: " in output

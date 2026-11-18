@@ -15,6 +15,7 @@ from typing import Protocol
 
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.sources import SourceSpec
+from thehouse_ml.universities import OSM_SOURCE, osm_headers
 
 
 class VariableCheckError(RuntimeError):
@@ -85,6 +86,22 @@ def verify_sources(sources: Sequence[SourceSpec], paths: ProjectPaths) -> Variab
     for source in sources:
         headers: set[str] = set()
         note = ""
+        if source.id == OSM_SOURCE:
+            headers, downloaded = osm_headers(paths)
+            note = "respuestas jsonv2 verificadas" if downloaded else "sin respuestas descargadas (sin verificar)"
+            found = tuple(variable for variable in source.variables_used if variable in headers)
+            missing = tuple(variable for variable in source.variables_used if variable not in headers)
+            checks.append(
+                SourceVariableCheck(
+                    source.id,
+                    source.variables_status,
+                    found,
+                    missing,
+                    note,
+                    verified=downloaded,
+                )
+            )
+            continue
         data_files = [file for file in source.download_url if file.kind == "data"]
         present_files = [file for file in data_files if (paths.data_raw / source.id / file.filename).is_file()]
         if not data_files:
@@ -152,9 +169,9 @@ def read_csv_header(path: Path, encoding: str = "utf-8") -> list[str]:
 
 
 def write_variables_report(path: Path, report: VariablesReport) -> None:
-    """Escribe el reporte Markdown en ``reports/``."""
+    """Escribe el reporte Markdown en ``reports/`` con finales de línea LF."""
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(report.render(), encoding="utf-8")
+    path.write_text(report.render(), encoding="utf-8", newline="\n")
 
 
 def _resolve_member(names: list[str], member: str) -> str | None:

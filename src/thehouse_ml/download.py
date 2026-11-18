@@ -6,7 +6,9 @@ Modos de operación por archivo:
   se descarga: solo se verifica su SHA-256 y se escribe el manifiesto;
 * si no está, se descarga y se validan tamaño y hash;
 * una fuente con ``download_url`` vacío se salta con el aviso
-  ``download_url pendiente``.
+  ``download_url pendiente``;
+* ``openstreetmap`` es una consulta a Nominatim (ML-02 T07): una petición por
+  universidad, User-Agent propio, ≤ 1 req/s y cacheo por archivo JSON.
 
 Un hash distinto al del registro o al del manifiesto anterior falla con un
 mensaje explícito y no sobrescribe el archivo ni el manifiesto.
@@ -26,6 +28,7 @@ from pathlib import Path
 from thehouse_ml.manifests import Manifest, ManifestFile, load_manifest, manifest_path, write_manifest
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.sources import FileSpec, SourceSpec, load_sources, select_sources
+from thehouse_ml.universities import OSM_SOURCE, download_osm
 from thehouse_ml.variables import VariableCheckError, verify_sources, write_variables_report
 
 Fetcher = Callable[[str, Path], None]
@@ -75,6 +78,9 @@ def download_source(
     today: str | None = None,
 ) -> DownloadOutcome:
     """Descarga (o verifica) los archivos de una fuente y escribe su manifiesto."""
+    if source.id == OSM_SOURCE:
+        outcome = download_osm(source.id, paths, fetcher, today)
+        return DownloadOutcome(outcome.source_id, outcome.status, outcome.message)
     if not source.download_url:
         return DownloadOutcome(source.id, "pendiente", "download_url pendiente")
 
@@ -131,10 +137,17 @@ def run_download(
     source_id: str | None = None,
     fetcher: Fetcher | None = None,
 ) -> str:
-    """Ejecuta la etapa completa: descarga, manifiestos y reporte de variables."""
-    sources = select_sources(load_sources(paths.sources_toml), source_id)
-    outcomes = [download_source(source, paths, fetcher) for source in sources]
-    report = verify_sources(sources, paths)
+    """Ejecuta la etapa completa: descarga filtrada y reporte de TODAS las fuentes.
+
+    ``source_id`` limita únicamente qué fuentes se descargan. El reporte de
+    variables cubre siempre todas las fuentes de ``data/sources.toml``: las
+    descendadas se verifican leyendo sus archivos en ``data/raw`` y las que no
+    tienen archivo se marcan como sin verificar, pero ninguna se omite.
+    """
+    all_sources = load_sources(paths.sources_toml)
+    selected = select_sources(all_sources, source_id)
+    outcomes = [download_source(source, paths, fetcher) for source in selected]
+    report = verify_sources(all_sources, paths)
     report_path = paths.reports / "variables_check.md"
     write_variables_report(report_path, report)
 

@@ -6,8 +6,9 @@ from pathlib import Path
 
 import pytest
 
-from conftest import fixture_bytes, make_file, make_source
+from conftest import fixture_bytes, make_file, make_source, write_osm_project
 from thehouse_ml.paths import ProjectPaths
+from thehouse_ml.universities import OSM_SOURCE
 from thehouse_ml.variables import (
     VariableCheckError,
     read_csv_header,
@@ -134,6 +135,30 @@ def test_downloaded_but_missing_file_is_not_failed(tmp_path: Path) -> None:
     report = verify_sources([source], paths)
 
     assert "sin verificar" in report.checks[0].note
+    assert report.failures == []
+
+
+def test_osm_variables_are_verified_from_the_jsonv2_responses(tmp_path: Path) -> None:
+    write_osm_project(tmp_path)
+    paths = ProjectPaths(root=tmp_path)
+    osm = make_source(OSM_SOURCE, ("osm_id", "osm_type", "lat", "lon", "name"))
+
+    report = verify_sources([osm], paths)
+
+    assert report.checks[0].verified is True
+    assert report.checks[0].missing == ()
+    assert "respuestas jsonv2 verificadas" in report.checks[0].note
+    assert report.failures == []
+
+
+def test_osm_without_responses_is_not_failed(tmp_path: Path) -> None:
+    paths = ProjectPaths(root=tmp_path)
+    osm = make_source(OSM_SOURCE, ("osm_id", "osm_type", "lat", "lon", "name"))
+
+    report = verify_sources([osm], paths)
+
+    assert report.checks[0].verified is False
+    assert "sin respuestas descargadas" in report.checks[0].note
     assert report.failures == []
 
 

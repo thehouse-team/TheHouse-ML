@@ -136,3 +136,14 @@ Este documento no es un diario. Registra decisiones estables y pendientes bajo `
 - **Estado:** APROBADO — César Yael López Trujillo — 2026-11-17.
 - **Fecha:** 2026-11-17.
 - **Impacto:** habilita la T04 (calibración regional con respaldo municipio → estado → nacional) y confirma la fuente y los códigos del Censo en `data/sources.toml`. La varianza usa linealización de Taylor para razón con UPM con reemplazo dentro de cada estrato. Se mantiene la licencia de libre uso de INEGI citando al autor y el producto, sin sugerir respaldo de INEGI.
+
+## M-ML-016 — ML-02 T07: verificación de coordenadas con OpenStreetMap
+
+- **Decisión:** ejecutar la **T07 antes que la T05**, porque la T05 (entorno de campus con DENUE) necesita las coordenadas verificadas que entrega la T07.
+- **Fuente del seed:** las 10 universidades se copian del backend `TheHouse-Backend`, archivo `TheHouse.Application/Common/UniversitySeedData.cs`, commit `b7d75955513320a0a97aa5daf6b3bbe92e9514d2`, a `data/seed/universities_seed.csv` (en git). Procedencia registrada también en `data/sources.toml` (fuente `thehouse_seed_nv07_nv08_nv11`).
+- **Uso de Nominatim:** una sola consulta por universidad a `https://nominatim.openstreetmap.org/search` con `format=jsonv2`, `limit=5`, `countrycodes=mx`, viewbox de ±0.1° alrededor de la coordenada del seed y `bounded=1`. Se respeta su política de uso: User-Agent propio `TheHouse-ML/0.1 (proyecto escolar UTTT)`, **máximo 1 petición por segundo**, **solo estas 10 consultas** y sin scraping. Cada respuesta se guarda en `data/raw/openstreetmap/<code>.json` (fuera de git) con su SHA-256 en `data/manifests/openstreetmap.json`; si el JSON ya existe, no se vuelve a pedir. Atribución `© OpenStreetMap contributors (ODbL)` en `reports/universities_check.md` y en `data/sources.toml`.
+- **Regla de selección y umbral:** se elige el elemento OSM más cercano al seed cuyo tipo sea educativo (`class=amenity` y `type` en `university`, `college` o `school`). Distancia haversine: `status = "ok"` si es ≤ 200 m; `"revisar"` si es > 200 m; `"sin_coincidencia"` si no hay candidato educativo (columnas `osm_*` vacías).
+- **Confirmación humana:** las coincidencias dudosas (estado `revisar` o `sin_coincidencia`, en particular las 3 coordenadas aproximadas del seed: `UAEH-ESTL`, `UMB-VDC` y `UCAN`) las confirma un humano en openstreetmap.org **antes de usarlas en la T05**.
+- **Estado:** APROBADO — César Yael López Trujillo — 2026-11-17. Autorización: «Apruebo M-ML-016 y EJECUTA ML-02 1.0.1, task T07 (antes que T05, porque T05 necesita coordenadas verificadas), en la rama feat/ml-02-universidades».
+- **Fecha:** 2026-11-17.
+- **Impacto:** habilita la T07 y entrega a `TheHouse-Backend` (NV-11) la tabla de coordenadas y la lista de universidades a corregir en `reports/universities_check.md`. Sin dependencias nuevas: HTTP y JSON con la biblioteca estándar.

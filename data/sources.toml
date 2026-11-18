@@ -186,9 +186,12 @@ date = "vigente_al_verificar"
 license = "Open Database License (ODbL) 1.0; atribución y compartir-igual para bases derivadas"
 attribution = "© OpenStreetMap contributors (ODbL)."
 dictionary_url = "https://wiki.openstreetmap.org/wiki/Elements"
-variables_status = "pending"
-download_url = []  # Pendiente: la verificación de campus es una consulta, no una descarga de archivo.
-# Se confirma en la T07.
+variables_status = "confirmed"  # Campos jsonv2 verificados en la T07 (M-ML-016).
+# La verificación de campus es una consulta a Nominatim, no una descarga de archivo (T07):
+# una consulta por universidad, User-Agent "TheHouse-ML/0.1 (proyecto escolar UTTT)",
+# maximo 1 req/s, format=jsonv2, limit=5, countrycodes=mx, viewbox +-0.1 grados, bounded=1.
+# Respuestas en data/raw/openstreetmap/<code>.json y SHA-256 en data/manifests/openstreetmap.json.
+download_url = []
 variables_used = [
   "osm_id",
   "osm_type",
@@ -206,6 +209,9 @@ date = "2026"
 license = "Datos propios del proyecto TheHouse"
 attribution = "TheHouse (repositorio TheHouse-Backend, specs NV-07, NV-08, NV-11)."
 dictionary_url = "https://github.com/thehouse-team/TheHouse-Backend"
+# Copia local de las 10 universidades (M-ML-016): archivo
+# TheHouse.Application/Common/UniversitySeedData.cs del backend, commit
+# b7d75955513320a0a97aa5daf6b3bbe92e9514d2, en data/seed/universities_seed.csv.
 variables_status = "pending"
 download_url = []  # Pendiente: dato propio del backend, se entrega por spec, no por descarga.
 # Se confirma contra NV-11 del backend.
