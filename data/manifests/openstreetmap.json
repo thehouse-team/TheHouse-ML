@@ -1,0 +1,85 @@
+{
+  "source_id": "openstreetmap",
+  "files": [
+    {
+      "url": "https://nominatim.openstreetmap.org/search?q=Universidad+Tecnol%C3%B3gica+de+Tula-Tepeji&format=jsonv2&limit=5&countrycodes=mx&viewbox=-99.444710%2C20.109030%2C-99.244710%2C19.909030&bounded=1",
+      "filename": "UTTT.json",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 561,
+      "sha256": "44be6d20cd3dc4bbf0c3410ede622dad88548827dd7f28133e3d8d649d07e4c8",
+      "license": "Open Database License (ODbL) 1.0"
+    },
+    {
+      "url": "https://nominatim.openstreetmap.org/search?q=Universidad+Aut%C3%B3noma+del+Estado+de+Hidalgo%2C+Escuela+Superior+de+Tepeji+del+R%C3%ADo&format=jsonv2&limit=5&countrycodes=mx&viewbox=-99.461160%2C20.017030%2C-99.261160%2C19.817030&bounded=1",
+      "filename": "UAEH-ESTE.json",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "license": "Open Database License (ODbL) 1.0"
+    },
+    {
+      "url": "https://nominatim.openstreetmap.org/search?q=Universidad+Aut%C3%B3noma+del+Estado+de+Hidalgo%2C+Escuela+Superior+de+Tlahuelilpan&format=jsonv2&limit=5&countrycodes=mx&viewbox=-99.330410%2C20.229910%2C-99.130410%2C20.029910&bounded=1",
+      "filename": "UAEH-ESTL.json",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "license": "Open Database License (ODbL) 1.0"
+    },
+    {
+      "url": "https://nominatim.openstreetmap.org/search?q=Universidad+Aut%C3%B3noma+del+Estado+de+Hidalgo%2C+Escuela+Superior+de+Atotonilco+de+Tula&format=jsonv2&limit=5&countrycodes=mx&viewbox=-99.336010%2C20.115840%2C-99.136010%2C19.915840&bounded=1",
+      "filename": "UAEH-ESAT.json",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "license": "Open Database License (ODbL) 1.0"
+    },
+    {
+      "url": "https://nominatim.openstreetmap.org/search?q=Instituto+Tecnol%C3%B3gico+Superior+del+Occidente+del+Estado+de+Hidalgo&format=jsonv2&limit=5&countrycodes=mx&viewbox=-99.321780%2C20.305510%2C-99.121780%2C20.105510&bounded=1",
+      "filename": "ITSOEH.json",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 627,
+      "sha256": "a9b8b59321c2b2f6b1e5e9e87015985228b5c07ffe0a3ad234623f4b03297261",
+      "license": "Open Database License (ODbL) 1.0"
+    },
+    {
+      "url": "https://nominatim.openstreetmap.org/search?q=Tecnol%C3%B3gico+de+Estudios+Superiores+de+Jilotepec&format=jsonv2&limit=5&countrycodes=mx&viewbox=-99.677190%2C20.019530%2C-99.477190%2C19.819530&bounded=1",
+      "filename": "TESJI.json",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "license": "Open Database License (ODbL) 1.0"
+    },
+    {
+      "url": "https://nominatim.openstreetmap.org/search?q=Universidad+Mexiquense+del+Bicentenario%2C+Unidad+de+Estudios+Superiores+Jilotepec&format=jsonv2&limit=5&countrycodes=mx&viewbox=-99.678490%2C20.012480%2C-99.478490%2C19.812480&bounded=1",
+      "filename": "UMB-JILO.json",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "license": "Open Database License (ODbL) 1.0"
+    },
+    {
+      "url": "https://nominatim.openstreetmap.org/search?q=Universidad+Mexiquense+del+Bicentenario%2C+Unidad+de+Estudios+Superiores+Villa+del+Carb%C3%B3n&format=jsonv2&limit=5&countrycodes=mx&viewbox=-99.563120%2C19.827910%2C-99.363120%2C19.627910&bounded=1",
+      "filename": "UMB-VDC.json",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "license": "Open Database License (ODbL) 1.0"
+    },
+    {
+      "url": "https://nominatim.openstreetmap.org/search?q=Universidad+Canadiense&format=jsonv2&limit=5&countrycodes=mx&viewbox=-99.445070%2C20.151700%2C-99.245070%2C19.951700&bounded=1",
+      "filename": "UCAN.json",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 2,
+      "sha256": "4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+      "license": "Open Database License (ODbL) 1.0"
+    },
+    {
+      "url": "https://nominatim.openstreetmap.org/search?q=Universidad+del+Nuevo+M%C3%A9xico&format=jsonv2&limit=5&countrycodes=mx&viewbox=-99.436290%2C20.131080%2C-99.236290%2C19.931080&bounded=1",
+      "filename": "UNE-TULA.json",
+      "downloaded_at": "2026-11-17",
+      "size_bytes": 549,
+      "sha256": "7d2f84cba43a20069e93fc7e706af71b2a535ede76aef80ae11dcc79c9aac411",
+      "license": "Open Database License (ODbL) 1.0"
+    }
+  ]
+}

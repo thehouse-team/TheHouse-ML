@@ -138,7 +138,7 @@ def test_second_run_uses_manual_mode_without_network(tmp_path: Path) -> None:
     assert "inegi_enigh_2022: manual" in output
 
 
-def test_source_filter_limits_the_report(tmp_path: Path) -> None:
+def test_source_filter_limits_the_download_but_not_the_report(tmp_path: Path) -> None:
     _write_registry(tmp_path)
     paths = ProjectPaths(root=tmp_path)
     run_download(paths, fetcher=fixture_fetcher())
@@ -146,9 +146,49 @@ def test_source_filter_limits_the_report(tmp_path: Path) -> None:
     output = run_download(paths, source_id="inegi_enigh_2022", fetcher=fixture_fetcher())
     report = (tmp_path / "reports" / "variables_check.md").read_text(encoding="utf-8")
 
+    # El filtro solo limita las líneas de descarga de la consola.
     assert "inegi_enigh_2022:" in output
-    assert "## inegi_envi_2020" not in report
+    assert "inegi_envi_2020:" not in output
+    # El reporte cubre siempre todas las fuentes del registro.
+    assert "## inegi_envi_2020" in report
     assert "## inegi_enigh_2022" in report
+    assert "## inegi_censo_2020_viviendas_ca" in report
+
+
+def test_download_without_source_omits_osm_and_never_calls_the_fetcher(tmp_path: Path) -> None:
+    (tmp_path / "data").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "data" / "sources.toml").write_text(
+        """[[sources]]
+id = "inegi_envi_2020"
+name = "ENVI de prueba"
+license = "Libre uso"
+attribution = "INEGI"
+variables_status = "pending"
+variables_used = ["P5_1"]
+download_url = []
+
+[[sources]]
+id = "openstreetmap"
+name = "OpenStreetMap"
+license = "ODbL"
+attribution = "OSM"
+variables_status = "confirmed"
+variables_used = ["osm_id"]
+download_url = []
+""",
+        encoding="utf-8",
+    )
+    paths = ProjectPaths(root=tmp_path)
+    calls: list[str] = []
+
+    def fetch(url: str, _destination: Path) -> None:
+        calls.append(url)
+
+    output = run_download(paths, fetcher=fetch)
+
+    assert "openstreetmap: omitido - ejecute download --source openstreetmap" in output
+    assert calls == []
+    assert not (paths.data_raw / "openstreetmap").exists()
 
 
 def test_cli_download_returns_zero_with_preplaced_files(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:

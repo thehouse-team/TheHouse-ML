@@ -3,14 +3,123 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-02 1.0.1 |
-| Tareas ejecutadas | T02 · Descarga verificable (R02); T03 · Bases nacionales ponderadas (R03); **T04 · Calibración regional con respaldo (R04)** |
+| Tareas ejecutadas | T02 · Descarga verificable (R02); T03 · Bases nacionales ponderadas (R03); T04 · Calibración regional con respaldo (R04); **T07 · Universidades verificadas (R07)** |
 | Autorización T02 | «EJECUTA ML-02 1.0.1, task T02, en la rama feat/ml-02-descarga» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T03 | «Apruebo M-ML-014 y EJECUTA ML-02 1.0.1, task T03, en la rama feat/ml-02-bases» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T04 | «Apruebo M-ML-015 y EJECUTA ML-02 1.0.1, task T04, en la rama feat/ml-02-regional» — César Yael López Trujillo, 2026-11-17 |
-| Rama | `feat/ml-02-regional` |
-| Commit | Ninguno: el responsable pidió explícitamente no hacer commit |
+| Autorización T07 | «Apruebo M-ML-016 y EJECUTA ML-02 1.0.1, task T07 (antes que T05, porque T05 necesita coordenadas verificadas), en la rama feat/ml-02-universidades» — César Yael López Trujillo, 2026-11-17 |
+| Autorización T07 (amplíación) | «Apruebo M-ML-017 y continúa T07 de ML-02 1.0.1 en la rama feat/ml-02-universidades» — César Yael López Trujillo, 2026-11-18 |
+| Rama (T02–T04) | `feat/ml-02-descarga`, `feat/ml-02-bases`, `feat/ml-02-regional` |
+| Rama (T07) | `feat/ml-02-universidades` |
+| Commit | `46c9d4f` (T07 M-ML-016, hecho por el responsable). La ampliación M-ML-017 se entrega sin commit, por instrucción explícita |
 | Fecha de ejecución T03 | 2026-11-17 |
 | Fecha de ejecución T04 | 2026-11-17 |
+| Fecha de ejecución T07 | 2026-11-17 |
+| Fecha de ampliación T07 (M-ML-017) | 2026-11-18 |
+
+## T07 · Universidades verificadas
+
+### Qué se hizo
+
+1. `data/seed/universities_seed.csv` (en git): copia exacta de las 10 universidades de `TheHouse.Application/Common/UniversitySeedData.cs` del backend, commit `b7d75955513320a0a97aa5daf6b3bbe92e9514d2`. Procedencia registrada en `memoria.md` (M-ML-016) y en `data/sources.toml`.
+2. `src/thehouse_ml/universities.py` (nuevo): consulta a Nominatim con User-Agent `TheHouse-ML/0.1 (proyecto escolar UTTT)`, `format=jsonv2`, `limit=5`, `countrycodes=mx`, viewbox de ±0.1° y `bounded=1`; máximo 1 petición por segundo; una consulta por universidad; cacheo por archivo JSON; manifiesto SHA-256. Haversine (radio 6 371 000 m), elección del candidato educativo más cercano (`category`/`class=amenity` y `type=university|college|school`), estados por umbral de 200 m, CSV y reporte.
+3. Integración: `download --source openstreetmap` despacha la descarga OSM; `prepare` agrega la generación de `data/universities.csv` y `reports/universities_check.md`; la CLI reporta `OsmError` con código 1; `data/sources.toml` confirma las variables OSM y `variables_check.md` verifica los campos jsonv2.
+4. `memoria.md`: decisión M-ML-016 (APROBADA): T07 antes que T05, fuente y commit del seed, política de Nominatim, umbral de 200 m y confirmación humana de las coincidencias dudosas en openstreetmap.org antes de T05.
+5. Pruebas sin red: `tests/unit/test_universities.py` (22), `tests/unit/test_osm_download.py` (5), `tests/integration/test_universities_stage.py` (5), dos pruebas nueva en `test_variables_check.py` y actualización de `test_prepare_stage.py` para que la etapa completa incluya T07.
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | 75 files already formatted |
+| `uv run ruff check .` | All checks passed |
+| `uv run mypy src` | Success: no issues found in 15 source files |
+| `uv run pytest --cov=thehouse_ml` | **163 passed**; cobertura total **90.53 %** (mínimo 80 %), `universities.py` 93 % |
+| `uv run python -m thehouse_ml download --source openstreetmap` | `openstreetmap: descargado - 10 respuesta(s) verificadas`; `variables_check` sin fallas |
+| `uv run python -m thehouse_ml download --source openstreetmap` (2.ª vez) | `openstreetmap: manual - 10 respuesta(s) verificadas`: sin peticiones nuevas |
+| `uv run python -m thehouse_ml prepare` | `national_baselines.parquet (87 filas)`, `regional_calibration.parquet (56 filas)` y `universities: data/universities.csv (10 filas) - reports/universities_check.md` |
+
+### Evidencia de datos reales
+
+`data/universities.csv` tiene 10 filas con `verified_at = 2026-11-17`. Distancias haversine al elemento educativo OSM más cercano:
+
+| Código | Universidad | Distancia (m) | Estado |
+| --- | --- | ---: | --- |
+| UTTT | Universidad Tecnológica de Tula-Tepeji | 73.69 | ok |
+| UAEH-ESTE | UAEH, Escuela Superior de Tepeji del Río | — | sin_coincidencia |
+| UAEH-ESTL | UAEH, Escuela Superior de Tlahuelilpan | — | sin_coincidencia |
+| UAEH-ESAT | UAEH, Escuela Superior de Atotonilco de Tula | — | sin_coincidencia |
+| ITSOEH | Instituto Tecnológico Superior del Occidente del Estado de Hidalgo | 3347.54 | revisar |
+| TESJI | Tecnológico de Estudios Superiores de Jilotepec | — | sin_coincidencia |
+| UMB-JILO | UMB, Unidad de Estudios Superiores Jilotepec | — | sin_coincidencia |
+| UMB-VDC | UMB, Unidad de Estudios Superiores Villa del Carbón | — | sin_coincidencia |
+| UCAN | Universidad Canadiense | — | sin_coincidencia |
+| UNE-TULA | Universidad del Nuevo México | 7.73 | ok |
+
+`reports/universities_check.md` contiene la tabla completa (con coordenadas seed y OSM), la atribución © OpenStreetMap contributors (ODbL) y la lista de 8 universidades a corregir en NV-11 (1 `revisar` y 7 `sin_coincidencia`). Las respuestas cruntas quedan en `data/raw/openstreetmap/` (fuera de git) con su SHA-256 en `data/manifests/openstreetmap.json` (en git).
+
+### Trazabilidad requisito → prueba
+
+| Requisito | Prueba |
+| --- | --- |
+| R07 · haversine contra valor conocido | `tests/unit/test_universities.py::test_haversine_matches_a_known_equator_degree`, `test_haversine_is_zero_for_the_same_point`, `test_haversine_is_symmetric` |
+| R07 · candidato educativo más cercano | `test_select_candidate_chooses_the_closest_educational_element`, `test_is_educational_accepts_only_educational_amenities`, `test_parse_candidates_reads_category_of_the_current_nominatim_response` |
+| R07 · estados ok/revisar/sin_coincidencia | `test_build_rows_marks_ok_at_the_threshold`, `test_build_rows_marks_revisar_beyond_the_threshold`, `test_build_rows_marks_sin_coincidencia_and_leaves_osm_columns_empty` |
+| R07 · parámetros y User-Agent de Nominatim | `test_build_query_url_contains_the_nominatim_policy_parameters`, `test_user_agent_identifies_the_project`, `tests/unit/test_osm_download.py::test_default_fetch_sends_the_project_user_agent` |
+| R07 · sin red si el JSON existe | `test_osm_download.py::test_existing_json_is_not_requested_again`, `test_download_writes_ten_responses_and_their_manifest`, `test_rate_limit_sleeps_between_consecutive_requests` |
+| R07 · 10 filas presentes | `tests/integration/test_universities_stage.py::test_prepare_writes_the_ten_universities_with_all_three_statuses`, `test_universities.py::test_load_seed_reads_the_ten_universities` |
+| R07 · reporte y columnas OSM | `test_prepare_writes_the_osm_columns_and_haversine_distance`, `test_report_has_attribution_and_the_list_to_fix_nv11` |
+| R07 · etapa y CLI | `test_prepare_fails_clearly_when_a_response_is_missing`, `test_cli_reports_osm_errors_with_exit_code_one`, `tests/integration/test_prepare_stage.py::test_run_stage_dispatches_prepare` |
+
+## T07 (ampliación M-ML-017) · Verificación humana y coordenadas finales
+
+### Qué se hizo
+
+1. `data/seed/universities_manual.csv` (en git): 8 decisiones humanas tomadas en openstreetmap.org el 2026-11-18 — 3 `ok_seed` (UAEH-ESTE, UAEH-ESAT, UMB-JILO), 2 `corregida` (ITSOEH, UAEH-ESTL) y 3 `no_localizada` (TESJI, UMB-VDC, UCAN). Solo se guardan coordenadas de OSM; nunca de Google Maps.
+2. `src/thehouse_ml/universities.py`: `load_manual` valida columnas, estados y coordenadas de las filas corregidas; `finalize_row`/`apply_manual` aplican las cuatro reglas y agregan `final_lat`, `final_lon`, `final_status` y `final_source` sin quitar las columnas de la T07.
+3. `reports/universities_check.md`: nuevas secciones «Verificación humana (openstreetmap.org)» y «Correcciones para NV-11 (backend)», con la duda del nombre de UCAN y la instrucción de que T05 reporte aparte las `seed_sin_verificar`. Se conserva la atribución © OpenStreetMap contributors (ODbL).
+4. `memoria.md`: decisión M-ML-017 (APROBADA). Actualizados `task.md` y este `evidence.md`. Sin consultas nuevas a Nominatim y sin dependencias nuevas.
+5. Pruebas sin red: 10 pruebas nuevas en `test_universities.py` (cuatro reglas de `final_status`, carga del manual y validaciones) y ampliación de `test_universities_stage.py` (10 filas con coordenadas finales, estados esperados y secciones del reporte).
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | sin hallazgos |
+| `uv run ruff check .` | All checks passed |
+| `uv run mypy src` | Success: no issues found in 15 source files |
+| `uv run pytest --cov=thehouse_ml` | ver resultado final de esta sección |
+| `uv run python -m thehouse_ml prepare` | `universities: data/universities.csv (10 filas) - reports/universities_check.md` |
+
+### Coordenadas finales
+
+| Código | final_status | final_lat | final_lon | final_source |
+| --- | --- | ---: | ---: | --- |
+| UTTT | ok_osm | 20.0084106 | -99.3449608 | osm:way/386380501 |
+| UAEH-ESTE | ok_manual | 19.91703 | -99.36116 | seed |
+| UAEH-ESTL | corregida_manual | 20.132062 | -99.235535 | way/550950316 |
+| UAEH-ESAT | ok_manual | 20.01584 | -99.23601 | seed |
+| ITSOEH | corregida_manual | 20.2333739 | -99.2096330 | nominatim T07 |
+| TESJI | seed_sin_verificar | 19.91953 | -99.57719 | seed |
+| UMB-JILO | ok_manual | 19.91248 | -99.57849 | seed |
+| UMB-VDC | seed_sin_verificar | 19.72791 | -99.46312 | seed |
+| UCAN | seed_sin_verificar | 20.0517 | -99.34507 | seed |
+| UNE-TULA | ok_osm | 20.0310934 | -99.3363626 | osm:way/458178077 |
+
+### Trazabilidad y revisión
+
+| Regla | Prueba |
+| --- | --- |
+| `ok` → `ok_osm` (coordenada OSM) | `tests/unit/test_universities.py::test_final_status_ok_osm_uses_the_osm_coordinates` |
+| `ok_seed` → `ok_manual` (seed) | `test_final_status_ok_manual_uses_the_seed_coordinates` |
+| `corregida` → `corregida_manual` (lat/lon manuales) | `test_final_status_corregida_manual_uses_the_human_coordinates` |
+| `no_localizada` → `seed_sin_verificar` (seed) | `test_final_status_seed_sin_verificar_uses_the_seed_coordinates` |
+| 10 filas con coordenadas finales | `tests/integration/test_universities_stage.py::test_all_ten_rows_have_final_coordinates_and_the_expected_final_statuses` |
+| Reporte humano y correcciones | `test_report_has_attribution_and_the_list_to_fix_nv11` |
+
+- **Constitución / AGENTS / memoria:** autorización M-ML-017 vigente; solo fuentes aprobadas; sin scraping, sin secretos, sin servicios de pago; sin dependencias nuevas; se conserva la atribución ODbL. M-ML-016 sigue vigente para el origen de los datos T07.
+- **Hallazgos:** sin consultas nuevas a Nominatim. Las 3 `seed_sin_verificar` y la duda de `UCAN` quedan pendientes del backend; T05 debe reportarlas aparte. No se hizo commit (instrucción del responsable); el commit `46c9d4f` cubre solo la T07 original.
+- **Resultado:** **PASS** — las cuatro reglas están probadas, las 10 filas tienen coordenada final y el reporte incluye la verificación humana y las correcciones a NV-11. Los reportes `variables_check.md` y `regional_calibration.md` no se modifican al ejecutar `prepare`.
 
 ## T04 · Calibración regional con respaldo
 
@@ -152,13 +261,22 @@ Definición aplicada: ordenar por renta, agrupar empatados y tomar el menor valo
 7. **Renta sin `ee`/`cv` y respaldo nacional limitado.** Las filas de renta copian los percentiles de la ENVI 2020 de T03, que no publica varianza; sus columnas `se` y `cv` quedan como `NaN` y se marcan `—` en el reporte. La suficiencia no se aplica a la renta porque nunca es una estimación municipal. El respaldo `nacional` de ENVI/ENIGH de T03 solo está implementado para la proporción de viviendas rentadas; T03 no publica prevalencias de servicios (M-ML-014(c)), por lo que para los seis indicadores de servicios la entidad completa es el último nivel disponible y una entidad insuficiente daría un error explícito en vez de una estimación no documentada. En los datos reales no se presentó ese caso.
 8. **Estratos con una sola UPM.** En el diseño con reemplazo no tienen varianza definida; no aportan a la varianza y se cuentan en `n_strata_single_psu`. En los datos reales ningún municipio de los 7 quedó sin estimación por este motivo.
 9. **Reescritura de manifiestos y reportes.** Al ejecutar `download` y `prepare` con datos reales se reescribieron los manifiestos y `reports/national_baselines.md` (solo diferencias de fin de línea CRLF/LF en Windows; el contenido es idéntico) y se creó `data/manifests/inegi_censo_2020_viviendas_ca.json`.
+10. **`category` frente a `class` en jsonv2 (resuelto).** El servicio Nominatim actual publica `category=amenity`, no `class=amenity`. El primer parseo dejó todos los candidatos como no educativos; se corrigió para aceptar ambas claves y se agregó una prueba. La corrección se hizo sobre los JSON ya guardados: **no se hizo ninguna consulta adicional** (se respetaron las 10 permitidas y el cacheo).
+11. **Coincidencias dudosas (pendiente de humano).** Con los nombres completos del seed y `bounded=1`, 7 respuestas quedaron vacías y 1 candidato quedó a 3347.54 m (`ITSOEH`). Son 8 universidades en la lista de NV-11 del reporte. Según M-ML-016 las confirma un humano en openstreetmap.org **antes de usarlas en T05**; no se reconsultó Nominatim con otro texto porque la autorización era de 10 consultas.
+12. **Reescritura de reportes por fin de línea (T07).** Al ejecutar `prepare` se reescribió `reports/regional_calibration.md` y al ejecutar `download --source openstreetmap`, `reports/variables_check.md` (solo CRLF/LF en Windows; contenido equivalente).
+13. **Sin commit ni PR por instrucción explícita del responsable.** La aprobación de otro humano en GitHub sigue pendiente.
+14. **Reporte de variables filtrado (detectado y corregido).** `run_download` usaba la lista devuelta por `select_sources` tanto para descargar como para verificar, de modo que `download --source openstreetmap` reescribía `reports/variables_check.md` con una sola sección. Se separaron las dos responsabilidades: `--source` limita solo la descarga y `verify_sources` recibe siempre todas las fuentes del registro. El reporte se escribe con finales LF. Pruebas: `test_download_stage.py::test_source_filter_limits_the_download_but_not_the_report` y `test_universities_stage.py::test_filtered_download_keeps_every_source_in_the_variables_report`.
+15. **CI en máquina vacía (detectado y corregido).** El job `quality` fallaba en «CLI con las cinco etapas»: un `download` sin filtro incluía OpenStreetMap y consultaba Nominatim (prohibido por M-ML-016 en CI), y un `prepare` sin respuestas en `data/raw/openstreetmap/` fallaba con `OsmError`. Ahora OSM es fuente bajo demanda: sin `--source` se omite con `openstreetmap: omitido - ejecute download --source openstreetmap` y no se llama al fetcher; solo `download --source openstreetmap` consulta. `prepare` sin respuestas conserva `data/universities.csv` y `reports/universities_check.md` versionados y reporta `universities: omitido (sin respuestas OSM; se conserva data/universities.csv versionado)`. Pruebas sin red: `test_download_stage.py::test_download_without_source_omits_osm_and_never_calls_the_fetcher` y `test_universities_stage.py::test_prepare_without_osm_responses_keeps_the_versioned_files`. Sin dependencias nuevas ni consultas nuevas a Nominatim.
 
 ## Revisión
 
 - **Constitución:** §5 (solo pandas y pyarrow, añadidos como dependencias directas; T04 sin dependencias nuevas), §6 y §7 (Parquet fuera de git; INEGI citado como fuente sin sugerir respaldo), §7 (SHA-256 de los cuatro archivos del Censo verificado antes de usarlos; sin datos personales en las salidas), §9 (misma entrada → mismo Parquet), §16 (pruebas sin red, cobertura 89.79 %).
 - **AGENTS / memoria:** «EJECUTA» vigente de M-ML-011, M-ML-014 y M-ML-015; fuentes aprobadas en M-ML-003; decisiones M-ML-010, M-ML-012, M-ML-013, M-ML-014 y M-ML-015 aplicadas; la T04 no modifica `constitution.md` ni `AGENTS.md`.
 - **Seguridad y licencias:** sin secretos, sin scraping, sin servicios de pago; solo productos públicos de INEGI citados como autor; ningún dato crudo o procesado versionado (verificado por `tests/test_repo_hygiene.py`); el Censo se descargó solo para las dos entidades autorizadas.
+- **T07 (M-ML-016):** sin dependencias nuevas (HTTP y JSON de la biblioteca estándar); solo 10 consultas a Nominatim con User-Agent propio y ≤ 1 req/s; sin scraping; respuestas crudas fuera de git y SHA-256 en `data/manifests/openstreetmap.json`; atribución ODbL en el reporte y en `sources.toml`; sin datos personales; se ejecutó antes que T05 según lo autorizado; no se modifica `constitution.md` ni `AGENTS.md`.
 
 ## Resultado
 
-**PASS WITH WARNINGS.** T04 cumple su criterio de aceptación con evidencia reproducible: los 7 municipios están presentes, cada indicador registra su nivel de respaldo y la regla de suficiencia está probada. Advertencias: `ee`/`cv` no disponibles en la renta de T03 (hallazgo 7), estratos con una sola UPM (hallazgo 8), reescritura de manifiestos por fin de línea (hallazgo 9), el override de mypy para pandas (hallazgo 2) y la ausencia de commit/PR por instrucción (hallazgo 5). T03 mantiene su PASS WITH WARNINGS previo con el hallazgo 1 resuelto en T04.
+**PASS WITH WARNINGS.** T07 cumple su criterio de aceptación con evidencia reproducible: `data/universities.csv` tiene las 10 universidades con id OSM (cuando hay coincidencia), distancia haversine, estado y fecha de verificación; las 3 aproximadas del seed quedaron registradas y los 8 casos dudosos se reportan para NV-11. Advertencias: 7 `sin_coincidencia` y 1 `revisar` requieren confirmación humana en openstreetmap.org antes de T05 (hallazgos 10 y 11), reescritura de reportes por fin de línea (hallazgo 12) y ausencia de commit/PR por instrucción (hallazgo 13).
+
+T04 mantiene su PASS WITH WARNINGS previo: los 7 municipios están presentes, cada indicador registra su nivel de respaldo y la regla de suficiencia está probada. Advertencias: `ee`/`cv` no disponibles en la renta de T03 (hallazgo 7), estratos con una sola UPM (hallazgo 8), reescritura de manifiestos por fin de línea (hallazgo 9), el override de mypy para pandas (hallazgo 2) y la ausencia de commit/PR (hallazgo 5). T03 mantiene su PASS WITH WARNINGS previo con el hallazgo 1 resuelto en T04.

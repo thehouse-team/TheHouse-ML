@@ -53,11 +53,11 @@ no se carga el cuerpo de los microdatos. Una variable confirmada ausente hace fa
 
 ## openstreetmap
 
-- estado: `pending`
-- verificado: no
-- variables encontradas: (ninguna)
-- variables faltantes: (sin verificar)
-- nota: download_url pendiente (sin verificar)
+- estado: `confirmed`
+- verificado: si
+- variables encontradas: `osm_id`, `osm_type`, `lat`, `lon`, `name`
+- variables faltantes: (ninguna)
+- nota: respuestas jsonv2 verificadas
 
 ## thehouse_seed_nv07_nv08_nv11
 
