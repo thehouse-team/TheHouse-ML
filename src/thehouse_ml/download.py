@@ -7,8 +7,11 @@ Modos de operación por archivo:
 * si no está, se descarga y se validan tamaño y hash;
 * una fuente con ``download_url`` vacío se salta con el aviso
   ``download_url pendiente``;
-* ``openstreetmap`` es una consulta a Nominatim (ML-02 T07): una petición por
-  universidad, User-Agent propio, ≤ 1 req/s y cacheo por archivo JSON.
+* ``openstreetmap`` es una fuente **bajo demanda** (ML-02 T07): solo se consulta
+  con ``download --source openstreetmap``. Una descarga sin filtro la omite con
+  el aviso ``omitido: ejecute download --source openstreetmap`` para no repetir
+  consultas a Nominatim en CI (M-ML-016). Si se consulta, es una petición por
+  universidad, con User-Agent propio, ≤ 1 req/s y cacheo por archivo JSON.
 
 Un hash distinto al del registro o al del manifiesto anterior falla con un
 mensaje explícito y no sobrescribe el archivo ni el manifiesto.
@@ -20,7 +23,7 @@ import hashlib
 import shutil
 import urllib.error
 import urllib.request
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from dataclasses import dataclass
 from datetime import date
 from pathlib import Path
@@ -121,15 +124,47 @@ def download_source(
     return DownloadOutcome(source.id, status, message)
 
 
+def _sources_to_download(all_sources: Sequence[SourceSpec], source_id: str | None) -> tuple[list[SourceSpec], bool]:
+    """Selecciona fuentes y avisa si OSM se omite por ser bajo demanda.
+
+    ``select_sources`` valida que un ``source_id`` explícito exista. Sin filtro,
+    OpenStreetMap se excluye para no consultar Nominatim en una máquina limpia.
+    """
+    selected = select_sources(all_sources, source_id)
+    if source_id is None:
+        return [source for source in selected if source.id != OSM_SOURCE], True
+    return selected, False
+
+
+def _outcomes_in_registry_order(
+    all_sources: Sequence[SourceSpec],
+    to_download: Sequence[SourceSpec],
+    paths: ProjectPaths,
+    fetcher: Fetcher | None,
+    today: str | None,
+    omit_osm: bool,
+) -> list[DownloadOutcome]:
+    """Produce los resultados en el orden del registro, con el aviso de OSM si aplica."""
+    selected_ids = {source.id for source in to_download}
+    outcomes: list[DownloadOutcome] = []
+    for source in all_sources:
+        if omit_osm and source.id == OSM_SOURCE:
+            outcomes.append(DownloadOutcome(OSM_SOURCE, "omitido", "ejecute download --source openstreetmap"))
+        elif source.id in selected_ids:
+            outcomes.append(download_source(source, paths, fetcher, today))
+    return outcomes
+
+
 def download_all(
     paths: ProjectPaths,
     source_id: str | None = None,
     fetcher: Fetcher | None = None,
     today: str | None = None,
 ) -> list[DownloadOutcome]:
-    """Descarga todas las fuentes registradas, o solo ``source_id``."""
-    sources = select_sources(load_sources(paths.sources_toml), source_id)
-    return [download_source(source, paths, fetcher, today) for source in sources]
+    """Descarga todas las fuentes registradas, o solo ``source_id``; OSM es bajo demanda."""
+    all_sources = load_sources(paths.sources_toml)
+    to_download, omit_osm = _sources_to_download(all_sources, source_id)
+    return _outcomes_in_registry_order(all_sources, to_download, paths, fetcher, today, omit_osm)
 
 
 def run_download(
@@ -139,14 +174,16 @@ def run_download(
 ) -> str:
     """Ejecuta la etapa completa: descarga filtrada y reporte de TODAS las fuentes.
 
-    ``source_id`` limita únicamente qué fuentes se descargan. El reporte de
-    variables cubre siempre todas las fuentes de ``data/sources.toml``: las
-    descendadas se verifican leyendo sus archivos en ``data/raw`` y las que no
-    tienen archivo se marcan como sin verificar, pero ninguna se omite.
+    ``source_id`` limita únicamente qué fuentes se descargan. Sin filtro,
+    OpenStreetMap se omite (fuente bajo demanda) para no consultar Nominatim en
+    CI. El reporte de variables cubre siempre todas las fuentes de
+    ``data/sources.toml``: las descendadas se verifican leyendo sus archivos en
+    ``data/raw`` y las que no tienen archivo se marcan como sin verificar, pero
+    ninguna se omite del reporte.
     """
     all_sources = load_sources(paths.sources_toml)
-    selected = select_sources(all_sources, source_id)
-    outcomes = [download_source(source, paths, fetcher) for source in selected]
+    to_download, omit_osm = _sources_to_download(all_sources, source_id)
+    outcomes = _outcomes_in_registry_order(all_sources, to_download, paths, fetcher, None, omit_osm)
     report = verify_sources(all_sources, paths)
     report_path = paths.reports / "variables_check.md"
     write_variables_report(report_path, report)

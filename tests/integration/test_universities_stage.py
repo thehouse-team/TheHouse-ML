@@ -12,7 +12,7 @@ from conftest import REPO_ROOT, write_osm_project
 from thehouse_ml.cli import main
 from thehouse_ml.download import run_download
 from thehouse_ml.paths import ProjectPaths
-from thehouse_ml.universities import OSM_SOURCE, UNIVERSITY_COLUMNS, OsmError, run_universities
+from thehouse_ml.universities import OSM_SKIP_MESSAGE, OSM_SOURCE, UNIVERSITY_COLUMNS, run_universities
 
 pytestmark = pytest.mark.integration
 
@@ -116,13 +116,22 @@ def test_report_has_attribution_and_the_list_to_fix_nv11(tmp_path: Path) -> None
         assert corrections.count(f"- `{code}` —") == 1
 
 
-def test_prepare_fails_clearly_when_a_response_is_missing(tmp_path: Path) -> None:
-    write_osm_project(tmp_path)
+def test_prepare_without_osm_responses_keeps_the_versioned_files(tmp_path: Path) -> None:
+    write_osm_project(tmp_path, with_responses=False)
     paths = ProjectPaths(root=tmp_path)
-    (paths.data_raw / OSM_SOURCE / "UTTT.json").unlink()
+    shutil.copyfile(REPO_ROOT / "data" / "universities.csv", paths.universities_csv)
+    report = paths.reports / "universities_check.md"
+    report.parent.mkdir(parents=True, exist_ok=True)
+    shutil.copyfile(REPO_ROOT / "reports" / "universities_check.md", report)
+    csv_before = paths.universities_csv.read_bytes()
+    report_before = report.read_bytes()
 
-    with pytest.raises(OsmError, match="download --source openstreetmap"):
-        run_universities(paths, today=VERIFIED_AT)
+    message = run_universities(paths, today=VERIFIED_AT)
+
+    assert message == OSM_SKIP_MESSAGE
+    assert paths.universities_csv.read_bytes() == csv_before
+    assert report.read_bytes() == report_before
+    assert not (paths.data_raw / OSM_SOURCE).exists()
 
 
 def test_filtered_download_keeps_every_source_in_the_variables_report(tmp_path: Path) -> None:

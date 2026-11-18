@@ -518,11 +518,23 @@ def render_report(rows: Sequence[UniversityRow], manual: Mapping[str, ManualVeri
     return "\n".join(lines)
 
 
+OSM_SKIP_MESSAGE = "universities: omitido (sin respuestas OSM; se conserva data/universities.csv versionado)"
+
+
 def run_universities(paths: ProjectPaths, today: str | None = None) -> str:
-    """Etapa T07: valida las 10 respuestas y escribe el CSV y el reporte."""
+    """Etapa T07: valida las 10 respuestas y escribe el CSV y el reporte.
+
+    OpenStreetMap es una fuente bajo demanda: si las respuestas no están en
+    ``data/raw/openstreetmap``, no se consulta Nominatim y se conservan el CSV y
+    el reporte versionados (necesario para ejecutar ``prepare`` en una máquina
+    limpia de CI).
+    """
     seeds = load_seed(paths.data_seed)
     if len(seeds) != EXPECTED_UNIVERSITIES:
         raise OsmError(f"El seed debe tener {EXPECTED_UNIVERSITIES} universidades; se encontraron {len(seeds)}")
+    folder = paths.data_raw / OSM_SOURCE
+    if any(not (folder / f"{seed.code}.json").is_file() for seed in seeds):
+        return OSM_SKIP_MESSAGE
     manual = load_manual(paths.manual_seed)
     responses: dict[str, tuple[OsmCandidate, ...]] = {}
     for seed in seeds:
@@ -619,6 +631,7 @@ __all__ = [
     "MANUAL_COLUMNS",
     "MANUAL_STATUSES",
     "NOMINATIM_URL",
+    "OSM_SKIP_MESSAGE",
     "OSM_SOURCE",
     "RATE_LIMIT_SECONDS",
     "RESULT_LIMIT",
