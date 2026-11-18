@@ -8,14 +8,14 @@
 | Fecha | 2026-11-12 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-12 (M-ML-012): aprueba ML-02 1.0.1 |
-| Estado de ejecución | **🔄 EN EJECUCIÓN — T01, T02 y T03 completas; T04–T09 sin ejecutar** |
+| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T04 completas; T05–T09 sin ejecutar** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.1 |
 | Tasks | `task.md` 1.0.1 |
 | Precondición | ML-01 completa; fuentes de M-ML-003 aprobadas |
 | Relación con el backend | Verifica las coordenadas de las 10 universidades del seed de NV-11 (3 están aproximadas al centro del municipio) y entrega las correcciones |
 
-Spec aprobada (1.0.1, M-ML-012). No autoriza código ni descargas hasta recibir «EJECUTA» con tasks y rutas. T03 se ejecutó el 2026-11-17 bajo M-ML-014; las tasks T04–T09 siguen sin autorización de ejecución.
+Spec aprobada (1.0.1, M-ML-012). No autoriza código ni descargas hasta recibir «EJECUTA» con tasks y rutas. T03 se ejecutó el 2026-11-17 bajo M-ML-014 y T04 el 2026-11-17 bajo M-ML-015; las tasks T05–T09 siguen sin autorización de ejecución.
 
 ## 1. Contexto
 
@@ -163,9 +163,9 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Tasks | 9 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 3 |
+| Tasks completadas | 4 |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🔄 EN EJECUCIÓN — T01, T02 y T03 completas; T04–T09 sin ejecutar** |
+| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T04 completas; T05–T09 sin ejecutar** |
 
 ## 15. Aprobación pendiente
 

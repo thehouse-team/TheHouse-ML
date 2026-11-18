@@ -58,6 +58,15 @@ def test_sources_have_unique_ids() -> None:
     assert len(ids) == len(set(ids)), "Los ids de fuentes deben ser únicos"
 
 
+def test_censo_dictionary_url_points_to_the_official_amplified_dictionary() -> None:
+    censo = next(source for source in _load_sources() if source.get("id") == "inegi_censo_2020_viviendas_ca")
+
+    assert censo["dictionary_url"] == (
+        "https://www.inegi.org.mx/contenidos/programas/ccpv/2020/microdatos/"
+        "diccionario_cuestionario_ampliado_cpv2020.xlsx"
+    )
+
+
 def test_variables_status_is_valid() -> None:
     for source in _load_sources():
         source_id = source.get("id", "<sin id>")

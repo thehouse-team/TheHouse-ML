@@ -83,11 +83,42 @@ def test_inpc_registers_the_verified_general_index_file() -> None:
     assert files[0].encoding == "utf-8"
 
 
-@pytest.mark.parametrize("source_id", ["inegi_censo_2020_viviendas_ca", "inegi_denue_vigente"])
-def test_pending_sources_have_no_download_url(source_id: str) -> None:
-    source = _by_id()[source_id]
+def test_censo_registers_four_verified_files_and_confirmed_variables() -> None:
+    censo = _by_id()["inegi_censo_2020_viviendas_ca"]
 
-    assert source.download_url == ()
+    assert censo.variables_status == "confirmed"
+    assert set(censo.variables_used) == {
+        "ENT",
+        "MUN",
+        "FACTOR",
+        "ESTRATO",
+        "UPM",
+        "TENENCIA",
+        "AGUA_ENTUBADA",
+        "DRENAJE",
+        "ELECTRICIDAD",
+        "INTERNET",
+        "COMBUSTIBLE",
+    }
+    assert "AGUA_ENT" not in censo.variables_used
+    files = censo.download_url
+    assert len(files) == 4
+    assert files[0].filename == "Censo2020_CA_hgo_csv.zip"
+    assert files[0].size_bytes == 17_225_011
+    assert files[0].sha256 == "5d0ff2b338acb93f8558ef2fed0500c1b4af004cdfc5ee34fb1fec7faa21e865"
+    assert files[0].table == "Viviendas13.CSV"
+    assert files[0].encoding == "latin-1"
+    assert files[1].filename == "Censo2020_CA_mex_csv.zip"
+    assert files[1].size_bytes == 41_189_169
+    assert files[1].sha256 == "178a2a5c3a0b7b08a1ac878a5e94ca4e6c9b9d5851d98b8b07fe2f9d35672c2b"
+    assert files[1].table == "Viviendas15.CSV"
+    assert [file.kind for file in files[2:]] == ["dictionary", "dictionary"]
+    assert files[2].sha256 == "e728cdac1872be856ba15c2902a77fb6c03e60c2d98619b7ae8988cc82afb6dc"
+    assert files[3].sha256 == "64c7d6974392132258d77b8697e92cb9f39ba4cd303fc5a9c0f32861f174f381"
+
+
+def test_denue_is_still_pending_without_download_url() -> None:
+    assert _by_id()["inegi_denue_vigente"].download_url == ()
 
 
 def test_select_sources_filters_and_rejects_unknown_ids() -> None:
