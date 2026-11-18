@@ -117,8 +117,26 @@ def test_censo_registers_four_verified_files_and_confirmed_variables() -> None:
     assert files[3].sha256 == "64c7d6974392132258d77b8697e92cb9f39ba4cd303fc5a9c0f32861f174f381"
 
 
-def test_denue_is_still_pending_without_download_url() -> None:
-    assert _by_id()["inegi_denue_vigente"].download_url == ()
+DENUE_VARIABLES = ("id", "codigo_act", "per_ocu", "cve_ent", "cve_mun", "latitud", "longitud", "fecha_alta")
+DENUE_PRIVATE = ("nom_estab", "raz_social", "telefono", "correoelec", "www", "tipo_vial", "nom_vial", "numero_ext")
+
+
+def test_denue_registers_two_states_and_only_public_variables() -> None:
+    denue = _by_id()["inegi_denue_vigente"]
+
+    assert denue.variables_status == "confirmed"
+    assert denue.variables_used == DENUE_VARIABLES
+    assert not (set(DENUE_PRIVATE) & set(denue.variables_used))
+    files = denue.download_url
+    assert len(files) == 3
+    assert files[0].filename == "denue_13_csv.zip"
+    assert files[0].size_bytes == 15_059_273
+    assert files[0].sha256 == "d0747958bc364177ea8d281047334cffd4d3505247f43967e08da2ca9c1d9ca5"
+    assert files[0].table == "conjunto_de_datos/denue_inegi_13_.csv"
+    assert files[0].encoding == "latin-1"
+    assert [file.filename for file in files[1:]] == ["denue_15_1_csv.zip", "denue_15_2_csv.zip"]
+    assert all(file.size_bytes is None and file.sha256 is None for file in files[1:])  # lo escribe `download`
+    assert all(file.table == "conjunto_de_datos/*.csv" for file in files[1:])  # todos los CSV de la carpeta
 
 
 def test_select_sources_filters_and_rejects_unknown_ids() -> None:

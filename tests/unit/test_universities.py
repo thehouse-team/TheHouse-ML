@@ -28,10 +28,38 @@ from thehouse_ml.universities import (
     load_seed,
     parse_candidates,
     select_candidate,
+    write_universities_csv,
 )
 
 SEED_PATH = REPO_ROOT / "data" / "seed" / "universities_seed.csv"
 MANUAL_PATH = REPO_ROOT / "data" / "seed" / "universities_manual.csv"
+
+
+def test_write_universities_csv_uses_lf_and_does_not_rewrite_unchanged_content(tmp_path: Path) -> None:
+    path = tmp_path / "universities.csv"
+    rows = (
+        UniversityRow(
+            code="A",
+            name="Uno",
+            seed_lat="20.0",
+            seed_lon="-99.0",
+            final_lat="20.0",
+            final_lon="-99.0",
+            final_status="ok_osm",
+        ),
+    )
+
+    write_universities_csv(path, rows)
+    first = path.read_bytes()
+    assert b"\r\n" not in first
+
+    write_universities_csv(path, rows)
+    assert path.read_bytes() == first
+
+    crlf = first.replace(b"\n", b"\r\n")
+    path.write_bytes(crlf)
+    write_universities_csv(path, rows)
+    assert path.read_bytes() == crlf  # contenido equivalente: no se reescribe
 
 
 def _seed(lat: str = "20.0", lon: str = "-99.0", code: str = "UTTT") -> UniversitySeed:

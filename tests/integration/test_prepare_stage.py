@@ -118,6 +118,15 @@ filename = "{INPC_ZIP}"
 kind = "data"
 table = "conjunto_de_datos/inpc.csv"
 encoding = "utf-8"
+
+[[sources]]
+id = "inegi_denue_vigente"
+name = "DENUE de prueba"
+license = "Términos de Libre Uso de la Información del INEGI"
+attribution = "Fuente: INEGI, DENUE 05/2026"
+dictionary_url = "https://example.test"
+variables_status = "confirmed"
+variables_used = ["id", "codigo_act", "latitud", "longitud"]
 """
     (tmp_path / "data" / "sources.toml").write_text(registry, encoding="utf-8")
 
@@ -279,3 +288,4 @@ def test_run_stage_dispatches_prepare(tmp_path: Path) -> None:
 
     assert output.startswith("prepare: ")
     assert "universities: " in output
+    assert "denue: " in output

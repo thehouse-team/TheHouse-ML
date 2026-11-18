@@ -20,6 +20,7 @@ from __future__ import annotations
 
 import csv
 import hashlib
+import io
 import json
 import math
 import time
@@ -424,12 +425,29 @@ def build_rows(
 
 
 def write_universities_csv(path: Path, rows: Sequence[UniversityRow]) -> None:
-    """Escribe el CSV versionado con columnas estables."""
+    """Escribe el CSV versionado con LF; no lo toca si el contenido no cambia.
+
+    El ``DictWriter`` de ``csv`` usa CRLF por omisión, que en Windows hacía que
+    ``prepare`` reescribiera el archivo versionado solo por fin de línea (M-ML-018).
+    """
+    buffer = io.StringIO(newline="")
+    writer = csv.DictWriter(buffer, fieldnames=list(UNIVERSITY_COLUMNS), lineterminator="\n")
+    writer.writeheader()
+    writer.writerows(asdict(row) for row in rows)
+    content = buffer.getvalue()
+
+    if path.is_file():
+        try:
+            with path.open("r", encoding="utf-8", newline="") as stream:
+                previous = stream.read()
+        except OSError:
+            previous = None
+        if previous is not None and previous.replace("\r\n", "\n") == content:
+            return
+
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("w", encoding="utf-8", newline="") as stream:
-        writer = csv.DictWriter(stream, fieldnames=list(UNIVERSITY_COLUMNS))
-        writer.writeheader()
-        writer.writerows(asdict(row) for row in rows)
+    with path.open("w", encoding="utf-8", newline="\n") as stream:
+        stream.write(content)
 
 
 def render_report(rows: Sequence[UniversityRow], manual: Mapping[str, ManualVerification] | None = None) -> str:

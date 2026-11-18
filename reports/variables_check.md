@@ -29,11 +29,11 @@ no se carga el cuerpo de los microdatos. Una variable confirmada ausente hace fa
 
 ## inegi_denue_vigente
 
-- estado: `pending`
-- verificado: no
-- variables encontradas: (ninguna)
-- variables faltantes: (sin verificar)
-- nota: download_url pendiente (sin verificar)
+- estado: `confirmed`
+- verificado: si
+- variables encontradas: `id`, `codigo_act`, `per_ocu`, `cve_ent`, `cve_mun`, `latitud`, `longitud`, `fecha_alta`
+- variables faltantes: (ninguna)
+- nota: -
 
 ## inegi_inpc
 

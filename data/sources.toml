@@ -109,25 +109,38 @@ variables_used = [
 id = "inegi_denue_vigente"
 name = "INEGI — Directorio Estadístico Nacional de Unidades Económicas (DENUE)"
 url = "https://www.inegi.org.mx/app/descarga/?ti=6"
-edition = "DENUE, edición vigente al ejecutar ML-02 (basada en Censos Económicos más recientes)"
-date = "vigente_al_ejecutar"
-license = "Términos de libre uso de la información del INEGI (citar a INEGI como autor y el producto; no sugerir respaldo de INEGI)"
-attribution = "Fuente: INEGI, Directorio Estadístico Nacional de Unidades Económicas (DENUE)."
+edition = "DENUE 05/2026"
+date = "2026-05-20"
+license = "Términos de Libre Uso de la Información del INEGI"
+attribution = "Fuente: INEGI, DENUE 05/2026"
 dictionary_url = "https://www.inegi.org.mx/app/descarga/?ti=6"
-variables_status = "pending"
-download_url = []  # Pendiente: falta la URL directa y su hash verificado.
+variables_status = "confirmed"  # Verificado por el responsable el 2026-11-18 (M-ML-018).
+# Solo los estados 13 (Hidalgo) y 15 (Estado de México): los campus de Tepeji y
+# Jilotepec están cerca de la frontera Hidalgo–Edomex y se cuentan ambos (M-ML-018).
+# PRIVACIDAD: solo se leen variables_used con usecols; NUNCA nom_estab, raz_social,
+# telefono, correoelec, www ni campos de dirección (tipo_vial, nom_vial, numero_ext, ...).
+# Desviación autorizada por el catálogo oficial (M-ML-018, ver evidence.md): la URL
+# originalmente indicada, https://www.inegi.org.mx/contenidos/masiva/denue/denue_15_csv.zip,
+# devuelve una página 404 de INEGI. El catálogo de descarga masiva publica Edomex
+# 05/2026 en dos ZIP (denue_15_1_csv.zip y denue_15_2_csv.zip); se leen todos los
+# CSV dentro de conjunto_de_datos/ de cada uno. Sus tamaños y hashes los calcula
+# `download` y los guarda en data/manifests/inegi_denue_vigente.json en la primera
+# descarga; el responsable los confirma con Get-FileHash.
+download_url = [
+  { url = "https://www.inegi.org.mx/contenidos/masiva/denue/denue_13_csv.zip", filename = "denue_13_csv.zip", size_bytes = 15059273, sha256 = "d0747958bc364177ea8d281047334cffd4d3505247f43967e08da2ca9c1d9ca5", kind = "data", table = "conjunto_de_datos/denue_inegi_13_.csv", encoding = "latin-1" },
+  { url = "https://www.inegi.org.mx/contenidos/masiva/denue/denue_15_1_csv.zip", filename = "denue_15_1_csv.zip", kind = "data", table = "conjunto_de_datos/*.csv", encoding = "latin-1" },
+  { url = "https://www.inegi.org.mx/contenidos/masiva/denue/denue_15_2_csv.zip", filename = "denue_15_2_csv.zip", kind = "data", table = "conjunto_de_datos/*.csv", encoding = "latin-1" },
+]
+# Hidalgo: 160666 filas en conjunto_de_datos/denue_inegi_13_.csv (M-ML-018).
 variables_used = [
   "id",
-  "clee",
-  "nom_estab",
   "codigo_act",
-  "nombre_act",
   "per_ocu",
-  "latitud",
-  "longitud",
   "cve_ent",
   "cve_mun",
-  "cve_loc",
+  "latitud",
+  "longitud",
+  "fecha_alta",
 ]
 
 [[sources]]
