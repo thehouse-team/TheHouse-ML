@@ -1,5 +1,7 @@
 """Esquema de features compartido con el backend (ML-03 T01, ML-03-R01).
 
+Incluye las features del par (T02) y las restricciones duras (T03).
+
 `feature_schema.json` vive junto a este módulo y se empaqueta con él.
 """
 
@@ -8,6 +10,13 @@ from __future__ import annotations
 from functools import cache
 
 from thehouse_ml.features.campuses import Campus, CampusError, load_campuses
+from thehouse_ml.features.constraints import (
+    ConstraintResult,
+    FilterResult,
+    check_hard_constraints,
+    filter_rooms,
+    implemented_constraints,
+)
 from thehouse_ml.features.loader import (
     SCHEMA_RESOURCE,
     FeatureSchema,
@@ -54,8 +63,10 @@ __all__ = [
     "SCHEMA_RESOURCE",
     "Campus",
     "CampusError",
+    "ConstraintResult",
     "FeatureSchema",
     "FieldSpec",
+    "FilterResult",
     "HardConstraint",
     "IncompleteProfileError",
     "Metadata",
@@ -68,9 +79,12 @@ __all__ = [
     "SchemaError",
     "StudentProfile",
     "ValueRange",
+    "check_hard_constraints",
     "compute_pair_features",
     "default_schema",
     "feature_vector",
+    "filter_rooms",
+    "implemented_constraints",
     "load_campuses",
     "load_schema",
     "parse_schema",

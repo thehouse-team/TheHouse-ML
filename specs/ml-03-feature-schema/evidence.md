@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-03 1.0.0 |
-| Tareas ejecutadas | T01 · Esquema de features (R01); T02 · Cálculo de features de referencia (R02, sección propia abajo) |
+| Tareas ejecutadas | T01 · Esquema de features (R01); T02 · Cálculo de features de referencia (R02) y T03 · Restricciones duras (R03), cada una con sección propia abajo |
 | Autorización T01 | «EJECUTA ML-03 1.0.0, task T01 (ML-03-R01), en la rama feat/ml-03-schema. Rutas permitidas: src/thehouse_ml/, tests/, data/seed/, memoria.md y specs/ml-03-feature-schema/. Sin dependencias nuevas (nada de jsonschema ni pydantic: valida con la biblioteca estándar)» — César Yael López Trujillo, 2026-11-19 |
 | Autorización T01 (ampliación) | Respuestas del responsable a las advertencias 1–5 y autorización para mover el esquema a `src/thehouse_ml/features/` (ubicación de `specs/ARQUITECTURA.md`), actualizar `specs/ARQUITECTURA.md` (ML-03 con 7 tasks y catálogo sintético de cuartos) y `specs/README.md` (ML-03 en ejecución, 1/7); aprueba `backend_status = "ml_only"` y el radio de 6371 km; sin commit — César Yael López Trujillo, 2026-11-19 |
 | Rama (T01) | `feat/ml-03-schema` |
@@ -103,7 +103,7 @@ Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` → 
 | 6 | `distance_km` y `effective_distance_km` con rango 0–30 (dominio del catálogo sintético); el tratamiento fuera de rango lo define T02. | INFORMATIVO | Pasa a T02 |
 | 7 | Ubicación del módulo distinta de `specs/ARQUITECTURA.md` y conteo de 6 tasks. | INFORMATIVO | **RESUELTO** — módulo movido a `src/thehouse_ml/features/`; ARQUITECTURA con 7 tasks y catálogo sintético de cuartos |
 | 8 | `specs/README.md` desactualizado para ML-03. | INFORMATIVO | **RESUELTO** — 🟡 EN EJECUCIÓN, 1/7 |
-| 9 | Avisar al backend (NV-12) de los campos `missing_in_property` del cuarto (spec RK03). | ADVERTENCIA | **ABIERTO — acción pendiente del responsable** (César Yael López Trujillo) |
+| 9 | Avisar al backend (NV-12) de los campos `missing_in_property` del cuarto (spec RK03). | ADVERTENCIA | **RESUELTO (2026-11-19)** — aviso enviado por el responsable; ver «Acción pendiente resuelta» en T03. RK03 sigue abierto hasta que el backend implemente NV-12 |
 | 10 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR de T01 |
 | 11 | Al cambiar ML-03 de 6 a 7 tasks, el total de `specs/ARQUITECTURA.md` §6 pasa de 41 a 42 tasks. | INFORMATIVO | Ajustado por consistencia |
 
@@ -248,7 +248,7 @@ Corrida final, después de aplicar las decisiones de M-ML-023 (esquema 1.1.0), i
 | 4 | La función valida contra los rangos del cuarto que son SUPUESTOS (`bedrooms` 1–10, `bathrooms` 1–6, `area_m2` 6–400): un cuarto real fuera de esos rangos se rechaza aunque esos campos no entren en ninguna feature. | ADVERTENCIA | **RESUELTO (M-ML-023)** — solo tipo y no negativo; los rangos quedan como SUPUESTO del catálogo sintético |
 | 5 | `budget.min`, `maxDistanceKm` y `livingWith` no entran en ninguna de las 7 features (son de HC/ML-04); `livingWith` igual es obligatorio por la regla `reject` del esquema. | INFORMATIVO | Coherente con el esquema |
 | 6 | Las universidades sin verificar (TESJI, UMB-VDC, UCAN) dan distancias orientativas; `Campus.seed_verified` lo conserva, pero la salida de features no lo marca. | INFORMATIVO | Para T06 (métricas con y sin ellas) |
-| 7 | Aviso al backend (NV-12) de los campos `missing_in_property` (hallazgo 9 de T01). | ADVERTENCIA | **ABIERTO — acción pendiente del responsable** |
+| 7 | Aviso al backend (NV-12) de los campos `missing_in_property` (hallazgo 9 de T01). | ADVERTENCIA | **RESUELTO (2026-11-19)** — ver «Acción pendiente resuelta» en T03 |
 | 8 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR de T02 |
 | 9 | Con la fórmula 1.1.0, `price_to_budget` puede valer miles (p. ej. 3000 con presupuesto 0), mientras el esquema mantiene `range` 0–1 para esta feature (válido solo en pares que pasan HC01). No se cambió: queda igual que el hallazgo 3. Si se quiere que todo valor calculado cumpla su `range`, la opción análoga a la de la distancia sería `max: null` con `training_range` [0, 1]. | INFORMATIVO | **RESUELTO (M-ML-023)** — dentro de 1.1.0 (sin publicar): `range` `{"min": 0, "max": null}` y `training_range` [0, 1]; prueba de que 3000.0 es válido y queda fuera de `training_range` |
 | 10 | Revisión del resto de las features: `services_coverage` (0–1) es una proporción de un subconjunto, así que no puede salir de [0, 1]; `place_type_match`, `property_type_match` y `pets_compatible` solo valen 0 o 1. Ninguna otra feature puede rebasar su `range`. Los mínimos en 0 se cumplen porque las distancias, la renta y `max(budget.max, 1)` no son negativos (entradas validadas). | INFORMATIVO | Verificado con pruebas: todo valor de la tabla cumple su `range` |
@@ -257,3 +257,128 @@ Corrida final, después de aplicar las decisiones de M-ML-023 (esquema 1.1.0), i
 
 - **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas. Los casos por tabla son sintéticos; las coordenadas de campus vienen de `data/universities.csv` (ODbL, registrado en M-ML-016/M-ML-017).
 - **Resultado:** **PASS WITH WARNINGS** — la aceptación de R02 se cumple (función pura con casos límite: presupuesto exacto, distancia 0, sin servicios, y el resto de la tabla) y los cuatro controles pasan. Los hallazgos 1, 2, 3, 4 y 9 se resolvieron con M-ML-023 (esquema 1.1.0). Única advertencia abierta: el aviso al backend (NV-12, hallazgo 7), acción pendiente del responsable.
+
+## T03 · Restricciones duras
+
+| Campo | Valor |
+| --- | --- |
+| Autorización T03 | «EJECUTA ML-03 1.0.0, task T03 (ML-03-R03), en la rama feat/ml-03-constraints. Rutas permitidas: src/thehouse_ml/features/, tests/, memoria.md, specs/ml-03-feature-schema/ y specs/README.md (solo la fila de ML-03). Sin dependencias nuevas. No modifiques feature_schema.json (1.1.0); si hace falta un cambio, repórtamelo como hallazgo» — César Yael López Trujillo, 2026-11-19 |
+| Rama | `feat/ml-03-constraints` |
+| Commit base | `ed927b3` (merge del PR #17, T02) |
+| Commit (T03) | Sin commit, por instrucción explícita del responsable |
+| Fecha de ejecución | 2026-11-19 |
+| Decisión | M-ML-024 (APROBADO — César Yael López Trujillo, 2026-11-19) |
+| Esquema | `feature_schema.json` **1.1.0, sin cambios** |
+
+Lecturas previas: `constitution.md` (§11) → `AGENTS.md` → `memoria.md` (M-ML-021 a M-ML-023) → `spec.md`, `plan.md`, `task.md` y `evidence.md` de ML-03 → `src/thehouse_ml/features/` (`feature_schema.json`, `loader.py` y `pairs.py`).
+
+### Qué se hizo
+
+1. **`src/thehouse_ml/features/constraints.py`** — implementación de referencia, pura (sin I/O, sin red, sin aleatoriedad):
+   - `check_hard_constraints(student: StudentProfile, room: Room, schema: FeatureSchema | None = None) -> ConstraintResult`. Primero `resolve_student` (la misma de `compute_pair_features`: reglas para faltantes y validación; quick setup incompleto → `IncompleteProfileError`) y `validate_room`; después evalúa **las restricciones de `hard_constraints` del esquema, en su orden**.
+   - `ConstraintResult(allowed: bool, violated: tuple[str, ...])`: `violated` lista **todas** las restricciones violadas, en el orden del esquema.
+   - `filter_rooms(student: StudentProfile, rooms: Iterable[Room], schema: FeatureSchema | None = None) -> FilterResult`, con `FilterResult(allowed: tuple[Room, ...], exclusions: Mapping[str, int], excluded: int)`: resuelve el perfil una vez, conserva el orden de los cuartos y cuenta exclusiones por id (todas las del esquema, con 0 si no excluyen; un cuarto con varias violaciones cuenta en cada una).
+   - Cada id del esquema se liga a un predicado (`HC01_budget`, `HC02_living_with`, `HC03_pets`); si el esquema trae un id sin implementación, ambas funciones lanzan `PairInputError`. `implemented_constraints()` expone los ids implementados.
+   - La distancia **no** es restricción dura (M-ML-023): no se evalúa aquí.
+2. **`tests/fixtures/hard_constraint_cases.json`** — 27 casos por tabla (esquema 1.1.0), entradas **sintéticas** y salidas escritas a mano (el generador quedó en el scratchpad de la sesión, fuera del repo, con las salidas como literales). Nota en `tests/fixtures/README.md`.
+3. **`tests/unit/test_hard_constraints.py`** — 49 pruebas nuevas (27 de la tabla y 22 de reglas, filtro, coherencia con T02, privacidad y pureza).
+4. **`src/thehouse_ml/features/__init__.py`** — exporta `ConstraintResult`, `FilterResult`, `check_hard_constraints`, `filter_rooms` e `implemented_constraints`.
+5. **Documentos** — M-ML-024 (APROBADO) en `memoria.md`; T03 marcada en `task.md`; `spec.md` §14 con 3 tasks completadas; fila de ML-03 en `specs/README.md` (3/7).
+
+### Restricciones del esquema contra la implementación
+
+| Id | `excludes_when` del esquema | Implementación | Diferencia |
+| --- | --- | --- | --- |
+| `HC01_budget` | `room.price_mxn > student.budget.max` | `room.price_mxn > student.budget_max` (renta igual al presupuesto pasa) | Ninguna |
+| `HC02_living_with` | `student.livingWith != "any" and room.livingWith != student.livingWith` | Igual | Ninguna |
+| `HC03_pets` | `student.pets = true and room.pets_allowed = false` | `student.pets and not room.pets_allowed` (pets nulo → `false`) | Ninguna |
+
+### `livingWith`: 9 combinaciones (spec §7 regla 3)
+
+| Estudiante ↓ / Cuarto → | `women` | `men` | `any` |
+| --- | --- | --- | --- |
+| `any` | pasa | pasa | pasa |
+| `women` | pasa | excluye (HC02) | excluye (HC02) |
+| `men` | excluye (HC02) | pasa | excluye (HC02) |
+
+### Casos por tabla
+
+| Escenario pedido | Casos (`id`) |
+| --- | --- |
+| Renta < = > presupuesto | `budget_rent_below` (3999), `budget_rent_equal` (4000, pasa), `budget_rent_above` (4001, HC01); además `budget_max_zero_rent_zero` (pasa) y `budget_max_zero_rent_one` (HC01) |
+| 9 combinaciones de `livingWith` | `living_with_student_{any,women,men}_room_{women,men,any}` |
+| 4 combinaciones de mascotas | `pets_student_{false,true}_room_{false,true}` |
+| `pets` nulo (regla para faltantes → `false`) | `pets_null_room_false` (pasa) |
+| Varias violadas a la vez | `violates_budget_and_pets`, `violates_living_with_and_pets`, `violates_all_three` |
+| Distancia no es restricción dura | `distance_over_max_and_30_km_not_excluded` (40.03 km con `maxDistanceKm` 5: pasa) |
+| Quick setup incompleto | `incomplete_budget_max`, `incomplete_livingWith`, `incomplete_placeType`, `incomplete_all_quick_setup` (`IncompleteProfileError`) |
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `98 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 24 source files` (PASS) |
+| `uv run pytest --cov=thehouse_ml` | **525 passed**; cobertura total **94.43 %** ≥ 80 %; `features/constraints.py` **100 %** (54 sentencias, 8 ramas); `pairs.py`, `loader.py`, `campuses.py` y `__init__.py` siguen en 100 % (PASS) |
+
+### Trazabilidad R03 → prueba
+
+| Criterio | Prueba (`tests/unit/test_hard_constraints.py`) |
+| --- | --- |
+| Casos por tabla (27) | `::test_table_case[*]` |
+| La tabla cubre todos los escenarios pedidos; metadatos = esquema | `::test_the_table_covers_every_requested_scenario`, `::test_the_table_metadata_matches_the_schema` |
+| HC01: renta igual pasa, un peso más excluye | `::test_rent_equal_to_budget_passes_and_one_peso_more_is_excluded` |
+| HC02: matriz 3 × 3 de la spec | `::test_living_with_matrix_of_the_spec` |
+| HC03 con `pets` nulo según la regla del esquema | `::test_null_pets_follows_the_missing_rule_of_the_schema` |
+| Todas las violadas, en el orden del esquema | `::test_every_violated_constraint_is_reported_in_schema_order` |
+| Restricciones leídas del esquema, no del código | `::test_constraints_are_read_from_the_schema`, `::test_every_schema_constraint_has_an_implementation`, `::test_the_implemented_rules_are_the_ones_written_in_the_schema` |
+| Restricción sin implementación → falla | `::test_a_schema_constraint_without_implementation_fails` |
+| Una sola implementación de las reglas para faltantes (T02) | `::test_missing_rules_are_the_single_implementation_of_t02`, `::test_invalid_inputs_are_rejected_like_in_t02` |
+| Filtro: permitidos y exclusiones por id | `::test_filter_returns_allowed_rooms_in_order_and_exclusions_per_constraint`, `::test_filter_agrees_with_the_pair_function`, `::test_filter_with_no_rooms_reports_zero_for_every_constraint`, `::test_filter_with_incomplete_profile_raises_the_t02_error` |
+| La distancia no es restricción dura | `::test_distance_is_not_a_hard_constraint` |
+| Coherencia con T02 (casos que pasan: `price_to_budget ≤ 1` y `pets_compatible = 1`) | `::test_pairs_that_pass_the_constraints_have_price_to_budget_at_most_one_and_compatible_pets` (≥ 20 casos de `pair_feature_cases.json`), `::test_pair_cases_excluded_by_t02_signals_violate_the_matching_constraint` |
+| Privacidad: sin campo de género; HC02 solo usa `livingWith` | `::test_no_gender_field_exists_in_the_profile_or_is_used_by_the_constraints` |
+| Pureza | `::test_the_constraints_module_has_no_io_or_randomness`, `::test_the_function_is_deterministic_and_does_not_mutate_inputs` |
+
+### Acción pendiente resuelta
+
+| Acción | Estado |
+| --- | --- |
+| Aviso a TheHouse-Backend sobre los campos que faltan en Property (lat/lon, placeType, propertyType, pets_allowed, livingWith y servicios del catálogo de NV-11) y sobre las correcciones de `reports/universities_check.md` | **RESUELTA** — enviado por César Yael López Trujillo por WhatsApp el 2026-11-19 a las 12:33 y recibido a las 12:35. NV-12 queda como responsabilidad del backend (riesgo RK03 sigue abierto hasta que el backend lo implemente). Cierra el hallazgo 9 de T01 y el 7 de T02 |
+
+### Tabla de coherencia
+
+| Regla | Evidencia | Resultado |
+| --- | --- | --- |
+| Constitution §11.1: `livingWith` y presupuesto como restricciones duras | `HC01_budget` y `HC02_living_with` excluyen el cuarto; `HC03_pets` también | PASS |
+| Constitution §11.2: sin género como señal; solo en `livingWith` que elige el estudiante | Sin campo de género en `StudentProfile`, `ResolvedStudent` ni el esquema; HC02 solo compara `livingWith` (prueba) | PASS |
+| Constitution §2.4 / §13: el contrato es `feature_schema.json` | Las restricciones y su orden se leen del esquema; el texto `excludes_when` está fijado por prueba | PASS |
+| Constitution §13.4: casos dorados para el backend | `hard_constraint_cases.json` listo para ML-06; la paridad no se ejecuta en T03 | No ejecutado (ML-06) |
+| Constitution §5 / AGENTS: sin dependencias nuevas | Solo biblioteca estándar; `pyproject.toml` y `uv.lock` sin cambios | PASS |
+| Constitution §8: datos sintéticos etiquetados | `metadata.synthetic: true` en `hard_constraint_cases.json` | PASS |
+| Spec §7 regla 2: una sola implementación | `resolve_student` y `validate_room` de T02 reutilizadas (prueba de identidad) | PASS |
+| M-ML-023: la distancia no es restricción dura | Caso `distance_over_max_and_30_km_not_excluded` y prueba del filtro | PASS |
+| `feature_schema.json` sin cambios | `git status` no lo lista | PASS |
+| AGENTS: rutas permitidas | `git status` solo lista `src/thehouse_ml/features/`, `tests/`, `memoria.md`, `specs/ml-03-feature-schema/` y la fila de ML-03 en `specs/README.md` | PASS |
+| AGENTS: un control no ejecutado no se reporta como PASS | T04–T07 abiertas; la paridad ONNX y la prueba de ≥ 90 % (T06) no se reportan | PASS |
+
+### Hallazgos
+
+| # | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| 1 | No hace falta cambiar `feature_schema.json`: las tres restricciones del esquema coinciden con lo pedido en el «EJECUTA». | INFORMATIVO | Esquema 1.1.0 sin cambios |
+| 2 | El esquema define cada restricción con texto (`excludes_when`), no con una expresión ejecutable; el código liga cada id a su predicado. Un cambio del texto con el mismo id no se detectaría solo. | ADVERTENCIA | **Mitigado** — `test_the_implemented_rules_are_the_ones_written_in_the_schema` fija el texto de las tres; si cambia, la prueba falla y obliga a revisar el código |
+| 3 | Por la regla aprobada (spec §7 regla 3 y §10), un estudiante `women` o `men` excluye los cuartos `any`: solo ve cuartos con su misma política. Esto reduce los cuartos compatibles de esos estudiantes y afecta el umbral de ≥ 90 % de T06 según las distribuciones de `livingWith` de T04 y T05. | INFORMATIVO | Para T04–T06: ver «Nota para T05» |
+| 4 | La implicación con T02 va en un solo sentido: si el par pasa HC01, `price_to_budget ≤ 1`; pero `price_to_budget = 1` no implica que pase (presupuesto 0 y renta 1 → 1 / max(0, 1) = 1, y HC01 lo excluye; caso `budget_max_zero_rent_one`). No afecta el `training_range` [0, 1] de 1.1.0. | INFORMATIVO | Documentado; sin cambio |
+| 5 | Decisiones de implementación nuevas (API, `FilterResult`, error para ids sin implementación, conteo de exclusiones con varias violaciones). | ADVERTENCIA | **RESUELTO** — M-ML-024 APROBADO por César Yael López Trujillo (2026-11-19) |
+| 6 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR de T03 |
+
+### Revisión y resultado
+
+- **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas. Los casos por tabla son sintéticos; las coordenadas de UTTT vienen de `data/universities.csv` (ODbL, M-ML-016/M-ML-017).
+- **Resultado:** **PASS** — la aceptación de R03 se cumple (los pares que violan presupuesto, `livingWith` o mascotas se excluyen; pruebas por cada regla), los cuatro controles pasan y M-ML-024 quedó APROBADO (hallazgo 5 resuelto). El hallazgo 2 queda mitigado con prueba. El aviso al backend quedó resuelto; RK03 sigue abierto hasta que el backend implemente NV-12 (riesgo de la spec, no bloquea T03).
+
+### Nota para T05
+
+La distribución de `livingWith` de los cuartos debe incluir suficientes cuartos `women` y `men` para que se cumpla el umbral de ≥ 90 % de T06, porque los estudiantes `women` y `men` no ven cuartos `any` (HC02). Origen: hallazgo 3 de T03; M-ML-024.

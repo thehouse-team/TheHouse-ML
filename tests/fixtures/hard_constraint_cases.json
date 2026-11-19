@@ -1,0 +1,1209 @@
+{
+  "metadata": {
+    "description": "Casos por tabla de las restricciones duras (ML-03 T03, ML-03-R03). Candidatos a casos dorados del backend (ML-06).",
+    "spec": "ML-03 1.0.0",
+    "schema_version": "1.1.0",
+    "synthetic": true,
+    "conventions": "Nombres de campo del esquema; una clave ausente en student equivale a nulo. expected.violated lista todas las restricciones violadas en el orden de hard_constraints del esquema. Las salidas esperadas se escribieron a mano.",
+    "hard_constraints": [
+      "HC01_budget",
+      "HC02_living_with",
+      "HC03_pets"
+    ],
+    "campuses": {
+      "UTTT": {
+        "lat": 20.0084106,
+        "lon": -99.3449608,
+        "source": "data/universities.csv (final_lat, final_lon)"
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "budget_rent_below",
+      "description": "Renta 3999 < budget.max 4000: pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3999,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "budget_rent_equal",
+      "description": "Renta 4000 = budget.max 4000: pasa (solo excluye >).",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 4000,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "budget_rent_above",
+      "description": "Renta 4001 > budget.max 4000: viola HC01.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 4001,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": false,
+        "violated": [
+          "HC01_budget"
+        ]
+      }
+    },
+    {
+      "id": "budget_max_zero_rent_zero",
+      "description": "budget.max 0 y renta 0: pasa (0 > 0 es falso).",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 0,
+          "budget.max": 0,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 0,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "budget_max_zero_rent_one",
+      "description": "budget.max 0 y renta 1: viola HC01.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 0,
+          "budget.max": 0,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 1,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": false,
+        "violated": [
+          "HC01_budget"
+        ]
+      }
+    },
+    {
+      "id": "living_with_student_any_room_women",
+      "description": "Estudiante livingWith=any, cuarto livingWith=women: pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "women",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "living_with_student_any_room_men",
+      "description": "Estudiante livingWith=any, cuarto livingWith=men: pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "men",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "living_with_student_any_room_any",
+      "description": "Estudiante livingWith=any, cuarto livingWith=any: pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "living_with_student_women_room_women",
+      "description": "Estudiante livingWith=women, cuarto livingWith=women: pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "women",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "women",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "living_with_student_women_room_men",
+      "description": "Estudiante livingWith=women, cuarto livingWith=men: viola HC02.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "women",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "men",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": false,
+        "violated": [
+          "HC02_living_with"
+        ]
+      }
+    },
+    {
+      "id": "living_with_student_women_room_any",
+      "description": "Estudiante livingWith=women, cuarto livingWith=any: viola HC02.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "women",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": false,
+        "violated": [
+          "HC02_living_with"
+        ]
+      }
+    },
+    {
+      "id": "living_with_student_men_room_women",
+      "description": "Estudiante livingWith=men, cuarto livingWith=women: viola HC02.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "men",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "women",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": false,
+        "violated": [
+          "HC02_living_with"
+        ]
+      }
+    },
+    {
+      "id": "living_with_student_men_room_men",
+      "description": "Estudiante livingWith=men, cuarto livingWith=men: pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "men",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "men",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "living_with_student_men_room_any",
+      "description": "Estudiante livingWith=men, cuarto livingWith=any: viola HC02.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "men",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": false,
+        "violated": [
+          "HC02_living_with"
+        ]
+      }
+    },
+    {
+      "id": "pets_student_false_room_false",
+      "description": "Estudiante pets=false, cuarto pets_allowed=false: pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "pets_student_false_room_true",
+      "description": "Estudiante pets=false, cuarto pets_allowed=true: pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "pets_student_true_room_false",
+      "description": "Estudiante pets=true, cuarto pets_allowed=false: viola HC03.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": true,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": false,
+        "violated": [
+          "HC03_pets"
+        ]
+      }
+    },
+    {
+      "id": "pets_student_true_room_true",
+      "description": "Estudiante pets=true, cuarto pets_allowed=true: pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": true,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "pets_null_room_false",
+      "description": "Estudiante pets nulo (regla para faltantes: false) y cuarto sin mascotas: pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "violates_budget_and_pets",
+      "description": "Renta 5000 > 4000 y mascota no admitida: HC01 y HC03.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": true,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 5000,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": false,
+        "violated": [
+          "HC01_budget",
+          "HC03_pets"
+        ]
+      }
+    },
+    {
+      "id": "violates_living_with_and_pets",
+      "description": "Estudiante men, cuarto women, mascota no admitida: HC02 y HC03.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "men",
+          "placeType": "room",
+          "pets": true,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "women",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": false,
+        "violated": [
+          "HC02_living_with",
+          "HC03_pets"
+        ]
+      }
+    },
+    {
+      "id": "violates_all_three",
+      "description": "Renta 4500 > 4000, estudiante women y cuarto any, mascota no admitida: las tres.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "women",
+          "placeType": "room",
+          "pets": true,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 4500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": false,
+        "violated": [
+          "HC01_budget",
+          "HC02_living_with",
+          "HC03_pets"
+        ]
+      }
+    },
+    {
+      "id": "distance_over_max_and_30_km_not_excluded",
+      "description": "Cuarto a 40.03 km (> maxDistanceKm 5 y > 30 km): la distancia no es restricción dura, pasa.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 5,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.3684106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "allowed": true,
+        "violated": []
+      }
+    },
+    {
+      "id": "incomplete_budget_max",
+      "description": "Falta budget.max del quick setup: IncompleteProfileError.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected_error": {
+        "type": "IncompleteProfileError",
+        "missing": [
+          "budget.max"
+        ]
+      }
+    },
+    {
+      "id": "incomplete_livingWith",
+      "description": "Falta livingWith del quick setup: IncompleteProfileError.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected_error": {
+        "type": "IncompleteProfileError",
+        "missing": [
+          "livingWith"
+        ]
+      }
+    },
+    {
+      "id": "incomplete_placeType",
+      "description": "Falta placeType del quick setup: IncompleteProfileError.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "livingWith": "any",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected_error": {
+        "type": "IncompleteProfileError",
+        "missing": [
+          "placeType"
+        ]
+      }
+    },
+    {
+      "id": "incomplete_all_quick_setup",
+      "description": "Faltan budget.max, livingWith y placeType: IncompleteProfileError con los tres.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi"
+          ],
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": true,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected_error": {
+        "type": "IncompleteProfileError",
+        "missing": [
+          "budget.max",
+          "livingWith",
+          "placeType"
+        ]
+      }
+    }
+  ]
+}
