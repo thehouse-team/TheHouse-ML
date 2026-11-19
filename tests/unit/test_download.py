@@ -102,6 +102,22 @@ def test_source_with_empty_download_url_is_skipped(tmp_path: Path) -> None:
     assert not manifest_path(paths, "sin_url").exists()
 
 
+def test_discarded_source_is_skipped_without_fetching(tmp_path: Path) -> None:
+    paths = _paths(tmp_path)
+    source = make_source("inside_airbnb", ("room_type",), status="discarded", reference="M-ML-019")
+
+    def forbidden_fetch(_url: str, _destination: Path) -> None:
+        raise AssertionError("Una fuente descartada no debe descargarse")
+
+    outcome = download_source(source, paths, forbidden_fetch)
+
+    assert outcome.status == "omitida"
+    assert outcome.message == "descartada: M-ML-019"
+    assert outcome.render() == "inside_airbnb: omitida - descartada: M-ML-019"
+    assert not manifest_path(paths, "inside_airbnb").exists()
+    assert not (paths.data_raw / "inside_airbnb").exists()
+
+
 def test_download_all_uses_the_registry_and_rejects_unknown_sources(tmp_path: Path) -> None:
     import shutil
 

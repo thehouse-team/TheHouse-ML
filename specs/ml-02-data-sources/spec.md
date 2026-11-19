@@ -8,27 +8,27 @@
 | Fecha | 2026-11-12 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-12 (M-ML-012): aprueba ML-02 1.0.1 |
-| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T05 y T07 completas; T06, T08, T09 sin ejecutar** |
+| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T05 y T07 completas; T06 DESCARTADA (M-ML-019); T08, T09 sin ejecutar** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.1 |
 | Tasks | `task.md` 1.0.1 |
 | Precondición | ML-01 completa; fuentes de M-ML-003 aprobadas |
 | Relación con el backend | Verifica las coordenadas de las 10 universidades del seed de NV-11 (3 están aproximadas al centro del municipio) y entrega las correcciones |
 
-Spec aprobada (1.0.1, M-ML-012). No autoriza código ni descargas hasta recibir «EJECUTA» con tasks y rutas. T03 se ejecutó el 2026-11-17 bajo M-ML-014, T04 el 2026-11-17 bajo M-ML-015 y T07 el 2026-11-17 bajo M-ML-016 (antes que T05, porque T05 necesita coordenadas verificadas); la T05 se ejecutó el 2026-11-18 bajo M-ML-018. Las tasks T06, T08 y T09 siguen sin autorización de ejecución.
+Spec aprobada (1.0.1, M-ML-012). No autoriza código ni descargas hasta recibir «EJECUTA» con tasks y rutas. T03 se ejecutó el 2026-11-17 bajo M-ML-014, T04 el 2026-11-17 bajo M-ML-015 y T07 el 2026-11-17 bajo M-ML-016 (antes que T05, porque T05 necesita coordenadas verificadas); la T05 se ejecutó el 2026-11-18 bajo M-ML-018. La T06 quedó **DESCARTADA** el 2026-11-18 por M-ML-019 (Inside Airbnb no se descarga ni se verifica); las tasks T08 y T09 siguen sin autorización de ejecución.
 
 ## 1. Contexto
 
-No existe un dataset público de estudiantes buscando cuarto en México, y las encuestas tienen pocas viviendas por municipio. Por eso los datos se trabajan en dos niveles: **nacional** (INEGI) para obtener bases y proporciones con muestra suficiente, y **regional** para calibrarlas a los 7 municipios de las universidades del seed (Hidalgo: Tula de Allende, Tepeji del Río de Ocampo, Tlahuelilpan, Atotonilco de Tula y Mixquiahuala de Juárez; Estado de México: Jilotepec y Villa del Carbón). INEGI describe hogares y viviendas, no cuartos; los atributos a nivel cuarto (servicios, tipo de cuarto) vienen de Inside Airbnb Ciudad de México, y más adelante de los cuartos reales de la app (ML-07).
+No existe un dataset público de estudiantes buscando cuarto en México, y las encuestas tienen pocas viviendas por municipio. Por eso los datos se trabajan en dos niveles: **nacional** (INEGI) para obtener bases y proporciones con muestra suficiente, y **regional** para calibrarlas a los 7 municipios de las universidades del seed (Hidalgo: Tula de Allende, Tepeji del Río de Ocampo, Tlahuelilpan, Atotonilco de Tula y Mixquiahuala de Juárez; Estado de México: Jilotepec y Villa del Carbón). INEGI describe hogares y viviendas, no cuartos. Inside Airbnb quedó **descartado** (M-ML-019), así que el catálogo de cuartos se generará **sintético en ML-03** con distribuciones documentadas, calibrado con INEGI y etiquetado como sintético; más adelante se contrastará con los cuartos reales de la app (ML-07).
 
 ## 2. Objetivo
 
-Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servicios de vivienda; (2) su calibración a la región; (3) un catálogo de cuartos sin datos personales mapeado a los catálogos de NV-11; (4) el entorno de cada universidad (DENUE); y (5) las coordenadas verificadas de las 10 universidades.
+Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servicios de vivienda; (2) su calibración a la región; (3) las bases para el catálogo **sintético** de cuartos de ML-03, sin datos personales y mapeado a los catálogos de NV-11 (M-ML-019); (4) el entorno de cada universidad (DENUE); y (5) las coordenadas verificadas de las 10 universidades.
 
 ## 3. Precondiciones
 
 1. ML-01 completa.
-2. Fuentes y licencias registradas como APROBADO en M-ML-003 (términos de libre uso de INEGI, Inside Airbnb, OpenStreetMap).
+2. Fuentes y licencias registradas como APROBADO en M-ML-003 (términos de libre uso de INEGI y OpenStreetMap). Inside Airbnb quedó DESCARTADO por M-ML-019 y no se descarga.
 3. Variables confirmadas en los diccionarios oficiales antes de escribir código; las del Censo 2020 ya se confirmaron (§10).
 4. Autorización «EJECUTA».
 
@@ -39,7 +39,7 @@ Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servi
 3. Bases nacionales (INEGI): Censo de Población y Vivienda 2020, muestra del cuestionario ampliado (`Viviendas_CA`: `TENENCIA`, servicios, `FACTOR` y `MUN`), que **no** pregunta el monto de renta; Encuesta Nacional de Vivienda (ENVI) 2020 como fuente del monto y motivo de renta; ENIGH 2022 solo como validación del gasto en vivienda de inquilinos.
 4. Calibración regional: estimaciones de los 7 municipios (Hidalgo: Tula de Allende, Tepeji del Río de Ocampo, Tlahuelilpan, Atotonilco de Tula y Mixquiahuala de Juárez; Estado de México: Jilotepec y Villa del Carbón) con respaldo jerárquico municipio → estado → nacional cuando la muestra no alcanza.
 5. Entorno de las universidades: conteos del DENUE por categoría SCIAN (abarrotes, lavanderías, farmacias, papelerías, transporte, comida) en radios de 1, 2 y 5 km de cada campus.
-6. Catálogo de cuartos: Inside Airbnb Ciudad de México (una instantánea) para atributos a nivel cuarto, sin datos personales y mapeado a NV-11.
+6. Catálogo de cuartos: **DESCARTADA la T06** (M-ML-019). No se usa Inside Airbnb. ML-03 generará el catálogo de cuartos de forma sintética, calibrado con ENVI 2020/ENIGH 2022 (renta), Censo 2020 (servicios) y DENUE (entorno), sin datos personales, mapeado a NV-11 y etiquetado como sintético (constitution §8).
 7. Universidades: verificación contra OpenStreetMap de las coordenadas del seed de NV-11, con prioridad en las 3 aproximadas (UAEH-ESTL, UMB-VDC, UCAN).
 8. Data card con fuentes, licencias, atribuciones, ponderación, transformaciones, tamaños de muestra y limitaciones.
 
@@ -58,8 +58,8 @@ Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servi
 - **Actualización de montos:** las rentas de 2020 se llevan a pesos del año de ejecución con el INPC de INEGI; el índice y la fecha quedan en el manifiesto.
 - **Calibración regional (salida `regional_calibration.parquet`):** para los 7 municipios, proporción de viviendas rentadas y servicios desde el Censo (nivel municipal con respaldo); el monto de renta solo existe a nivel estatal (ENVI: Hidalgo y Estado de México), así que la renta regional usa la forma nacional reescalada a la mediana estatal y se contrasta con el seed de TheHouse. Cada valor guarda su nivel.
 - **Entorno DENUE (salida `campus_context.parquet`):** conteos por categoría y radio para cada universidad; alimenta el factor de extras en ML-03.
-- **Cuartos (salida `rooms.parquet`):** columnas conservadas de Inside Airbnb `room_type`, `property_type`, `accommodates`, `bedrooms`, `bathrooms_text`, `amenities`, `price`, `latitude`, `longitude`; se eliminan nombres, descripciones, URLs, fotos y todo dato del anfitrión; coordenadas redondeadas a 3 decimales; precio por noche convertido a percentil dentro de su tipo y luego a renta mensual con la calibración regional (nunca se usa el precio por noche como renta).
-- Mapeo de `amenities` al catálogo de NV-11 (`wifi`, `water`, `electricity`, `gas`, `hot_water`, `laundry`, `kitchen`, `furnished`, `parking`, `security`, `cleaning`) y de `room_type`/`property_type` a `placeType` y `propertyTypes`; tablas de mapeo versionadas en `src/thehouse_ml/data/mappings/`.
+- **Cuartos (salida `rooms.parquet`): DESCARTADA la T06 (M-ML-019).** No se descarga Inside Airbnb ni se produce este Parquet en ML-02. ML-03 generará un catálogo **sintético** de cuartos con semilla fija, distribuciones documentadas y catálogos cerrados de NV-11; la renta mensual se calibrará con `national_baselines.parquet` y `regional_calibration.parquet`, los servicios con el Censo 2020 y el entorno con `campus_context.parquet`. Todo resultado se etiquetará como sintético (constitution §8) y nunca se presentará como desempeño real.
+- **Nota para ML-03:** el mapeo de servicios al catálogo de NV-11 (`wifi`, `water`, `electricity`, `gas`, `hot_water`, `laundry`, `kitchen`, `furnished`, `parking`, `security`, `cleaning`) y de `room_type`/`property_type` a `placeType` y `propertyTypes` se define en ML-03 sobre el catálogo sintético; las tablas de mapeo versionadas viven en `src/thehouse_ml/data/mappings/`. En ML-02 no se leen ni se guardan datos de anfitriones.
 - **Universidades (salida `universities.csv`, en git):** código del seed, latitud, longitud, id del elemento OSM, fuente y fecha de verificación; diferencias mayores a 200 m respecto al seed se reportan para corregir NV-11.
 - Todas las salidas en `data/processed/` (fuera de git) salvo `universities.csv`, `sources.toml`, manifiestos y tablas de mapeo.
 
@@ -72,7 +72,7 @@ Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servi
 | ENIGH 2022 | INEGI | Validación del gasto en renta de inquilinos (no el alquiler imputado a propietarios) | Nacional, estatal | Términos de libre uso de INEGI |
 | DENUE (edición vigente) | INEGI | Establecimientos con coordenadas alrededor de cada campus | Hasta localidad | Términos de libre uso de INEGI |
 | INPC | INEGI | Actualizar montos de 2020 a pesos del año de ejecución | Nacional | Términos de libre uso de INEGI |
-| Inside Airbnb, Ciudad de México (instantánea 2026-09-23, `listings.csv.gz`) | Inside Airbnb | Atributos a nivel cuarto | Ciudad | CC BY 4.0, verificada el 2026-11-10; cita formal de dataset, una descarga, sin scraping ni republicar |
+| ~~Inside Airbnb, Ciudad de México (instantánea 2026-09-23, `listings.csv.gz`)~~ | Inside Airbnb | **DESCARTADA (M-ML-019)**: no cubre los 7 municipios, mide renta turística por noche y trae datos personales; el catálogo será sintético en ML-03 | — | CC BY 4.0 verificada, pero sin uso: no se descarga ni se verifica |
 | OpenStreetMap | Colaboradores de OSM | Verificar coordenadas de campus | Punto | ODbL: atribución y misma licencia para bases derivadas |
 | Seed de TheHouse (NV-07, NV-08, NV-11) | Propio | Universidades, rangos de referencia | Región | Propio |
 
@@ -85,7 +85,7 @@ Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servi
 | Bases nacionales | `data/processed/national_baselines.parquet` | No | Prueba de esquema, percentiles ordenados (p10 ≤ … ≤ p90), proporciones entre 0 y 1 |
 | Calibración regional | `data/processed/regional_calibration.parquet` | No | 7 municipios presentes, cada valor con su nivel de respaldo |
 | Entorno de campus | `data/processed/campus_context.parquet` | No | 10 universidades × 3 radios, conteos no negativos y crecientes con el radio |
-| Catálogo de cuartos | `data/processed/rooms.parquet` | No | Sin columnas prohibidas, catálogos cerrados de NV-11, rentas dentro del rango regional |
+| ~~Catálogo de cuartos~~ | ~~`data/processed/rooms.parquet`~~ | No | **DESCARTADA (M-ML-019)**: no se descarga ni se produce; se traslada a ML-03 como catálogo sintético etiquetado como tal |
 | Universidades verificadas | `data/universities.csv` | Sí | 10 filas con id OSM; diferencias > 200 m reportadas |
 | Data card | `reports/data_card.md` | Sí | Fuentes, atribuciones, ponderación, tamaños de muestra y limitaciones |
 
@@ -103,8 +103,8 @@ Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servi
 
 - Ningún dato crudo o procesado entra a git; solo agregados, manifiestos y tablas de mapeo.
 - Los microdatos públicos de INEGI son anónimos; aun así no se publican celdas con menos de 30 viviendas.
-- Atribución a INEGI, Inside Airbnb (CC BY 4.0) y OpenStreetMap (ODbL) en la data card y el README.
-- Se respeta la política de Inside Airbnb: una descarga, sin scraping del sitio.
+- Atribución a INEGI y OpenStreetMap (ODbL) en la data card y el README. Inside Airbnb no se usa (M-ML-019), por lo que no se descarga, se verifica ni se atribuye como fuente de datos.
+- Sin scraping: la única fuente bajo demanda es OpenStreetMap/Nominatim, con sus 10 consultas autorizadas (M-ML-016).
 
 ## 9. Requisitos verificables
 
@@ -115,7 +115,7 @@ Obtener con licencia verificada: (1) bases nacionales de renta, tenencia y servi
 | ML-02-R03 | Bases nacionales ponderadas | `national_baselines.parquet` con percentiles de renta, proporción de renta y servicios ponderados con el factor de expansión y actualizados con el INPC; pruebas de esquema y de orden de percentiles. | F2 | T03 |
 | ML-02-R04 | Calibración regional con respaldo | `regional_calibration.parquet` con los 7 municipios; cada indicador indica si salió del municipio, del estado o del país según la regla de suficiencia; prueba de la regla. | F2 | T04 |
 | ML-02-R05 | Entorno de campus | `campus_context.parquet` con conteos del DENUE por categoría SCIAN para las 10 universidades en radios de 1, 2 y 5 km; prueba de consistencia de radios. | F2 | T05 |
-| ML-02-R06 | Catálogo de cuartos sin datos personales | `rooms.parquet` sin columnas prohibidas (prueba automática), con coordenadas redondeadas, servicios y tipos mapeados a NV-11 y renta mensual calibrada; los valores no mapeados se cuentan y se reportan. | F2 | T06 |
+| ML-02-R06 | Inside Airbnb descartado (M-ML-019) | `data/sources.toml` marca la fuente con `variables_status = "discarded"` y `status_reference = "M-ML-019"`, sin la URL no verificada de `listings.csv.gz`; `download` la omite con el aviso `descartada: M-ML-019` sin descargarla ni verificarla, y `reports/variables_check.md` la muestra como descartada conservando las demás secciones. No se produce `rooms.parquet`: el catálogo sintético de cuartos, sin datos personales y etiquetado como sintético, se define en ML-03. | F2 | T06 (DESCARTADA) |
 | ML-02-R07 | Universidades verificadas | `data/universities.csv` con las 10 universidades, id OSM y fecha de verificación; las 3 aproximadas revisadas; diferencias mayores a 200 m reportadas para el backend. | F3 | T07 |
 | ML-02-R08 | Data card | `reports/data_card.md` con fuentes, licencias, atribuciones, ponderación, niveles de respaldo, tamaños de muestra, histogramas y limitaciones. | F3 | T08 |
 | ML-02-R09 | Pruebas y evidencia | Pruebas unitarias e integración de lo implementado con cobertura ≥ 80 % del código nuevo; ruff y mypy sin errores; `evidence.md` con commit, comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`. | F4 | T09 |
@@ -130,7 +130,7 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Región | Los 7 municipios de las universidades del seed (Hidalgo: Tula de Allende, Tepeji del Río de Ocampo, Tlahuelilpan, Atotonilco de Tula y Mixquiahuala de Juárez; Estado de México: Jilotepec y Villa del Carbón) | APROBADO |
 | Regla de suficiencia | ≥ 30 viviendas rentadas en muestra y CV ≤ 30 %; si no, respaldo estado → país | APROBADO |
 | Edición del DENUE | La vigente al ejecutar (basada en los Censos Económicos más recientes) | APROBADO |
-| Inside Airbnb | Instantánea de Ciudad de México del 2026-09-23 (17.2 MB); CC BY 4.0 verificada el 2026-11-10; cita formal de dataset; sin republicar ni subir el CSV | APROBADO |
+| Inside Airbnb | **DESCARTADO por M-ML-019** (2026-11-18): solo CDMX, renta turística por noche, datos personales de anfitriones y cobertura ya resuelta por ENVI/ENIGH, Censo y DENUE. Se retira la URL de `listings.csv.gz`; no se descarga nada | DESCARTADO (M-ML-019) |
 | Datos de matrícula (ANUIES) | — | DESCARTADO (M-ML-012): no es indispensable y su licencia no está verificada |
 
 ## 11. Costo — COST-001
@@ -146,7 +146,7 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | ML-02-RK01 | Muestra municipal insuficiente | Estimaciones regionales inestables | Regla de suficiencia con respaldo estado → país y reporte del nivel usado |
 | ML-02-RK02 | Sin renta a nivel municipal (el Censo 2020 no la pregunta) | La renta regional es estatal, no municipal | Usar ENVI estatal, contrastar con el seed de TheHouse y, después, con cuartos reales (ML-07) |
 | ML-02-RK03 | Datos de 2020 desactualizados | Rentas bajas respecto a hoy | Actualizar con INPC y validar contra el seed de TheHouse |
-| ML-02-RK04 | La Ciudad de México no representa a la región | Atributos de cuarto sesgados | Usar solo formas relativas de Inside Airbnb y calibrar montos con INEGI regional |
+| ML-02-RK04 | La Ciudad de México no representa a la región | ~~Atributos de cuarto sesgados~~ | **RESUELTO por M-ML-019:** Inside Airbnb se descarta; ML-03 genera el catálogo sintético calibrado con INEGI regional y DENUE, etiquetado como sintético |
 | ML-02-RK05 | Coordenadas equivocadas | Distancias erróneas en backend y modelo | Verificación punto por punto contra OSM |
 
 ## 13. Dependencias
@@ -164,9 +164,12 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
 | Tasks completadas | 6 |
+| Tasks descartadas | 1 (T06, M-ML-019) |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T05 y T07 completas; T06, T08, T09 sin ejecutar** |
+| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T05 y T07 completas; T06 DESCARTADA (M-ML-019); T08, T09 sin ejecutar** |
 
 ## 15. Aprobación pendiente
 
 Para aprobar se requiere la revisión humana de esta versión y la resolución (o aceptación explícita como PENDIENTE) de las decisiones de la §10. Para ejecutar se requiere además «EJECUTA» con versión, tasks y rutas permitidas.
+
+El 2026-11-18 el responsable aprobó M-ML-019 y dio «EJECUTA ML-02 1.0.1, task T06, en la rama docs/ml-02-t06-descartada», con rutas permitidas `data/sources.toml`, `memoria.md`, `specs/ml-02-data-sources/`, `reports/variables_check.md`, `src/thehouse_ml/` y `tests/` (estas últimas solo para que la fuente descartada no se descargue ni se verifique). Sin dependencias nuevas y sin descargar nada de Inside Airbnb.

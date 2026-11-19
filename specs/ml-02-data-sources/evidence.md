@@ -3,22 +3,25 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-02 1.0.1 |
-| Tareas ejecutadas | T02 · Descarga verificable (R02); T03 · Bases nacionales ponderadas (R03); T04 · Calibración regional con respaldo (R04); T07 · Universidades verificadas (R07); **T05 · Entorno de campus (R05)** |
+| Tareas ejecutadas | T02 · Descarga verificable (R02); T03 · Bases nacionales ponderadas (R03); T04 · Calibración regional con respaldo (R04); T07 · Universidades verificadas (R07); T05 · Entorno de campus (R05); **T06 · DESCARTADA (M-ML-019)** |
 | Autorización T02 | «EJECUTA ML-02 1.0.1, task T02, en la rama feat/ml-02-descarga» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T03 | «Apruebo M-ML-014 y EJECUTA ML-02 1.0.1, task T03, en la rama feat/ml-02-bases» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T04 | «Apruebo M-ML-015 y EJECUTA ML-02 1.0.1, task T04, en la rama feat/ml-02-regional» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T07 | «Apruebo M-ML-016 y EJECUTA ML-02 1.0.1, task T07 (antes que T05, porque T05 necesita coordenadas verificadas), en la rama feat/ml-02-universidades» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T07 (amplíación) | «Apruebo M-ML-017 y continúa T07 de ML-02 1.0.1 en la rama feat/ml-02-universidades» — César Yael López Trujillo, 2026-11-18 |
 | Autorización T05 | «Apruebo M-ML-018 y EJECUTA ML-02 1.0.1, task T05, en la rama feat/ml-02-denue. Rutas permitidas: src/thehouse_ml/, tests/, data/sources.toml, data/manifests/, reports/, memoria.md y specs/ml-02-data-sources/. Sin dependencias nuevas» — César Yael López Trujillo, 2026-11-18 |
+| Autorización T06 | «Apruebo M-ML-019 y EJECUTA ML-02 1.0.1, task T06, en la rama docs/ml-02-t06-descartada. Rutas permitidas: data/sources.toml, memoria.md, specs/ml-02-data-sources/, reports/variables_check.md, src/thehouse_ml/ y tests/ (solo si hace falta para que la fuente descartada no se descargue ni se verifique). Sin dependencias nuevas y sin descargar nada de Inside Airbnb» — César Yael López Trujillo, 2026-11-18 |
 | Rama (T02–T04) | `feat/ml-02-descarga`, `feat/ml-02-bases`, `feat/ml-02-regional` |
 | Rama (T07) | `feat/ml-02-universidades` |
 | Rama (T05) | `feat/ml-02-denue` |
+| Rama (T06) | `docs/ml-02-t06-descartada` |
 | Commit | `46c9d4f` (T07 M-ML-016, hecho por el responsable). Las ampliaciones M-ML-017 y M-ML-018 (T05) se entregan sin commit, por instrucción explícita |
 | Fecha de ejecución T03 | 2026-11-17 |
 | Fecha de ejecución T04 | 2026-11-17 |
 | Fecha de ejecución T07 | 2026-11-17 |
 | Fecha de ampliación T07 (M-ML-017) | 2026-11-18 |
 | Fecha de ejecución T05 | 2026-11-18 |
+| Fecha de ejecución T06 (descarte) | 2026-11-18 |
 
 ## T05 · Entorno de campus (DENUE 05/2026)
 
@@ -318,6 +321,75 @@ Definición aplicada: ordenar por renta, agrupar empatados y tomar el menor valo
 - Manifiestos verificados el 2026-11-17: `envi_2020_base_de_datos_csv.zip` (7,322,530 B, `36b8e3d0…40b`), `envi_2020_fd.xlsx` (242,100 B, `208fc3d2…fbcf`), `enigh2022_ns_viviendas_csv.zip` (1,712,569 B, `6ebd189f…5bd4`). El de INPC se agregó en T03 (`data/manifests/inegi_inpc.json`).
 - En T02: 86 pruebas, cobertura 91.30 %, ruff y mypy sin errores.
 
+## T06 · Catálogo de cuartos — DESCARTADA (M-ML-019)
+
+### Decisión
+
+M-ML-019 (APROBADA por César Yael López Trujillo el 2026-11-18): **Inside Airbnb queda descartada** como fuente de ML-02. Motivos: (1) en México solo publica datos descargables de Ciudad de México y no cubre Tula, Tepeji, Atotonilco, Mixquiahuala, Tlahuelilpan, Jilotepec ni Villa del Carbón; (2) mide rentas turísticas por noche, no cuartos para estudiantes por mes; (3) sus archivos traen datos personales de anfitriones (nombres, fotos), contrarios a la constitución §7; (4) las rentas ya están cubiertas por ENVI 2020 y ENIGH 2022 (M-ML-014), los servicios de la vivienda por el Censo 2020 (M-ML-015) y el entorno por el DENUE (M-ML-018). Consecuencia: el catálogo de cuartos se generará **sintético en ML-03**, calibrado con esas fuentes y etiquetado como sintético (constitution §8).
+
+### Qué se hizo
+
+1. `data/sources.toml`: `inside_airbnb_cdmx_2026_09_23` pasó a `variables_status = "discarded"` con `status_reference = "M-ML-019"`; se retiró la URL no verificada `https://data.insideairbnb.com/.../listings.csv.gz` (se conserva solo la página de políticas `https://insideairbnb.com/get-the-data/`) y `download_url` sigue vacío. No se descargó ni se verificó ningún archivo de Inside Airbnb.
+2. `src/thehouse_ml/sources.py`: `ALLOWED_STATUS` acepta `"discarded"`; `SourceSpec` incorpora `status_reference`, obligatorio cuando el estado es `discarded` (validación con error explícito si falta).
+3. `src/thehouse_ml/download.py`: una fuente descartada se omite antes de cualquier descarga o manifiesto, con `DownloadOutcome(..., "omitida", "descartada: <status_reference>")`.
+4. `src/thehouse_ml/variables.py`: una fuente descartada conserva su sección en `reports/variables_check.md` con `- estado: discarded`, `verificado: no` y `nota: descartada: M-ML-019`; no cuenta como fallo y no se leen encabezados. Las demás secciones del reporte no se tocan.
+5. `spec.md`, `plan.md` y `task.md`: T06 marcada **DESCARTADA (M-ML-019)** con la justificación, R06 reorientado al descarte, matriz y estados actualizados, y nota para ML-03 sobre el catálogo sintético. `memoria.md`: M-ML-019 (APROBADA) y M-ML-003 ajustada. `evidence.md`: esta sección.
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `80 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 16 source files` (PASS) |
+| `uv run pytest --cov=thehouse_ml` | `215 passed in 8.57s`; cobertura total `91.22 %` ≥ 80 % (PASS) |
+| `uv run thehouse-ml download` (sin `--source`) | Todas las fuentes reales en modo `manual`; **línea de Inside Airbnb: `inside_airbnb_cdmx_2026_09_23: omitida - descartada: M-ML-019`**; OSM omitido bajo demanda; sin red y sin descargar nada de Inside Airbnb |
+
+Salida completa de `download` (2026-11-18):
+
+```text
+inegi_censo_2020_viviendas_ca: manual - 4 archivo(s) verificados
+inegi_envi_2020: manual - 2 archivo(s) verificados
+inegi_enigh_2022: manual - 1 archivo(s) verificados
+inegi_denue_vigente: manual - 3 archivo(s) verificados
+inegi_inpc: manual - 1 archivo(s) verificados
+inside_airbnb_cdmx_2026_09_23: omitida - descartada: M-ML-019
+openstreetmap: omitido - ejecute download --source openstreetmap
+thehouse_seed_nv07_nv08_nv11: pendiente - download_url pendiente
+variables_check: C:/Users/cesar/source/repos/TheHouse-ML/reports/variables_check.md
+```
+
+Diff de `reports/variables_check.md` tras `download` (solo la sección de Inside Airbnb):
+
+```diff
+ ## inside_airbnb_cdmx_2026_09_23
+ 
+-- estado: `confirmed`
++- estado: `discarded`
+ - verificado: no
+ - variables encontradas: (ninguna)
+ - variables faltantes: (sin verificar)
+-- nota: download_url pendiente (sin verificar)
++- nota: descartada: M-ML-019
+```
+
+### Trazabilidad requisito → prueba
+
+| Requisito | Prueba |
+| --- | --- |
+| R06 · fuente descartada en el registro con referencia | `tests/unit/test_sources_registry.py::test_inside_airbnb_is_discarded_per_m_ml_019`, `tests/unit/test_sources_loader.py::test_inside_airbnb_is_discarded_with_reference_and_no_download_url` |
+| R06 · estado `discarded` validado con `status_reference` | `tests/unit/test_sources_loader.py::test_discarded_status_requires_a_reference`, `test_discarded_status_is_loaded_with_its_reference` |
+| R06 · `download` omite sin descargar ni verificar | `tests/unit/test_download.py::test_discarded_source_is_skipped_without_fetching`, `tests/integration/test_download_stage.py::test_discarded_source_is_omitted_but_keeps_its_report_section` |
+| R06 · reporte marca el descarte y conserva las otras secciones | `tests/unit/test_variables_check.py::test_discarded_source_is_shown_as_discarded_and_other_sections_are_kept`, el diff de `reports/variables_check.md` mostrado arriba |
+| R09 · calidad general | 215 pruebas, 91.22 % de cobertura, ruff y mypy sin errores |
+
+### Revisión y resultado
+
+- **Constitución:** §7 (sin datos personales ni descargas de fuentes no autorizadas; se elimina la fuente que traía nombres y fotos de anfitriones), §8 (el catálogo de cuartos pasa a ML-03 como sintético y etiquetado como tal), §3/SDD-001 (cambio por spec, aprobación y «EJECUTA» vigentes), §16 (cobertura 91.22 % con pruebas sin red). No se modificaron `constitution.md` ni `AGENTS.md`.
+- **AGENTS / memoria:** autorización de M-ML-019 del responsable vigente (M-ML-011); M-ML-019 APROBADA; rutas respetadas; sin dependencias nuevas; sin descargas de Inside Airbnb.
+- **Seguridad y licencias:** sin secretos, sin scraping, sin servicios de pago; el único acceso a red autorizado sigue siendo Nominatim en T07 y no se usó en esta ejecución. Ningún dato crudo o procesado entró a git.
+- **PASS.** T06 quedó DESCARTADA con evidencia reproducible: la fuente figura como `discarded` con `M-ML-019`, `download` la omite con el aviso exigido, el reporte de variables solo cambió en su sección y las 215 pruebas pasan. El hallazgo 20 quedó resuelto con la autorización y el ajuste de `specs/ARQUITECTURA.md`; el hallazgo 21 queda **PENDIENTE PARA T09** (reescritura de `downloaded_at` en modo manual), sin corregir en esta task. No se hizo commit, por instrucción explícita del responsable.
+
 ## Hallazgos y desviaciones
 
 1. **Servicios en T04, no en T03 (resuelto).** La redacción de R03 en la spec menciona «servicios ponderados», pero el responsable acotó la T03 a renta y proporción de viviendas rentadas y asignó la prevalencia de servicios por municipio al Censo 2020 de la T04 (M-ML-014(c)). La T04 generó esos siete indicadores para los 7 municipios; no se reportó como PASS una salida de servicios de T03.
@@ -325,7 +397,7 @@ Definición aplicada: ordenar por renta, agrupar empatados y tomar el menor valo
 3. **INPC: valor semántico.** El diccionario del ZIP describe `VALOR` como «variación porcentual anual», pero el responsable verificó que son niveles del índice base 2Q jul 2018 = 100 (2024-07 = 136.003). Se documentó en `data/sources.toml`, el reporte y el código; se filtra solo el concepto general.
 4. **Definición de `n_muestra`.** Se adoptó como el conteo sin ponderar de viviendas rentadas con renta válida (la muestra que produce los percentiles); la proporción de rentadas usa todas las viviendas del grupo. Queda explicado en el reporte.
 5. **Sin commit ni PR** por instrucción explícita del responsable. La aprobación de otro humano en GitHub sigue pendiente.
-6. **Fuentes pendientes.** El Censo 2020 se descargó y verificó en T04; DENUE, Inside Airbnb, OpenStreetMap y el seed siguen sin descarga por estar fuera de esta autorización (T05–T09).
+6. **Fuentes pendientes.** El Censo 2020 se descargó y verificó en T04 y el DENUE en T05; Inside Airbnb quedó **DESCARTADA** (M-ML-019), OpenStreetMap se consultó solo en T07 y el seed sigue sin descarga por ser dato propio del backend.
 7. **Renta sin `ee`/`cv` y respaldo nacional limitado.** Las filas de renta copian los percentiles de la ENVI 2020 de T03, que no publica varianza; sus columnas `se` y `cv` quedan como `NaN` y se marcan `—` en el reporte. La suficiencia no se aplica a la renta porque nunca es una estimación municipal. El respaldo `nacional` de ENVI/ENIGH de T03 solo está implementado para la proporción de viviendas rentadas; T03 no publica prevalencias de servicios (M-ML-014(c)), por lo que para los seis indicadores de servicios la entidad completa es el último nivel disponible y una entidad insuficiente daría un error explícito en vez de una estimación no documentada. En los datos reales no se presentó ese caso.
 8. **Estratos con una sola UPM.** En el diseño con reemplazo no tienen varianza definida; no aportan a la varianza y se cuentan en `n_strata_single_psu`. En los datos reales ningún municipio de los 7 quedó sin estimación por este motivo.
 9. **Reescritura de manifiestos y reportes.** Al ejecutar `download` y `prepare` con datos reales se reescribieron los manifiestos y `reports/national_baselines.md` (solo diferencias de fin de línea CRLF/LF en Windows; el contenido es idéntico) y se creó `data/manifests/inegi_censo_2020_viviendas_ca.json`.
@@ -338,6 +410,9 @@ Definición aplicada: ordenar por renta, agrupar empatados y tomar el menor valo
 16. **URL de Edomex 404 (resuelto el 2026-11-18).** `denue_15_csv.zip` devuelve una página HTML de 2,263 bytes. El catálogo de descarga masiva del DENUE 05/2026 publica Edomex en dos ZIP (`denue_15_1_csv.zip`, `denue_15_2_csv.zip`); se usaron esos dos archivos y sus hashes quedaron en el manifiesto. El responsable aprobó el cambio y se registró como adenda de M-ML-018 en `memoria.md` (ver sección T05).
 17. **Nombre de salida (resuelto el 2026-11-18).** La spec 1.0.1 describe `campus_context.parquet` en §6 y §6.2; la autorización de T05 pidió inicialmente `denue_campus.parquet`. El responsable aprobó usar el nombre de la spec: la salida se renombró a `data/processed/campus_context.parquet` en código, pruebas, reporte, `task.md` y esta evidencia. El reporte conserva su nombre `reports/denue_campus.md`.
 18. **Reescritura de `data/universities.csv` por fin de línea (resuelto el 2026-11-18).** `prepare` reescribía el CSV versionado porque `csv.DictWriter` usa CRLF por omisión en Windows. Ahora `write_universities_csv` genera el contenido con `lineterminator="\n"`, compara con el archivo existente (normalizando CRLF→LF) y no escribe si el contenido no cambia. Se restauró el archivo con `git checkout -- data/universities.csv`; `prepare` ya no lo modifica. Prueba: `tests/unit/test_universities.py::test_write_universities_csv_uses_lf_and_does_not_rewrite_unchanged_content`.
+19. **Fechas de manifiestos reescritas por `download` (resuelto el 2026-11-18).** Al ejecutar `download` sin filtro en la T06, los cinco manifiestos de INEGI se reescribieron solo en `downloaded_at` (2026-11-17 → 2026-11-18), un efecto colateral de la etapa y fuera de las rutas permitidas para esta task. Se restauraron con `git checkout -- data/manifests/`; los hashes y tamaños no cambiaron. No se creó ningún manifiesto de Inside Airbnb (fuente descartada).
+20. **Referencia residual en `specs/ARQUITECTURA.md` (resuelto el 2026-11-18).** La línea 62 listaba a Inside Airbnb entre las fuentes de `download`. El responsable **autorizó** agregar `specs/ARQUITECTURA.md` a las rutas permitidas y ajustar ese archivo: se quitó Inside Airbnb de la tabla de `download`, se añadió la nota de que fue descartada por M-ML-019 y que el catálogo de cuartos será sintético en ML-03, y se alinearon las filas de `prepare` y de ML-02. Solo cambiaron esas menciones; no afectó al código ni al comportamiento de `download`.
+21. **PENDIENTE PARA T09 — `download` en modo manual reescribe `downloaded_at` en los manifiestos aunque el SHA-256 no cambie; debe conservarse la fecha original si el archivo es idéntico.** Detectado al ejecutar `download` sin filtro en T06: los cinco manifiestos de INEGI cambiaron solo `downloaded_at` (2026-11-17 → 2026-11-18) con el mismo SHA-256 y tamaño; se restauraron con `git checkout -- data/manifests/`, pero la causa (escritura incondicional del manifiesto) sigue sin corregirse. No se corrige en T06: queda registrado para la T09 (pruebas y evidencia) con su prueba de regresión. Ver hallazgo 19.
 
 ## Revisión
 

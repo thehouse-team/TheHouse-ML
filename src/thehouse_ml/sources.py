@@ -3,6 +3,10 @@
 El archivo es la contract de ML-02 (R01/R02). Una entrada de ``download_url``
 puede ser una URL simple o una tabla con url, nombre, tamaño, SHA-256, tipo,
 tabla CSV dentro del ZIP y codificación.
+
+``variables_status = "discarded"`` (con ``status_reference`` obligatorio)
+marca una fuente descartada por decisión aprobada: no se descarga ni se
+verifica, pero conserva su sección en el reporte de variables (M-ML-019).
 """
 
 from __future__ import annotations
@@ -16,7 +20,7 @@ from urllib.parse import unquote, urlsplit
 
 SOURCE_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]+$")
 SHA256_PATTERN = re.compile(r"^[0-9a-f]{64}$")
-ALLOWED_STATUS = frozenset({"pending", "confirmed"})
+ALLOWED_STATUS = frozenset({"pending", "confirmed", "discarded"})
 ALLOWED_KINDS = frozenset({"data", "dictionary"})
 
 
@@ -53,6 +57,7 @@ class SourceSpec:
     variables_status: str
     variables_used: tuple[str, ...]
     download_url: tuple[FileSpec, ...]
+    status_reference: str | None = None
 
 
 def load_sources(path: Path) -> list[SourceSpec]:
@@ -94,6 +99,10 @@ def _parse_source(entry: object, index: int) -> SourceSpec:
     if status not in ALLOWED_STATUS:
         raise SourceRegistryError(f"{where}: variables_status inválido {status!r}")
 
+    reference = _optional_str(entry, "status_reference", where)
+    if status == "discarded" and reference is None:
+        raise SourceRegistryError(f"{where}: una fuente descartada debe declarar status_reference")
+
     variables = _required_str_list(entry, "variables_used", where)
     files = _parse_download_url(entry.get("download_url"), where)
     return SourceSpec(
@@ -104,6 +113,7 @@ def _parse_source(entry: object, index: int) -> SourceSpec:
         variables_status=status,
         variables_used=variables,
         download_url=files,
+        status_reference=reference,
     )
 
 

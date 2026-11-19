@@ -59,11 +59,13 @@ flowchart LR
 
 | Etapa | Lee | Escribe | Spec |
 | --- | --- | --- | --- |
-| `download` | INEGI (Censo 2020 muestra, ENVI 2020, ENIGH 2022, DENUE, INPC), Inside Airbnb, OpenStreetMap | `data/raw/` + manifiesto SHA-256 en `data/manifests/` | ML-02 |
-| `prepare` | `data/raw/`, seed de TheHouse, tablas de mapeo | Bases nacionales, calibración regional, entorno de campus, catálogo de cuartos y universidades (`data/processed/`); estudiantes sintéticos y pares estudiante–cuarto | ML-02, ML-03 |
+| `download` | INEGI (Censo 2020 muestra, ENVI 2020, ENIGH 2022, DENUE, INPC), OpenStreetMap | `data/raw/` + manifiesto SHA-256 en `data/manifests/` | ML-02 |
+| `prepare` | `data/raw/`, seed de TheHouse, tablas de mapeo | Bases nacionales, calibración regional, entorno de campus, catálogo sintético de cuartos (ML-03) y universidades (`data/processed/`); estudiantes sintéticos y pares estudiante–cuarto | ML-02, ML-03 |
 | `train` | Pares y etiquetas | Modelo base (reglas) y modelos entrenados en `models/` | ML-04, ML-05 |
 | `evaluate` | Modelos y partición de prueba | `reports/metrics.json`, `reports/model_card.md`, comparación contra el modelo base | ML-04, ML-05 |
 | `export` | Modelo promovido | `model.onnx`, `feature_schema.json`, `golden_cases.json`, `model_card.md`, `metrics.json`, `SHA256SUMS` | ML-06 |
+
+Inside Airbnb fue **descartada por M-ML-019**: `download` no descarga ni verifica esa fuente y el catálogo de cuartos se generará **sintético en ML-03**, calibrado con INEGI y etiquetado como sintético.
 
 `data/raw/`, `data/processed/` y `models/` **nunca** se suben a git (licencias y tamaño). Lo que sí se sube: código, manifiestos, tablas de mapeo, configuración y reportes.
 
@@ -123,7 +125,7 @@ Todo requisito tiene al menos una task y toda task tiene un requisito. El últim
 | Spec | Tema | Qué se construye | Entregables principales | Tasks | Necesita antes |
 | --- | --- | --- | --- | --- | --- |
 | **ML-01** | Base del proyecto | Paquete Python con `uv`, comando con las 5 etapas vacías, calidad automática y CI | `pyproject.toml`, `uv.lock`, `cli.py`, `ci.yml`, prueba de que no se suben datos | 5 | Constitution 1.0.0 |
-| **ML-02** | Datos | Bases **nacionales** de INEGI (renta, tenencia, servicios) ponderadas, **calibradas** a los 7 municipios de la región con respaldo estado → país, entorno de cada campus (DENUE), catálogo de cuartos sin datos personales y universidades verificadas | `sources.toml`, manifiestos SHA-256, `national_baselines`, `regional_calibration`, `campus_context`, `rooms`, `universities.csv`, `reports/data_card.md` | 9 | ML-01; licencias de M-ML-003 aprobadas |
+| **ML-02** | Datos | Bases **nacionales** de INEGI (renta, tenencia, servicios) ponderadas, **calibradas** a los 7 municipios de la región con respaldo estado → país, entorno de cada campus (DENUE), universidades verificadas y bases para el catálogo **sintético** de cuartos de ML-03 (Inside Airbnb descartada por M-ML-019) | `sources.toml`, manifiestos SHA-256, `national_baselines`, `regional_calibration`, `campus_context`, `universities.csv`, `reports/data_card.md` | 9 | ML-01; licencias de M-ML-003 aprobadas |
 | **ML-03** | Esquema de features | Qué entra al modelo (estudiante, cuarto, par), restricciones duras (presupuesto, `livingWith`, mascotas) y estudiantes sintéticos | `feature_schema.json` validado contra NV-11, generador con semilla, pares sin fuga entre entrenamiento y prueba | 6 | ML-02; NV-11 del backend |
 | **ML-04** | Modelo base por reglas | Puntaje determinista 0–100 con pesos: presupuesto 30, distancia 25, servicios 20, tipo de lugar 10, modalidad 10, extras 5 | Función de puntaje, pesos versionados, ≥ 50 casos dorados, reporte del modelo base | 5 | ML-03 |
 | **ML-05** | Modelo entrenado | Regresión logística y LightGBM (LambdaRank) con validación cruzada por estudiante; se promueve solo si supera al modelo base | Métricas NDCG@10, Precision@5, MAP (media ± desviación), ablación, segmentos, `reports/model_card.md` | 6 | ML-04 |

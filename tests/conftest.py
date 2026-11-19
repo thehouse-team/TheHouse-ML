@@ -54,6 +54,7 @@ def make_source(
     files: tuple[FileSpec, ...] = (),
     *,
     status: str = "confirmed",
+    reference: str | None = None,
     license_text: str = "Licencia de prueba",
 ) -> SourceSpec:
     """Construye un SourceSpec para pruebas."""
@@ -65,6 +66,7 @@ def make_source(
         variables_status=status,
         variables_used=variables,
         download_url=files,
+        status_reference=reference,
     )
 
 

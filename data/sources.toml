@@ -1,6 +1,8 @@
 # Registro de fuentes de datos para ML-02 (T01, ampliado en T02).
 # Campos obligatorios por fuente: url, edition, date, license, attribution, variables_used,
-# dictionary_url y variables_status ("pending" | "confirmed").
+# dictionary_url y variables_status ("pending" | "confirmed" | "discarded").
+# Una fuente "discarded" debe declarar status_reference (decisión M-ML-XXX): download la
+# omite sin descargarla ni verificarla y el reporte de variables la muestra como descartada.
 # download_url: lista de archivos a descargar. Cada archivo es una tabla con:
 #   url (obligatoria), filename, size_bytes, sha256, kind ("data" | "dictionary"),
 #   table (CSV dentro del ZIP, si aplica) y encoding.
@@ -168,16 +170,22 @@ variables_used = [
 
 [[sources]]
 id = "inside_airbnb_cdmx_2026_09_23"
-name = "Inside Airbnb — Ciudad de México (listings)"
-url = "https://data.insideairbnb.com/mexico/df/mexico-city/2026-09-23/data/listings.csv.gz"
-edition = "Instantánea Ciudad de México 2026-09-23"
+name = "Inside Airbnb — Ciudad de México (DESCARTADA)"
+# M-ML-019: se retira la URL no verificada del archivo listings.csv.gz; no se descarga nada.
+url = "https://insideairbnb.com/get-the-data/"
+edition = "Instantánea Ciudad de México 2026-09-23 — DESCARTADA (M-ML-019)"
 date = "2026-09-23"
 license = "Creative Commons Attribution 4.0 International (CC BY 4.0); una descarga, sin scraping ni republicar microdatos"
 attribution = "Fuente: Inside Airbnb, Mexico City, listings (2026-09-23), http://insideairbnb.com/get-the-data/ (CC BY 4.0)."
 dictionary_url = "https://insideairbnb.com/get-the-data/"
-variables_status = "confirmed"
-download_url = []  # Pendiente: falta el hash verificado del archivo de esta instantánea.
-# Columnas confirmadas en spec §6.
+# DESCARTADA por M-ML-019 (César Yael López Trujillo, 2026-11-18): en México solo publica
+# CDMX (no cubre los 7 municipios), mide rentas turísticas por noche (no cuartos por mes) y
+# trae datos personales de anfitriones. Rentas: ENVI 2020/ENIGH 2022 (M-ML-014); servicios:
+# Censo 2020 (M-ML-015); entorno: DENUE (M-ML-018). El catálogo de cuartos será sintético en ML-03.
+variables_status = "discarded"
+status_reference = "M-ML-019"
+download_url = []  # Descartada: no hay archivo que descargar ni hash que verificar.
+# Columnas que se habrían usado según la spec §6; quedan documentadas pero no se verifican.
 variables_used = [
   "room_type",
   "property_type",

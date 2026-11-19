@@ -177,6 +177,28 @@ def test_osm_without_responses_is_not_failed(tmp_path: Path) -> None:
     assert report.failures == []
 
 
+def test_discarded_source_is_shown_as_discarded_and_other_sections_are_kept(tmp_path: Path) -> None:
+    paths = ProjectPaths(root=tmp_path)
+    envi = make_source(
+        "envi",
+        ("P5_1", "P5_2", "P5_5"),
+        (make_file(ENVI_FILE, table="Bases de datos/TVIVIENDA.csv", encoding="latin-1"),),
+    )
+    discarded = make_source("inside_airbnb", ("room_type",), status="discarded", reference="M-ML-019")
+    _place(paths, "envi", ENVI_FILE, fixture_bytes(ENVI_FILE))
+
+    report = verify_sources([envi, discarded], paths)
+    rendered = report.render()
+
+    assert "## envi" in rendered
+    assert "## inside_airbnb" in rendered
+    assert "- estado: `discarded`" in rendered
+    assert "descartada: M-ML-019" in rendered
+    discarded_check = next(check for check in report.checks if check.source_id == "inside_airbnb")
+    assert discarded_check.verified is False
+    assert report.failures == []
+
+
 def test_write_variables_report_creates_the_reports_folder(tmp_path: Path) -> None:
     paths = ProjectPaths(root=tmp_path)
     report = verify_sources([make_source("sin_url", ("X",), status="pending")], paths)

@@ -85,6 +85,19 @@ def verify_sources(sources: Sequence[SourceSpec], paths: ProjectPaths) -> Variab
     """Compara las variables registradas con los encabezados disponibles."""
     checks: list[SourceVariableCheck] = []
     for source in sources:
+        if source.variables_status == "discarded":
+            # No se descarga ni se verifica, pero conserva su sección en el reporte (M-ML-019).
+            checks.append(
+                SourceVariableCheck(
+                    source.id,
+                    source.variables_status,
+                    (),
+                    (),
+                    f"descartada: {source.status_reference}",
+                    verified=False,
+                )
+            )
+            continue
         headers: set[str] = set()
         note = ""
         if source.id == OSM_SOURCE:

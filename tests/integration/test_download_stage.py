@@ -191,6 +191,47 @@ download_url = []
     assert not (paths.data_raw / "openstreetmap").exists()
 
 
+def test_discarded_source_is_omitted_but_keeps_its_report_section(tmp_path: Path) -> None:
+    (tmp_path / "data").mkdir(parents=True, exist_ok=True)
+    (tmp_path / "data" / "sources.toml").write_text(
+        """[[sources]]
+id = "inegi_envi_2020"
+name = "ENVI de prueba"
+license = "Libre uso"
+attribution = "INEGI"
+variables_status = "pending"
+variables_used = ["P5_1"]
+download_url = []
+
+[[sources]]
+id = "inside_airbnb_cdmx_2026_09_23"
+name = "Inside Airbnb de prueba (descartada)"
+license = "CC BY 4.0"
+attribution = "Inside Airbnb"
+variables_status = "discarded"
+status_reference = "M-ML-019"
+variables_used = ["room_type"]
+download_url = [{ url = "https://example.test/listings.csv.gz", filename = "listings.csv.gz" }]
+""",
+        encoding="utf-8",
+    )
+    paths = ProjectPaths(root=tmp_path)
+    calls: list[str] = []
+
+    def fetch(url: str, _destination: Path) -> None:
+        calls.append(url)
+
+    output = run_download(paths, fetcher=fetch)
+
+    assert "inside_airbnb_cdmx_2026_09_23: omitida - descartada: M-ML-019" in output
+    assert calls == []  # nunca se pide listings.csv.gz
+    report = (tmp_path / "reports" / "variables_check.md").read_text(encoding="utf-8")
+    assert "## inegi_envi_2020" in report
+    assert "## inside_airbnb_cdmx_2026_09_23" in report
+    assert "- estado: `discarded`" in report
+    assert "descartada: M-ML-019" in report
+
+
 def test_cli_download_returns_zero_with_preplaced_files(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
     _write_registry(tmp_path)
     paths = ProjectPaths(root=tmp_path)
