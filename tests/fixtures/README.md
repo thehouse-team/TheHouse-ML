@@ -17,3 +17,10 @@ No contienen datos reales del INEGI.
   `feature_schema.json` y salida esperada con tolerancia 1e-6). Entradas **sintéticas**; las salidas se
   calcularon a mano (cuartos sobre el meridiano del campus). Se reutilizarán como casos dorados del
   backend en ML-06.
+
+# Casos de ML-03 T03
+
+- `hard_constraint_cases.json`: casos por tabla de las restricciones duras (`HC01_budget`, `HC02_living_with`,
+  `HC03_pets`): entrada con los nombres de `feature_schema.json` y salida esperada (`allowed` y la lista de
+  restricciones violadas en el orden del esquema) o `expected_error` para el quick setup incompleto. Entradas
+  **sintéticas**; las salidas se escribieron a mano. Se reutilizarán como casos dorados del backend en ML-06.
