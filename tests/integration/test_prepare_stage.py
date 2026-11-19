@@ -12,6 +12,7 @@ import pytest
 
 from conftest import write_osm_project
 from thehouse_ml.cli import main
+from thehouse_ml.data_card import run_data_card
 from thehouse_ml.national import BASELINE_COLUMNS, ENIGH_SOURCE, ENVI_SOURCE, run_prepare
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.stages import run_stage
@@ -289,3 +290,24 @@ def test_run_stage_dispatches_prepare(tmp_path: Path) -> None:
     assert output.startswith("prepare: ")
     assert "universities: " in output
     assert "denue: " in output
+    assert "data card: " in output
+
+
+def test_prepare_generates_the_data_card_with_all_sections(tmp_path: Path) -> None:
+    _write_project(tmp_path)
+    paths = ProjectPaths(root=tmp_path)
+
+    run_stage("prepare", paths)
+    # El proyecto inventado no trae ZIP del DENUE: se agrega solo el agregado.
+    pd.DataFrame(
+        [{"code": "UTTT", "radius_m": 2000, "category": "total", "count": 42, "final_status": "ok_osm"}]
+    ).to_parquet(paths.data_processed / "campus_context.parquet", index=False)
+
+    assert run_data_card(paths).startswith("data card:")
+
+    card = (tmp_path / "reports" / "data_card.md").read_text(encoding="utf-8")
+    for number in range(1, 12):
+        assert f"## {number}." in card
+    assert "rent_histogram.parquet" in card
+    assert "Histogramas" in card
+    assert (tmp_path / "data" / "processed" / "rent_histogram.parquet").is_file()
