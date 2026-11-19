@@ -10,7 +10,7 @@ Para entender el proyecto completo (qué hace, cómo se conecta con el backend y
 | --- | --- | --- | --- | --- |
 | ML-01 | [Base del proyecto](ml-01-foundation/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T05 (2026-11-10): PASS, ver `evidence.md`** | 5/5 |
 | ML-02 | [Datos: bases nacionales, calibración regional y licencias](ml-02-data-sources/spec.md) | **✅ APROBADA** | **✅ COMPLETA — T01–T05 y T07–T09 (8 tasks); T06 DESCARTADA (M-ML-019); cierre M-ML-020, ver `evidence.md`** | 8 completadas + 1 descartada |
-| ML-03 | [Esquema de features y estudiantes sintéticos](ml-03-feature-schema/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/6 |
+| ML-03 | [Esquema de features, estudiantes sintéticos y catálogo sintético de cuartos](ml-03-feature-schema/spec.md) | **✅ APROBADA — 1.0.0** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/7 |
 | ML-04 | [Modelo base por reglas](ml-04-baseline-model/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/5 |
 | ML-05 | [Modelo entrenado y evaluación](ml-05-trained-model/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/6 |
 | ML-06 | [Artefacto ONNX y contrato con el backend](ml-06-onnx-export/spec.md) | **🟡 BORRADOR — PENDIENTE DE APROBACIÓN** | **⛔ NO EJECUTAR HASTA «EJECUTA»** | 0/6 |
