@@ -28,6 +28,8 @@ from thehouse_ml.inpc import (
 )
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.percentiles import weighted_percentiles
+from thehouse_ml.rent_histogram import RentBin, build_bins
+from thehouse_ml.rent_histogram import rows_to_frame as rent_rows_to_frame
 from thehouse_ml.sources import SourceSpec, load_sources
 
 ENVI_SOURCE = "inegi_envi_2020"
@@ -134,10 +136,38 @@ def run_prepare(paths: ProjectPaths) -> str:
     baselines = rows_to_frame(rows)
     baselines.to_parquet(parquet_path, index=False)
 
+    histogram_bins = _rent_histogram(envi, deflators.envi)
+    histogram_path = paths.data_processed / "rent_histogram.parquet"
+    rent_rows_to_frame(histogram_bins).to_parquet(histogram_path, index=False)
+
     report_path = paths.reports / "national_baselines.md"
     report_path.parent.mkdir(parents=True, exist_ok=True)
     report_path.write_text(render_report(rows, deflators, index), encoding="utf-8", newline="\n")
-    return f"prepare: {parquet_path.as_posix()} ({len(rows)} filas) - {report_path.as_posix()}"
+    return (
+        f"prepare: {parquet_path.as_posix()} ({len(rows)} filas), "
+        f"rent_histogram.parquet ({len(histogram_bins)} intervalos) - {report_path.as_posix()}"
+    )
+
+
+def _rent_histogram(envi: pd.DataFrame, deflator: float) -> list[RentBin]:
+    """Intervalos de la renta de ENVI para nacional, Hidalgo (13) y Edomex (15)."""
+    valid = envi.loc[envi["valid_rent"]]
+    scopes = (
+        ("nacional", valid),
+        ("13", valid.loc[valid["entidad"] == "13"]),
+        ("15", valid.loc[valid["entidad"] == "15"]),
+    )
+    return [
+        bin_
+        for scope, frame in scopes
+        for bin_ in build_bins(
+            scope,
+            frame["rent"].tolist(),
+            frame["weight"].tolist(),
+            deflator,
+            source=ENVI_SOURCE,
+        )
+    ]
 
 
 def rows_to_frame(rows: list[BaselineRow] | tuple[BaselineRow, ...]) -> pd.DataFrame:

@@ -34,6 +34,7 @@ from thehouse_ml.csvio import CsvReadError, read_zip_csv
 from thehouse_ml.national import ENIGH_SOURCE, ENVI_SOURCE
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.sources import SourceSpec, load_sources
+from thehouse_ml.thresholds import MAX_CV, MIN_DWELLINGS
 
 CENSO_SOURCE = "inegi_censo_2020_viviendas_ca"
 CENSO_COLUMNS: tuple[str, ...] = (
@@ -50,8 +51,7 @@ CENSO_COLUMNS: tuple[str, ...] = (
     "COMBUSTIBLE",
 )
 
-MIN_RENTADAS = 30
-MAX_CV = 0.30
+MIN_RENTADAS = MIN_DWELLINGS  # alias público usado por la data card y las pruebas
 UNSPECIFIED = frozenset({"9", ""})
 
 # Códigos confirmados con el diccionario oficial del Censo (M-ML-015).

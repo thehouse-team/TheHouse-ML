@@ -8,10 +8,10 @@
 | Fecha | 2026-11-12 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-12 (M-ML-012): aprueba ML-02 1.0.1 |
-| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T05 y T07 completas; T06 DESCARTADA (M-ML-019); T08, T09 sin ejecutar** |
+| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T05, T07 y T08 completas; T06 DESCARTADA (M-ML-019); T09 sin ejecutar** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 9 |
-| Tasks completadas | 6 |
+| Tasks completadas | 7 |
 | Tasks descartadas | 1 (T06, M-ML-019) |
 
 ## Reglas de esta lista
@@ -37,7 +37,7 @@
 ## F3 — Calidad, seguridad y datos
 
 - [x] **T07 · Universidades verificadas** — Requisito: ML-02-R07 · Aceptación: `data/universities.csv` con las 10 universidades, id OSM y fecha de verificación; las 3 aproximadas revisadas; diferencias mayores a 200 m reportadas para el backend. **Ampliada el 2026-11-18 con M-ML-017:** verificación humana en `data/seed/universities_manual.csv` y columnas `final_lat`, `final_lon`, `final_status` y `final_source`.
-- [ ] **T08 · Data card** — Requisito: ML-02-R08 · Aceptación: `reports/data_card.md` con fuentes, licencias, atribuciones, ponderación, niveles de respaldo, tamaños de muestra, histogramas y limitaciones.
+- [x] **T08 · Data card** — Requisito: ML-02-R08 · Aceptación: `reports/data_card.md` generado automáticamente por `prepare` desde `data/sources.toml`, `data/manifests/`, `data/universities.csv` y los Parquet de `data/processed/`; 11 secciones con fuentes, licencias, atribuciones, ponderación, niveles de respaldo, tamaños de muestra, histogramas y limitaciones.
 
 ## F4 — Evidencia
 
@@ -58,5 +58,5 @@ Como consecuencia de M-ML-019, ML-03 generará el catálogo de cuartos de forma 
 | T05 | R05 | F2 | COMPLETA |
 | T06 | R06 | F2 | DESCARTADA (M-ML-019) |
 | T07 | R07 | F3 | COMPLETA |
-| T08 | R08 | F3 | ABIERTA |
+| T08 | R08 | F3 | COMPLETA |
 | T09 | R09 | F4 | ABIERTA |

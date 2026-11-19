@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-02 1.0.1 |
-| Tareas ejecutadas | T02 · Descarga verificable (R02); T03 · Bases nacionales ponderadas (R03); T04 · Calibración regional con respaldo (R04); T07 · Universidades verificadas (R07); T05 · Entorno de campus (R05); **T06 · DESCARTADA (M-ML-019)** |
+| Tareas ejecutadas | T02 · Descarga verificable (R02); T03 · Bases nacionales ponderadas (R03); T04 · Calibración regional con respaldo (R04); T07 · Universidades verificadas (R07); T05 · Entorno de campus (R05); **T06 · DESCARTADA (M-ML-019)**; T08 · Data card (R08) |
 | Autorización T02 | «EJECUTA ML-02 1.0.1, task T02, en la rama feat/ml-02-descarga» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T03 | «Apruebo M-ML-014 y EJECUTA ML-02 1.0.1, task T03, en la rama feat/ml-02-bases» — César Yael López Trujillo, 2026-11-17 |
 | Autorización T04 | «Apruebo M-ML-015 y EJECUTA ML-02 1.0.1, task T04, en la rama feat/ml-02-regional» — César Yael López Trujillo, 2026-11-17 |
@@ -11,10 +11,12 @@
 | Autorización T07 (amplíación) | «Apruebo M-ML-017 y continúa T07 de ML-02 1.0.1 en la rama feat/ml-02-universidades» — César Yael López Trujillo, 2026-11-18 |
 | Autorización T05 | «Apruebo M-ML-018 y EJECUTA ML-02 1.0.1, task T05, en la rama feat/ml-02-denue. Rutas permitidas: src/thehouse_ml/, tests/, data/sources.toml, data/manifests/, reports/, memoria.md y specs/ml-02-data-sources/. Sin dependencias nuevas» — César Yael López Trujillo, 2026-11-18 |
 | Autorización T06 | «Apruebo M-ML-019 y EJECUTA ML-02 1.0.1, task T06, en la rama docs/ml-02-t06-descartada. Rutas permitidas: data/sources.toml, memoria.md, specs/ml-02-data-sources/, reports/variables_check.md, src/thehouse_ml/ y tests/ (solo si hace falta para que la fuente descartada no se descargue ni se verifique). Sin dependencias nuevas y sin descargar nada de Inside Airbnb» — César Yael López Trujillo, 2026-11-18 |
+| Autorización T08 | «EJECUTA ML-02 1.0.1, task T08 (ML-02-R08), en la rama feat/ml-02-data-card. Rutas permitidas: src/thehouse_ml/, tests/, reports/, memoria.md y specs/ml-02-data-sources/. Sin dependencias nuevas (nada de matplotlib)» — César Yael López Trujillo, 2026-11-18 |
 | Rama (T02–T04) | `feat/ml-02-descarga`, `feat/ml-02-bases`, `feat/ml-02-regional` |
 | Rama (T07) | `feat/ml-02-universidades` |
 | Rama (T05) | `feat/ml-02-denue` |
 | Rama (T06) | `docs/ml-02-t06-descartada` |
+| Rama (T08) | `feat/ml-02-data-card` |
 | Commit | `46c9d4f` (T07 M-ML-016, hecho por el responsable). Las ampliaciones M-ML-017 y M-ML-018 (T05) se entregan sin commit, por instrucción explícita |
 | Fecha de ejecución T03 | 2026-11-17 |
 | Fecha de ejecución T04 | 2026-11-17 |
@@ -22,6 +24,82 @@
 | Fecha de ampliación T07 (M-ML-017) | 2026-11-18 |
 | Fecha de ejecución T05 | 2026-11-18 |
 | Fecha de ejecución T06 (descarte) | 2026-11-18 |
+| Fecha de ejecución T08 | 2026-11-18 |
+
+## T08 · Data card
+
+### Qué se hizo
+
+1. `src/thehouse_ml/data_card.py` (nuevo): `collect_inputs` lee `data/sources.toml`, todos los JSON de `data/manifests/`, `data/universities.csv` y los cuatro Parquet de `data/processed/`; `render_data_card` produce las 11 secciones del requisito sin cifras escritas a mano; `run_data_card` escribe `reports/data_card.md` con finales LF. La generación se conecta al final de `prepare` en `stages.py`, y `cli.py` reporta `DataCardError` con código 1.
+2. `src/thehouse_ml/rent_histogram.py` (nuevo): intervalos fijos de 500 pesos hasta 10,000 y `10,000+`, con conteo de muestra y frecuencia expandida; `group_small_bins` agrupa intervalos adyacentes hasta alcanzar el mínimo de 30 viviendas, preservando la suma expandida. `src/thehouse_ml/thresholds.py` centralized ese mínimo y el `MAX_CV` que antes vivían en `regional.py` (ahora aliases, sin cambio de comportamiento).
+3. `national.py`: la parte nacional de `prepare` escribe además `data/processed/rent_histogram.parquet` (63 intervalos: 21 × nacional/Hidalgo/Edomex) a partir de las rentas válidas de ENVI ya leídas, sin abrir nuevas fuentes ni agregar dependencias.
+4. `spec.md`, `plan.md` y `task.md`: T08 marcada COMPLETA (7 de 9 tasks; T06 sigue descartada). `memoria.md` no se modifica: la ejecución no crea una decisión nueva.
+
+### Secciones del reporte
+
+1. Propósito y alcance (7 municipios y 10 universidades leídos de los Parquet y del CSV; catálogo de cuartos sintético en ML-03).
+2. Fuentes (id, producto, edición, URL, licencia, tamaños y SHA-256 de los manifiestos, estado y decisión de memoria; Inside Airbnb como `DESCARTADA (M-ML-019)`).
+3. Atribuciones (`Fuente: INEGI, <producto>` por producto, `© OpenStreetMap contributors (ODbL)` y la aclaración de que INEGI no respalda el proyecto).
+4. Ponderación (factor y diseño estrato/UPM derivados de `variables_used`) y deflactación al INPC de jul-2024 (factores leídos de `national_baselines.parquet`).
+5. Niveles de respaldo por municipio e indicador, con la regla ≥ 30 y CV ≤ 30 %.
+6. Tamaños de muestra con supresión de celdas < 30; en datos reales se suprimen dos filas (`tipo de vivienda 6` y `7` de ENVI).
+7. Histogramas en texto: renta ENVI (nacional, Hidalgo, Edomex) y negocios totales a 2 km por universidad (DENUE).
+8. Universidades con `final_status` y fuente de coordenada; advertencia para TESJI, UMB-VDC y UCAN.
+9. Transformaciones y archivos de salida de cada etapa.
+10. Limitaciones (encuestas 2020/2022 deflactadas, renta estatal, 3 sin verificar, DENUE cuenta establecimientos, sin cuartos reales, Inside Airbnb descartada).
+11. Privacidad (columnas del DENUE nunca leídas y solo agregados en git).
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | 86 files already formatted (PASS) |
+| `uv run ruff check .` | All checks passed! (PASS) |
+| `uv run mypy src` | Success: no issues found in 19 source files (PASS) |
+| `uv run pytest --cov=thehouse_ml` | **238 passed in 12.08s**; cobertura total **91.76 %** ≥ 80 %; `data_card.py` 94 %, `rent_histogram.py` 92 % (PASS) |
+| `uv run python -m thehouse_ml prepare` | `national_baselines.parquet (87 filas), rent_histogram.parquet (63 intervalos)`; `regional_calibration.parquet (56 filas)`; `data/universities.csv (10 filas)`; `campus_context.parquet (300 filas, 981,519 establecimientos)`; `data card: reports/data_card.md` |
+
+### Verificación de los histogramas con datos reales
+
+La suma de las barras de cada ámbito se calculó leyendo el reporte y se comparó con `suma_factores` de `national_baselines.parquet`:
+
+| Ámbito | suma de barras | total impreso | Parquet | Resultado |
+| --- | ---: | ---: | ---: | --- |
+| Nacional | 5,619,414 | 5,619,414 | 5,619,414 | PASS |
+| Hidalgo | 81,275 | 81,275 | 81,275 | PASS |
+| Estado de México | 739,380 | 739,380 | 739,380 | PASS |
+
+El reporte tiene 11 secciones `## N.` y tres filas marcadas `suprimido`. Los intervalos con menos de 30 viviendas se agruparon (por ejemplo, Hidalgo publica `500-1,499`, `1,500-1,999` y `2,000-7,499`).
+
+### Trazabilidad requisito → prueba
+
+| Requisito | Prueba |
+| --- | --- |
+| R08 · 11 secciones | `tests/unit/test_data_card.py::test_data_card_has_all_eleven_sections`, `tests/integration/test_prepare_stage.py::test_prepare_generates_the_data_card_with_all_sections` |
+| R08 · fuentes, hashes y decisión de memoria | `test_source_figures_come_from_the_manifest`, `test_discarded_source_appears_as_discarded_but_not_as_an_attribution` |
+| R08 · atribuciones sin respaldo de INEGI | `test_every_inegi_product_and_osm_are_attributed_without_endorsement` |
+| R08 · ponderación y deflactación | `tests/unit/test_data_card.py` (sección 4 generada de `variables_used` y del Parquet) |
+| R08 · niveles y regla de suficiencia | `test_cells_with_fewer_than_thirty_dwellings_are_suppressed` (sección 5) |
+| R08 · supresión < 30 | `test_cells_with_fewer_than_thirty_dwellings_are_suppressed`, `tests/unit/test_rent_histogram.py::test_group_small_bins_suppresses_a_tiny_sample` |
+| R08 · histograma suma el total expandido | `test_rent_histogram_adds_up_to_the_expanded_total`, `test_expanded_frequency_is_the_sum_of_the_weights`, `test_group_small_bins_preserves_the_expanded_total` |
+| R08 · DENUE y universidades | `test_denue_histogram_shows_the_total_category_at_the_configured_radius`, `test_unverified_universities_are_warned_about` |
+| R08 · privacidad | `test_privacy_section_names_never_read_columns_and_aggregates_only` |
+| R08 · lectura automática de archivos | `test_all_inputs_are_read_from_disk`, `tests/unit/test_stages.py::test_prepare_generates_the_data_card_after_the_other_outputs` |
+| R08 · nota `tipo_viv = &` (sección 6) | `test_unspecified_tipo_viv_code_is_labeled_in_the_sample_table` |
+| R08 · nota del CV (sección 5) | `test_cv_note_is_below_the_levels_table` |
+| R08 · nota de redondeo (sección 7) | `test_rounding_note_uses_the_registered_deflactor` |
+
+### Ajustes textuales del 2026-11-19
+
+Sin cambiar cifras: (1) la sección 6 rotula `tipo_viv = &` de ENIGH como `tipo de vivienda no especificado (&)`; (2) la sección 5 agrega bajo la tabla la nota sobre el CV (solo proporciones, linealización de Taylor con ESTRATO/UPM; la renta es mediana estatal sin CV); (3) la sección 7 agrega bajo el histograma nacional la nota sobre el desplazamiento de intervalos al deflactar rentas redondas. El factor `1.248112` y el mes se leen de `national_baselines.parquet` y de `inpc.REFERENCE_MONTH`; el ejemplo `2,500 → 3,120` se calcula con ese factor. Se agregaron tres pruebas unitarias. Revalidado: 238 pruebas, 91.76 % de cobertura, los tres histogramas siguen sumando su total expandido y las dos celdas `suprimido` permanecen.
+
+### Revisión y resultado
+
+- **Constitución:** §7 y §8 (sin datos personales, sin celdas < 30 viviendas, INEGI citado como autor sin sugerir respaldo, Inside Airbnb sin atribución), §6 (solo agregados y metadatos en git; Parquet fuera de git), §9 (misma entrada produce la misma data card), §16 (pruebas sin red con datos inventados, cobertura 91.76 %).
+- **AGENTS / memoria:** «EJECUTA» del responsable vigente (M-ML-011) con rutas respetadas; M-ML-013/M-ML-014 (deflactor), M-ML-015 (suficiencia), M-ML-018 (privacidad del DENUE), M-ML-019 (descarte) aplicados; `constitution.md` y `AGENTS.md` intactos; sin commit por instrucción explícita.
+- **Seguridad y licencias:** sin red, sin secretos, sin scraping y sin servicios de pago; sin dependencias nuevas (solo biblioteca estándar, pandas y pyarrow ya presentes); no se descargó nada.
+- **Archivos versionados:** `data/manifests/`, `data/universities.csv` y los reportes `denue_campus.md`, `national_baselines.md`, `regional_calibration.md`, `universities_check.md` y `variables_check.md` quedaron sin cambios tras `prepare` (`git status --short` sobre esas rutas, sin salida).
+- **PASS.** T08 cumple R08 con evidencia reproducible: 11 secciones generadas desde código, ninguna cifra escrita a mano, celdas < 30 suprimidas, los tres histogramas de renta suman exactamente su total expandido y todas las atribuciones se generan desde `sources.toml`. Sin commit, por instrucción explícita.
 
 ## T05 · Entorno de campus (DENUE 05/2026)
 
@@ -413,6 +491,9 @@ Diff de `reports/variables_check.md` tras `download` (solo la sección de Inside
 19. **Fechas de manifiestos reescritas por `download` (resuelto el 2026-11-18).** Al ejecutar `download` sin filtro en la T06, los cinco manifiestos de INEGI se reescribieron solo en `downloaded_at` (2026-11-17 → 2026-11-18), un efecto colateral de la etapa y fuera de las rutas permitidas para esta task. Se restauraron con `git checkout -- data/manifests/`; los hashes y tamaños no cambiaron. No se creó ningún manifiesto de Inside Airbnb (fuente descartada).
 20. **Referencia residual en `specs/ARQUITECTURA.md` (resuelto el 2026-11-18).** La línea 62 listaba a Inside Airbnb entre las fuentes de `download`. El responsable **autorizó** agregar `specs/ARQUITECTURA.md` a las rutas permitidas y ajustar ese archivo: se quitó Inside Airbnb de la tabla de `download`, se añadió la nota de que fue descartada por M-ML-019 y que el catálogo de cuartos será sintético en ML-03, y se alinearon las filas de `prepare` y de ML-02. Solo cambiaron esas menciones; no afectó al código ni al comportamiento de `download`.
 21. **PENDIENTE PARA T09 — `download` en modo manual reescribe `downloaded_at` en los manifiestos aunque el SHA-256 no cambie; debe conservarse la fecha original si el archivo es idéntico.** Detectado al ejecutar `download` sin filtro en T06: los cinco manifiestos de INEGI cambiaron solo `downloaded_at` (2026-11-17 → 2026-11-18) con el mismo SHA-256 y tamaño; se restauraron con `git checkout -- data/manifests/`, pero la causa (escritura incondicional del manifiesto) sigue sin corregirse. No se corrige en T06: queda registrado para la T09 (pruebas y evidencia) con su prueba de regresión. Ver hallazgo 19.
+22. **Salida intermedia nueva (resuelto el 2026-11-18).** Para que el histograma de renta use la distribución real y no una reconstrucción a partir de percentiles, `prepare` escribe `data/processed/rent_histogram.parquet` con los intervalos de ENVI. Es un derivation interno fuera de git; no cambia el contrato de la spec §6.2 ni agrega dependencias. Se documenta en la sección 9 de la data card.
+23. **Proyectos sin DENUE (resuelto el 2026-11-18).** Las pruebas de integración que simulan `prepare` sin los ZIP del DENUE no producen `campus_context.parquet`. Para no convertir eso en un error, `run_data_card` omite la generación con el aviso `data card: omitido (faltan salidas de prepare)` cuando falta alguna entrada; con datos reales, `prepare` produce el Parquet y la data card normalmente.
+24. **`verified_at` dependiente de la fecha (2026-11-19, PENDIENTE PARA T09).** Al ejecutar `prepare` el 2026-11-19, `run_universities` reescribió las 10 filas de `data/universities.csv` cambiando solo `verified_at` de 2026-11-18 a 2026-11-19 (usa la fecha del sistema). No guarda relación con la data card: se restauró el archivo con `git checkout -- data/universities.csv` y quedó sin cambios. Queda registrado para la T09 junto con el hallazgo 21.
 
 ## Revisión
 
@@ -429,3 +510,5 @@ Diff de `reports/variables_check.md` tras `download` (solo la sección de Inside
 **PASS WITH WARNINGS.** T07 cumple su criterio de aceptación con evidencia reproducible: `data/universities.csv` tiene las 10 universidades con id OSM (cuando hay coincidencia), distancia haversine, estado y fecha de verificación; las 3 aproximadas del seed quedaron registradas y los 8 casos dudosos se reportan para NV-11. Advertencias: 7 `sin_coincidencia` y 1 `revisar` requieren confirmación humana en openstreetmap.org antes de T05 (hallazgos 10 y 11), reescritura de reportes por fin de línea (hallazgo 12) y ausencia de commit/PR por instrucción (hallazgo 13).
 
 T04 mantiene su PASS WITH WARNINGS previo: los 7 municipios están presentes, cada indicador registra su nivel de respaldo y la regla de suficiencia está probada. Advertencias: `ee`/`cv` no disponibles en la renta de T03 (hallazgo 7), estratos con una sola UPM (hallazgo 8), reescritura de manifiestos por fin de línea (hallazgo 9), el override de mypy para pandas (hallazgo 2) y la ausencia de commit/PR (hallazgo 5). T03 mantiene su PASS WITH WARNINGS previo con el hallazgo 1 resuelto en T04.
+
+**PASS.** T08 cumple R08: `reports/data_card.md` se genera automáticamente desde el registro, los manifiestos, el CSV de universidades y los Parquet; contiene las 11 secciones exigidas, suprime las celdas con menos de 30 viviendas en muestra, sus tres histogramas de renta suman exactamente el total expandido de `national_baselines.parquet`, Inside Airbnb figura como `DESCARTADA (M-ML-019)` sin atribución como fuente y todas las atribuciones INEGI/OSM se producen desde `sources.toml`. Sin commit, por instrucción explícita.

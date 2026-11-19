@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
+from thehouse_ml.data_card import run_data_card
 from thehouse_ml.denue import run_denue
 from thehouse_ml.download import Fetcher, run_download
 from thehouse_ml.national import run_prepare
@@ -57,6 +58,9 @@ def run_stage(name: str, paths: ProjectPaths, source: str | None = None, fetcher
         return run_download(paths, source_id=source, fetcher=fetcher)
     if name == "prepare":
         del source, fetcher  # La etapa prepare no usa red ni filtro de fuente.
-        return f"{run_prepare(paths)}\n{run_regional(paths)}\n{run_universities(paths)}\n{run_denue(paths)}"
+        return (
+            f"{run_prepare(paths)}\n{run_regional(paths)}\n{run_universities(paths)}\n"
+            f"{run_denue(paths)}\n{run_data_card(paths)}"
+        )
     del source, fetcher  # Las etapas vacías no leen ni escriben archivos.
     return f"{stage.name}: pendiente de {stage.spec}"
