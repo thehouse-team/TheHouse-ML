@@ -8,7 +8,7 @@
 | Fecha | 2026-11-12 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-12 (M-ML-012): aprueba ML-02 1.0.1 |
-| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T05, T07 y T08 completas; T06 DESCARTADA (M-ML-019); T09 sin ejecutar** |
+| Estado de ejecución | **✅ COMPLETA — T01–T05 y T07–T09 completas (8 tasks); T06 DESCARTADA (M-ML-019)** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 
 ## Enfoque

@@ -90,9 +90,22 @@ def load_manifest(path: Path) -> Manifest | None:
 
 
 def write_manifest(path: Path, manifest: Manifest) -> None:
-    """Escribe el manifiesto, creando la carpeta si hace falta."""
+    """Escribe el manifiesto con LF; no lo toca si el contenido no cambia.
+
+    Evita que una segunda corrida de ``download`` modifique un archivo
+    versionado solo por el fin de línea de Windows (hallazgos 9 y 21).
+    """
+    content = json.dumps(manifest.to_dict(), ensure_ascii=False, indent=2) + "\n"
+    if path.is_file():
+        try:
+            previous = path.read_text(encoding="utf-8")
+        except OSError:
+            previous = None
+        if previous is not None and previous.replace("\r\n", "\n") == content:
+            return
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(manifest.to_dict(), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    with path.open("w", encoding="utf-8", newline="\n") as stream:
+        stream.write(content)
 
 
 def _as_record(value: object, path: Path) -> dict[str, object]:

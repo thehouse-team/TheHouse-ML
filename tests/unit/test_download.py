@@ -7,7 +7,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import fixture_fetcher, make_file, make_source
+from conftest import fixture_bytes, fixture_fetcher, make_file, make_source
 from thehouse_ml.download import DownloadError, default_fetch, download_source
 from thehouse_ml.manifests import manifest_path
 from thehouse_ml.paths import ProjectPaths
@@ -56,6 +56,43 @@ def test_manual_mode_uses_local_file_without_fetching(tmp_path: Path) -> None:
 
     assert outcome.status == "manual"
     assert manifest_path(paths, "manual").is_file()
+
+
+def test_manual_mode_keeps_the_original_downloaded_at(tmp_path: Path) -> None:
+    """Hallazgo 21: reverificar un archivo idéntico no cambia su fecha."""
+    paths = _paths(tmp_path)
+    source = make_source("manual", ("P5_1",), (make_file("envi_2020_base_de_datos_csv.zip"),))
+    local = paths.data_raw / "manual" / "envi_2020_base_de_datos_csv.zip"
+    local.parent.mkdir(parents=True)
+    local.write_bytes(fixture_bytes("envi_2020_base_de_datos_csv.zip"))
+
+    def forbidden_fetch(_url: str, _destination: Path) -> None:
+        raise AssertionError("El modo manual no debe descargar")
+
+    download_source(source, paths, forbidden_fetch, today="2026-11-17")
+    first = manifest_path(paths, "manual").read_bytes()
+
+    outcome = download_source(source, paths, forbidden_fetch, today="2026-11-19")
+
+    assert outcome.status == "manual"
+    assert json.loads(first)["files"][0]["downloaded_at"] == "2026-11-17"
+    assert manifest_path(paths, "manual").read_bytes() == first
+
+
+def test_a_new_download_gets_the_current_date_even_with_a_previous_manifest(tmp_path: Path) -> None:
+    """La fecha nueva sí se estampa cuando el archivo se descarga de nuevo."""
+    paths = _paths(tmp_path)
+    source = make_source("envi", ("P5_1",), (make_file("envi_2020_base_de_datos_csv.zip"),))
+    file = source.download_url[0]
+
+    first = download_source(source, paths, fixture_fetcher(), today="2026-11-17")
+    assert first.status == "descargado"
+    (paths.data_raw / "envi" / file.filename).unlink()
+    second = download_source(source, paths, fixture_fetcher(), today="2026-11-19")
+
+    assert second.status == "descargado"
+    manifest = json.loads(manifest_path(paths, "envi").read_text(encoding="utf-8"))
+    assert manifest["files"][0]["downloaded_at"] == "2026-11-19"
 
 
 def test_wrong_sha256_in_registry_fails_clearly(tmp_path: Path) -> None:

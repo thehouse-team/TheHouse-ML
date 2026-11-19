@@ -51,6 +51,23 @@ def test_download_writes_ten_responses_and_their_manifest(tmp_path: Path) -> Non
     assert "ODbL" in manifest["files"][0]["license"]
 
 
+def test_cached_responses_keep_their_original_downloaded_at(tmp_path: Path) -> None:
+    """Hallazgo 21 también aplica al manifiesto OSM (fuente bajo demanda)."""
+    write_osm_project(tmp_path)
+    paths = ProjectPaths(root=tmp_path)
+    manifest = manifest_path(paths, OSM_SOURCE)
+    first = manifest.read_bytes()
+    assert json.loads(first)["files"][0]["downloaded_at"] == "2026-11-17"
+
+    def forbidden(_url: str, _destination: Path) -> None:
+        raise AssertionError("Las respuestas ya están cacheadas: no se debe usar la red")
+
+    outcome = download_osm(OSM_SOURCE, paths, forbidden, today="2026-11-20", sleeper=lambda _: None)
+
+    assert outcome.status == "manual"
+    assert manifest.read_bytes() == first
+
+
 def test_existing_json_is_not_requested_again(tmp_path: Path) -> None:
     write_osm_project(tmp_path, with_responses=False)
     paths = ProjectPaths(root=tmp_path)
