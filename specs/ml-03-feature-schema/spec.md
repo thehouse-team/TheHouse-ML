@@ -95,6 +95,7 @@ Se registran en `memoria.md` (M-ML-021, APROBADO).
 | Entorno DENUE | No entra como feature del modelo en v1; solo se documenta (riesgo RK03) | APROBADO |
 | Semilla y parámetros del generador | Semilla fija; parámetros de estudiantes en `src/thehouse_ml/synthetic/students_params.json` y de cuartos en `src/thehouse_ml/synthetic/rooms_params.json` | APROBADO |
 | Umbral de estudiantes con al menos un cuarto compatible | Se verifica en T06: la mayoría de los estudiantes tiene al menos un cuarto que pasa las restricciones duras; umbral exacto: ≥ 90 % | APROBADO |
+| Factores de distancia efectiva por transporte | `walk` 1.0, `bike` 0.5, `public` 0.4, `car` 0.25 (`effective_distance_km = distance_km × factor`); omitidos por error en M-ML-021 y aclarados en M-ML-022 | APROBADO |
 
 ## 11. Costo — COST-001
 
@@ -124,7 +125,7 @@ Se registran en `memoria.md` (M-ML-021, APROBADO).
 | Tasks | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 1 (T01) |
 | Estado documental | **✅ APROBADA** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 
