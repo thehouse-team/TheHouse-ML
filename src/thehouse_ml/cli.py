@@ -17,6 +17,8 @@ from thehouse_ml.paths import ROOT_ENV_VAR, ProjectPaths
 from thehouse_ml.regional import RegionalError
 from thehouse_ml.sources import SourceRegistryError
 from thehouse_ml.stages import STAGES, run_stage
+from thehouse_ml.synthetic.rooms import RoomParamsError
+from thehouse_ml.synthetic.rooms_stage import RoomsError
 from thehouse_ml.synthetic.students import StudentParamsError
 from thehouse_ml.synthetic.students_stage import StudentsError
 from thehouse_ml.universities import OsmError
@@ -65,6 +67,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         OsmError,
         PrepareError,
         RegionalError,
+        RoomParamsError,
+        RoomsError,
         SourceRegistryError,
         StudentParamsError,
         StudentsError,

@@ -11,7 +11,7 @@
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 4 |
+| Tasks completadas | 5 |
 
 ## Reglas de esta lista
 
@@ -29,7 +29,7 @@
 - [x] **T02 · Cálculo de features de referencia** — Requisito: ML-03-R02 · Aceptación: Función pura que, dado estudiante y cuarto, produce las features del par; pruebas con casos límite (presupuesto exacto, distancia 0, sin servicios).
 - [x] **T03 · Restricciones duras** — Requisito: ML-03-R03 · Aceptación: Los pares que violan presupuesto, `livingWith` o mascotas se excluyen; pruebas por cada regla.
 - [x] **T04 · Estudiantes sintéticos** — Requisito: ML-03-R04 · Aceptación: Generador reproducible (misma semilla → mismos perfiles) que respeta rangos y catálogos; reporte de distribuciones; presupuesto calibrado con la renta regional (`regional_calibration.parquet`): prueba de que la mediana de `budget.max` por universidad es coherente con la renta p50 regional.
-- [ ] **T05 · Catálogo sintético de cuartos** — Requisito: ML-03-R05 · Aceptación: Generador reproducible (misma semilla → mismos cuartos) que produce ~3,000 cuartos entre los 10 campuses del seed, todos a ≤30 km del campus; rangos y catálogos de NV-11; renta coherente con la calibración por municipio — prueba que compara la mediana generada contra la calibrada; reporte de distribuciones del catálogo (servicios, `placeType`, `propertyTypes`, mascotas, `livingWith`, distancia a campus) etiquetado como sintético.
+- [x] **T05 · Catálogo sintético de cuartos** — Requisito: ML-03-R05 · Aceptación: Generador reproducible (misma semilla → mismos cuartos) que produce ~3,000 cuartos entre los 10 campuses del seed, todos a ≤30 km del campus; rangos y catálogos de NV-11; renta coherente con la calibración por municipio — prueba que compara la mediana generada contra la calibrada; reporte de distribuciones del catálogo (servicios, `placeType`, `propertyTypes`, mascotas, `livingWith`, distancia a campus) etiquetado como sintético.
 
 ## F3 — Calidad, seguridad y datos
 
@@ -47,6 +47,6 @@
 | T02 | R02 | F2 | COMPLETA (M-ML-023; `evidence.md`) |
 | T03 | R03 | F2 | COMPLETA (M-ML-024; `evidence.md`) |
 | T04 | R04 | F2 | COMPLETA (M-ML-025; `evidence.md`) |
-| T05 | R05 | F2 | ABIERTA |
+| T05 | R05 | F2 | COMPLETA (M-ML-026; `evidence.md`) |
 | T06 | R06 | F3 | ABIERTA |
 | T07 | R07 | F4 | ABIERTA |
