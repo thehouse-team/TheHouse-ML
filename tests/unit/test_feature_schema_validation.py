@@ -44,7 +44,7 @@ def problems_for(raw_schema: dict[str, Any], mutate: Mutation) -> str:
 def test_an_unchanged_copy_parses(raw_schema: dict[str, Any]) -> None:
     schema = parse_schema(copy.deepcopy(raw_schema))
 
-    assert schema.version == "1.0.0"
+    assert schema.version == "1.1.0"
     assert schema.catalog("university_code")[0] == "UTTT"
     assert schema.catalog("placeType") == ("room", "room_private_bath", "studio", "shared")
     with pytest.raises(KeyError):
@@ -55,7 +55,7 @@ def test_load_schema_from_a_path(tmp_path: Path, raw_schema: dict[str, Any]) -> 
     path = tmp_path / "schema.json"
     path.write_text(json.dumps(raw_schema), encoding="utf-8")
 
-    assert load_schema(path).version == "1.0.0"
+    assert load_schema(path).version == "1.1.0"
 
 
 def test_invalid_json_is_reported(tmp_path: Path) -> None:
@@ -122,6 +122,14 @@ def test_a_non_object_root_is_rejected() -> None:
         (lambda d: d.update(feature_order=[]), "lista vacía"),
         (lambda d: d["feature_order"].append("distance_km"), "duplicados"),
         (lambda d: d["feature_order"].pop(), "exactamente las features"),
+        # Esquema 1.1.0 (M-ML-023): `max: null` solo en features del par; training_range [min, max] dentro de range.
+        (lambda d: student(d, "maxDistanceKm").update(range={"min": 0.5, "max": None}), "deben ser numéricos"),
+        (lambda d: d["pair_features"][0].update(range={"min": "0", "max": None}), "min debe ser numérico"),
+        (lambda d: d["pair_features"][0].update(training_range=[0]), "se esperaba [min, max]"),
+        (lambda d: d["pair_features"][0].update(training_range=[0, "30"]), "se esperaba [min, max]"),
+        (lambda d: d["pair_features"][0].update(training_range=[30, 0]), "mayor que max"),
+        (lambda d: d["pair_features"][0].update(training_range=[-1, 30]), "fuera de range [0, ∞)"),
+        (lambda d: d["pair_features"][3].update(training_range=[0, 2]), "fuera de range [0, 1]"),
     ],
 )
 def test_broken_schemas_are_rejected(raw_schema: dict[str, Any], mutate: Mutation, message: str) -> None:

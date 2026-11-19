@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from functools import cache
 
+from thehouse_ml.features.campuses import Campus, CampusError, load_campuses
 from thehouse_ml.features.loader import (
     SCHEMA_RESOURCE,
     FeatureSchema,
@@ -21,6 +22,20 @@ from thehouse_ml.features.loader import (
     parse_schema,
     schema_transport_factors,
     validate,
+)
+from thehouse_ml.features.pairs import (
+    IncompleteProfileError,
+    PairFeatures,
+    PairInputError,
+    ResolvedStudent,
+    Room,
+    StudentProfile,
+    compute_pair_features,
+    feature_vector,
+    resolve_student,
+    room_from_record,
+    student_from_record,
+    validate_room,
 )
 
 
@@ -37,18 +52,33 @@ def schema_version() -> str:
 
 __all__ = [
     "SCHEMA_RESOURCE",
+    "Campus",
+    "CampusError",
     "FeatureSchema",
     "FieldSpec",
     "HardConstraint",
+    "IncompleteProfileError",
     "Metadata",
     "MissingRule",
     "PairFeature",
+    "PairFeatures",
+    "PairInputError",
+    "ResolvedStudent",
+    "Room",
     "SchemaError",
+    "StudentProfile",
     "ValueRange",
+    "compute_pair_features",
     "default_schema",
+    "feature_vector",
+    "load_campuses",
     "load_schema",
     "parse_schema",
+    "resolve_student",
+    "room_from_record",
     "schema_transport_factors",
     "schema_version",
+    "student_from_record",
     "validate",
+    "validate_room",
 ]

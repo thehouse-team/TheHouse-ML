@@ -11,7 +11,7 @@
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 1 |
+| Tasks completadas | 2 |
 
 ## Reglas de esta lista
 
@@ -26,7 +26,7 @@
 
 ## F2 — Implementación
 
-- [ ] **T02 · Cálculo de features de referencia** — Requisito: ML-03-R02 · Aceptación: Función pura que, dado estudiante y cuarto, produce las features del par; pruebas con casos límite (presupuesto exacto, distancia 0, sin servicios).
+- [x] **T02 · Cálculo de features de referencia** — Requisito: ML-03-R02 · Aceptación: Función pura que, dado estudiante y cuarto, produce las features del par; pruebas con casos límite (presupuesto exacto, distancia 0, sin servicios).
 - [ ] **T03 · Restricciones duras** — Requisito: ML-03-R03 · Aceptación: Los pares que violan presupuesto, `livingWith` o mascotas se excluyen; pruebas por cada regla.
 - [ ] **T04 · Estudiantes sintéticos** — Requisito: ML-03-R04 · Aceptación: Generador reproducible (misma semilla → mismos perfiles) que respeta rangos y catálogos; reporte de distribuciones; presupuesto calibrado con la renta regional (`regional_calibration.parquet`): prueba de que la mediana de `budget.max` por universidad es coherente con la renta p50 regional.
 - [ ] **T05 · Catálogo sintético de cuartos** — Requisito: ML-03-R05 · Aceptación: Generador reproducible (misma semilla → mismos cuartos) que produce ~3,000 cuartos entre los 10 campuses del seed, todos a ≤30 km del campus; rangos y catálogos de NV-11; renta coherente con la calibración por municipio — prueba que compara la mediana generada contra la calibrada; reporte de distribuciones del catálogo (servicios, `placeType`, `propertyTypes`, mascotas, `livingWith`, distancia a campus) etiquetado como sintético.
@@ -44,7 +44,7 @@
 | Task | Requisito | Fase | Estado |
 | --- | --- | --- | --- |
 | T01 | R01 | F1 | COMPLETA (M-ML-022; `evidence.md`) |
-| T02 | R02 | F2 | ABIERTA |
+| T02 | R02 | F2 | COMPLETA (M-ML-023; `evidence.md`) |
 | T03 | R03 | F2 | ABIERTA |
 | T04 | R04 | F2 | ABIERTA |
 | T05 | R05 | F2 | ABIERTA |

@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-03 1.0.0 |
-| Tareas ejecutadas | T01 · Esquema de features (R01) |
+| Tareas ejecutadas | T01 · Esquema de features (R01); T02 · Cálculo de features de referencia (R02, sección propia abajo) |
 | Autorización T01 | «EJECUTA ML-03 1.0.0, task T01 (ML-03-R01), en la rama feat/ml-03-schema. Rutas permitidas: src/thehouse_ml/, tests/, data/seed/, memoria.md y specs/ml-03-feature-schema/. Sin dependencias nuevas (nada de jsonschema ni pydantic: valida con la biblioteca estándar)» — César Yael López Trujillo, 2026-11-19 |
 | Autorización T01 (ampliación) | Respuestas del responsable a las advertencias 1–5 y autorización para mover el esquema a `src/thehouse_ml/features/` (ubicación de `specs/ARQUITECTURA.md`), actualizar `specs/ARQUITECTURA.md` (ML-03 con 7 tasks y catálogo sintético de cuartos) y `specs/README.md` (ML-03 en ejecución, 1/7); aprueba `backend_status = "ml_only"` y el radio de 6371 km; sin commit — César Yael López Trujillo, 2026-11-19 |
 | Rama (T01) | `feat/ml-03-schema` |
@@ -111,3 +111,149 @@ Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` → 
 
 - **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas. El snapshot es un dato propio del proyecto TheHouse.
 - **Resultado:** **PASS WITH WARNINGS** — la aceptación de R01 se cumple (`feature_schema.json` con nombres, tipos, rangos, catálogos y versión, validado contra el snapshot de NV-11 verificado por el responsable) y los cuatro controles pasan. Única advertencia abierta: el aviso al backend (NV-12, hallazgo 9), acción pendiente del responsable; no bloquea T01 pero sí el uso del modelo en producción.
+
+## T02 · Cálculo de features de referencia
+
+| Campo | Valor |
+| --- | --- |
+| Autorización T02 | «EJECUTA ML-03 1.0.0, task T02 (ML-03-R02), en la rama feat/ml-03-pair-features. Rutas permitidas: src/thehouse_ml/features/, tests/, memoria.md y specs/ml-03-feature-schema/. Sin dependencias nuevas» (el mismo mensaje pide actualizar `specs/README.md`) — César Yael López Trujillo, 2026-11-19 |
+| Rama | `feat/ml-03-pair-features` |
+| Commit base | `5376da9` (merge del PR #16, T01) |
+| Commit (T02) | Sin commit, por instrucción explícita del responsable |
+| Fecha de ejecución | 2026-11-19 |
+| Decisión | M-ML-023 (APROBADO — César Yael López Trujillo, 2026-11-19, con las decisiones sobre los hallazgos 1, 2 y 4) |
+| Esquema | `feature_schema.json` 1.0.0 → **1.1.0** (ampliación compatible; ver «Cambio de esquema 1.1.0») |
+
+Lecturas previas: `constitution.md` → `AGENTS.md` → `memoria.md` (M-ML-021 y M-ML-022) → `specs/ARQUITECTURA.md` → `spec.md`, `plan.md`, `task.md` y `evidence.md` de ML-03 → `src/thehouse_ml/features/feature_schema.json`.
+
+### Qué se hizo
+
+1. **`src/thehouse_ml/features/pairs.py`** — implementación de referencia, pura (sin I/O, sin red, sin aleatoriedad):
+   - Dataclasses tipadas del esquema: `StudentProfile` (NV-11, todo nulable salvo `university_code`), `ResolvedStudent` (sin nulos) y `Room` (13 campos de `room`). `STUDENT_ATTRIBUTES` y `ROOM_ATTRIBUTES` mapean los nombres del esquema a atributos; una prueba exige que cubran exactamente los campos del esquema.
+   - `resolve_student` aplica las reglas para faltantes **leídas del esquema** (`default`, `reject`, `accept_all`); si falta algún dato del quick setup lanza `IncompleteProfileError` con todos los faltantes. Después valida tipo, rango y catálogo de cada campo y `budget.min <= budget.max` (`PairInputError`). `validate_room` hace lo mismo con el cuarto.
+   - `compute_pair_features(student, room, campuses, schema=None) -> dict[str, float]` devuelve las 7 features en el orden de `schema.feature_order`; si el esquema nombra una feature sin implementación, falla. `feature_vector` da el vector para el modelo.
+   - `distance_km` = `universities.haversine_m(...) / 1000` (misma función de ML-02, radio 6371 km); `effective_distance_km` con los factores de `schema_transport_factors`; `price_to_budget`, `services_coverage`, `place_type_match`, `property_type_match` y `pets_compatible` según las fórmulas del esquema. Las features `integer` valen 0 o 1.
+   - Sin recorte de distancia: los valores mayores a 30 km o a `maxDistanceKm` se devuelven tal cual.
+   - `student_from_record` / `room_from_record` construyen las dataclasses desde registros con los nombres del esquema (clave ausente en el estudiante = nulo).
+2. **`src/thehouse_ml/features/campuses.py`** — `Campus` y `load_campuses(path)`: lee `final_lat`/`final_lon` de `data/universities.csv` y marca `seed_verified = false` en las `seed_sin_verificar`. Es la única parte con I/O; la función de features recibe los campus ya cargados.
+3. **`tests/fixtures/pair_feature_cases.json`** — 35 casos por tabla (esquema 1.1.0) (entrada + salida esperada, tolerancia 1e-6), entradas **sintéticas**. Las salidas se calcularon **a mano**, sin el código bajo prueba: los cuartos con distancia > 0 están sobre el meridiano del campus, donde haversine = 6371 km × Δφ (0.09° → 10.007543 km; 0.36° → 40.030174 km). El generador quedó en el scratchpad de la sesión, fuera del repo.
+4. **Pruebas** — `tests/unit/test_pair_features.py` (87) y `tests/unit/test_campuses.py` (9), más 7 casos nuevos en `test_feature_schema_validation.py`.
+
+En total, 136 pruebas nuevas:
+
+- `tests/unit/test_pair_features.py`: 120 (incluye los 33 añadidos para el hallazgo 9).
+- `tests/unit/test_campuses.py`: 9.
+- `tests/unit/test_feature_schema_validation.py`: 7.
+5. **Documentos** — M-ML-023 (APROBADO) en `memoria.md`; T02 marcada en `task.md`; `spec.md` §14 con 2 tasks completadas; `specs/README.md` (ML-03 2/7); nota del fixture en `tests/fixtures/README.md`.
+
+### Comprobación de las fórmulas contra el esquema
+
+| Feature | Esquema | Pedido en el «EJECUTA» | Diferencia |
+| --- | --- | --- | --- |
+| `distance_km` | haversine campus–cuarto, radio 6371 km | haversine con `haversine_m` de ML-02 | Ninguna |
+| `effective_distance_km` | `distance_km × factor`; walk 1.0, bike 0.5, public 0.4, car 0.25; nulo → public | Igual | Ninguna |
+| `price_to_budget` | 1.0.0: `price_mxn / budget.max`; `budget.max = 0` → 0. **1.1.0:** `price_mxn / max(budget.max, 1)` | `price_mxn / budget.max`; definir el caso 0 | En 1.0.0 el esquema ya definía el caso 0 (hallazgo 2); resuelto en 1.1.0 con una sola fórmula |
+| `services_coverage` | cubiertos / pedidos; vacío o nulo → 1 | Igual | Ninguna |
+| `place_type_match` | 1 si coincide | Igual | Ninguna |
+| `property_type_match` | 1 si nulo, vacío o contiene | Igual | Ninguna |
+| `pets_compatible` | 0 solo si mascota y no admite; nulo → false | Igual | Ninguna |
+
+### Casos por tabla
+
+| Escenario pedido | Casos (`id`) |
+| --- | --- |
+| Presupuesto exacto | `budget_exact` (1.0) |
+| Distancia 0 | `distance_zero`, `distance_zero_other_campus` |
+| Sin servicios pedidos | `no_services_requested`, `null_essential_services` |
+| Cuarto sin servicios | `room_without_services` (0.0); además `partial_services` (2/3) |
+| Mascotas, 4 combinaciones | `pets_student_{false,true}_room_{false,true}` |
+| `propertyTypes` vacío | `property_types_empty`; además `property_types_contains`, `property_types_mismatch`, `null_property_types` |
+| Cada transporte | `transport_walk`, `transport_bike`, `transport_public`, `transport_car`, `null_transport` |
+| Campos nulos con su regla | `null_budget_min_and_max_distance`, `null_essential_services`, `null_pets`, `null_property_types`, `null_transport`, `all_optional_null` |
+| Distancia > 30 km | `distance_over_30_km` (40.03 km con `maxDistanceKm` 5), `distance_over_30_km_car` |
+| Quick setup incompleto | `incomplete_budget_max`, `incomplete_livingWith`, `incomplete_placeType`, `incomplete_all_quick_setup` |
+| `budget.max = 0` (1.1.0) | `budget_max_zero_price_zero` (0 / 1 = 0), `budget_max_zero_price_positive` (3000 / 1 = 3000), `budget_max_one` (3000 / 1 = 3000) |
+| Rangos SUPUESTOS del cuarto (1.1.0) | `room_assumed_ranges_exceeded` (12 recámaras, 8 baños, 450 m²: se acepta) |
+| Otros | `place_type_mismatch`, `price_over_budget` (1.25, sin recorte) |
+
+### Cambio de esquema 1.1.0 (M-ML-023)
+
+Ampliación compatible (versión menor): todo valor válido en 1.0.0 sigue siéndolo y ningún catálogo, rango ni nulable de NV-11 cambia. Registrado en `metadata.changelog`.
+
+| Elemento | 1.0.0 | 1.1.0 |
+| --- | --- | --- |
+| `distance_km.range` | `{"min": 0, "max": 30}` | `{"min": 0, "max": null}` (sin límite superior) + `"training_range": [0, 30]` |
+| `effective_distance_km.range` | `{"min": 0, "max": 30}` | `{"min": 0, "max": null}` + `"training_range": [0, 30]` |
+| `price_to_budget.formula` | `price_mxn / budget.max`; `budget.max = 0` → 0 | `price_mxn / max(budget.max, 1)`, sin casos especiales |
+| `price_to_budget.range` | `{"min": 0, "max": 1}` | `{"min": 0, "max": null}` + `"training_range": [0, 1]` (pares que pasan HC01; hallazgo 9) |
+| `bedrooms`, `bathrooms`, `area_m2` (`range_basis`) | SUPUESTO documentado | SUPUESTO para el catálogo sintético; en la entrada solo tipo y no negativo |
+| `metadata` | — | `schema_version` 1.1.0, `decision` y `changelog` |
+
+En el cargador (`loader.py`): `ValueRange.max` admite `None` (solo en `pair_features`; un campo del estudiante o del cuarto con `max: null` se rechaza), `PairFeature.training_range` (par `[min, max]` cerrado y dentro de `range`) y `FieldSpec.range_basis` / `range_is_assumption`. En `pairs.py`: la fórmula única de `price_to_budget` y la validación de los campos con rango SUPUESTO (tipo y no negativo).
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `96 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 23 source files` (PASS) |
+| `uv run pytest --cov=thehouse_ml` | **476 passed**; cobertura total **94.32 %** ≥ 80 %; `features/pairs.py` **100 %** (173 sentencias, 62 ramas), `features/loader.py` **100 %** (334 sentencias, 132 ramas), `features/campuses.py` **100 %** (45 sentencias, 14 ramas), `features/__init__.py` 100 % (PASS) |
+
+Corrida final, después de aplicar las decisiones de M-ML-023 (esquema 1.1.0), incluida la del hallazgo 9.
+
+### Trazabilidad R02 → prueba
+
+| Criterio | Prueba |
+| --- | --- |
+| Casos por tabla (35) con tolerancia 1e-6 | `test_pair_features.py::test_table_case[*]` |
+| Una distancia > 30 km es válida contra el esquema 1.1.0 (y queda fuera de `training_range`) | `::test_a_distance_beyond_30_km_is_valid_against_the_schema` |
+| `price_to_budget` = `price_mxn / max(budget.max, 1)` | `::test_price_to_budget_is_one_formula_with_max_budget_one` |
+| `price_to_budget` = 3000.0 es válido contra el esquema y queda fuera de `training_range` [0, 1] | `::test_a_price_to_budget_of_3000_is_valid_against_the_schema` |
+| Todo valor calculado de la tabla cumple el `range` de su feature (31 casos) | `::test_every_computed_feature_is_valid_against_its_schema_range[*]` |
+| Solo las features sin límite superior llevan `training_range`; las de rango cerrado no lo pueden rebasar | `::test_only_unbounded_features_can_leave_their_training_range` |
+| Los rangos SUPUESTOS del cuarto no lo rechazan | `::test_assumed_room_ranges_do_not_reject_the_room` |
+| `max: null` y `training_range` en el cargador | `test_feature_schema_validation.py::test_broken_schemas_are_rejected` (7 casos nuevos) |
+| La tabla cubre todos los escenarios pedidos | `::test_the_table_covers_every_requested_scenario` |
+| Coordenadas de la tabla = `data/universities.csv`; metadatos = esquema | `::test_the_table_uses_the_campus_coordinates_of_universities_csv`, `::test_the_table_metadata_matches_the_schema` |
+| Orden exacto del esquema | `::test_features_come_back_in_the_exact_order_of_the_schema`, `::test_the_order_is_taken_from_the_schema_not_from_the_code`, `::test_a_schema_feature_without_reference_implementation_fails` |
+| Distancias > 30 km o > `maxDistanceKm` sin recorte | `::test_distances_beyond_30_km_or_max_distance_are_returned_unclipped` |
+| Reglas para faltantes leídas del esquema | `::test_missing_rules_come_from_the_schema`, `::test_dataclasses_cover_every_field_of_the_schema` |
+| Validación de entradas | `::test_invalid_student_values_are_rejected` (16), `::test_invalid_room_values_are_rejected` (12), `::test_records_with_unknown_or_missing_keys_are_rejected` y otras |
+| Pureza (determinista, sin mutar, sin I/O ni aleatoriedad) | `::test_the_function_is_deterministic_and_does_not_mutate_inputs`, `::test_the_pairs_module_has_no_io_or_randomness` |
+| Una sola implementación de haversine | `::test_distance_reuses_the_single_haversine_of_ml02` |
+| Campus desde `data/universities.csv` | `test_campuses.py` (9) |
+
+### Tabla de coherencia
+
+| Regla | Evidencia | Resultado |
+| --- | --- | --- |
+| Constitution §2.4 / §13: el contrato es `feature_schema.json` | Reglas, factores y orden se leen del esquema; la fórmula de `price_to_budget` es la misma en esquema y código | PASS |
+| Constitution §18: versión semántica | 1.0.0 → 1.1.0 (menor): ampliación compatible aprobada en M-ML-023; NV-11 sin cambios (pruebas contra el snapshot en verde) | PASS |
+| Constitution §5 / AGENTS: sin dependencias nuevas | Solo biblioteca estándar; `pyproject.toml` y `uv.lock` sin cambios | PASS |
+| Constitution §8: datos sintéticos etiquetados | `metadata.synthetic: true` en `pair_feature_cases.json` | PASS |
+| Constitution §11: restricciones duras | No se implementan aquí (T03); la distancia no se trata como restricción dura | PASS (fuera de alcance de T02) |
+| Constitution §13.4: casos dorados para el backend | La tabla queda lista para ML-06; la paridad ONNX no se ejecuta en T02 | No ejecutado (ML-06) |
+| Spec §7 regla 2: una sola implementación de referencia | `pairs.py`; `haversine_m` de ML-02 reutilizada | PASS |
+| AGENTS: rutas permitidas | `git status` solo lista `src/thehouse_ml/features/`, `tests/`, `memoria.md`, `specs/ml-03-feature-schema/` y `specs/README.md` (pedido en el «EJECUTA») | PASS |
+| AGENTS: un control no ejecutado no se reporta como PASS | T03–T07 abiertas; la paridad ONNX no se reporta | PASS |
+
+### Hallazgos
+
+| # | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| 1 | El esquema declara `range` 0–30 para `distance_km` y `effective_distance_km`, pero la función devuelve distancias reales mayores (p. ej. 40.03 km en `distance_over_30_km`). El esquema **no se cambió**. Opciones: ampliar el rango (cambio de esquema; según la regla de versionado, posible versión mayor) o documentar que 0–30 es el dominio del catálogo sintético y no un límite de la entrada. | ADVERTENCIA | **RESUELTO (M-ML-023)** — `range` con mínimo 0 y sin límite superior + `training_range` [0, 30]; esquema 1.1.0; prueba de que > 30 km es válido |
+| 2 | `budget.max = 0`: el esquema ya fija `price_to_budget = 0`; no hay división entre cero. Con renta positiva el valor 0 parece «precio ideal», aunque solo es seguro porque HC01 excluye ese par (T03). Alternativa: devolver un valor ≥ 1 para que ese par nunca parezca barato. | ADVERTENCIA | **RESUELTO (M-ML-023)** — `price_mxn / max(budget.max, 1)` en esquema y código; casos recalculados a mano (0 → 0; 3000 → 3000) |
+| 3 | `price_to_budget` puede pasar de 1 (`price_over_budget` = 1.25): se devuelve sin recorte; el esquema ya dice que el rango 0–1 solo se cumple en los pares que pasan HC01. | INFORMATIVO | **RESUELTO con el hallazgo 9** — `range` sin límite superior y `training_range` [0, 1] |
+| 4 | La función valida contra los rangos del cuarto que son SUPUESTOS (`bedrooms` 1–10, `bathrooms` 1–6, `area_m2` 6–400): un cuarto real fuera de esos rangos se rechaza aunque esos campos no entren en ninguna feature. | ADVERTENCIA | **RESUELTO (M-ML-023)** — solo tipo y no negativo; los rangos quedan como SUPUESTO del catálogo sintético |
+| 5 | `budget.min`, `maxDistanceKm` y `livingWith` no entran en ninguna de las 7 features (son de HC/ML-04); `livingWith` igual es obligatorio por la regla `reject` del esquema. | INFORMATIVO | Coherente con el esquema |
+| 6 | Las universidades sin verificar (TESJI, UMB-VDC, UCAN) dan distancias orientativas; `Campus.seed_verified` lo conserva, pero la salida de features no lo marca. | INFORMATIVO | Para T06 (métricas con y sin ellas) |
+| 7 | Aviso al backend (NV-12) de los campos `missing_in_property` (hallazgo 9 de T01). | ADVERTENCIA | **ABIERTO — acción pendiente del responsable** |
+| 8 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR de T02 |
+| 9 | Con la fórmula 1.1.0, `price_to_budget` puede valer miles (p. ej. 3000 con presupuesto 0), mientras el esquema mantiene `range` 0–1 para esta feature (válido solo en pares que pasan HC01). No se cambió: queda igual que el hallazgo 3. Si se quiere que todo valor calculado cumpla su `range`, la opción análoga a la de la distancia sería `max: null` con `training_range` [0, 1]. | INFORMATIVO | **RESUELTO (M-ML-023)** — dentro de 1.1.0 (sin publicar): `range` `{"min": 0, "max": null}` y `training_range` [0, 1]; prueba de que 3000.0 es válido y queda fuera de `training_range` |
+| 10 | Revisión del resto de las features: `services_coverage` (0–1) es una proporción de un subconjunto, así que no puede salir de [0, 1]; `place_type_match`, `property_type_match` y `pets_compatible` solo valen 0 o 1. Ninguna otra feature puede rebasar su `range`. Los mínimos en 0 se cumplen porque las distancias, la renta y `max(budget.max, 1)` no son negativos (entradas validadas). | INFORMATIVO | Verificado con pruebas: todo valor de la tabla cumple su `range` |
+
+### Revisión y resultado
+
+- **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas. Los casos por tabla son sintéticos; las coordenadas de campus vienen de `data/universities.csv` (ODbL, registrado en M-ML-016/M-ML-017).
+- **Resultado:** **PASS WITH WARNINGS** — la aceptación de R02 se cumple (función pura con casos límite: presupuesto exacto, distancia 0, sin servicios, y el resto de la tabla) y los cuatro controles pasan. Los hallazgos 1, 2, 3, 4 y 9 se resolvieron con M-ML-023 (esquema 1.1.0). Única advertencia abierta: el aviso al backend (NV-12, hallazgo 7), acción pendiente del responsable.
