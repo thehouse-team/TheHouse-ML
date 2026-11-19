@@ -125,7 +125,7 @@ Se registran en `memoria.md` (M-ML-021, APROBADO).
 | Tasks | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 4 (T01, T02, T03, T04) |
+| Tasks completadas | 5 (T01, T02, T03, T04, T05) |
 | Estado documental | **✅ APROBADA** |
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 

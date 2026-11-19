@@ -1,0 +1,170 @@
+{
+  "metadata": {
+    "params_version": "1.0.0",
+    "spec": "ML-03 1.0.0, T05 (ML-03-R05)",
+    "decision": "M-ML-026 (APROBADO)",
+    "synthetic": true,
+    "currency": "MXN mensuales en pesos de julio de 2024 (M-ML-014)",
+    "description": "Parámetros del generador del catálogo sintético de cuartos. Cada parámetro lleva su base: «calibrado: <fuente>» o «SUPUESTO documentado». Los cuartos no imitan anuncios reales: no llevan títulos, descripciones, nombres ni datos de anfitriones (constitución §7 y §8)."
+  },
+  "parameters": {
+    "seed": {
+      "value": 20261905,
+      "basis": "SUPUESTO documentado: semilla fija (constitución §9) e independiente de la de estudiantes (20261119): otro número y otro espacio de nombres; cada campus usa su propio generador random.Random(\"rooms:<seed>:<code>\")."
+    },
+    "n_rooms": {
+      "value": 3000,
+      "basis": "SUPUESTO documentado: número aprobado en M-ML-021 (spec ML-03 §10: ~3,000 cuartos entre los 10 campus del seed)."
+    },
+    "room_id.prefix": {
+      "value": "R",
+      "basis": "SUPUESTO documentado: id sintético sin datos personales (constitución §7): prefijo + número consecutivo."
+    },
+    "room_id.width": {
+      "value": 5,
+      "basis": "SUPUESTO documentado: 5 dígitos con ceros a la izquierda (R00001 a R03000)."
+    },
+    "universities.per_campus": {
+      "value": 300,
+      "basis": "SUPUESTO documentado: partes iguales (3,000 / 10 campus, M-ML-021) porque no hay oferta pública verificada por campus. Las 3 seed_sin_verificar (TESJI, UMB-VDC, UCAN) entran con seed_verified = false, tomado de data/universities.csv (M-ML-017)."
+    },
+    "universities.municipio_clave": {
+      "value": {
+        "UTTT": "13076",
+        "UAEH-ESTE": "13063",
+        "UAEH-ESTL": "13070",
+        "UAEH-ESAT": "13013",
+        "ITSOEH": "13041",
+        "TESJI": "15045",
+        "UMB-JILO": "15045",
+        "UMB-VDC": "15112",
+        "UCAN": "13076",
+        "UNE-TULA": "13076"
+      },
+      "basis": "calibrado: la misma correspondencia campus → municipio de students_params.json (ciudad de data/seed/universities_seed.csv = municipio_nombre de regional_calibration.parquet); una prueba verifica que coinciden."
+    },
+    "location.max_distance_km": {
+      "value": 30,
+      "basis": "calibrado: tope de M-ML-021 y spec ML-03 R05 (todos los cuartos a ≤ 30 km del campus) y training_range de distance_km en feature_schema.json 1.1.0."
+    },
+    "location.distance_bands_km": {
+      "value": [
+        {"min": 0.0, "max": 1.0, "probability": 0.25},
+        {"min": 1.0, "max": 2.0, "probability": 0.20},
+        {"min": 2.0, "max": 5.0, "probability": 0.25},
+        {"min": 5.0, "max": 10.0, "probability": 0.15},
+        {"min": 10.0, "max": 20.0, "probability": 0.10},
+        {"min": 20.0, "max": 30.0, "probability": 0.05}
+      ],
+      "basis": "SUPUESTO documentado: la mayoría de la oferta para estudiantes está cerca del campus (45 % a ≤ 2 km, 70 % a ≤ 5 km) con una cola hasta 30 km (15 % a más de 10 km) para los estudiantes que viajan en transporte público o auto. Dentro de cada banda la distancia es uniforme. Sin fuente pública de oferta de cuartos por distancia; validar con el equipo (riesgo RK02)."
+    },
+    "location.bearing_degrees": {
+      "value": [0, 360],
+      "basis": "SUPUESTO documentado: rumbo uniforme alrededor del campus; el punto se calcula sobre la esfera de 6,371 km (el mismo radio de haversine_m, M-ML-022), así que la distancia haversine del cuarto al campus es la distancia muestreada."
+    },
+    "location.coordinate_decimals": {
+      "value": 6,
+      "basis": "SUPUESTO documentado: 6 decimales (~0.1 m), suficiente para la distancia y sin falsa precisión."
+    },
+    "rent.median_anchor": {
+      "value": "regional_calibration.parquet · indicador renta · p50",
+      "basis": "calibrado: renta p50 regional del municipio del campus (ENVI 2020 deflactada a jul-2024, respaldo estatal de M-ML-015: Hidalgo $1,872 y Estado de México $2,496). La mediana general de la renta de cada campus se iguala a este valor."
+    },
+    "rent.shape": {
+      "value": "rent_histogram.parquet · scope = entidad del campus",
+      "basis": "calibrado: forma del histograma ponderado de renta de la ENVI 2020 del estado del campus (intervalos de 500 pesos de jul-2024 hasta 10,000 y 10,000+; ML-02 T08), uniforme dentro de cada intervalo, escalada para que su mediana sea la renta p50 regional."
+    },
+    "rent.open_bin_upper": {
+      "value": 15000,
+      "basis": "SUPUESTO documentado: tope del intervalo abierto 10,000+ para muestrear dentro de él (1.4 % de la frecuencia en el Estado de México y 0 % en Hidalgo)."
+    },
+    "rent.place_type_multipliers": {
+      "value": {"shared": 0.6, "room": 0.9, "room_private_bath": 1.15, "studio": 1.5},
+      "basis": "SUPUESTO documentado: la renta de la ENVI es de vivienda completa, no de cuarto (nota para T05, hallazgo 3 de T04). Multiplicadores relativos en el orden shared < room < room_private_bath < studio; se normalizan con un factor común para que la mediana general de cada campus siga siendo la renta p50 regional (M-ML-025). Dentro de cada placeType el cuantil de la renta se muestrea estratificado (un estrato por cuarto) para que la mediana de cada grupo siga la forma del histograma."
+    },
+    "rent.round_to": {
+      "value": 50,
+      "basis": "SUPUESTO documentado: rentas en múltiplos de 50 pesos; con objetivos de $1,872 y $2,496 el redondeo pesa ≤ 1.3 % (nota para T05: con objetivos menores a ~$1,500 el paso de 100 pesaría ±4 %)."
+    },
+    "rent.clip": {
+      "value": [0, 50000],
+      "basis": "calibrado: rango de price_mxn de feature_schema.json 1.1.0 (igual al presupuesto de NV-11)."
+    },
+    "rent.calibration_tolerance": {
+      "value": 0.10,
+      "basis": "SUPUESTO documentado: la mediana de la renta de cada campus debe quedar a ±10 % de la renta p50 regional, la misma tolerancia aprobada para budget.max en M-ML-025."
+    },
+    "services.census_indicators": {
+      "value": {"water": "agua_entubada", "electricity": "electricidad", "gas": "gas", "wifi": "internet"},
+      "basis": "calibrado: Censo de Población y Vivienda 2020, cuestionario ampliado (M-ML-015), proporción ponderada por municipio del campus en regional_calibration.parquet: AGUA_ENTUBADA (dentro o en el patio), ELECTRICIDAD, COMBUSTIBLE = gas, INTERNET → wifi (spec ML-03 §10). DRENAJE no tiene equivalente en NV-11 y no se usa. Las proporciones son de todas las viviendas del municipio, no solo de las rentadas."
+    },
+    "services.census_tolerance_se": {
+      "value": 3,
+      "basis": "SUPUESTO documentado: la proporción generada por campus debe quedar a ±3 errores estándar binomiales de la del Censo (√(p(1−p)/300)), con un mínimo de ±2 puntos: ±8.6 puntos para internet ≈ 45 % y ±2 puntos para electricidad ≈ 99 %."
+    },
+    "services.priors_by_place_type": {
+      "value": {
+        "hot_water": {"shared": 0.75, "room": 0.75, "room_private_bath": 0.85, "studio": 0.85},
+        "laundry": {"shared": 0.50, "room": 0.45, "room_private_bath": 0.45, "studio": 0.35},
+        "kitchen": {"shared": 0.80, "room": 0.60, "room_private_bath": 0.60, "studio": 0.90},
+        "furnished": {"shared": 0.70, "room": 0.55, "room_private_bath": 0.60, "studio": 0.50},
+        "parking": {"shared": 0.20, "room": 0.25, "room_private_bath": 0.30, "studio": 0.35},
+        "security": {"shared": 0.30, "room": 0.30, "room_private_bath": 0.35, "studio": 0.40},
+        "cleaning": {"shared": 0.20, "room": 0.15, "room_private_bath": 0.20, "studio": 0.10}
+      },
+      "basis": "SUPUESTO documentado: el Censo no mide estos servicios (spec ML-03 §10). Probabilidad independiente por servicio según placeType: el estudio casi siempre trae cocina propia y el cuarto compartido suele incluir cocina común y muebles; estacionamiento y vigilancia algo más probables en estudios. Sin fuente pública; validar con el equipo (riesgo RK02)."
+    },
+    "livingWith.probabilities": {
+      "value": {"women": 0.25, "men": 0.25, "any": 0.50},
+      "basis": "SUPUESTO documentado: propuesta de la nota para T05 (M-ML-025, hallazgo 5 de T04): los estudiantes women y men no ven cuartos any (HC02), así que cada campus necesita suficientes cuartos women y men para el umbral de ≥ 90 % de T06."
+    },
+    "livingWith.min_per_campus": {
+      "value": 40,
+      "basis": "SUPUESTO documentado: mínimo de cuartos women y de cuartos men por campus que exige la prueba de T05 (nota para T05, M-ML-025; ≈ 13 % de 300)."
+    },
+    "placeType.probabilities": {
+      "value": {"room": 0.40, "room_private_bath": 0.25, "studio": 0.15, "shared": 0.20},
+      "basis": "SUPUESTO documentado: la oferta típica para estudiantes en ciudades medias es el cuarto individual; le siguen el cuarto con baño propio y el compartido; los estudios son menos comunes. Sin fuente pública; validar con el equipo (riesgo RK02)."
+    },
+    "propertyType.by_place_type": {
+      "value": {
+        "shared": {"house": 0.55, "apartment": 0.25, "student_residence": 0.20},
+        "room": {"house": 0.60, "apartment": 0.25, "student_residence": 0.15},
+        "room_private_bath": {"house": 0.50, "apartment": 0.30, "student_residence": 0.20},
+        "studio": {"house": 0.25, "apartment": 0.65, "student_residence": 0.10}
+      },
+      "basis": "SUPUESTO documentado: los cuartos están sobre todo en casas; los estudios, en departamentos; las residencias estudiantiles son minoría. Sin fuente pública; validar con el equipo (riesgo RK02)."
+    },
+    "pets_allowed.by_property_type": {
+      "value": {"house": 0.35, "apartment": 0.25, "student_residence": 0.10},
+      "basis": "SUPUESTO documentado: es más común admitir mascotas en casas que en departamentos y casi nunca en residencias (≈ 30 % del catálogo). Sin fuente pública; validar con el equipo (riesgo RK02)."
+    },
+    "bedrooms.by_place_type": {
+      "value": {
+        "shared": {"values": [2, 3, 4, 5], "weights": [0.30, 0.35, 0.25, 0.10]},
+        "room": {"values": [2, 3, 4, 5], "weights": [0.30, 0.35, 0.25, 0.10]},
+        "room_private_bath": {"values": [2, 3, 4, 5], "weights": [0.25, 0.35, 0.25, 0.15]},
+        "studio": {"values": [1], "weights": [1.0]}
+      },
+      "basis": "SUPUESTO documentado: recámaras del inmueble (Property.Bedrooms); los cuartos están en inmuebles de 2 a 5 recámaras y el estudio tiene una. Dentro del rango SUPUESTO 1–10 del esquema (M-ML-022)."
+    },
+    "bathrooms.by_place_type": {
+      "value": {
+        "shared": {"values": [1, 2, 3], "weights": [0.55, 0.35, 0.10]},
+        "room": {"values": [1, 2, 3], "weights": [0.55, 0.35, 0.10]},
+        "room_private_bath": {"values": [2, 3, 4], "weights": [0.50, 0.35, 0.15]},
+        "studio": {"values": [1], "weights": [1.0]}
+      },
+      "basis": "SUPUESTO documentado: baños del inmueble (Property.Bathrooms, enteros); con baño propio hay al menos 2 (el propio y el común). Se recortan a recámaras + 1 para que el inmueble sea coherente. Dentro del rango SUPUESTO 1–6 del esquema (M-ML-022)."
+    },
+    "area_m2.by_place_type": {
+      "value": {
+        "shared": [12, 24],
+        "room": [9, 16],
+        "room_private_bath": [12, 22],
+        "studio": [20, 45]
+      },
+      "basis": "SUPUESTO documentado: superficie del espacio que se ofrece (el cuarto o el estudio), uniforme en el intervalo y redondeada a 1 m². Dentro del rango SUPUESTO 6–400 del esquema (M-ML-022), cuya descripción va «de un cuarto mínimo a una casa compartida grande»; si el backend define AreaM2 como superficie del inmueble, se cambia aquí (hallazgo de T05)."
+    }
+  }
+}

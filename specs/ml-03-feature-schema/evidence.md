@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-03 1.0.0 |
-| Tareas ejecutadas | T01 · Esquema de features (R01); T02 · Cálculo de features de referencia (R02); T03 · Restricciones duras (R03) y T04 · Estudiantes sintéticos (R04), cada una con sección propia abajo |
+| Tareas ejecutadas | T01 · Esquema de features (R01); T02 · Cálculo de features de referencia (R02); T03 · Restricciones duras (R03); T04 · Estudiantes sintéticos (R04) y T05 · Catálogo sintético de cuartos (R05), cada una con sección propia abajo |
 | Autorización T01 | «EJECUTA ML-03 1.0.0, task T01 (ML-03-R01), en la rama feat/ml-03-schema. Rutas permitidas: src/thehouse_ml/, tests/, data/seed/, memoria.md y specs/ml-03-feature-schema/. Sin dependencias nuevas (nada de jsonschema ni pydantic: valida con la biblioteca estándar)» — César Yael López Trujillo, 2026-11-19 |
 | Autorización T01 (ampliación) | Respuestas del responsable a las advertencias 1–5 y autorización para mover el esquema a `src/thehouse_ml/features/` (ubicación de `specs/ARQUITECTURA.md`), actualizar `specs/ARQUITECTURA.md` (ML-03 con 7 tasks y catálogo sintético de cuartos) y `specs/README.md` (ML-03 en ejecución, 1/7); aprueba `backend_status = "ml_only"` y el radio de 6371 km; sin commit — César Yael López Trujillo, 2026-11-19 |
 | Rama (T01) | `feat/ml-03-schema` |
@@ -544,3 +544,170 @@ Origen: hallazgos 3, 4 y 5 de T04 y aprobación de M-ML-025 (César Yael López 
 1. **`livingWith` de los cuartos:** distribución propuesta **women 0.25 · men 0.25 · any 0.50**, más una prueba de T05 que exija **al menos 40 cuartos `women` y 40 `men` por campus**. Con estudiantes women 0.30 · men 0.25 · any 0.45 (M-ML-025), el 55.1 % solo ve cuartos de su mismo valor (HC02), y el umbral de ≥ 90 % de T06 depende del número absoluto de esos cuartos por campus (ver «Hallazgo obligatorio: `livingWith`»).
 2. **Renta por `placeType`:** la renta del INEGI (ENVI 2020, `regional_calibration.parquet`) es de **vivienda completa**, no de cuarto. La renta de cada cuarto se ajusta con **multiplicadores por `placeType` documentados** en `rooms_params.json`, en el orden `shared` < `room` < `room_private_bath` < `studio`, y se normaliza para que la **mediana general** de la renta de cada campus siga calibrada con la renta p50 regional (la prueba de T05 compara esa mediana con la calibrada). Así la relación con `budget.max` de los estudiantes (mediana = renta p50 × 1.3) se mantiene.
 3. **Limitación de la tolerancia:** la tolerancia de ±10 % alrededor de la mediana supone objetivos de al menos **~$1,500**. Con objetivos menores, el redondeo a 100 pesos ya pesa ±4 % (un objetivo de $1,170 dio +11.1 %). Si T05 redondea rentas o calibra subgrupos (por ejemplo por `placeType`) con medianas menores a ~$1,500, debe documentar una tolerancia acorde o redondear con un paso menor.
+
+## T05 · Catálogo sintético de cuartos
+
+| Campo | Valor |
+| --- | --- |
+| Autorización T05 | «EJECUTA ML-03 1.0.0, task T05 (ML-03-R05), en la rama feat/ml-03-rooms. Rutas permitidas: src/thehouse_ml/ (incluido src/thehouse_ml/synthetic/), tests/, reports/, memoria.md, specs/ml-03-feature-schema/ y specs/README.md (solo la fila de ML-03). Sin dependencias nuevas. No modifiques feature_schema.json (1.1.0) ni students_params.json» — César Yael López Trujillo, 2026-11-19 |
+| Rama | `feat/ml-03-rooms` |
+| Commit base | `f7960b7` (merge del PR #19, T04) |
+| Commit (T05) | Sin commit, por instrucción explícita del responsable |
+| Fecha de ejecución | 2026-11-19 |
+| Decisión | M-ML-026 (APROBADO — César Yael López Trujillo — 2026-11-19, con los valores propuestos sin cambios) |
+| Esquema | `feature_schema.json` **1.1.0, sin cambios**; `students_params.json` **sin cambios** |
+
+Lecturas previas: `constitution.md` (§8 y §11) → `AGENTS.md` → `memoria.md` (M-ML-014, M-ML-015, M-ML-017, M-ML-019 a M-ML-025) → `spec.md` (§6 y §10), `plan.md`, `task.md` y `evidence.md` de ML-03 (las dos «Nota para T05») → `src/thehouse_ml/features/` y `src/thehouse_ml/synthetic/students*`.
+
+### Qué se hizo
+
+1. **`src/thehouse_ml/synthetic/rooms_params.json`** (en git, empaquetado) — 28 parámetros del generador, cada uno `{value, basis}` con `basis` = «calibrado: <fuente>» o «SUPUESTO documentado: …». Metadatos `synthetic: true` y `decision: "M-ML-026 (APROBADO)"`. Resumen en la tabla de abajo.
+2. **`src/thehouse_ml/synthetic/rooms.py`** — generador **puro** (sin I/O, red ni reloj): `load_params`/`parse_params` validan los parámetros contra el esquema (catálogos, rango de `price_mxn`, rangos SUPUESTOS de recámaras, baños y superficie, bandas contiguas hasta 30 km, probabilidades que suman 1, orden de multiplicadores `shared` < `room` < `room_private_bath` < `studio`, `n_rooms = per_campus × 10`). `RentShape` convierte el histograma en una distribución continua (uniforme por intervalo; `cdf`, `quantile`, `median`); `mixture_normalizer` resuelve por bisección el factor común de los multiplicadores para que la mediana de la mezcla sea la del histograma; `destination_point` coloca el cuarto sobre la esfera de 6,371 km (mismo radio de `haversine_m`). `generate_rooms(params, inputs, campuses, schema)` usa un `random.Random("rooms:<seed>:<code>")` por campus con un orden fijo de extracciones (primero el `placeType` de los 300 cuartos, luego el cuantil de renta estratificado dentro de cada `placeType`, luego el resto cuarto por cuarto), valida cada cuarto con `validate_room` de T02 y devuelve `SyntheticRoom(room_id, seed_verified, campus_distance_km, room: Room)`. Sin numpy.
+3. **`src/thehouse_ml/synthetic/rooms_stage.py`** — etapa `run_rooms` de `prepare`: lee la renta p50 (con `rent_anchors` de T04) y las proporciones del Censo de `regional_calibration.parquet`, el histograma del estado de `rent_histogram.parquet` y los campus de `data/universities.csv`; escribe `data/processed/rooms.parquet` (fuera de git; columnas `room_id`, `university_code`, `seed_verified`, `campus_distance_km`, los 12 campos de `room` del esquema y `synthetic = true`; tipos fijos) y `reports/rooms_catalog.md` (título «DATOS SINTÉTICOS», sin fechas ni rutas absolutas). Sin insumos la etapa se omite con un mensaje; si falta la renta, un indicador del Censo, el histograma de una entidad o un campus, lanza `RoomsError`.
+4. **`src/thehouse_ml/stages.py`, `cli.py` y `synthetic/__init__.py`** — `prepare` corre `run_rooms` después de `run_students` y antes de la data card; la CLI devuelve 1 con `RoomParamsError` o `RoomsError`; el paquete exporta el generador.
+5. **Pruebas** — `tests/unit/test_synthetic_rooms.py` (62) y `tests/integration/test_rooms_stage.py` (8); `tests/unit/test_stages.py` con el orden nuevo de `prepare`. Las pruebas unitarias usan solo insumos versionados: renta p50 y proporciones del Censo de `reports/regional_calibration.md` e histogramas agrupados (≥ 30 viviendas por celda) de `reports/data_card.md` §7.
+6. **Documentos** — M-ML-026 (APROBADO) en `memoria.md`; T05 marcada en `task.md`; `spec.md` §14 con 5 tasks; fila de ML-03 en `specs/README.md` (5/7).
+
+### Parámetros (`rooms_params.json` 1.0.0)
+
+| Parámetro | Valor | Base |
+| --- | --- | --- |
+| `seed` | 20261905 (generador por campus `"rooms:<seed>:<code>"`; estudiantes usan 20261119 y `"<seed>:<code>"`) | SUPUESTO |
+| `n_rooms` / `universities.per_campus` | 3,000 / 300 por campus | SUPUESTO (aprobado en M-ML-021) |
+| `room_id.prefix` / `.width` | `R` / 5 → `R00001`…`R03000` | SUPUESTO |
+| `universities.municipio_clave` | igual a `students_params.json` (prueba) | calibrado: `universities_seed.csv` + `regional_calibration.parquet` |
+| `location.max_distance_km` | 30 | calibrado: M-ML-021 y `training_range` de `distance_km` |
+| `location.distance_bands_km` | 0–1 km 25 % · 1–2 km 20 % · 2–5 km 25 % · 5–10 km 15 % · 10–20 km 10 % · 20–30 km 5 % (uniforme dentro de la banda) | SUPUESTO |
+| `location.bearing_degrees` / `.coordinate_decimals` | uniforme [0, 360) / 6 decimales | SUPUESTO |
+| `rent.median_anchor` | renta p50 de `regional_calibration.parquet` (Hidalgo $1,872; Edomex $2,496) | calibrado: ENVI 2020, jul-2024, M-ML-015 |
+| `rent.shape` | histograma ENVI del estado del campus (`rent_histogram.parquet`), escalado a la p50 | calibrado: ML-02 T08 |
+| `rent.open_bin_upper` | 15,000 (tope del intervalo 10,000+) | SUPUESTO |
+| `rent.place_type_multipliers` | shared 0.60 · room 0.90 · room_private_bath 1.15 · studio 1.50 (efectivos 0.622 · 0.933 · 1.192 · 1.555) | SUPUESTO (nota para T05) |
+| `rent.round_to` / `rent.clip` | 50 / [0, 50,000] | SUPUESTO / calibrado: `price_mxn` del esquema |
+| `rent.calibration_tolerance` | ±10 % | SUPUESTO (igual a M-ML-025) |
+| `services.census_indicators` | water ← `agua_entubada` · electricity ← `electricidad` · gas ← `gas` · wifi ← `internet` | calibrado: Censo 2020 por municipio (M-ML-015) |
+| `services.census_tolerance_se` | ±3 errores estándar binomiales (n = 300), mínimo ±2 puntos | SUPUESTO |
+| `services.priors_by_place_type` | hot_water, laundry, kitchen, furnished, parking, security, cleaning por `placeType` (ver M-ML-026) | SUPUESTO |
+| `livingWith.probabilities` / `.min_per_campus` | women 0.25 · men 0.25 · any 0.50 / 40 | SUPUESTO (nota para T05, M-ML-025) |
+| `placeType.probabilities` | room 0.40 · room_private_bath 0.25 · studio 0.15 · shared 0.20 | SUPUESTO |
+| `propertyType.by_place_type` | studio sobre todo `apartment` (0.65); cuartos sobre todo `house` (0.50–0.60) | SUPUESTO |
+| `pets_allowed.by_property_type` | house 0.35 · apartment 0.25 · student_residence 0.10 | SUPUESTO |
+| `bedrooms` / `bathrooms` / `area_m2` por `placeType` | recámaras 2–5 (estudio 1); baños 1–3, con baño propio 2–4, estudio 1, recortados a recámaras + 1; superficie del espacio ofrecido 9–45 m² | SUPUESTO (dentro de los rangos SUPUESTOS del esquema) |
+
+### Renta por campus contra la calibración (`reports/rooms_catalog.md` §2)
+
+| Campus | Municipio | Nivel | Renta p50 regional | p25 | p50 | p75 | Desviación p50 |
+| --- | --- | --- | ---: | ---: | ---: | ---: | ---: |
+| UTTT | Tula de Allende | estado | $1,872 | $1,200 | $1,925 | $3,100 | +2.8 % |
+| UAEH-ESTE | Tepeji del Río de Ocampo | estado | $1,872 | $1,200 | $1,850 | $3,050 | −1.2 % |
+| UAEH-ESTL | Tlahuelilpan | estado | $1,872 | $1,150 | $1,800 | $2,925 | −3.9 % |
+| UAEH-ESAT | Atotonilco de Tula | estado | $1,872 | $1,150 | $1,850 | $2,962 | −1.2 % |
+| ITSOEH | Mixquiahuala de Juárez | estado | $1,872 | $1,200 | $1,900 | $3,012 | +1.5 % |
+| TESJI (sin verificar) | Jilotepec | estado | $2,496 | $1,650 | $2,500 | $4,012 | +0.2 % |
+| UMB-JILO | Jilotepec | estado | $2,496 | $1,650 | $2,500 | $4,062 | +0.2 % |
+| UMB-VDC (sin verificar) | Villa del Carbón | estado | $2,496 | $1,550 | $2,400 | $3,900 | −3.9 % |
+| UCAN (sin verificar) | Tula de Allende | estado | $1,872 | $1,150 | $1,850 | $3,012 | −1.2 % |
+| UNE-TULA | Tula de Allende | estado | $1,872 | $1,150 | $1,850 | $2,962 | −1.2 % |
+
+Los 10 campus dentro de ±10 %. Referencia de la ENVI estatal (`regional_calibration.parquet`): p25–p75 $1,248–$2,995 en Hidalgo y $1,623–$3,495 en el Estado de México; la dispersión de los cuartos es algo mayor por los multiplicadores de `placeType`. Mediana por `placeType` (todo el catálogo): shared $1,250 < room $1,900 < room_private_bath $2,450 < studio $3,150; el orden se cumple en los 10 campus (§3 del reporte). Distancia: máximo 29.94 km, mediana 2.59 km, 44.5 % a ≤ 2 km. Censo: 40 de 40 proporciones (4 servicios × 10 campus) dentro de la tolerancia; la mayor diferencia es `wifi` en UTTT (42.0 % contra 46.9 %, tolerancia ±8.6). `livingWith`: de 62 a 85 cuartos `women` y de 62 a 84 `men` por campus (mínimo exigido 40).
+
+### Hallazgo obligatorio: umbral de estudiantes con al menos un cuarto compatible
+
+Estimación de exploración (script en el scratchpad de la sesión, fuera del repo; **no** es la prueba formal de T06): los 2,000 estudiantes de `students.parquet` (T04) contra los 3,000 cuartos de `rooms.parquet`, con `filter_rooms` (HC01 presupuesto, HC02 `livingWith`, HC03 mascotas; M-ML-024) y la distancia haversine del campus del estudiante al cuarto contra su `maxDistanceKm` resuelto (nulo → 30, M-ML-022).
+
+| Campus | Estudiantes | HC (cuartos de su campus) | HC + `maxDistanceKm` (cuartos de su campus) | HC + `maxDistanceKm` (todo el catálogo) |
+| --- | ---: | ---: | ---: | ---: |
+| UTTT | 200 | 100.0 % | 100.0 % | 100.0 % |
+| UAEH-ESTE | 200 | 100.0 % | 100.0 % | 100.0 % |
+| UAEH-ESTL | 200 | 100.0 % | 100.0 % | 100.0 % |
+| UAEH-ESAT | 200 | 100.0 % | 100.0 % | 100.0 % |
+| ITSOEH | 200 | 100.0 % | 100.0 % | 100.0 % |
+| TESJI (sin verificar) | 200 | 100.0 % | 100.0 % | 100.0 % |
+| UMB-JILO | 200 | 100.0 % | 100.0 % | 100.0 % |
+| UMB-VDC (sin verificar) | 200 | 100.0 % | 100.0 % | 100.0 % |
+| UCAN (sin verificar) | 200 | 100.0 % | 99.5 % | 99.5 % |
+| UNE-TULA | 200 | 100.0 % | 100.0 % | 100.0 % |
+| **Total** | 2,000 | **100.0 %** | **99.95 %** | **99.95 %** |
+
+- Ningún campus queda por debajo del 90 %: **no se propone ajuste**. El único estudiante sin cuarto con la distancia (UCAN) pide `men`, lleva mascota y `maxDistanceKm` = 0.5 km.
+- **Para T06 (candidatos):** el número de cuartos compatibles por estudiante (HC, cuartos de su campus) es mínimo 1, p10 28 y mediana 62; para `women` y `men` el máximo es 84 y la mediana 46–49; con `maxDistanceKm` la mediana baja a 50. Solo **21.2 %** de los estudiantes tiene ≥ 200 cuartos compatibles, así que los **200 candidatos por estudiante** de M-ML-021 no pueden ser todos compatibles con 300 cuartos por campus: T06 deberá definir si los candidatos incluyen cuartos excluidos (como negativos) o de otros campus.
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `109 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 29 source files` (PASS) |
+| `uv run pytest --cov=thehouse_ml` | **640 passed**; cobertura total **95.19 %** ≥ 80 %; `synthetic/rooms.py` **99.19 %** (sin cubrir: la salida de respaldo de `quantile` y el error de distancia > 30 km, defensivos), `synthetic/rooms_stage.py` **99.18 %** (sin cubrir: un `placeType` sin cuartos), `synthetic/__init__.py`, `stages.py` y `cli.py` 100 % (PASS) |
+| `uv run python -m thehouse_ml prepare` (dos veces) | Código 0 las dos veces; `rooms: 3000 cuartos sintéticos -> data/processed/rooms.parquet; reporte reports/rooms_catalog.md`. SHA-256 de los 138 archivos versionados y no ignorados más `rooms.parquet` y `students.parquet` idéntico entre corridas (`rooms.parquet` `e2ab7e8e…8dca`, `reports/rooms_catalog.md` `ce83040d…6631` tras la aprobación; `rooms.parquet` no cambió al aprobar) (PASS) |
+
+### Trazabilidad R05 → prueba
+
+| Criterio | Prueba |
+| --- | --- |
+| Cada parámetro con valor y base documentada; sintético; M-ML-026 APROBADO | `test_synthetic_rooms.py::test_every_parameter_has_a_value_and_a_documented_basis`, `::test_parameters_are_marked_synthetic_and_approved_as_m_ml_026`, `::test_requested_values_are_in_the_params`, `::test_distance_bands_put_most_rooms_near_with_a_tail_to_thirty_km`, `::test_studio_is_more_likely_to_have_a_kitchen_than_a_room` |
+| Campus → municipio igual que en estudiantes | `::test_campus_municipality_matches_the_students_params` |
+| Parámetros inválidos rechazados | `::test_invalid_parameters_are_rejected[*]` (34), `::test_missing_unknown_and_unexplained_parameters_are_rejected`, `::test_load_params_reports_invalid_json`, `::test_load_params_reads_an_explicit_path` |
+| Renta: forma, normalización y ubicación | `::test_rent_shape_quantile_inverts_the_cdf`, `::test_rent_shape_rejects_invalid_histograms`, `::test_mixture_normalizer_keeps_the_overall_median`, `::test_destination_point_lands_at_the_requested_haversine_distance`, `::test_rent_is_rounded_and_clipped` |
+| Misma semilla → mismos cuartos (registros y Parquet byte por byte); otra semilla → distintos | `::test_same_seed_gives_the_same_rooms_byte_for_byte`, `::test_another_seed_gives_different_rooms` |
+| ~3,000 cuartos, 300 por campus, todos a ≤ 30 km | `::test_three_thousand_rooms_three_hundred_per_campus`, `::test_every_room_is_within_thirty_km_of_its_campus` |
+| Validez contra el esquema y NV-11 (`validate_room`, snapshot `nv11_catalogs.json`, rangos SUPUESTOS) | `::test_every_room_is_valid_with_the_schema_and_nv11` |
+| 3 campus sin verificar marcados | `::test_unverified_campuses_are_marked` |
+| Mediana de la renta por campus a ±10 % de la p50 regional | `::test_rent_median_per_campus_is_within_ten_percent_of_the_regional_p50` |
+| Orden de medianas por `placeType` (en cada campus y en total) | `::test_rent_medians_follow_the_place_type_order_in_every_campus` |
+| water/electricity/gas/wifi cerca del Censo (±3 ee, mínimo 2 pts) | `::test_census_services_follow_the_municipal_census_within_the_documented_tolerance` |
+| ≥ 40 cuartos `women` y ≥ 40 `men` por campus | `::test_each_campus_has_at_least_forty_women_and_forty_men_rooms`, `::test_categorical_shares_resemble_the_parameters` |
+| Sin campos personales ni de género; ids sintéticos | `::test_no_personal_or_gender_field_anywhere`, `::test_frame_has_the_documented_columns_and_synthetic_flag` |
+| Insumos faltantes | `::test_missing_inputs_are_errors`, `test_rooms_stage.py::test_missing_census_indicator_is_an_error`, `::test_missing_rent_is_an_error`, `::test_missing_state_histogram_is_an_error`, `::test_missing_campus_in_universities_csv_is_an_error`, `::test_cli_reports_rooms_errors_with_exit_code_one`, `::test_without_inputs_the_stage_is_skipped` |
+| Parquet y reporte «DATOS SINTÉTICOS» con renta, distancia, servicios contra Censo, `placeType`, `propertyType`, mascotas y `livingWith` | `test_rooms_stage.py::test_run_rooms_writes_the_parquet_and_the_report` |
+| Correr dos veces no cambia archivos | `test_rooms_stage.py::test_running_twice_does_not_change_any_file` y la doble corrida de `prepare` de arriba |
+| Orden de `prepare` | `test_stages.py::test_prepare_generates_the_data_card_after_the_other_outputs` |
+
+### Tabla de coherencia
+
+| Regla | Evidencia | Resultado |
+| --- | --- | --- |
+| Constitution §8: sintéticos honestos, distribuciones documentadas y semilla fija | `rooms_params.json` con base por parámetro; semilla fija; `synthetic = true`; reporte «DATOS SINTÉTICOS» | PASS |
+| Constitution §7.4: sin datos personales | Ids `R00001`…`R03000`; sin títulos, descripciones, nombres ni anfitriones (prueba de columnas) | PASS |
+| Constitution §11.2: sin género | Ningún campo de género; `livingWith` es la política del cuarto (prueba) | PASS |
+| Constitution §9: reproducibilidad | Misma semilla → mismos bytes; `prepare` dos veces sin cambios | PASS |
+| Constitution §5 / AGENTS: sin dependencias nuevas | Solo biblioteca estándar (`random`, `math`, `statistics`, `itertools`) más pandas ya instalado; `pyproject.toml` y `uv.lock` sin cambios | PASS |
+| AGENTS: `data/processed/` fuera de git | `rooms.parquet` ignorado (`git status` no lo lista) | PASS |
+| M-ML-014: pesos de julio de 2024 | Renta anclada en la p50 y el histograma deflactados a jul-2024 | PASS |
+| M-ML-015: Censo por municipio y renta con respaldo estatal | 4 servicios con nivel `municipio`; renta con nivel `estado`, visibles en el reporte | PASS |
+| M-ML-017 / spec §7 regla 4: 3 campus sin verificar | `seed_verified = false` para TESJI, UMB-VDC y UCAN; marcados en el reporte | PASS |
+| M-ML-019: sin Inside Airbnb | Ningún dato de anuncios; catálogo sintético calibrado con INEGI | PASS |
+| M-ML-021: ~3,000 cuartos, ≤ 30 km, renta y servicios calibrados | 3,000 (300 × 10), máximo 29.94 km; pruebas de mediana y Censo | PASS |
+| M-ML-024 y M-ML-025 (notas para T05) | `livingWith` 0.25 · 0.25 · 0.50 con ≥ 40 por campus; multiplicadores por `placeType` normalizados; redondeo a 50 (objetivos ≥ $1,872) | PASS |
+| `feature_schema.json` 1.1.0 y `students_params.json` sin cambios | `git status` no los lista | PASS |
+| AGENTS: rutas permitidas | `git status` solo lista `src/thehouse_ml/`, `tests/`, `reports/`, `memoria.md`, `specs/ml-03-feature-schema/` y la fila de ML-03 en `specs/README.md` | PASS |
+| AGENTS: un control no ejecutado no se reporta como PASS | La prueba de ≥ 90 % es de T06 y no se reporta como PASS; la tabla de arriba es una estimación | PASS |
+
+### Hallazgos
+
+| # | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| 1 | Todos los valores marcados SUPUESTO (ubicación, multiplicadores, priors de servicios, `placeType`, `propertyType`, mascotas, `livingWith`, recámaras, baños y superficie) son propuestas del agente. | ADVERTENCIA | **RESUELTO** — M-ML-026 APROBADO por César Yael López Trujillo — 2026-11-19, sin cambios en los valores |
+| 2 | Para T06: con 300 cuartos por campus solo 21.2 % de los estudiantes tiene ≥ 200 cuartos compatibles (los `women`/`men`, como máximo 84); los 200 candidatos por estudiante de M-ML-021 no pueden ser todos compatibles. | ADVERTENCIA | Para T06 (ver «Nota para T06»: candidatos = cuartos del campus que pasan las restricciones duras, hasta 200) |
+| 3 | `area_m2` se interpreta como superficie del espacio ofrecido (cuarto o estudio) y recámaras/baños como del inmueble; el backend no define la semántica de `Property.AreaM2`. | ADVERTENCIA | Documentado en `rooms_params.json`; acción pendiente del responsable (ver abajo) |
+| 4 | La renta regional es estatal y de vivienda completa; las proporciones del Censo son de todas las viviendas del municipio, no solo de las rentadas. | INFORMATIVO | Documentado; riesgo RK02 (ML-07) |
+| 5 | El generador usa los 21 intervalos del histograma estatal (algunos con menos de 30 viviendas en muestra, que la data card agrupa al publicar). `rooms.parquet` queda fuera de git y el reporte solo publica cuartiles de los cuartos sintéticos, no los intervalos. | INFORMATIVO | Sin acción; las pruebas en CI usan los histogramas agrupados ya publicados |
+| 6 | Las distancias de TESJI, UMB-VDC y UCAN son orientativas (coordenadas sin verificar, M-ML-017). | INFORMATIVO | Marcadas en el Parquet y el reporte |
+| 7 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR de T05 |
+
+### Revisión y resultado
+
+- **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas. Insumos: `regional_calibration.parquet` y `rent_histogram.parquet` (derivados de INEGI, términos de libre uso, ya registrados en ML-02) y `data/universities.csv` (ODbL, M-ML-016/M-ML-017). El reporte solo publica agregados sintéticos y las proporciones y la renta p50 que ya publica `reports/regional_calibration.md`.
+- **Resultado:** **PASS** — la aceptación de R05 se cumple (generador reproducible, 3,000 cuartos a ≤ 30 km, rangos y catálogos de NV-11, prueba de la mediana de renta contra la calibrada y reporte sintético de distribuciones), los cinco controles pasan y M-ML-026 quedó APROBADO por el responsable (hallazgo 1 resuelto). Los hallazgos 2 y 3 no bloquean T05: pasan a la «Nota para T06» y a la acción pendiente del responsable.
+
+### Acción pendiente del responsable
+
+Confirmar con el backend el significado de `Property.AreaM2` (superficie del espacio ofrecido —cuarto o estudio— o del inmueble completo), junto con NV-12. T05 usa la superficie del espacio ofrecido (`area_m2.by_place_type` en `rooms_params.json`); si el backend define la del inmueble, se cambia ese parámetro, se sube la versión de `rooms_params.json` y se vuelve a correr `prepare`. Origen: hallazgo 3 de T05.
+
+### Nota para T06
+
+Origen: hallazgo 2 de T05 y aprobación de M-ML-026 (César Yael López Trujillo, 2026-11-19). Es una indicación del responsable para T06; no se ejecuta en T05.
+
+1. **Candidatos por estudiante:** como solo **21.2 %** de los estudiantes tiene 200 o más cuartos compatibles (los `women` y `men`, como máximo 84), se propone que los candidatos de cada estudiante sean **los cuartos de su campus que pasan las restricciones duras** (`filter_rooms`, HC01–HC03), **hasta un máximo de 200**; si hay más, se toma una muestra con semilla fija. No se incluyen cuartos que no pasan las restricciones duras. Se registrará en T06 como aclaración de M-ML-021 («hasta 200» candidatos por estudiante).
+2. **Estimación del umbral:** la tabla de «Hallazgo obligatorio» de T05 salió de un script de exploración en el scratchpad de la sesión (fuera del repo, no versionado). No se copia al repositorio: T06 implementa la prueba formal de ≥ 90 % con `filter_rooms` sobre `students.parquet` y `rooms.parquet`, y esa prueba sustituye a la estimación.
