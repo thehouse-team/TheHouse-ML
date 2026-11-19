@@ -9,10 +9,13 @@ import shutil
 from collections.abc import Callable
 from pathlib import Path
 
+from thehouse_ml.manifests import Manifest, ManifestFile, write_manifest
 from thehouse_ml.sources import FileSpec, SourceSpec
+from thehouse_ml.universities import UniversitySeed, build_query_url
 
 FIXTURES = Path(__file__).resolve().parent / "fixtures"
 REPO_ROOT = Path(__file__).resolve().parents[1]
+OSM_DOWNLOADED_AT = "2026-11-17"
 
 
 def fixture_bytes(name: str) -> bytes:
@@ -129,4 +132,27 @@ def write_osm_project(root: Path, *, with_responses: bool = True) -> tuple[str, 
                 }
             ]
         (folder / f"{code}.json").write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+    # Manifiesto OSM inventado: las fechas de `universities.csv` salen de aquí
+    # (filas ok_osm) y del CSV manual (resto), nunca del reloj del sistema.
+    files = tuple(
+        ManifestFile(
+            url=build_query_url(
+                UniversitySeed(
+                    code=str(row["code"]),
+                    name=str(row["name"]),
+                    city=str(row["city"]),
+                    latitude=str(row["latitude"]),
+                    longitude=str(row["longitude"]),
+                )
+            ),
+            filename=f"{row['code']}.json",
+            downloaded_at=OSM_DOWNLOADED_AT,
+            size_bytes=(folder / f"{row['code']}.json").stat().st_size,
+            sha256=hashlib.sha256((folder / f"{row['code']}.json").read_bytes()).hexdigest(),
+            license="Open Database License (ODbL) 1.0",
+        )
+        for row in seeds
+    )
+    write_manifest(root / "data" / "manifests" / "openstreetmap.json", Manifest("openstreetmap", files))
     return codes

@@ -25,6 +25,117 @@
 | Fecha de ejecución T05 | 2026-11-18 |
 | Fecha de ejecución T06 (descarte) | 2026-11-18 |
 | Fecha de ejecución T08 | 2026-11-18 |
+| Autorización T09 | «EJECUTA ML-02 1.0.1, task T09 (ML-02-R09), en la rama feat/ml-02-cierre. Rutas permitidas: src/thehouse_ml/, tests/, data/manifests/ (solo para conservar fechas originales), data/universities.csv, reports/, README.md (solo la sección de atribución de datos), memoria.md y specs/ml-02-data-sources/. Sin dependencias nuevas ni descargas nuevas» — César Yael López Trujillo, 2026-11-19 |
+| Rama (T09) | `feat/ml-02-cierre` |
+| Fecha de ejecución T09 | 2026-11-19 |
+| Commit (T09) | Sin commit, por instrucción explícita del responsable en el «EJECUTA» |
+| Autorización adicional (2026-11-19) | «Autorizo el hallazgo 25: agrega specs/README.md a las rutas permitidas y actualiza solo el estado de ML-02 a COMPLETA (8 tasks + T06 descartada, M-ML-020). Marca los hallazgos 5 y 13 como "se cierran al mezclar el PR de T09"» — César Yael López Trujillo |
+
+Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` → `AGENTS.md` → `memoria.md` (M-ML-001 a M-ML-019) → `CONTRIBUTING.md` → `spec.md`, `plan.md`, `task.md` y `evidence.md` de ML-02.
+
+## T09 · Pruebas y evidencia (cierre de ML-02)
+
+### Qué se hizo
+
+1. **Hallazgo 21 — `downloaded_at` estable en modo manual.** `src/thehouse_ml/download.py` conserva la fecha original del manifiesto cuando el archivo ya estaba en `data/raw/` (modo manual) y su SHA-256 y tamaño coinciden con los registrados; solo estampa la fecha del día si el archivo se descargó o cambió. La misma regla se aplicó a `download_osm` en `src/thehouse_ml/universities.py` (el manifiesto OSM es otro archivo versionado con la misma defecto). `write_manifest` escribe con LF y no reescribe el JSON si el contenido es idéntico.
+2. **Hallazgo 24 — `verified_at` sin reloj del sistema.** `run_universities` ya no usa `date.today()`: las filas con verificación humana toman `verified_at` de `data/seed/universities_manual.csv` y las filas `ok_osm` (y las demás sin decisión humana) toman el `downloaded_at` del manifiesto `data/manifests/openstreetmap.json`. Se agregaron `load_osm_dates` y `resolve_verified_at`, con pruebas unitarias y de integración que simulan dos fechas distintas. La primera ejecución con datos reales ajustó solo 2 celdas de `data/universities.csv` (UTTT y UNE-TULA: 2026-11-18 → 2026-11-17, la fecha del manifiesto OSM); las 8 filas manuales conservan 2026-11-18.
+3. **Auditoría de fechas del sistema en archivos versionados.** Se buscó `date.today`, `datetime.now`, `utcnow` y `strftime` en todo `src/`: las tres apariciones eran las corregidas en los puntos 1 y 2. Los reportes (`reports/*.md`) no imprimen la fecha de generación: solo fechas de las fuentes (ediciones, jul-2024, revisión humana del 2026-11-18) tomadas de archivos versionados. No quedó ningún otro valor dependiente del reloj del sistema en manifiestos, CSV ni reportes.
+4. **Atribución en el README.** Se reemplazó la sección «Datos y atribución», que decía «fuentes previstas, pendientes de verificar su licencia» y listaba Inside Airbnb, por el «Fuente: INEGI» de cada producto (ENVI 2020, ENIGH 2022, INPC, Censo 2020 y DENUE 05/2026), «© OpenStreetMap contributors (ODbL)», la aclaración de que TheHouse no está respaldado por el INEGI y el descarte de Inside Airbnb (spec §7 regla 6 y §8).
+5. **Pruebas y cobertura.** 11 pruebas nuevas en `tests/unit/test_csvio.py` elevaron ese módulo de 71.64 % a 100 %: todos los 14 módulos nuevos de ML-02 superan 80 %. Se agregaron además pruebas de regresión para los dos hallazgos (modo manual, manifiesto OSM cacheado, dos días simulados) y se actualizó `tests/conftest.py` para que el proyecto OSM inventado escriba también su manifiesto.
+6. **Documentos.** `spec.md`, `plan.md` y `task.md` quedan en ✅ COMPLETA (8 tasks completas + T06 descartada); `memoria.md` registra M-ML-020. No se sube la versión 1.0.1: ni la constitución ni `AGENTS.md` piden un bump al cerrar y cambiar la versión aprobada exigiría un «Apruebo X.Y.Z» nuevo.
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `87 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 19 source files` (PASS) |
+| `uv run pytest --cov=thehouse_ml --cov-report=term-missing` | **258 passed in 22.52s**; cobertura total **92.56 %** ≥ 80 %; ML-02 (14 módulos) **92.23 %**, mínimo por módulo `inpc.py` 82.09 %; `csvio.py` 100 % (PASS) |
+| `uv run python -m thehouse_ml download` | 5 fuentes INEGI en `manual` (4/2/1/3/1 archivos verificados); Inside Airbnb `omitida - descartada: M-ML-019`; OSM `omitido`; seed `pendiente`; `reports/variables_check.md` sin cambios (PASS) |
+| `uv run python -m thehouse_ml prepare` | `national_baselines.parquet (87 filas)`, `rent_histogram.parquet (63 intervalos)`, `regional_calibration.parquet (56 filas)`, `data/universities.csv (10 filas)`, `campus_context.parquet (300 filas, 981,519 establecimientos)` y `reports/data_card.md` (PASS) |
+| `uv run python -m thehouse_ml download` + `prepare` (2.ª corrida seguida) | Misma salida; `git status --short` **idéntico** al de antes de la segunda corrida (PASS) |
+| `uv run python -m thehouse_ml download --source openstreetmap` | `openstreetmap: manual - 10 respuesta(s) verificadas`; `data/manifests/openstreetmap.json` byte por byte igual (PASS) |
+
+### Idempotencia comprobada
+
+Tras la primera `prepare` el único archivo versionado modificado por la etapa fue `data/universities.csv`, con el cambio intencionado de los dos `verified_at` de `ok_osm` (hallazgo 24). Se guardó `git status --short` antes y después de ejecutar `download` y `prepare` una segunda vez: la comparación textual devolvió `GIT_STATUS_IDENTICAL=True`. Ningún manifiesto, reporte ni CSV volvió a cambiar. En las pruebas sin red, `test_prepare_on_two_different_days_does_not_change_the_csv` ejecuta `run_universities` con `today="2026-11-19"` y `today="2026-11-20"` y comprueba que el CSV y el reporte quedan byte por byte iguales.
+
+### Trazabilidad R09 → prueba
+
+| Criterio de R09 | Prueba / evidencia |
+| --- | --- |
+| Cobertura ≥ 80 % del código nuevo | `uv run pytest --cov=thehouse_ml --cov-report=term-missing`: 92.56 % total y 92.23 % en los 14 módulos de ML-02; `tests/unit/test_csvio.py` (11 pruebas) |
+| Pruebas unitarias e integración | `tests/unit/` (21 archivos) y `tests/integration/` (6 archivos); 258 pruebas en total |
+| Sin red en las pruebas | Fixtures sintéticos en `tests/fixtures/` y `tests/conftest.py`; fetchers inyectados que fallan si se usa la red (`test_manual_mode_keeps_the_original_downloaded_at`, `test_cached_responses_keep_their_original_downloaded_at`) |
+| ruff y mypy sin errores | Comandos y resultados de la tabla anterior |
+| Hallazgo 21 (manifiestos) | `tests/unit/test_download.py::test_manual_mode_keeps_the_original_downloaded_at`, `::test_a_new_download_gets_the_current_date_even_with_a_previous_manifest`, `tests/unit/test_osm_download.py::test_cached_responses_keep_their_original_downloaded_at` |
+| Hallazgo 24 (`verified_at`) | `tests/unit/test_universities.py::test_load_osm_dates_reads_the_manifest_by_code`, `::test_resolve_verified_at_uses_the_osm_manifest_for_osm_rows`, `::test_resolve_verified_at_uses_the_manual_date_for_manual_rows`; `tests/integration/test_universities_stage.py::test_prepare_on_two_different_days_does_not_change_the_csv` |
+| Atribución sin respaldo de INEGI | `tests/unit/test_data_card.py::test_every_inegi_product_and_osm_are_attributed_without_endorsement`; revisión manual del README (sección «Datos y atribución») |
+| Coherencia con constitution, AGENTS y memoria | Tablas siguientes y `tests/test_repo_hygiene.py` |
+
+### Tabla de coherencia — constitución
+
+| § | Regla | Evidencia en el repo | Resultado |
+| --- | --- | --- | --- |
+| §3 / SDD-001 | cambio por spec → plan → task → aprobación → «EJECUTA» → evidence | `specs/ml-02-data-sources/{spec,plan,task,evidence}.md`; autorizaciones T02–T09 en la cabecera y en §15 del spec; M-ML-020 | PASS |
+| §4 / SDD-002 | specs independientes | `specs/README.md` (mapa de ML-01 a ML-07; ML-02 en ✅ COMPLETA, 8 completadas + 1 descartada); solo ML-02 ejecutada | PASS |
+| §5 | stack de la tabla; dependencias solo con decisión M-ML | `pyproject.toml`, `uv.lock` (pandas y pyarrow de T03); T09 sin dependencias nuevas | PASS |
+| §6 | `data/raw`, `data/processed`, `models` fuera de git; manifiestos y reportes dentro | `.gitignore`; `tests/test_repo_hygiene.py` (10 pruebas) | PASS |
+| §7 | fuentes licenciadas registradas; SHA-256; sin scraping; sin datos personales | `data/sources.toml`; `data/manifests/*.json`; `reports/variables_check.md`; `src/denue.py` (`usecols` de 8 variables públicas); `src/download.py` omite la fuente descartada; `specs/ARQUITECTURA.md` | PASS |
+| §8 | datos sintéticos etiquetados; desempeño real solo con señales reales | `spec.md` §1 y §6, `task.md` (nota ML-03), `memoria.md` M-ML-019/020, `README.md` (sección de atribución) | PASS |
+| §9 | reproducibilidad: misma entrada → misma salida | `git status` idéntico tras dos corridas; `write_manifest` y `write_universities_csv` con LF y sin reescritura; pruebas de dos fechas | PASS |
+| §10 | todo modelo se compara con la base por reglas | Fuera de alcance de ML-02: ML-04 sigue en borrador y no autorizada | NO APLICA (no se reporta PASS) |
+| §11 | `livingWith` y presupuesto como restricciones duras; sin atributos sensibles | Fuera de alcance de ML-02: ML-04 | NO APLICA |
+| §12 | desglose por factor comprensible | Fuera de alcance de ML-02: ML-04 y `TheHouse-GenAI` | NO APLICA |
+| §13 | ONNX sin pickle; schema, model card, metrics y SHA-256 | `tests/test_repo_hygiene.py` prohíbe `.pkl`, `.pickle`, `.joblib`; ML-06 no autorizada, sin artefactos en ML-02 | PASS (sin artefactos) |
+| §14 | sin secretos; dependencias fijas; SHA-256 en artefactos | `.github/workflows/ci.yml` (gitleaks, pip-audit, `uv sync --frozen`); `data/manifests/*.json` | PASS |
+| §15 / COST-001 | costo $0, CPU local y GitHub Actions público | `memoria.md` M-ML-007 (repositorio público desde 2026-11-10); `ci.yml` sin GPU ni servicios de pago; ejecución local en CPU | PASS |
+| §16 | cobertura ≥ 80 % y pruebas sin red | 258 pruebas; 92.56 % total; 92.23 % en código nuevo de ML-02 (mínimo 82.09 %) | PASS |
+| §17 | CI con ruff, mypy, pytest+cobertura, pip-audit, gitleaks y pipeline de muestra | `.github/workflows/ci.yml` (jobs `quality`, `tests-windows`, `dependency-audit`, `secrets-gitleaks`) | PASS |
+| §18 | versión semántica de paquete y modelo | `pyproject.toml` 0.1.0; spec 1.0.1 sin bump justificado en §15 del spec | PASS |
+| §19 | ramas con PR, checks y aprobación ajena; sin commit directo a `main` | `git log --first-parent main`: solo merges desde el commit inicial (PR #5, #6, #8–#13). La aprobación en GitHub no es auditable desde el clon local | PASS con observación |
+| §20–§21 | EJECUTA, sin scraping/pickle/costos; revisión de coherencia y seguridad en cada iteración | Secciones de T09; `constitution.md` y `AGENTS.md` sin modificaciones (`git status --short`) | PASS |
+
+### Tabla de coherencia — AGENTS.md
+
+| Regla | Evidencia en el repo | Resultado |
+| --- | --- | --- |
+| Leer constitution → AGENTS → memoria → spec/plan/task | Sección «Lecturas previas» de esta evidencia | PASS |
+| Estado vigente: responsable César (M-ML-011); cada task con su EJECUTA | Autorización T09 del responsable vigente, 2026-11-19; autorizaciones T02–T08 en la cabecera | PASS |
+| Protocolo: aprobar / ejecutar / descargar / agregar dependencias / release / GitHub / merge | Sin descargas nuevas, sin dependencias nuevas, sin release, sin cambios en GitHub y sin merge por el agente; rutas de T09 respetadas | PASS |
+| Un plan aprobado no habilita tareas fuera de él; cambio material requiere reaprobar | Solo T09; sin bump de versión; los cambios en `README.md` se limitan a la sección de atribución | PASS |
+| Flujo: implementar → probar → coherencia → seguridad y licencias | Secciones «Qué se hizo», «Comandos», «Tablas de coherencia» y «Revisión» | PASS |
+| Un control no ejecutado no se reporta como PASS | §10–§12 de la constitución marcados NO APLICA; hallazgos abiertos listados al final | PASS |
+| Cerrar task solo con aceptación y evidencia reproducible | 258 pruebas, comandos y resultados en esta sección; aceptación de R09 verificada | PASS |
+| Datos: no subir `raw`/`processed`/`models`; SHA-256; sin datos personales | `.gitignore`, `tests/test_repo_hygiene.py`, `data/manifests/`, `usecols` del DENUE | PASS |
+| Modelos y métricas: base por reglas, sintéticas etiquetadas, ONNX sin pickle, cuatro archivos por artefacto | ML-04/ML-06 no ejecutadas; etiquetado sintético en spec, README y memoria; sin artefactos versionados | NO APLICA / PASS en etiquetado |
+| Rutas protegidas: no editar constitution ni AGENTS; sin secretos, scraping, pago ni commit directo a `main` | `git status --short` no lista esos archivos; gitleaks en CI; fetchers sin red; ningún commit directo a `main` | PASS |
+| Resultado de revisión: PASS / PASS WITH WARNINGS / BLOCKED | Resultado de T09 y global al final de esta evidencia | PASS |
+| Convenciones: documentos en español, decisiones `M-ML-XXX`, specs con cuatro archivos | Todos los documentos en español; M-ML-020; `spec.md`, `plan.md`, `task.md`, `evidence.md` | PASS |
+| Cierre de tarea: qué se hizo, qué se verificó, qué queda pendiente, qué decisiones esperan aprobación | «Resumen final de ML-02» al final de esta evidencia | PASS |
+
+### Tabla de coherencia — decisiones M-ML-011 a M-ML-019
+
+| Decisión | Evidencia en el repo | Resultado |
+| --- | --- | --- |
+| M-ML-011 — César pasa a ser responsable | `AGENTS.md` y `CONTRIBUTING.md` (rol de responsable); «EJECUTA» firmado por César en T09 | PASS |
+| M-ML-012 — verificación automática de variables | `src/thehouse_ml/sources.py` (`variables_status`), `src/thehouse_ml/variables.py`, `reports/variables_check.md`, `tests/unit/test_sources_loader.py`, `test_variables_check.py` | PASS |
+| M-ML-013 — variables de ENVI y ENIGH confirmadas | `data/sources.toml` (`variables_status = "confirmed"`, `P5_8` excluida); `reports/variables_check.md`; `tests/unit/test_sources_loader.py` | PASS |
+| M-ML-014 — pesos de jul-2024, deflactor INPC y alcance de T03 | `src/thehouse_ml/inpc.py`, `src/thehouse_ml/national.py`, `reports/national_baselines.md`, `data/manifests/inegi_inpc.json`, `tests/unit/test_inpc.py` | PASS |
+| M-ML-015 — Censo 2020, códigos y regla de suficiencia | `data/sources.toml` (4 archivos), `src/thehouse_ml/regional.py`, `reports/regional_calibration.md`, `tests/unit/test_regional.py` | PASS |
+| M-ML-016 — T07 con OpenStreetMap antes que T05 | `src/thehouse_ml/universities.py`, `data/manifests/openstreetmap.json`, `reports/universities_check.md`, `tests/unit/test_osm_download.py`; 10 consultas, User-Agent propio, ≤ 1 req/s | PASS |
+| M-ML-017 — verificación humana y coordenadas finales | `data/seed/universities_manual.csv` (8 decisiones), `data/universities.csv` (`final_status`, 10 filas), `finalize_row`/`apply_manual` en `universities.py`, `reports/universities_check.md` | PASS; 3 `seed_sin_verificar` y la duda de UCAN siguen pendientes del backend |
+| M-ML-018 — DENUE 05/2026 para el entorno de campus | `data/sources.toml` (3 ZIP), `data/manifests/inegi_denue_vigente.json`, `src/thehouse_ml/denue.py`, `data/processed/campus_context.parquet`, `reports/denue_campus.md` | PASS; URL de Edomex corregida por 404 (hallazgo 16, aprobado) |
+| M-ML-019 — Inside Airbnb descartada; catálogo sintético en ML-03 | `data/sources.toml` (`discarded`, `status_reference`), `download.py` (omite sin descargar), `reports/variables_check.md`, `spec.md` §6, `specs/ARQUITECTURA.md`, `README.md` | PASS |
+
+### Revisión de T09
+
+- **Constitución:** §3, §5–§9, §14–§19 y §20–§21 verificados en las tablas anteriores. §10–§12 no aplican a una spec de datos y se reportan como NO APLICA, no como PASS.
+- **AGENTS / memoria:** «EJECUTA» del responsable vigente con rutas y sin dependencias nuevas; M-ML-020 registra el cierre y la herencia a ML-03; `constitution.md` y `AGENTS.md` intactos.
+- **Seguridad y licencias:** sin red en las pruebas ni en esta ejecución (los archivos ya estaban en `data/raw/`); sin secretos, sin scraping, sin servicios de pago; atribuciones por producto generadas desde `sources.toml` en la data card y ahora también en el README.
+- **Archivos versionados:** `data/manifests/`, `reports/variables_check.md` y el resto de reportes quedaron sin cambios tras dos corridas de `download` y `prepare`; solo `data/universities.csv` cambió una vez de forma intencionada (hallazgo 24) y luego quedó estable.
+- **PASS.** T09 cumple R09: 258 pruebas en verde, 92.56 % de cobertura total y 92.23 % en el código nuevo de ML-02, ruff y mypy sin errores, dos corridas consecutivas sin cambios en archivos versionados, atribución completa en el README y tablas de coherencia con constitución, AGENTS y decisiones M-ML-011 a M-ML-019. Sin commit, por instrucción explícita del responsable.
 
 ## T08 · Data card
 
@@ -474,7 +585,7 @@ Diff de `reports/variables_check.md` tras `download` (solo la sección de Inside
 2. **pandas sin stubs de tipo.** `pandas` no publica `py.typed` y `pandas-stubs` no está en la tabla de la constitution §5, así que no se agregó. Se configuró en `pyproject.toml` un override de mypy `ignore_missing_imports` **solo para `pandas`/`pandas.*`**; el resto del código sigue en modo estricto.
 3. **INPC: valor semántico.** El diccionario del ZIP describe `VALOR` como «variación porcentual anual», pero el responsable verificó que son niveles del índice base 2Q jul 2018 = 100 (2024-07 = 136.003). Se documentó en `data/sources.toml`, el reporte y el código; se filtra solo el concepto general.
 4. **Definición de `n_muestra`.** Se adoptó como el conteo sin ponderar de viviendas rentadas con renta válida (la muestra que produce los percentiles); la proporción de rentadas usa todas las viviendas del grupo. Queda explicado en el reporte.
-5. **Sin commit ni PR** por instrucción explícita del responsable. La aprobación de otro humano en GitHub sigue pendiente.
+5. **Sin commit ni PR (se cierran al mezclar el PR de T09).** No se hizo commit ni PR por instrucción explícita del responsable. El cierre de este hallazgo queda condicionado a la mezcla del PR de T09 con aprobación de otra persona en GitHub.
 6. **Fuentes pendientes.** El Censo 2020 se descargó y verificó en T04 y el DENUE en T05; Inside Airbnb quedó **DESCARTADA** (M-ML-019), OpenStreetMap se consultó solo en T07 y el seed sigue sin descarga por ser dato propio del backend.
 7. **Renta sin `ee`/`cv` y respaldo nacional limitado.** Las filas de renta copian los percentiles de la ENVI 2020 de T03, que no publica varianza; sus columnas `se` y `cv` quedan como `NaN` y se marcan `—` en el reporte. La suficiencia no se aplica a la renta porque nunca es una estimación municipal. El respaldo `nacional` de ENVI/ENIGH de T03 solo está implementado para la proporción de viviendas rentadas; T03 no publica prevalencias de servicios (M-ML-014(c)), por lo que para los seis indicadores de servicios la entidad completa es el último nivel disponible y una entidad insuficiente daría un error explícito en vez de una estimación no documentada. En los datos reales no se presentó ese caso.
 8. **Estratos con una sola UPM.** En el diseño con reemplazo no tienen varianza definida; no aportan a la varianza y se cuentan en `n_strata_single_psu`. En los datos reales ningún municipio de los 7 quedó sin estimación por este motivo.
@@ -482,7 +593,7 @@ Diff de `reports/variables_check.md` tras `download` (solo la sección de Inside
 10. **`category` frente a `class` en jsonv2 (resuelto).** El servicio Nominatim actual publica `category=amenity`, no `class=amenity`. El primer parseo dejó todos los candidatos como no educativos; se corrigió para aceptar ambas claves y se agregó una prueba. La corrección se hizo sobre los JSON ya guardados: **no se hizo ninguna consulta adicional** (se respetaron las 10 permitidas y el cacheo).
 11. **Coincidencias dudosas (pendiente de humano).** Con los nombres completos del seed y `bounded=1`, 7 respuestas quedaron vacías y 1 candidato quedó a 3347.54 m (`ITSOEH`). Son 8 universidades en la lista de NV-11 del reporte. Según M-ML-016 las confirma un humano en openstreetmap.org **antes de usarlas en T05**; no se reconsultó Nominatim con otro texto porque la autorización era de 10 consultas.
 12. **Reescritura de reportes por fin de línea (T07).** Al ejecutar `prepare` se reescribió `reports/regional_calibration.md` y al ejecutar `download --source openstreetmap`, `reports/variables_check.md` (solo CRLF/LF en Windows; contenido equivalente).
-13. **Sin commit ni PR por instrucción explícita del responsable.** La aprobación de otro humano en GitHub sigue pendiente.
+13. **Sin commit ni PR (se cierran al mezclar el PR de T09).** No se hizo commit ni PR por instrucción explícita del responsable. Se cierra cuando se mezcle el PR de T09 con la aprobación de otra persona en GitHub.
 14. **Reporte de variables filtrado (detectado y corregido).** `run_download` usaba la lista devuelta por `select_sources` tanto para descargar como para verificar, de modo que `download --source openstreetmap` reescribía `reports/variables_check.md` con una sola sección. Se separaron las dos responsabilidades: `--source` limita solo la descarga y `verify_sources` recibe siempre todas las fuentes del registro. El reporte se escribe con finales LF. Pruebas: `test_download_stage.py::test_source_filter_limits_the_download_but_not_the_report` y `test_universities_stage.py::test_filtered_download_keeps_every_source_in_the_variables_report`.
 15. **CI en máquina vacía (detectado y corregido).** El job `quality` fallaba en «CLI con las cinco etapas»: un `download` sin filtro incluía OpenStreetMap y consultaba Nominatim (prohibido por M-ML-016 en CI), y un `prepare` sin respuestas en `data/raw/openstreetmap/` fallaba con `OsmError`. Ahora OSM es fuente bajo demanda: sin `--source` se omite con `openstreetmap: omitido - ejecute download --source openstreetmap` y no se llama al fetcher; solo `download --source openstreetmap` consulta. `prepare` sin respuestas conserva `data/universities.csv` y `reports/universities_check.md` versionados y reporta `universities: omitido (sin respuestas OSM; se conserva data/universities.csv versionado)`. Pruebas sin red: `test_download_stage.py::test_download_without_source_omits_osm_and_never_calls_the_fetcher` y `test_universities_stage.py::test_prepare_without_osm_responses_keeps_the_versioned_files`. Sin dependencias nuevas ni consultas nuevas a Nominatim.
 16. **URL de Edomex 404 (resuelto el 2026-11-18).** `denue_15_csv.zip` devuelve una página HTML de 2,263 bytes. El catálogo de descarga masiva del DENUE 05/2026 publica Edomex en dos ZIP (`denue_15_1_csv.zip`, `denue_15_2_csv.zip`); se usaron esos dos archivos y sus hashes quedaron en el manifiesto. El responsable aprobó el cambio y se registró como adenda de M-ML-018 en `memoria.md` (ver sección T05).
@@ -490,10 +601,11 @@ Diff de `reports/variables_check.md` tras `download` (solo la sección de Inside
 18. **Reescritura de `data/universities.csv` por fin de línea (resuelto el 2026-11-18).** `prepare` reescribía el CSV versionado porque `csv.DictWriter` usa CRLF por omisión en Windows. Ahora `write_universities_csv` genera el contenido con `lineterminator="\n"`, compara con el archivo existente (normalizando CRLF→LF) y no escribe si el contenido no cambia. Se restauró el archivo con `git checkout -- data/universities.csv`; `prepare` ya no lo modifica. Prueba: `tests/unit/test_universities.py::test_write_universities_csv_uses_lf_and_does_not_rewrite_unchanged_content`.
 19. **Fechas de manifiestos reescritas por `download` (resuelto el 2026-11-18).** Al ejecutar `download` sin filtro en la T06, los cinco manifiestos de INEGI se reescribieron solo en `downloaded_at` (2026-11-17 → 2026-11-18), un efecto colateral de la etapa y fuera de las rutas permitidas para esta task. Se restauraron con `git checkout -- data/manifests/`; los hashes y tamaños no cambiaron. No se creó ningún manifiesto de Inside Airbnb (fuente descartada).
 20. **Referencia residual en `specs/ARQUITECTURA.md` (resuelto el 2026-11-18).** La línea 62 listaba a Inside Airbnb entre las fuentes de `download`. El responsable **autorizó** agregar `specs/ARQUITECTURA.md` a las rutas permitidas y ajustar ese archivo: se quitó Inside Airbnb de la tabla de `download`, se añadió la nota de que fue descartada por M-ML-019 y que el catálogo de cuartos será sintético en ML-03, y se alinearon las filas de `prepare` y de ML-02. Solo cambiaron esas menciones; no afectó al código ni al comportamiento de `download`.
-21. **PENDIENTE PARA T09 — `download` en modo manual reescribe `downloaded_at` en los manifiestos aunque el SHA-256 no cambie; debe conservarse la fecha original si el archivo es idéntico.** Detectado al ejecutar `download` sin filtro en T06: los cinco manifiestos de INEGI cambiaron solo `downloaded_at` (2026-11-17 → 2026-11-18) con el mismo SHA-256 y tamaño; se restauraron con `git checkout -- data/manifests/`, pero la causa (escritura incondicional del manifiesto) sigue sin corregirse. No se corrige en T06: queda registrado para la T09 (pruebas y evidencia) con su prueba de regresión. Ver hallazgo 19.
+21. **`download` en modo manual reescribe `downloaded_at` en los manifiestos aunque el SHA-256 no cambie (RESUELTO en T09).** Detectado en T06: los cinco manifiestos de INEGI cambiaron solo `downloaded_at` (2026-11-17 → 2026-11-18) con el mismo SHA-256 y tamaño. Corregido en `download_source` (y, por el mismo defecto, en `download_osm`): un archivo ya presente y verificado conserva la fecha del manifiesto anterior; `write_manifest` no reescribe contenido idéntico. Pruebas: `test_manual_mode_keeps_the_original_downloaded_at`, `test_a_new_download_gets_the_current_date_even_with_a_previous_manifest` y `test_cached_responses_keep_their_original_downloaded_at`. Ver hallazgo 19.
 22. **Salida intermedia nueva (resuelto el 2026-11-18).** Para que el histograma de renta use la distribución real y no una reconstrucción a partir de percentiles, `prepare` escribe `data/processed/rent_histogram.parquet` con los intervalos de ENVI. Es un derivation interno fuera de git; no cambia el contrato de la spec §6.2 ni agrega dependencias. Se documenta en la sección 9 de la data card.
 23. **Proyectos sin DENUE (resuelto el 2026-11-18).** Las pruebas de integración que simulan `prepare` sin los ZIP del DENUE no producen `campus_context.parquet`. Para no convertir eso en un error, `run_data_card` omite la generación con el aviso `data card: omitido (faltan salidas de prepare)` cuando falta alguna entrada; con datos reales, `prepare` produce el Parquet y la data card normalmente.
-24. **`verified_at` dependiente de la fecha (2026-11-19, PENDIENTE PARA T09).** Al ejecutar `prepare` el 2026-11-19, `run_universities` reescribió las 10 filas de `data/universities.csv` cambiando solo `verified_at` de 2026-11-18 a 2026-11-19 (usa la fecha del sistema). No guarda relación con la data card: se restauró el archivo con `git checkout -- data/universities.csv` y quedó sin cambios. Queda registrado para la T09 junto con el hallazgo 21.
+24. **`verified_at` dependiente de la fecha (RESUELTO en T09).** Al ejecutar `prepare` el 2026-11-19, `run_universities` reescribía las 10 filas de `data/universities.csv` con la fecha del sistema. Corregido: las filas humanas toman `verified_at` de `data/seed/universities_manual.csv` (2026-11-18) y las filas `ok_osm` el `downloaded_at` del manifiesto OSM (2026-11-17). El ajuste real cambió solo UTTT y UNE-TULA; dos corridas con fechas simuladas distintas dejan el CSV idéntico. Pruebas: `test_resolve_verified_at_uses_the_osm_manifest_for_osm_rows`, `test_resolve_verified_at_uses_the_manual_date_for_manual_rows` y `test_prepare_on_two_different_days_does_not_change_the_csv`.
+25. **Índice de specs desactualizado (RESUELTO el 2026-11-19).** El responsable autorizó agregar `specs/README.md` a las rutas permitidas y actualizar solo el estado de ML-02: ahora figura como «✅ COMPLETA — T01–T05 y T07–T09 (8 tasks); T06 DESCARTADA (M-ML-020)», con «8 completadas + 1 descartada» en la columna de tasks. Las demás specs no se tocaron.
 
 ## Revisión
 
@@ -512,3 +624,81 @@ Diff de `reports/variables_check.md` tras `download` (solo la sección de Inside
 T04 mantiene su PASS WITH WARNINGS previo: los 7 municipios están presentes, cada indicador registra su nivel de respaldo y la regla de suficiencia está probada. Advertencias: `ee`/`cv` no disponibles en la renta de T03 (hallazgo 7), estratos con una sola UPM (hallazgo 8), reescritura de manifiestos por fin de línea (hallazgo 9), el override de mypy para pandas (hallazgo 2) y la ausencia de commit/PR (hallazgo 5). T03 mantiene su PASS WITH WARNINGS previo con el hallazgo 1 resuelto en T04.
 
 **PASS.** T08 cumple R08: `reports/data_card.md` se genera automáticamente desde el registro, los manifiestos, el CSV de universidades y los Parquet; contiene las 11 secciones exigidas, suprime las celdas con menos de 30 viviendas en muestra, sus tres histogramas de renta suman exactamente el total expandido de `national_baselines.parquet`, Inside Airbnb figura como `DESCARTADA (M-ML-019)` sin atribución como fuente y todas las atribuciones INEGI/OSM se producen desde `sources.toml`. Sin commit, por instrucción explícita.
+
+**PASS.** T09 cumple R09 con la evidencia de la sección de cierre: 258 pruebas, 92.56 % de cobertura total, 92.23 % en los 14 módulos nuevos de ML-02, ruff y mypy limpios, dos corridas de `download` y `prepare` sin cambios nuevos en archivos versionados, hallazgos 21 y 24 resueltos y tablas de coherencia completas. **Sin commit, por instrucción explícita del responsable.**
+
+## Resumen final de ML-02 (cierre T09, 2026-11-19)
+
+### Pull requests mezclados en `main` y sus commits
+
+Verificado con `git log --first-parent --oneline main` y `git log main --merges`. El commit inicial del repositorio es `20b2c19`; desde entonces, `main` solo ha recibido merges de PR.
+
+| PR | Rama | Commit de merge en `main` | Commit(s) de la task |
+| --- | --- | --- | --- |
+| #5 | `feat/ml-02-datos` (T01) | `e9db1c8` | `368fc6d` |
+| #6 | `feat/ml-02-descarga` (T02) | `62bae99` | `22d42e3` |
+| #8 | `feat/ml-02-bases` (T03) | `2d1a3b8` | `59575ec` (`1542cc4` integra `main` en la rama) |
+| #9 | `feat/ml-02-regional` (T04) | `134db2b` | `9281bba` |
+| #10 | `feat/ml-02-universidades` (T07) | `7472bc9` | `46c9d4f`, `a274001`, `7962578` |
+| #11 | `feat/ml-02-denue` (T05) | `c443952` | `bd64d71` |
+| #12 | `docs/ml-02-t06-descartada` (T06) | `41d9f20` | `64f7f82` |
+| #13 | `feat/ml-02-data-card` (T08) | `fc029b5` | `52f86ad` |
+
+**Observación sobre el PR #7:** el merge `9cd9402` («Merge pull request #7 from thehouse-team/feat/ml-02-bases») existe en el repositorio pero **no es ancestro de `main`** (`git merge-base --is-ancestor 9cd9402 main` devuelve 1): se integró en `feat/ml-02-descarga`, no en `main`. Por eso no se cuenta entre los PR mezclados en `main`; el contenido de T03 llegó a `main` con el PR #8. T09 se entrega **sin commit ni PR**, por instrucción explícita del responsable.
+
+### Comandos ejecutados y resultado
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | 87 files already formatted — PASS |
+| `uv run ruff check .` | All checks passed! — PASS |
+| `uv run mypy src` | Success: no issues found in 19 source files — PASS |
+| `uv run pytest --cov=thehouse_ml --cov-report=term-missing` | 258 passed in 22.52s; cobertura 92.56 % — PASS |
+| `uv run python -m thehouse_ml download` | 5 fuentes verificadas en modo manual; descartada y OSM omitidas — PASS |
+| `uv run python -m thehouse_ml prepare` | 5 salidas de `data/processed/`, `data/universities.csv` y 5 reportes — PASS |
+| `uv run python -m thehouse_ml download` + `prepare` (2.ª corrida) | `GIT_STATUS_IDENTICAL=True` — PASS |
+| `uv run python -m thehouse_ml download --source openstreetmap` | `manual - 10 respuesta(s) verificadas`; manifiesto sin cambios — PASS |
+| `git merge-base --is-ancestor 9cd9402 main` | 1 (PR #7 no mezclado en `main`) — observación |
+
+### Cobertura
+
+| Ámbito | Cobertura |
+| --- | ---: |
+| Total de `src/thehouse_ml` | **92.56 %** (mínimo exigido 80 %) |
+| Código nuevo de ML-02 (14 módulos: `sources`, `manifests`, `download`, `variables`, `csvio`, `percentiles`, `inpc`, `national`, `regional`, `universities`, `denue`, `rent_histogram`, `thresholds`, `data_card`) | **92.23 %** |
+| Módulo ML-02 con menor cobertura | `inpc.py` **82.09 %** (≥ 80 %) |
+| Pruebas | **258** (35 de integración, 10 de higiene y 213 unitarias) |
+
+### Estado final de los hallazgos
+
+| # | Hallazgo | Estado final |
+| --- | --- | --- |
+| 1 | Servicios en T04, no en T03 | RESUELTO (M-ML-014(c)) |
+| 2 | pandas sin stubs de tipo | MITIGADO — override de mypy solo para `pandas`; abierto mientras no se aprueben stubs |
+| 3 | INPC: valor semántico | RESUELTO (documentado y filtrado) |
+| 4 | Definición de `n_muestra` | RESUELTO (documentado) |
+| 5 | Sin commit ni PR | **Se cierra al mezclar el PR de T09** |
+| 6 | Fuentes pendientes | RESUELTO salvo el seed (dato propio, sin descarga) |
+| 7 | Renta sin `ee`/`cv`; respaldo nacional limitado | ABIERTO — limitación documentada en la data card |
+| 8 | Estratos con una sola UPM | ABIERTO — limitación documentada; no afectó a los 7 municipios |
+| 9 | Reescritura de manifiestos por fin de línea | RESUELTO definitivamente en T09 (`write_manifest` con LF y sin reescritura) |
+| 10 | `category` frente a `class` en jsonv2 | RESUELTO sin consultas nuevas |
+| 11 | Coincidencias dudosas | RESUELTO por M-ML-017; 3 `seed_sin_verificar` y la duda de UCAN siguen pendientes del backend |
+| 12 | Reescritura de reportes por fin de línea | RESUELTO |
+| 13 | Sin commit ni PR (histórico) | **Se cierra al mezclar el PR de T09** |
+| 14 | Reporte de variables filtrado | RESUELTO |
+| 15 | CI en máquina vacía | RESUELTO (OSM bajo demanda) |
+| 16 | URL de Edomex 404 | RESUELTO y aprobado por el responsable (adenda M-ML-018) |
+| 17 | Nombre de salida `campus_context.parquet` | RESUELTO |
+| 18 | Reescritura de `data/universities.csv` por fin de línea | RESUELTO |
+| 19 | Fechas de manifiestos reescritas | RESUELTO (ver 21) |
+| 20 | Referencia residual en `specs/ARQUITECTURA.md` | RESUELTO con autorización |
+| 21 | `downloaded_at` reescrito en modo manual | **RESUELTO en T09** (incluye manifiesto OSM) |
+| 22 | Salida intermedia `rent_histogram.parquet` | RESUELTO (documentado) |
+| 23 | Proyectos sin DENUE | RESUELTO |
+| 24 | `verified_at` dependiente de la fecha | **RESUELTO en T09** |
+| 25 | `specs/README.md` desactualizado | RESUELTO el 2026-11-19 (autorización del responsable; solo estado de ML-02) |
+
+### Resultado global
+
+**PASS WITH WARNINGS.** ML-02 1.0.1 queda **✅ COMPLETA** (T01–T05 y T07–T09 completas = 8 tasks; T06 DESCARTADA por M-ML-019). Los 9 requisitos tienen evidencia: R01–R08 en sus secciones y R09 en el cierre de esta evidencia. Advertencias que no bloquean el cierre: hallazgos 2, 7, 8 y 11 (parcial); tres universidades `seed_sin_verificar` (TESJI, UMB-VDC y UCAN) y la duda del nombre de UCAN pendientes del equipo del backend; las afirmaciones de desempeño real quedan para ML-07. Los hallazgos 5 y 13 **se cierran al mezclar el PR de T09** (sin commit ni PR por instrucción del responsable); el hallazgo 25 quedó resuelto el 2026-11-19 con la autorización para actualizar `specs/README.md`. Todo lo que no se cumplió se reporta aquí y no se oculta. Sin dependencias nuevas, sin descargas nuevas, sin scraping, sin secretos y sin commit, según lo autorizado.

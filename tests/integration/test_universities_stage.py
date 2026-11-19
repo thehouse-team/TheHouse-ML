@@ -8,7 +8,7 @@ from pathlib import Path
 
 import pytest
 
-from conftest import REPO_ROOT, write_osm_project
+from conftest import OSM_DOWNLOADED_AT, REPO_ROOT, write_osm_project
 from thehouse_ml.cli import main
 from thehouse_ml.download import run_download
 from thehouse_ml.paths import ProjectPaths
@@ -51,9 +51,33 @@ def test_prepare_writes_the_ten_universities_with_all_three_statuses(tmp_path: P
     assert "ok" in statuses.values()
     assert statuses["UMB-VDC"] == "revisar"
     assert statuses["UCAN"] == "sin_coincidencia"
-    assert all(row["verified_at"] == VERIFIED_AT for row in rows)
+    by_code = {row["code"]: row for row in rows}
+    # Hallazgo 24: ok_osm toma la fecha del manifiesto OSM; las 8 filas con
+    # revisión humana toman `verified_at` del CSV manual (2026-11-18).
+    assert by_code["UTTT"]["verified_at"] == OSM_DOWNLOADED_AT
+    assert by_code["UNE-TULA"]["verified_at"] == OSM_DOWNLOADED_AT
+    for code in ("UAEH-ESTE", "UAEH-ESTL", "UAEH-ESAT", "ITSOEH", "TESJI", "UMB-JILO", "UMB-VDC", "UCAN"):
+        assert by_code[code]["verified_at"] == "2026-11-18"
     assert all(row["final_lat"] and row["final_lon"] for row in rows)
     assert all(row["final_status"] and row["final_source"] for row in rows)
+
+
+def test_prepare_on_two_different_days_does_not_change_the_csv(tmp_path: Path) -> None:
+    """Hallazgo 24: dos fechas simuladas producen exactamente el mismo archivo."""
+    write_osm_project(tmp_path)
+    paths = ProjectPaths(root=tmp_path)
+    report_path = paths.reports / "universities_check.md"
+
+    run_universities(paths, today="2026-11-19")
+    csv_first = paths.universities_csv.read_bytes()
+    report_first = report_path.read_bytes()
+    run_universities(paths, today="2026-11-20")
+
+    assert paths.universities_csv.read_bytes() == csv_first
+    assert report_path.read_bytes() == report_first
+    rows = {row["code"]: row for row in _rows(paths)}
+    assert rows["UTTT"]["verified_at"] == OSM_DOWNLOADED_AT
+    assert rows["UCAN"]["verified_at"] == "2026-11-18"
 
 
 def test_all_ten_rows_have_final_coordinates_and_the_expected_final_statuses(tmp_path: Path) -> None:

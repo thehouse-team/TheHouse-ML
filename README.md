@@ -41,10 +41,18 @@ El código está bajo licencia MIT ([`LICENSE`](LICENSE)); los datos de terceros
 
 ## Datos y atribución
 
-Los datos de terceros no se incluyen en este repositorio; se descargan con un script reproducible.
+Los datos de terceros no se incluyen en este repositorio: se descargan con un script reproducible, se verifican con SHA-256 y se registran en `data/sources.toml` y `data/manifests/`. Las fuentes aprobadas están en `memoria.md` (M-ML-003).
 
-Fuentes previstas, pendientes de verificar su licencia antes de descargar (ver `memoria.md`, M-ML-003):
-- [INEGI](https://www.inegi.org.mx/): Censo de Población y Vivienda 2020 (muestra), ENVI 2020, ENIGH 2022, DENUE e INPC, bajo sus [Términos de libre uso](https://www.inegi.org.mx/inegi/terminos.html). Fuente: INEGI. TheHouse no está respaldado por INEGI.
-- [Inside Airbnb](https://insideairbnb.com/) (Ciudad de México).
-- [OpenStreetMap](https://www.openstreetmap.org/copyright) (© colaboradores de OpenStreetMap, ODbL).
-- Perfiles de estudiantes sintéticos generados desde el esquema de preferencias de TheHouse.
+Productos del INEGI usados, citados como autor y nombre del producto bajo los [Términos de libre uso de la información del INEGI](https://www.inegi.org.mx/inegi/terminos.html):
+
+- Censo de Población y Vivienda 2020 (muestra, cuestionario ampliado) — **Fuente: INEGI**.
+- Encuesta Nacional de Vivienda (ENVI) 2020 — **Fuente: INEGI**.
+- Encuesta Nacional de Ingresos y Gastos de los Hogares (ENIGH) 2022 — **Fuente: INEGI**.
+- Índice Nacional de Precios al Consumidor (INPC) — **Fuente: INEGI**.
+- Directorio Estadístico Nacional de Unidades Económicas (DENUE) 05/2026 — **Fuente: INEGI**.
+
+Esta atribución identifica únicamente al productor de los datos: **TheHouse no está respaldado por el INEGI** ni es una obra derivada oficial del INEGI.
+
+- [OpenStreetMap](https://www.openstreetmap.org/copyright): **© OpenStreetMap contributors (ODbL)**. Solo se consultó para verificar las coordenadas de los campus (10 peticiones autorizadas, M-ML-016).
+- Inside Airbnb **no se usa**: quedó descartada por M-ML-019 (solo cubre Ciudad de México, mide renta turística por noche y trae datos personales de anfitriones).
+- Las bases nacionales, la calibración regional, el entorno de campus y el catálogo de cuartos de ML-03 son datos derivados y **sintéticos** cuando corresponde; las métricas sobre datos sintéticos se etiquetan como tales y nunca se presentan como desempeño real (constitución §8).

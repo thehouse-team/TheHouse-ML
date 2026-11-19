@@ -7,7 +7,8 @@ from urllib.parse import parse_qs, urlsplit
 
 import pytest
 
-from conftest import REPO_ROOT
+from conftest import OSM_DOWNLOADED_AT, REPO_ROOT, write_osm_project
+from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.universities import (
     COUNTRY_CODES,
     DISTANCE_THRESHOLD_M,
@@ -25,8 +26,10 @@ from thehouse_ml.universities import (
     finalize_row,
     haversine_m,
     load_manual,
+    load_osm_dates,
     load_seed,
     parse_candidates,
+    resolve_verified_at,
     select_candidate,
     write_universities_csv,
 )
@@ -284,6 +287,40 @@ def test_apply_manual_keeps_the_original_columns() -> None:
     assert row.osm_id == "386380501"
     assert row.status == "ok"
     assert row.distance_m == ""
+
+
+def test_load_osm_dates_reads_the_manifest_by_code(tmp_path: Path) -> None:
+    write_osm_project(tmp_path)
+
+    dates = load_osm_dates(ProjectPaths(root=tmp_path))
+
+    assert len(dates) == 10
+    assert dates["UTTT"] == OSM_DOWNLOADED_AT
+    assert dates["UNE-TULA"] == OSM_DOWNLOADED_AT
+
+
+def test_load_osm_dates_without_a_manifest_is_empty(tmp_path: Path) -> None:
+    assert load_osm_dates(ProjectPaths(root=tmp_path)) == {}
+
+
+def test_resolve_verified_at_uses_the_osm_manifest_for_osm_rows() -> None:
+    row = _row("ok")
+    (resolved,) = resolve_verified_at([row], {}, {"UTTT": "2026-11-17"})
+
+    assert resolved.verified_at == "2026-11-17"
+    assert row.verified_at == ""  # la fila original no se muta
+
+
+def test_resolve_verified_at_uses_the_manual_date_for_manual_rows() -> None:
+    (resolved,) = resolve_verified_at([_row()], {"UTTT": _manual("no_localizada")}, {"UTTT": "2026-11-17"})
+
+    assert resolved.verified_at == "2026-11-18"  # verified_at del CSV manual, no del manifiesto OSM
+
+
+def test_resolve_verified_at_ignores_the_clock_and_keeps_unknown_rows_as_is() -> None:
+    (resolved,) = resolve_verified_at([_row()], {}, {})
+
+    assert resolved.verified_at == _row().verified_at == ""
 
 
 def test_load_manual_reads_the_eight_human_decisions() -> None:

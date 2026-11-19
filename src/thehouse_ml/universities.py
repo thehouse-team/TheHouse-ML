@@ -259,6 +259,47 @@ def apply_manual(rows: Sequence[UniversityRow], manual: Mapping[str, ManualVerif
     return tuple(finalize_row(row, manual) for row in rows)
 
 
+def load_osm_dates(paths: ProjectPaths) -> dict[str, str]:
+    """Fechas ``downloaded_at`` del manifiesto OSM, indexadas por código.
+
+    Es la fecha de la evidencia descargada de Nominatim (M-ML-016), no la del
+    día en que se ejecuta ``prepare``. Sin manifiesto devuelve un diccionario
+    vacío: las filas que no tengan verificación humana conservan la fecha que
+    ya trajeran, sin acudir nunca a la fecha del sistema (hallazgo 24).
+    """
+    manifest = load_manifest(manifest_path(paths, OSM_SOURCE))
+    if manifest is None:
+        return {}
+    return {
+        file.filename.removesuffix(".json"): file.downloaded_at
+        for file in manifest.files
+        if file.filename.endswith(".json")
+    }
+
+
+def resolve_verified_at(
+    rows: Sequence[UniversityRow],
+    manual: Mapping[str, ManualVerification],
+    osm_dates: Mapping[str, str],
+) -> tuple[UniversityRow, ...]:
+    """Fecha de verificación determinista por fila (hallazgo 24).
+
+    * con verificación humana (M-ML-017), la fecha del CSV
+      ``data/seed/universities_manual.csv``;
+    * en las demás filas (``ok_osm``), la fecha del manifiesto de
+      OpenStreetMap.
+
+    Nunca consulta la fecha del sistema: ejecutar ``prepare`` en dos días
+    distintos reproduce exactamente el mismo ``data/universities.csv``.
+    """
+    resolved: list[UniversityRow] = []
+    for row in rows:
+        entry = manual.get(row.code)
+        verified_at = entry.verified_at if entry is not None else osm_dates.get(row.code, row.verified_at)
+        resolved.append(replace(row, verified_at=verified_at))
+    return tuple(resolved)
+
+
 def build_query_url(seed: UniversitySeed) -> str:
     """Construye la única consulta permitida por universidad (Nominatim jsonv2)."""
     west = seed.longitude_float - VIEWBOX_DEGREES
@@ -315,7 +356,8 @@ def download_osm(
 
     for seed in seeds:
         destination = paths.data_raw / source_id / f"{seed.code}.json"
-        if destination.is_file():
+        was_cached = destination.is_file()
+        if was_cached:
             cached += 1
         else:
             if requests:
@@ -324,12 +366,20 @@ def download_osm(
             requests += 1
             downloaded += 1
         digest, size = _digest_and_size(destination)
-        _check_previous(destination, previous_files.get(destination.name), digest)
+        old = previous_files.get(destination.name)
+        _check_previous(destination, old, digest)
+        # Igual que en `download` (hallazgo 21): una respuesta cacheada y
+        # verificada no se considera una descarga nueva, conserva su fecha.
+        recorded_at = (
+            old.downloaded_at
+            if was_cached and old is not None and old.sha256 == digest and old.size_bytes == size
+            else download_date
+        )
         entries.append(
             ManifestFile(
                 url=build_query_url(seed),
                 filename=destination.name,
-                downloaded_at=download_date,
+                downloaded_at=recorded_at,
                 size_bytes=size,
                 sha256=digest,
                 license="Open Database License (ODbL) 1.0",
@@ -565,7 +615,12 @@ def run_universities(paths: ProjectPaths, today: str | None = None) -> str:
             raise OsmError(f"No se puede leer {payload_path.name}: {exc}") from exc
         responses[seed.code] = parse_candidates(payload, seed.code)
 
-    rows = apply_manual(build_rows(seeds, responses, today or date.today().isoformat()), manual)
+    # `today` solo se conserva como entrada de las pruebas que simulan dos días;
+    # la fecha que se escribe sale del manifiesto OSM o del CSV manual, nunca
+    # del reloj del sistema (hallazgo 24).
+    rows = resolve_verified_at(
+        apply_manual(build_rows(seeds, responses, today or ""), manual), manual, load_osm_dates(paths)
+    )
     write_universities_csv(paths.universities_csv, rows)
     report_path = paths.reports / "universities_check.md"
     report_path.parent.mkdir(parents=True, exist_ok=True)
@@ -670,10 +725,12 @@ __all__ = [
     "finalize_row",
     "haversine_m",
     "load_manual",
+    "load_osm_dates",
     "load_seed",
     "osm_headers",
     "parse_candidates",
     "render_report",
+    "resolve_verified_at",
     "run_universities",
     "select_candidate",
     "write_universities_csv",

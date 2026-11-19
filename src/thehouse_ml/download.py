@@ -101,18 +101,29 @@ def download_source(
 
     for file in source.download_url:
         destination = paths.data_raw / source.id / file.filename
-        if destination.is_file():
+        was_local = destination.is_file()
+        if was_local:
             manual += 1
         else:
             (fetcher or default_fetch)(file.url, destination)
             downloaded += 1
         digest, size = _digest_and_size(destination)
-        _check_file(file, digest, size, previous_files.get(file.filename), destination)
+        old = previous_files.get(file.filename)
+        _check_file(file, digest, size, old, destination)
+        # Un archivo que ya estaba (modo manual) y cuyo SHA-256 y tamaño no
+        # cambiaron no es una descarga nueva: conserva su fecha original
+        # (hallazgo 21). Solo se estampa una fecha nueva si se descargó o si
+        # el contenido cambió con respecto al manifiesto anterior.
+        recorded_at = (
+            old.downloaded_at
+            if was_local and old is not None and old.sha256 == digest and old.size_bytes == size
+            else download_date
+        )
         entries.append(
             ManifestFile(
                 url=file.url,
                 filename=file.filename,
-                downloaded_at=download_date,
+                downloaded_at=recorded_at,
                 size_bytes=size,
                 sha256=digest,
                 license=source.license,

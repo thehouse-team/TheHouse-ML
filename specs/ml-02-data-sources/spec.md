@@ -8,14 +8,14 @@
 | Fecha | 2026-11-12 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-12 (M-ML-012): aprueba ML-02 1.0.1 |
-| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T05, T07 y T08 completas; T06 DESCARTADA (M-ML-019); T09 sin ejecutar** |
+| Estado de ejecución | **✅ COMPLETA — T01–T05 y T07–T09 completas (8 tasks); T06 DESCARTADA (M-ML-019)** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.1 |
 | Tasks | `task.md` 1.0.1 |
 | Precondición | ML-01 completa; fuentes de M-ML-003 aprobadas |
 | Relación con el backend | Verifica las coordenadas de las 10 universidades del seed de NV-11 (3 están aproximadas al centro del municipio) y entrega las correcciones |
 
-Spec aprobada (1.0.1, M-ML-012). No autoriza código ni descargas hasta recibir «EJECUTA» con tasks y rutas. T03 se ejecutó el 2026-11-17 bajo M-ML-014, T04 el 2026-11-17 bajo M-ML-015 y T07 el 2026-11-17 bajo M-ML-016 (antes que T05, porque T05 necesita coordenadas verificadas); la T05 se ejecutó el 2026-11-18 bajo M-ML-018. La T06 quedó **DESCARTADA** el 2026-11-18 por M-ML-019 (Inside Airbnb no se descarga ni se verifica); la T08 se ejecutó el 2026-11-18 en la rama `feat/ml-02-data-card`; la T09 sigue sin autorización de ejecución.
+Spec aprobada (1.0.1, M-ML-012). No autoriza código ni descargas hasta recibir «EJECUTA» con tasks y rutas. T03 se ejecutó el 2026-11-17 bajo M-ML-014, T04 el 2026-11-17 bajo M-ML-015 y T07 el 2026-11-17 bajo M-ML-016 (antes que T05, porque T05 necesita coordenadas verificadas); la T05 se ejecutó el 2026-11-18 bajo M-ML-018. La T06 quedó **DESCARTADA** el 2026-11-18 por M-ML-019 (Inside Airbnb no se descarga ni se verifica); la T08 se ejecutó el 2026-11-18 en la rama `feat/ml-02-data-card`. La T09 (ML-02-R09) se ejecutó el 2026-11-19 en la rama `feat/ml-02-cierre`: pruebas, evidencia, revisión de coherencia y cierre de la spec. ML-02 queda **COMPLETA**: 8 tasks completas y T06 descartada.
 
 ## 1. Contexto
 
@@ -163,10 +163,10 @@ Se registran en `memoria.md` al aprobarse; mientras estén PENDIENTE, las tasks 
 | Tasks | 9 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 7 |
+| Tasks completadas | 8 |
 | Tasks descartadas | 1 (T06, M-ML-019) |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🔄 EN EJECUCIÓN — T01–T05, T07 y T08 completas; T06 DESCARTADA (M-ML-019); T09 sin ejecutar** |
+| Estado de ejecución | **✅ COMPLETA — T01–T05 y T07–T09 completas (8 tasks); T06 DESCARTADA (M-ML-019)** |
 
 ## 15. Aprobación pendiente
 
@@ -175,3 +175,5 @@ Para aprobar se requiere la revisión humana de esta versión y la resolución (
 El 2026-11-18 el responsable aprobó M-ML-019 y dio «EJECUTA ML-02 1.0.1, task T06, en la rama docs/ml-02-t06-descartada», con rutas permitidas `data/sources.toml`, `memoria.md`, `specs/ml-02-data-sources/`, `reports/variables_check.md`, `src/thehouse_ml/` y `tests/` (estas últimas solo para que la fuente descartada no se descargue ni se verifique). Sin dependencias nuevas y sin descargar nada de Inside Airbnb.
 
 El 2026-11-18 César Yael López Trujillo dio «EJECUTA ML-02 1.0.1, task T08 (ML-02-R08), en la rama feat/ml-02-data-card», con rutas permitidas `src/thehouse_ml/`, `tests/`, `reports/`, `memoria.md` y `specs/ml-02-data-sources/`, sin dependencias nuevas. La data card se genera desde código como parte de `prepare`; la evidencia está en `evidence.md`.
+
+El 2026-11-19 César Yael López Trujillo dio «EJECUTA ML-02 1.0.1, task T09 (ML-02-R09), en la rama feat/ml-02-cierre», con rutas permitidas `src/thehouse_ml/`, `tests/`, `data/manifests/` (solo para conservar fechas originales), `data/universities.csv`, `reports/`, `README.md` (solo la sección de atribución de datos), `memoria.md` y `specs/ml-02-data-sources/`, sin dependencias nuevas ni descargas nuevas. T09 cierra la spec con las pruebas, la evidencia y la revisión de coherencia; la decisión de cierre se registra como M-ML-020. No se sube la versión de la spec: ni la constitución ni `AGENTS.md` exigen un bump al cerrar, y cambiar la versión aprobada 1.0.1 requeriría una aprobación nueva («Apruebo X.Y.Z»).
