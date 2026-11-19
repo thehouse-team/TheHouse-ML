@@ -17,6 +17,8 @@ from thehouse_ml.paths import ROOT_ENV_VAR, ProjectPaths
 from thehouse_ml.regional import RegionalError
 from thehouse_ml.sources import SourceRegistryError
 from thehouse_ml.stages import STAGES, run_stage
+from thehouse_ml.synthetic.students import StudentParamsError
+from thehouse_ml.synthetic.students_stage import StudentsError
 from thehouse_ml.universities import OsmError
 from thehouse_ml.variables import VariableCheckError
 
@@ -64,6 +66,8 @@ def main(argv: Sequence[str] | None = None) -> int:
         PrepareError,
         RegionalError,
         SourceRegistryError,
+        StudentParamsError,
+        StudentsError,
         VariableCheckError,
     ) as exc:
         print(f"error: {exc}", file=sys.stderr)

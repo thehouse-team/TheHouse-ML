@@ -1,0 +1,158 @@
+{
+  "metadata": {
+    "params_version": "1.0.0",
+    "spec": "ML-03 1.0.0, T04 (ML-03-R04)",
+    "decision": "M-ML-025 (APROBADO)",
+    "synthetic": true,
+    "currency": "MXN mensuales en pesos de julio de 2024 (M-ML-014)",
+    "description": "Parámetros del generador de estudiantes sintéticos. Cada parámetro lleva su base: «calibrado: <fuente>» o «SUPUESTO documentado». Los perfiles no imitan personas reales y no llevan ningún campo de género (constitución §11)."
+  },
+  "parameters": {
+    "seed": {
+      "value": 20261119,
+      "basis": "SUPUESTO documentado: semilla fija (constitución §9); el número es la fecha de aprobación de ML-03. Cada campus usa su propio generador random.Random(\"<seed>:<code>\")."
+    },
+    "n_students": {
+      "value": 2000,
+      "basis": "SUPUESTO documentado: número aprobado en M-ML-021 (spec ML-03 §10)."
+    },
+    "student_id.prefix": {
+      "value": "S",
+      "basis": "SUPUESTO documentado: id sintético sin datos personales (constitución §7): prefijo + número consecutivo."
+    },
+    "student_id.width": {
+      "value": 4,
+      "basis": "SUPUESTO documentado: 4 dígitos con ceros a la izquierda (S0001 a S2000)."
+    },
+    "universities.per_campus": {
+      "value": 200,
+      "basis": "SUPUESTO documentado: partes iguales (2,000 / 10 campus) porque no hay matrícula pública verificada por campus. Los 10 campus son el catálogo university_code de feature_schema.json; las 3 seed_sin_verificar (TESJI, UMB-VDC, UCAN) entran con seed_verified = false, tomado de data/universities.csv."
+    },
+    "universities.municipio_clave": {
+      "value": {
+        "UTTT": "13076",
+        "UAEH-ESTE": "13063",
+        "UAEH-ESTL": "13070",
+        "UAEH-ESAT": "13013",
+        "ITSOEH": "13041",
+        "TESJI": "15045",
+        "UMB-JILO": "15045",
+        "UMB-VDC": "15112",
+        "UCAN": "13076",
+        "UNE-TULA": "13076"
+      },
+      "basis": "calibrado: columna city de data/seed/universities_seed.csv igual a municipio_nombre de regional_calibration.parquet (ML-02 T04); una prueba verifica la correspondencia."
+    },
+    "budget.max.median_factor": {
+      "value": 1.3,
+      "basis": "SUPUESTO documentado: mediana de budget.max = renta p50 regional × 1.3, porque el estudiante declara un tope por encima de lo que espera pagar y busca algo dentro de su presupuesto. La renta p50 es calibrado: regional_calibration.parquet, indicador renta (ENVI 2020 deflactada a jul-2024, respaldo estatal de M-ML-015: Hidalgo y Estado de México)."
+    },
+    "budget.max.log_sigma": {
+      "value": 0.35,
+      "basis": "SUPUESTO documentado: dispersión lognormal (desviación estándar del logaritmo); p25 ≈ 0.79 × mediana y p75 ≈ 1.27 × mediana. Es más estrecha que la de la renta de vivienda de la ENVI (≈ 0.57 en Edomex y 0.65 en Hidalgo, de p25 y p75 de regional_calibration.parquet) porque el presupuesto del estudiante depende menos del tamaño de la vivienda."
+    },
+    "budget.max.round_to": {
+      "value": 100,
+      "basis": "SUPUESTO documentado: los presupuestos se declaran en múltiplos de 100 pesos."
+    },
+    "budget.max.clip": {
+      "value": [0, 50000],
+      "basis": "calibrado: rango de presupuesto de NV-11 (data/seed/nv11_catalogs.json y feature_schema.json)."
+    },
+    "budget.max.calibration_tolerance": {
+      "value": 0.1,
+      "basis": "SUPUESTO documentado: la mediana generada de budget.max por campus debe quedar a ±10 % de renta p50 × factor. Con 200 estudiantes y sigma 0.35 el error estándar de la mediana es ≈ 3.1 % y el redondeo a 100 suma ≤ 2 %."
+    },
+    "budget.min.null_probability": {
+      "value": 0.3,
+      "basis": "SUPUESTO documentado: budget.min es opcional en NV-11; nulo → 0 (M-ML-022)."
+    },
+    "budget.min.fraction": {
+      "value": [0.4, 0.8],
+      "basis": "SUPUESTO documentado: budget.min = budget.max × U(0.4, 0.8), redondeado hacia abajo a múltiplos de 100; así siempre budget.min ≤ budget.max."
+    },
+    "transport.probabilities": {
+      "value": {
+        "walk": 0.2,
+        "bike": 0.05,
+        "public": 0.6,
+        "car": 0.15
+      },
+      "basis": "SUPUESTO documentado: en los municipios de los campus predomina el transporte público; caminar para quien vive cerca; bici y auto minoritarios."
+    },
+    "transport.null_probability": {
+      "value": 0.1,
+      "basis": "SUPUESTO documentado: transport es opcional; nulo → \"public\" (M-ML-022)."
+    },
+    "maxDistanceKm.by_transport": {
+      "value": {
+        "walk": {"values": [0.5, 1, 2, 3], "weights": [0.15, 0.35, 0.35, 0.15]},
+        "bike": {"values": [2, 3, 5, 8], "weights": [0.2, 0.3, 0.35, 0.15]},
+        "public": {"values": [3, 5, 8, 10, 15, 20], "weights": [0.1, 0.2, 0.25, 0.2, 0.15, 0.1]},
+        "car": {"values": [5, 10, 15, 20, 30], "weights": [0.1, 0.25, 0.3, 0.2, 0.15]}
+      },
+      "basis": "SUPUESTO documentado: la distancia aceptada depende del transporte elegido (antes de aplicar los nulos); todos los valores están en el rango 0.5–30 de NV-11."
+    },
+    "maxDistanceKm.null_probability": {
+      "value": 0.15,
+      "basis": "SUPUESTO documentado: maxDistanceKm es opcional; nulo → 30 (M-ML-022)."
+    },
+    "essentialServices.probabilities": {
+      "value": {
+        "wifi": 0.85,
+        "water": 0.9,
+        "electricity": 0.9,
+        "gas": 0.6,
+        "hot_water": 0.65,
+        "laundry": 0.35,
+        "kitchen": 0.5,
+        "furnished": 0.4,
+        "parking": 0.15,
+        "security": 0.45,
+        "cleaning": 0.15
+      },
+      "basis": "SUPUESTO documentado: probabilidad independiente de marcar cada servicio como esencial; los básicos (agua, luz, wifi) casi siempre, los extras menos."
+    },
+    "essentialServices.null_probability": {
+      "value": 0.1,
+      "basis": "SUPUESTO documentado: essentialServices es opcional; nulo → conjunto vacío (M-ML-022)."
+    },
+    "livingWith.probabilities": {
+      "value": {
+        "women": 0.3,
+        "men": 0.25,
+        "any": 0.45
+      },
+      "basis": "SUPUESTO documentado: 55 % de los estudiantes pide convivencia solo con mujeres o solo con hombres; con HC02 esos estudiantes solo ven cuartos del mismo valor (no ven cuartos any). Quick setup: nunca nulo. Es la elección del estudiante; no se infiere ni se guarda su género (constitución §11)."
+    },
+    "placeType.probabilities": {
+      "value": {
+        "room": 0.45,
+        "room_private_bath": 0.25,
+        "studio": 0.15,
+        "shared": 0.15
+      },
+      "basis": "SUPUESTO documentado: el cuarto sencillo es lo más buscado; quick setup: nunca nulo."
+    },
+    "propertyTypes.inclusion_probabilities": {
+      "value": {
+        "house": 0.6,
+        "apartment": 0.6,
+        "student_residence": 0.4
+      },
+      "basis": "SUPUESTO documentado: probabilidad independiente de aceptar cada tipo de inmueble; si no sale ninguno se elige uno al azar (un conjunto vacío equivaldría a nulo)."
+    },
+    "propertyTypes.null_probability": {
+      "value": 0.25,
+      "basis": "SUPUESTO documentado: propertyTypes es opcional; nulo → acepta todos (M-ML-022)."
+    },
+    "pets.true_probability": {
+      "value": 0.12,
+      "basis": "SUPUESTO documentado: proporción de estudiantes con mascota entre los que responden."
+    },
+    "pets.null_probability": {
+      "value": 0.2,
+      "basis": "SUPUESTO documentado: pets es opcional; nulo → false (M-ML-022)."
+    }
+  }
+}
