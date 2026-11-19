@@ -44,10 +44,17 @@ def test_prepare_generates_the_data_card_after_the_other_outputs(
 
         return run
 
-    for stage_name in ("run_prepare", "run_regional", "run_universities", "run_denue", "run_data_card"):
+    for stage_name in ("run_prepare", "run_regional", "run_universities", "run_denue", "run_students", "run_data_card"):
         monkeypatch.setattr(stages, stage_name, fake(stage_name))
 
     output = run_stage("prepare", ProjectPaths(root=tmp_path))
 
-    assert calls == ["run_prepare", "run_regional", "run_universities", "run_denue", "run_data_card"]
+    assert calls == [
+        "run_prepare",
+        "run_regional",
+        "run_universities",
+        "run_denue",
+        "run_students",
+        "run_data_card",
+    ]
     assert "run_data_card: ok" in output
