@@ -139,6 +139,53 @@ def test_denue_registers_two_states_and_only_public_variables() -> None:
     assert all(file.table == "conjunto_de_datos/*.csv" for file in files[1:])  # todos los CSV de la carpeta
 
 
+def test_inside_airbnb_is_discarded_with_reference_and_no_download_url() -> None:
+    airbnb = _by_id()["inside_airbnb_cdmx_2026_09_23"]
+
+    assert airbnb.variables_status == "discarded"
+    assert airbnb.status_reference == "M-ML-019"
+    assert airbnb.download_url == ()
+
+
+def test_discarded_status_requires_a_reference(tmp_path: Path) -> None:
+    path = tmp_path / "sources.toml"
+    path.write_text(
+        """[[sources]]
+id = "prueba"
+name = "Prueba"
+license = "Licencia"
+attribution = "Atribucion"
+variables_status = "discarded"
+variables_used = ["x"]
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(SourceRegistryError, match="status_reference"):
+        load_sources(path)
+
+
+def test_discarded_status_is_loaded_with_its_reference(tmp_path: Path) -> None:
+    path = tmp_path / "sources.toml"
+    path.write_text(
+        """[[sources]]
+id = "prueba"
+name = "Prueba"
+license = "Licencia"
+attribution = "Atribucion"
+variables_status = "discarded"
+status_reference = "M-ML-019"
+variables_used = ["x"]
+""",
+        encoding="utf-8",
+    )
+
+    source = load_sources(path)[0]
+
+    assert source.variables_status == "discarded"
+    assert source.status_reference == "M-ML-019"
+
+
 def test_select_sources_filters_and_rejects_unknown_ids() -> None:
     sources = load_sources(SOURCES_PATH)
 

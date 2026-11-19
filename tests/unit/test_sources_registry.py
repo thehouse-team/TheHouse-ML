@@ -17,7 +17,7 @@ REQUIRED_FIELDS = (
     "dictionary_url",
     "variables_status",
 )
-ALLOWED_VARIABLES_STATUS = {"pending", "confirmed"}
+ALLOWED_VARIABLES_STATUS = {"pending", "confirmed", "discarded"}
 
 
 def _load_sources() -> list[dict[str, object]]:
@@ -84,3 +84,12 @@ def test_variables_status_is_valid() -> None:
         assert status in ALLOWED_VARIABLES_STATUS, (
             f"La fuente {source_id!r} tiene variables_status inválido: {status!r}"
         )
+
+
+def test_inside_airbnb_is_discarded_per_m_ml_019() -> None:
+    airbnb = next(source for source in _load_sources() if source.get("id") == "inside_airbnb_cdmx_2026_09_23")
+
+    assert airbnb["variables_status"] == "discarded"
+    assert airbnb["status_reference"] == "M-ML-019"
+    assert airbnb["download_url"] == []
+    assert "listings.csv.gz" not in str(airbnb["url"])

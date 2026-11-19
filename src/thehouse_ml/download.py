@@ -5,6 +5,9 @@ Modos de operación por archivo:
 * si el archivo ya está en ``data/raw/<id>/`` (lo puso a mano el humano), no
   se descarga: solo se verifica su SHA-256 y se escribe el manifiesto;
 * si no está, se descarga y se validan tamaño y hash;
+* una fuente descartada (``variables_status = "discarded"``) se omite sin
+  descargar ni verificar, con el aviso ``descartada: <status_reference>``
+  (M-ML-019);
 * una fuente con ``download_url`` vacío se salta con el aviso
   ``download_url pendiente``;
 * ``openstreetmap`` es una fuente **bajo demanda** (ML-02 T07): solo se consulta
@@ -81,6 +84,8 @@ def download_source(
     today: str | None = None,
 ) -> DownloadOutcome:
     """Descarga (o verifica) los archivos de una fuente y escribe su manifiesto."""
+    if source.variables_status == "discarded":
+        return DownloadOutcome(source.id, "omitida", f"descartada: {source.status_reference}")
     if source.id == OSM_SOURCE:
         outcome = download_osm(source.id, paths, fetcher, today)
         return DownloadOutcome(outcome.source_id, outcome.status, outcome.message)

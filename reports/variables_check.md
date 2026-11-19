@@ -45,11 +45,11 @@ no se carga el cuerpo de los microdatos. Una variable confirmada ausente hace fa
 
 ## inside_airbnb_cdmx_2026_09_23
 
-- estado: `confirmed`
+- estado: `discarded`
 - verificado: no
 - variables encontradas: (ninguna)
 - variables faltantes: (sin verificar)
-- nota: download_url pendiente (sin verificar)
+- nota: descartada: M-ML-019
 
 ## openstreetmap
 
