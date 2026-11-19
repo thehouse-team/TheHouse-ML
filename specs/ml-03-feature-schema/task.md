@@ -11,7 +11,7 @@
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 0 |
+| Tasks completadas | 1 |
 
 ## Reglas de esta lista
 
@@ -22,7 +22,7 @@
 
 ## F1 — Diseño y contrato
 
-- [ ] **T01 · Esquema de features** — Requisito: ML-03-R01 · Aceptación: `feature_schema.json` con nombres, tipos, rangos, catálogos y versión; validado contra NV-11 por una prueba.
+- [x] **T01 · Esquema de features** — Requisito: ML-03-R01 · Aceptación: `feature_schema.json` con nombres, tipos, rangos, catálogos y versión; validado contra NV-11 por una prueba.
 
 ## F2 — Implementación
 
@@ -43,7 +43,7 @@
 
 | Task | Requisito | Fase | Estado |
 | --- | --- | --- | --- |
-| T01 | R01 | F1 | ABIERTA |
+| T01 | R01 | F1 | COMPLETA (M-ML-022; `evidence.md`) |
 | T02 | R02 | F2 | ABIERTA |
 | T03 | R03 | F2 | ABIERTA |
 | T04 | R04 | F2 | ABIERTA |

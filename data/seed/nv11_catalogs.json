@@ -1,0 +1,67 @@
+{
+  "snapshot_of": "NV-11 (preferencias de búsqueda del estudiante)",
+  "source": {
+    "origin": "TheHouse-Backend, TheHouse.Application/Common/PreferenceCatalogs.cs y Contracts/Profile/ProfileContracts.cs, commit b7d7595 (verificado en ea10a4c, 2026-11-19)",
+    "repository": "TheHouse-Backend",
+    "files": [
+      "TheHouse.Application/Common/PreferenceCatalogs.cs",
+      "Contracts/Profile/ProfileContracts.cs"
+    ],
+    "commit": "b7d7595",
+    "verified_commit": "ea10a4c",
+    "verified_on": "2026-11-19",
+    "verified_by": "César Yael López Trujillo, revisión humana del código del backend (PreferenceCatalogs.cs y ProfileContracts.cs) en el commit ea10a4c, 2026-11-19"
+  },
+  "backend_types": {
+    "budget.min": "int? (UserPreferences.BudgetMin; BudgetResponse(int? Min, int? Max, string Currency))",
+    "budget.max": "int? (UserPreferences.BudgetMax; BudgetResponse(int? Min, int? Max, string Currency))",
+    "maxDistanceKm": "decimal?",
+    "pets": "bool?"
+  },
+  "currency": "MXN",
+  "ranges": {
+    "budget": {
+      "type": "integer",
+      "min": 0,
+      "max": 50000,
+      "constraint": "budget.min <= budget.max"
+    },
+    "maxDistanceKm": {
+      "type": "number",
+      "min": 0.5,
+      "max": 30
+    }
+  },
+  "catalogs": {
+    "essentialServices": [
+      "wifi",
+      "water",
+      "electricity",
+      "gas",
+      "hot_water",
+      "laundry",
+      "kitchen",
+      "furnished",
+      "parking",
+      "security",
+      "cleaning"
+    ],
+    "livingWith": ["women", "men", "any"],
+    "placeType": ["room", "room_private_bath", "studio", "shared"],
+    "transport": ["walk", "bike", "public", "car"],
+    "propertyTypes": ["house", "apartment", "student_residence"]
+  },
+  "booleans": ["pets"],
+  "nullable": [
+    "budget.min",
+    "budget.max",
+    "maxDistanceKm",
+    "essentialServices",
+    "livingWith",
+    "placeType",
+    "pets",
+    "transport",
+    "propertyTypes"
+  ],
+  "quick_setup_required": ["budget.max", "livingWith", "placeType"]
+}
