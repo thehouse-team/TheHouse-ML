@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "schema_version": "1.0.0",
+    "schema_version": "1.1.0",
     "spec": "ML-03 1.0.0",
     "nv11_source": {
       "repository": "TheHouse-Backend",
@@ -10,9 +10,13 @@
       "snapshot": "data/seed/nv11_catalogs.json",
       "verified_by": "César Yael López Trujillo, revisión del código del backend en ea10a4c (2026-11-19)"
     },
-    "generated_by": "ML-03 T01 (ML-03-R01); escrito a mano y validado por thehouse_ml.features",
+    "generated_by": "ML-03 T01 (ML-03-R01); escrito a mano y validado por thehouse_ml.features. 1.1.0: ML-03 T02 (ML-03-R02)",
     "synthetic_training_data": true,
-    "decision": "M-ML-022",
+    "decision": "M-ML-022; 1.1.0: M-ML-023",
+    "changelog": [
+      {"version": "1.0.0", "decision": "M-ML-022", "change": "Versión inicial (T01)."},
+      {"version": "1.1.0", "decision": "M-ML-023", "change": "Ampliación compatible (T02): distance_km y effective_distance_km sin límite superior, con training_range [0, 30] del catálogo sintético; price_to_budget = price_mxn / max(budget.max, 1), sin límite superior, con training_range [0, 1] (pares que pasan HC01); los rangos SUPUESTOS del cuarto no se validan en la entrada."}
+    ],
     "versioning": "Un cambio en NV-11 (catálogos, rangos o nulables), incluidos los catálogos del cuarto, obliga a una versión mayor (spec ML-03 §7 regla 1; constitution §18)."
   },
   "currency": "MXN",
@@ -232,7 +236,7 @@
         "backend_status": "present",
         "backend_field": "Bedrooms",
         "backend_type": "int",
-        "range_basis": "SUPUESTO documentado (M-ML-022)",
+        "range_basis": "SUPUESTO documentado para el catálogo sintético (M-ML-022); en la entrada solo se valida el tipo y que no sea negativo (M-ML-023)",
         "description": "Recámaras del inmueble; rango 1–10 SUPUESTO: cubre cuartos, departamentos y casas compartidas."
       },
       {
@@ -243,7 +247,7 @@
         "backend_status": "present",
         "backend_field": "Bathrooms",
         "backend_type": "int",
-        "range_basis": "SUPUESTO documentado (M-ML-022)",
+        "range_basis": "SUPUESTO documentado para el catálogo sintético (M-ML-022); en la entrada solo se valida el tipo y que no sea negativo (M-ML-023)",
         "description": "Baños del inmueble (enteros, sin medios baños); rango 1–6 SUPUESTO."
       },
       {
@@ -255,7 +259,7 @@
         "backend_status": "present",
         "backend_field": "AreaM2",
         "backend_type": "double",
-        "range_basis": "SUPUESTO documentado (M-ML-022)",
+        "range_basis": "SUPUESTO documentado para el catálogo sintético (M-ML-022); en la entrada solo se valida el tipo y que no sea negativo (M-ML-023)",
         "description": "Superficie; rango 6–400 m² SUPUESTO: de un cuarto mínimo a una casa compartida grande."
       },
       {
@@ -281,26 +285,29 @@
       "name": "distance_km",
       "type": "number",
       "unit": "km",
-      "range": {"min": 0, "max": 30},
+      "range": {"min": 0, "max": null},
+      "training_range": [0, 30],
       "depends_on": ["student.university_code", "room.lat", "room.lon"],
-      "formula": "haversine(campus(student.university_code), (room.lat, room.lon)) con radio medio de 6371 km (el mismo de thehouse_ml.universities.haversine_m); el catálogo sintético genera cuartos a ≤ 30 km del campus."
+      "formula": "haversine(campus(student.university_code), (room.lat, room.lon)) con radio medio de 6371 km (el mismo de thehouse_ml.universities.haversine_m). Sin límite superior: la distancia no es restricción dura y no se recorta (M-ML-023); training_range [0, 30] es el dominio del catálogo sintético (cuartos a ≤ 30 km del campus)."
     },
     {
       "name": "effective_distance_km",
       "type": "number",
       "unit": "km",
-      "range": {"min": 0, "max": 30},
+      "range": {"min": 0, "max": null},
+      "training_range": [0, 30],
       "depends_on": ["distance_km", "student.transport"],
-      "formula": "distance_km × factor(student.transport); factores: walk 1.0, bike 0.5, public 0.4, car 0.25 (transport nulo → public).",
+      "formula": "distance_km × factor(student.transport); factores: walk 1.0, bike 0.5, public 0.4, car 0.25 (transport nulo → public). Sin límite superior (M-ML-023); training_range [0, 30] es el dominio del catálogo sintético.",
       "parameters_status": "APROBADO (spec ML-03 §10; M-ML-022)",
       "parameters": {"transport_factors": {"walk": 1.0, "bike": 0.5, "public": 0.4, "car": 0.25}}
     },
     {
       "name": "price_to_budget",
       "type": "number",
-      "range": {"min": 0, "max": 1},
+      "range": {"min": 0, "max": null},
+      "training_range": [0, 1],
       "depends_on": ["room.price_mxn", "student.budget.max"],
-      "formula": "room.price_mxn / student.budget.max; si budget.max = 0 (solo pasa HC01 un cuarto con price_mxn = 0) vale 0. El rango 0–1 se cumple en los pares que pasan HC01."
+      "formula": "room.price_mxn / max(student.budget.max, 1), una sola fórmula sin casos especiales (M-ML-023): con budget.max = 0 y renta 0 vale 0; con budget.max = 0 y renta positiva vale la renta (par excluido por HC01). Sin límite superior: los pares que no pasan HC01 dan valores > 1 sin recorte; training_range [0, 1] es el dominio de los pares que pasan HC01."
     },
     {
       "name": "services_coverage",

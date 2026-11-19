@@ -39,10 +39,14 @@ class ValueRange:
     """Rango cerrado [min, max]."""
 
     min: float
-    max: float
+    max: float | None  # None = sin límite superior (solo en features del par, M-ML-023)
 
     def contains(self, value: float) -> bool:
-        return self.min <= value <= self.max
+        return self.min <= value and (self.max is None or value <= self.max)
+
+    def render(self) -> str:
+        """Texto del rango para mensajes: `[0, 30]` o `[0, ∞)`."""
+        return f"[{self.min:g}, ∞)" if self.max is None else f"[{self.min:g}, {self.max:g}]"
 
 
 @dataclass(frozen=True)
@@ -69,11 +73,17 @@ class FieldSpec:
     backend_status: str | None = None
     backend_field: str | None = None
     unit: str | None = None
+    range_basis: str | None = None
+
+    @property
+    def range_is_assumption(self) -> bool:
+        """El rango es un SUPUESTO documentado del catálogo sintético, no un límite de la entrada."""
+        return self.range_basis is not None and self.range_basis.startswith("SUPUESTO")
 
 
 @dataclass(frozen=True)
 class PairFeature:
-    """Feature del par estudiante-cuarto (definición; el cálculo es T02)."""
+    """Feature del par estudiante-cuarto (definición; el cálculo está en `pairs.py`)."""
 
     name: str
     type: str
@@ -82,6 +92,7 @@ class PairFeature:
     depends_on: tuple[str, ...]
     parameters: Mapping[str, Any]
     unit: str | None = None
+    training_range: ValueRange | None = None
 
 
 @dataclass(frozen=True)
@@ -191,15 +202,33 @@ class _Reader:
             self.problems.append(f"{where}: elementos duplicados")
         return tuple(items)
 
-    def value_range(self, value: object, where: str) -> ValueRange | None:
+    def value_range(self, value: object, where: str, *, open_max: bool = False) -> ValueRange | None:
+        """Rango `{"min", "max"}`; con `open_max`, `"max": null` significa sin límite superior."""
         data = self.obj(value, where)
         low, high = data.get("min"), data.get("max")
+        if open_max and "max" in data and high is None:
+            if not _is_number(low):
+                self.problems.append(f"{where}: min debe ser numérico")
+                return None
+            return ValueRange(min=float(low), max=None)
         if not _is_number(low) or not _is_number(high):
             self.problems.append(f"{where}: min y max deben ser numéricos")
             return None
         if low > high:
             self.problems.append(f"{where}: min ({low}) mayor que max ({high})")
         return ValueRange(min=float(low), max=float(high))
+
+    def training_range(self, value: object, where: str, outer: ValueRange) -> ValueRange | None:
+        """`training_range`: par `[min, max]` cerrado y dentro de `range`."""
+        if not (isinstance(value, list) and len(value) == 2 and all(_is_number(item) for item in value)):
+            self.problems.append(f"{where}: se esperaba [min, max] numérico")
+            return None
+        low, high = float(value[0]), float(value[1])
+        if low > high:
+            self.problems.append(f"{where}: min ({low:g}) mayor que max ({high:g})")
+        elif not (outer.contains(low) and outer.contains(high)):
+            self.problems.append(f"{where}: [{low:g}, {high:g}] fuera de range {outer.render()}")
+        return ValueRange(min=low, max=high)
 
     def catalogs(self, value: object, where: str) -> dict[str, tuple[str, ...]]:
         result: dict[str, tuple[str, ...]] = {}
@@ -254,6 +283,7 @@ def _read_field(reader: _Reader, raw: object, where: str, *, room: bool) -> Fiel
         backend_status=backend_status,
         backend_field=reader.optional_text(data, "backend_field", where),
         unit=reader.optional_text(data, "unit", where),
+        range_basis=reader.optional_text(data, "range_basis", where),
     )
 
 
@@ -264,8 +294,12 @@ def _read_pair_feature(reader: _Reader, raw: object, where: str) -> PairFeature:
     kind = reader.text(data, "type", where)
     if kind and kind not in NUMERIC_TYPES:
         reader.problems.append(f"{where}.type: una feature del par debe ser numérica")
-    value_range = reader.value_range(data.get("range"), f"{where}.range") or ValueRange(0.0, 0.0)
+    value_range = reader.value_range(data.get("range"), f"{where}.range", open_max=True) or ValueRange(0.0, 0.0)
+    training_range = None
+    if "training_range" in data:
+        training_range = reader.training_range(data["training_range"], f"{where}.training_range", value_range)
     return PairFeature(
+        training_range=training_range,
         name=name,
         type=kind,
         range=value_range,

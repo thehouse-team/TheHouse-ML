@@ -33,8 +33,8 @@ def schema() -> FeatureSchema:
 
 
 def test_the_packaged_schema_loads_validates_and_exposes_its_version(schema: FeatureSchema) -> None:
-    assert schema.version == "1.0.0"
-    assert schema_version() == "1.0.0"
+    assert schema.version == "1.1.0"
+    assert schema_version() == "1.1.0"
     assert default_schema() is default_schema()
     assert schema.metadata.spec == "ML-03 1.0.0"
     assert schema.metadata.synthetic_training_data is True
