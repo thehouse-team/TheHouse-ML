@@ -1,5 +1,9 @@
 """Features del par estudiante-cuarto: implementación de referencia (ML-03 T02, ML-03-R02).
 
+Esquema 2.0.0 (ML-04 T02, ML-04-R02, M-ML-029): agrega `distance_ratio`,
+`price_below_min` y `extra_services_ratio` al final de `feature_order`, con la
+misma resolución de faltantes (`resolve_student`).
+
 Una sola implementación (spec ML-03 §7 regla 2) que también produce los casos
 dorados del backend. Es pura: no lee archivos, no usa red ni aleatoriedad; el
 esquema y las coordenadas de los campus llegan como argumentos.
@@ -239,6 +243,21 @@ def _services_coverage(student: ResolvedStudent, room: Room) -> float:
     return len(student.essential_services & room.services) / len(student.essential_services)
 
 
+def _price_below_min(student: ResolvedStudent, room: Room) -> float:
+    # Esquema 2.0.0 (M-ML-029): proporción del mínimo que la renta queda por debajo; 0 si no hay mínimo.
+    if student.budget_min > 0 and room.price_mxn < student.budget_min:
+        return (student.budget_min - room.price_mxn) / student.budget_min
+    return 0.0
+
+
+def _extra_services_ratio(student: ResolvedStudent, room: Room, catalog_size: int) -> float:
+    # Esquema 2.0.0 (M-ML-029): servicios del cuarto no pedidos / servicios del catálogo no pedidos.
+    not_requested = catalog_size - len(student.essential_services)
+    if not_requested == 0:
+        return 0.0
+    return len(room.services - student.essential_services) / not_requested
+
+
 def compute_pair_features(
     student: StudentProfile,
     room: Room,
@@ -258,6 +277,7 @@ def compute_pair_features(
     if factors is None:
         raise PairInputError("feature_schema.json no define transport_factors")
     distance = _distance_km(resolved, room, campuses)
+    services_catalog = len(schema.catalog("essentialServices"))
     formulas: dict[str, Callable[[], float]] = {
         "distance_km": lambda: distance,
         "effective_distance_km": lambda: distance * factors[resolved.transport],
@@ -268,6 +288,10 @@ def compute_pair_features(
             not resolved.property_types or room.property_type in resolved.property_types
         ),
         "pets_compatible": lambda: int(not (resolved.pets and not room.pets_allowed)),
+        # Esquema 2.0.0 (M-ML-029): distancia real entre maxDistanceKm resuelto (≥ 0.5 en NV-11).
+        "distance_ratio": lambda: distance / resolved.max_distance_km,
+        "price_below_min": lambda: _price_below_min(resolved, room),
+        "extra_services_ratio": lambda: _extra_services_ratio(resolved, room, services_catalog),
     }
     unknown = [name for name in schema.feature_order if name not in formulas]
     if unknown:

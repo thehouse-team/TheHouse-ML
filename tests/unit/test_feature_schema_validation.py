@@ -44,7 +44,7 @@ def problems_for(raw_schema: dict[str, Any], mutate: Mutation) -> str:
 def test_an_unchanged_copy_parses(raw_schema: dict[str, Any]) -> None:
     schema = parse_schema(copy.deepcopy(raw_schema))
 
-    assert schema.version == "1.1.0"
+    assert schema.version == "2.0.0"
     assert schema.catalog("university_code")[0] == "UTTT"
     assert schema.catalog("placeType") == ("room", "room_private_bath", "studio", "shared")
     with pytest.raises(KeyError):
@@ -55,7 +55,7 @@ def test_load_schema_from_a_path(tmp_path: Path, raw_schema: dict[str, Any]) -> 
     path = tmp_path / "schema.json"
     path.write_text(json.dumps(raw_schema), encoding="utf-8")
 
-    assert load_schema(path).version == "1.1.0"
+    assert load_schema(path).version == "2.0.0"
 
 
 def test_invalid_json_is_reported(tmp_path: Path) -> None:

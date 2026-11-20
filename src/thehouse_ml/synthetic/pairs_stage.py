@@ -333,7 +333,8 @@ def render_report(pair_set: PairSet, params: PairParams, schema: FeatureSchema) 
         f"({', '.join(f'`{item}`' for item in constraints)}; `filter_rooms`, M-ML-024), hasta"
         f" {params.max_candidates}. Si hay más,",
         'se toma una muestra uniforme sin reemplazo con `random.Random("pairs:candidates:<seed>:<student_id>")`.',
-        "Los cuartos que no pasan las restricciones no entran. Las 7 features se calculan con",
+        "Los cuartos que no pasan las restricciones no entran. Las"
+        f" {len(schema.feature_order)} features se calculan con",
         "`compute_pair_features` (T02, una sola implementación) en el orden de `feature_order` del esquema.",
         "",
         "## 3. Partición por estudiante",

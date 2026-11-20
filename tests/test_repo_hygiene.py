@@ -10,7 +10,7 @@ import pytest
 
 REPO = Path(__file__).resolve().parents[1]
 FORBIDDEN_PREFIXES = ("data/raw/", "data/processed/", "models/")
-FORBIDDEN_SUFFIXES = (".pkl", ".pickle", ".joblib")
+FORBIDDEN_SUFFIXES = (".pkl", ".pickle", ".joblib", ".onnx")
 
 
 def forbidden_files(tracked: list[str]) -> list[str]:
@@ -46,7 +46,46 @@ def test_detector_allows_versioned_paths(path: str) -> None:
 def test_gitignore_excludes_data_and_models() -> None:
     lines = {line.strip() for line in (REPO / ".gitignore").read_text(encoding="utf-8").splitlines()}
 
-    assert {"data/raw/", "data/processed/", "models/"} <= lines
+    # `/models/` anclado a la raíz: solo la carpeta de artefactos (M-ML-030, H1).
+    assert {"data/raw/", "data/processed/", "/models/"} <= lines
+
+
+def _git_ignored(paths: list[str]) -> set[str]:
+    git = shutil.which("git")
+    if git is None or not (REPO / ".git").exists():
+        pytest.skip("Sin git o fuera de un repositorio")
+    result = subprocess.run(
+        [git, "check-ignore", "--no-index", *paths], cwd=REPO, capture_output=True, text=True, check=False
+    )
+    return {line.strip().replace("\\", "/") for line in result.stdout.splitlines()}
+
+
+@pytest.mark.parametrize(
+    "path",
+    ["models/model.onnx", "models/baseline/model.onnx", "data/raw/censo.zip", "data/processed/pairs.parquet"],
+)
+def test_artifacts_and_data_are_ignored_by_git(path: str) -> None:
+    assert _git_ignored([path]) == {path}
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "src/thehouse_ml/models/baseline_params.json",
+        "src/thehouse_ml/models/baseline_config.py",
+        "src/thehouse_ml/models/__init__.py",
+    ],
+)
+def test_the_models_package_of_the_code_is_not_ignored(path: str) -> None:
+    assert _git_ignored([path]) == set()
+
+
+def test_onnx_files_are_flagged_wherever_they_are_tracked() -> None:
+    # Un .onnx versionado fuera de /models/ también es un artefacto prohibido (constitution §13: va en el release).
+    assert forbidden_files(["src/thehouse_ml/models/model.onnx", "reports/model.onnx"]) == [
+        "src/thehouse_ml/models/model.onnx",
+        "reports/model.onnx",
+    ]
 
 
 def test_no_data_or_model_files_are_tracked() -> None:

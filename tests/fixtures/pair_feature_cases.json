@@ -1,11 +1,11 @@
 {
   "metadata": {
-    "description": "Casos por tabla de las features del par (ML-03 T02, ML-03-R02). Candidatos a casos dorados del backend (ML-06).",
-    "spec": "ML-03 1.0.0",
-    "schema_version": "1.1.0",
+    "description": "Casos por tabla de las features del par (ML-03 T02, ML-03-R02; ampliados en ML-04 T02, ML-04-R02, con las 3 features del esquema 2.0.0). Candidatos a casos dorados del backend (ML-06).",
+    "spec": "ML-03 1.0.0; 2.0.0: ML-04 1.0.0",
+    "schema_version": "2.0.0",
     "tolerance": 1e-06,
     "synthetic": true,
-    "conventions": "Nombres de campo del esquema; una clave ausente en student equivale a nulo. Las salidas esperadas se calcularon a mano: los cuartos con distancia > 0 estan sobre el meridiano del campus, donde haversine = 6371 km x delta_phi (radianes).",
+    "conventions": "Nombres de campo del esquema; una clave ausente en student equivale a nulo. Las salidas esperadas se calcularon a mano: los cuartos con distancia > 0 estan sobre el meridiano del campus, donde haversine = 6371 km x delta_phi (radianes). Esquema 2.0.0: distance_ratio = distance_km esperada / maxDistanceKm resuelto (nulo -> 30); price_below_min y extra_services_ratio con aritmetica exacta (fracciones) sobre las entradas; los casos nuevos se recalcularon completos con la misma regla del meridiano.",
     "campuses": {
       "UTTT": {
         "lat": 20.0084106,
@@ -25,7 +25,10 @@
       "services_coverage",
       "place_type_match",
       "property_type_match",
-      "pets_compatible"
+      "pets_compatible",
+      "distance_ratio",
+      "price_below_min",
+      "extra_services_ratio"
     ]
   },
   "cases": [
@@ -77,7 +80,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -128,7 +134,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -179,7 +188,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -223,7 +235,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.0
       }
     },
     {
@@ -270,7 +285,10 @@
         "services_coverage": 0.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.0
       }
     },
     {
@@ -322,7 +340,10 @@
         "services_coverage": 0.6666666666666666,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.125
       }
     },
     {
@@ -373,7 +394,10 @@
         "services_coverage": 1.0,
         "place_type_match": 0,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -424,7 +448,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -475,7 +502,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -526,7 +556,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -577,7 +610,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 0
+        "pets_compatible": 0,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -626,7 +662,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -677,7 +716,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 0,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -729,7 +771,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -780,7 +825,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 1.0007543398010283,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -831,7 +879,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 1.0007543398010283,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -882,7 +933,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 1.0007543398010283,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -933,7 +987,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 1.0007543398010283,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -983,7 +1040,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 1.0007543398010283,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1032,7 +1092,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1075,7 +1138,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.0
       }
     },
     {
@@ -1125,7 +1191,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1173,7 +1242,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1209,7 +1281,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.33358477993367613,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.0
       }
     },
     {
@@ -1260,7 +1335,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 8.006034718408227,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1311,7 +1389,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 4.003017359204113,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1362,7 +1443,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1413,7 +1497,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1464,7 +1551,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1515,7 +1605,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1566,7 +1659,10 @@
         "services_coverage": 1.0,
         "place_type_match": 1,
         "property_type_match": 1,
-        "pets_compatible": 1
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
       }
     },
     {
@@ -1755,6 +1851,724 @@
           "livingWith",
           "placeType"
         ]
+      }
+    },
+    {
+      "id": "distance_ratio_null_max_distance",
+      "description": "maxDistanceKm nulo → 30: cuarto a 0.18 grados (20.015 km); distance_ratio = 20.015 / 30.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "essentialServices": [
+            "wifi",
+            "water"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3000,
+          "lat": 20.1884106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 20.015086796020388,
+        "effective_distance_km": 20.015086796020388,
+        "price_to_budget": 0.75,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.6671695598673463,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
+      }
+    },
+    {
+      "id": "distance_ratio_equal_max_distance",
+      "description": "Distancia igual a maxDistanceKm (10 km exactos sobre el meridiano): distance_ratio = 1.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi",
+            "water"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3000,
+          "lat": 20.098342760591873,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 9.999999999999604,
+        "effective_distance_km": 9.999999999999604,
+        "price_to_budget": 0.75,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.9999999999999604,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
+      }
+    },
+    {
+      "id": "distance_ratio_half",
+      "description": "Cuarto a 10 km con maxDistanceKm = 20: distance_ratio = 0.5 (quiebre de la curva de ML-04).",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 20,
+          "essentialServices": [
+            "wifi",
+            "water"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3000,
+          "lat": 20.098342760591873,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 9.999999999999604,
+        "effective_distance_km": 9.999999999999604,
+        "price_to_budget": 0.75,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.4999999999999802,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
+      }
+    },
+    {
+      "id": "price_below_min_null_budget_min",
+      "description": "budget.min nulo → 0: price_below_min = 0 aunque la renta sea baja (500).",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi",
+            "water"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 0.0,
+        "effective_distance_km": 0.0,
+        "price_to_budget": 0.125,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
+      }
+    },
+    {
+      "id": "price_equal_budget_min",
+      "description": "Renta igual a budget.min (2000): price_below_min = 0.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi",
+            "water"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 2000,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 0.0,
+        "effective_distance_km": 0.0,
+        "price_to_budget": 0.5,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.1111111111111111
+      }
+    },
+    {
+      "id": "price_below_budget_min",
+      "description": "Renta 1500 con budget.min 2000: price_below_min = 500 / 2000 = 0.25.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi",
+            "water"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 1500,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 0.0,
+        "effective_distance_km": 0.0,
+        "price_to_budget": 0.375,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.25,
+        "extra_services_ratio": 0.1111111111111111
+      }
+    },
+    {
+      "id": "price_far_below_budget_min",
+      "description": "Renta 200 con budget.min 2000: price_below_min = 1800 / 2000 = 0.9.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi",
+            "water"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 200,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 0.0,
+        "effective_distance_km": 0.0,
+        "price_to_budget": 0.05,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.9,
+        "extra_services_ratio": 0.1111111111111111
+      }
+    },
+    {
+      "id": "price_zero_with_budget_min",
+      "description": "Renta 0 con budget.min 2000: price_below_min = 1 (máximo del rango).",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi",
+            "water"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 0,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 0.0,
+        "effective_distance_km": 0.0,
+        "price_to_budget": 0.0,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 1.0,
+        "extra_services_ratio": 0.1111111111111111
+      }
+    },
+    {
+      "id": "extras_no_services_requested",
+      "description": "Sin servicios pedidos: 4 servicios del cuarto entre los 11 del catálogo = 4/11.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3000,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity",
+            "gas"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 0.0,
+        "effective_distance_km": 0.0,
+        "price_to_budget": 0.75,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.36363636363636365
+      }
+    },
+    {
+      "id": "extras_all_eleven_requested",
+      "description": "Pidió los 11 servicios: extra_services_ratio = 0 (sin denominador); cobertura 5/11.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi",
+            "water",
+            "electricity",
+            "gas",
+            "hot_water",
+            "laundry",
+            "kitchen",
+            "furnished",
+            "parking",
+            "security",
+            "cleaning"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3000,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity",
+            "gas",
+            "kitchen"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 0.0,
+        "effective_distance_km": 0.0,
+        "price_to_budget": 0.75,
+        "services_coverage": 0.45454545454545453,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.0
+      }
+    },
+    {
+      "id": "extras_room_without_extra_services",
+      "description": "El cuarto solo tiene los servicios pedidos (wifi, water): extra_services_ratio = 0.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi",
+            "water"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3000,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 0.0,
+        "effective_distance_km": 0.0,
+        "price_to_budget": 0.75,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.0
+      }
+    },
+    {
+      "id": "extras_room_with_every_service",
+      "description": "Pidió wifi y water; el cuarto tiene los 11: extra_services_ratio = 9/9 = 1.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi",
+            "water"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3000,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "electricity",
+            "gas",
+            "hot_water",
+            "laundry",
+            "kitchen",
+            "furnished",
+            "parking",
+            "security",
+            "cleaning"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 0.0,
+        "effective_distance_km": 0.0,
+        "price_to_budget": 0.75,
+        "services_coverage": 1.0,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 1.0
+      }
+    },
+    {
+      "id": "extras_partial",
+      "description": "Pidió wifi, water y laundry; el cuarto tiene wifi, water, gas y kitchen: 2/8 = 0.25.",
+      "input": {
+        "student": {
+          "university_code": "UTTT",
+          "budget.min": 2000,
+          "budget.max": 4000,
+          "maxDistanceKm": 10,
+          "essentialServices": [
+            "wifi",
+            "water",
+            "laundry"
+          ],
+          "livingWith": "any",
+          "placeType": "room",
+          "pets": false,
+          "transport": "walk",
+          "propertyTypes": [
+            "house"
+          ]
+        },
+        "room": {
+          "price_mxn": 3000,
+          "lat": 20.0084106,
+          "lon": -99.3449608,
+          "services": [
+            "wifi",
+            "water",
+            "gas",
+            "kitchen"
+          ],
+          "placeType": "room",
+          "propertyType": "house",
+          "pets_allowed": false,
+          "livingWith": "any",
+          "bedrooms": 3,
+          "bathrooms": 1,
+          "area_m2": 12.0,
+          "university_code": "UTTT",
+          "synthetic": true
+        }
+      },
+      "expected": {
+        "distance_km": 0.0,
+        "effective_distance_km": 0.0,
+        "price_to_budget": 0.75,
+        "services_coverage": 0.6666666666666666,
+        "place_type_match": 1,
+        "property_type_match": 1,
+        "pets_compatible": 1,
+        "distance_ratio": 0.0,
+        "price_below_min": 0.0,
+        "extra_services_ratio": 0.25
       }
     }
   ]

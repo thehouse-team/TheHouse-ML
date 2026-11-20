@@ -33,10 +33,10 @@ def schema() -> FeatureSchema:
 
 
 def test_the_packaged_schema_loads_validates_and_exposes_its_version(schema: FeatureSchema) -> None:
-    assert schema.version == "1.1.0"
-    assert schema_version() == "1.1.0"
+    assert schema.version == "2.0.0"
+    assert schema_version() == "2.0.0"
     assert default_schema() is default_schema()
-    assert schema.metadata.spec == "ML-03 1.0.0"
+    assert schema.metadata.spec == "ML-04 1.0.0"
     assert schema.metadata.synthetic_training_data is True
 
 
@@ -152,6 +152,9 @@ def test_feature_order_has_no_duplicates_and_covers_every_pair_feature(schema: F
         "place_type_match",
         "property_type_match",
         "pets_compatible",
+        "distance_ratio",
+        "price_below_min",
+        "extra_services_ratio",
     )
 
 

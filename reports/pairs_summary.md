@@ -6,12 +6,12 @@
 
 Generado por `uv run python -m thehouse_ml prepare` (`thehouse_ml.synthetic.pairs_stage`). Parámetros:
 `src/thehouse_ml/synthetic/pairs_params.json` versión 1.0.0 (decisión M-ML-027 (APROBADO)).
-Entradas: `data/processed/students.parquet` y `data/processed/rooms.parquet`. Salida: `data/processed/pairs.parquet` (fuera de git, columna `synthetic = true`). Esquema de features 1.1.0.
+Entradas: `data/processed/students.parquet` y `data/processed/rooms.parquet`. Salida: `data/processed/pairs.parquet` (fuera de git, columna `synthetic = true`). Esquema de features 2.0.0.
 
 ## 1. Resumen
 
 - Estudiantes: **2,000**; pares: **196,605** (semilla 20261120).
-- **Sin etiquetas:** el conjunto no lleva relevancia ni puntaje (ML-04 y ML-05). Columnas: `student_id`, `room_id`, `university_code`, `seed_verified`, `split`, `distance_km`, `effective_distance_km`, `price_to_budget`, `services_coverage`, `place_type_match`, `property_type_match`, `pets_compatible`, `synthetic`.
+- **Sin etiquetas:** el conjunto no lleva relevancia ni puntaje (ML-04 y ML-05). Columnas: `student_id`, `room_id`, `university_code`, `seed_verified`, `split`, `distance_km`, `effective_distance_km`, `price_to_budget`, `services_coverage`, `place_type_match`, `property_type_match`, `pets_compatible`, `distance_ratio`, `price_below_min`, `extra_services_ratio`, `synthetic`.
 - Umbral de M-ML-021 (≥ 90 % de los estudiantes con al menos un cuarto de su campus que pasa las restricciones duras, en total y por campus, con y sin las `seed_sin_verificar`): **cumple**.
 - Estudiantes sin candidatos (no generan pares): **0**.
 - Estudiantes con más de 200 cuartos compatibles (muestra uniforme de 200): **420**.
@@ -23,7 +23,7 @@ Entradas: `data/processed/students.parquet` y `data/processed/rooms.parquet`. Sa
 Para cada estudiante, los candidatos son los cuartos **de su campus** que pasan las restricciones duras
 (`HC01_budget`, `HC02_living_with`, `HC03_pets`; `filter_rooms`, M-ML-024), hasta 200. Si hay más,
 se toma una muestra uniforme sin reemplazo con `random.Random("pairs:candidates:<seed>:<student_id>")`.
-Los cuartos que no pasan las restricciones no entran. Las 7 features se calculan con
+Los cuartos que no pasan las restricciones no entran. Las 10 features se calculan con
 `compute_pair_features` (T02, una sola implementación) en el orden de `feature_order` del esquema.
 
 ## 3. Partición por estudiante
@@ -121,6 +121,9 @@ Valores calculados sobre todos los pares (sin etiqueta). `training_range` del es
 | `place_type_match` | integer | 0.000 | 0.000 | 1.000 | 0.301 |
 | `property_type_match` | integer | 0.000 | 1.000 | 1.000 | 0.700 |
 | `pets_compatible` | integer | 1.000 | 1.000 | 1.000 | 1.000 |
+| `distance_ratio` | number | 0.000 | 0.333 | 59.797 | 1.357 |
+| `price_below_min` | number | 0.000 | 0.000 | 0.931 | 0.137 |
+| `extra_services_ratio` | number | 0.000 | 0.500 | 1.000 | 0.483 |
 
 ## 8. Privacidad y limitaciones
 

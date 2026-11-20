@@ -1,7 +1,7 @@
 {
   "metadata": {
-    "schema_version": "1.1.0",
-    "spec": "ML-03 1.0.0",
+    "schema_version": "2.0.0",
+    "spec": "ML-04 1.0.0",
     "nv11_source": {
       "repository": "TheHouse-Backend",
       "commit": "b7d7595",
@@ -10,14 +10,15 @@
       "snapshot": "data/seed/nv11_catalogs.json",
       "verified_by": "César Yael López Trujillo, revisión del código del backend en ea10a4c (2026-11-19)"
     },
-    "generated_by": "ML-03 T01 (ML-03-R01); escrito a mano y validado por thehouse_ml.features. 1.1.0: ML-03 T02 (ML-03-R02)",
+    "generated_by": "ML-03 T01 (ML-03-R01); escrito a mano y validado por thehouse_ml.features. 1.1.0: ML-03 T02 (ML-03-R02). 2.0.0: ML-04 T02 (ML-04-R02)",
     "synthetic_training_data": true,
-    "decision": "M-ML-022; 1.1.0: M-ML-023",
+    "decision": "M-ML-022; 1.1.0: M-ML-023; 2.0.0: M-ML-029",
     "changelog": [
       {"version": "1.0.0", "decision": "M-ML-022", "change": "Versión inicial (T01)."},
-      {"version": "1.1.0", "decision": "M-ML-023", "change": "Ampliación compatible (T02): distance_km y effective_distance_km sin límite superior, con training_range [0, 30] del catálogo sintético; price_to_budget = price_mxn / max(budget.max, 1), sin límite superior, con training_range [0, 1] (pares que pasan HC01); los rangos SUPUESTOS del cuarto no se validan en la entrada."}
+      {"version": "1.1.0", "decision": "M-ML-023", "change": "Ampliación compatible (T02): distance_km y effective_distance_km sin límite superior, con training_range [0, 30] del catálogo sintético; price_to_budget = price_mxn / max(budget.max, 1), sin límite superior, con training_range [0, 1] (pares que pasan HC01); los rangos SUPUESTOS del cuarto no se validan en la entrada."},
+      {"version": "2.0.0", "decision": "M-ML-029", "change": "Versión mayor (ML-04 T02): agrega al final de feature_order distance_ratio, price_below_min y extra_services_ratio; las 7 features anteriores conservan nombre, fórmula, rango y posición. Motivo: cambia las entradas del ONNX y lo que calcula NV-23, así que el backend debe actualizar su spec (constitution §2.4 y §18)."}
     ],
-    "versioning": "Un cambio en NV-11 (catálogos, rangos o nulables), incluidos los catálogos del cuarto, obliga a una versión mayor (spec ML-03 §7 regla 1; constitution §18)."
+    "versioning": "Obligan a una versión mayor (constitution §18): un cambio en NV-11 (catálogos, rangos o nulables), incluidos los catálogos del cuarto (spec ML-03 §7 regla 1), y agregar, quitar o reordenar features del par en feature_order, porque cambia las entradas del ONNX y lo que calcula NV-23 (spec ML-04 §6.1). Ampliar un rango sin cambiar fórmulas ni orden es una versión menor (1.1.0, M-ML-023)."
   },
   "currency": "MXN",
   "catalogs": {
@@ -336,6 +337,28 @@
       "range": {"min": 0, "max": 1},
       "depends_on": ["student.pets", "room.pets_allowed"],
       "formula": "1 si student.pets = false (nulo → false) o room.pets_allowed = true; 0 en otro caso. Vale 1 en todo par que pasa HC03."
+    },
+    {
+      "name": "distance_ratio",
+      "type": "number",
+      "range": {"min": 0, "max": null},
+      "training_range": [0, 60],
+      "depends_on": ["distance_km", "student.maxDistanceKm"],
+      "formula": "distance_km / student.maxDistanceKm resuelto (maxDistanceKm nulo → 30, M-ML-022). Usa la distancia real, no la efectiva: maxDistanceKm ya refleja el transporte que eligió el estudiante. maxDistanceKm ≥ 0.5 en NV-11, así que no hay división entre cero. Sin límite superior: la distancia no es restricción dura y no se recorta (M-ML-023); 1 = justo en maxDistanceKm. training_range [0, 60] = cota del catálogo sintético (cuartos a ≤ 30 km entre el mínimo de maxDistanceKm, 0.5); máximo observado en pairs.parquet 59.797 (ML-04 T02)."
+    },
+    {
+      "name": "price_below_min",
+      "type": "number",
+      "range": {"min": 0, "max": 1},
+      "depends_on": ["room.price_mxn", "student.budget.min"],
+      "formula": "(student.budget.min − room.price_mxn) / student.budget.min si budget.min resuelto > 0 y room.price_mxn < budget.min; 0 en otro caso (budget.min nulo → 0, M-ML-022). Proporción del mínimo que la renta queda por debajo: 0 si la renta está en [budget.min, budget.max] o por encima; 1 si la renta es 0 con budget.min > 0."
+    },
+    {
+      "name": "extra_services_ratio",
+      "type": "number",
+      "range": {"min": 0, "max": 1},
+      "depends_on": ["student.essentialServices", "room.services"],
+      "formula": "|room.services − student.essentialServices| / (|catálogo essentialServices| − |student.essentialServices|), es decir, servicios del cuarto que el estudiante no pidió entre los servicios del catálogo (11) que no pidió; 0 si pidió los 11. essentialServices nulo → conjunto vacío (denominador 11)."
     }
   ],
   "hard_constraints": [
@@ -365,6 +388,9 @@
     "services_coverage",
     "place_type_match",
     "property_type_match",
-    "pets_compatible"
+    "pets_compatible",
+    "distance_ratio",
+    "price_below_min",
+    "extra_services_ratio"
   ]
 }

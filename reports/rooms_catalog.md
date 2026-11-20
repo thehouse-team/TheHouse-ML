@@ -7,7 +7,7 @@
 Generado por `uv run python -m thehouse_ml prepare` (`thehouse_ml.synthetic.rooms_stage`). Parámetros:
 `src/thehouse_ml/synthetic/rooms_params.json` versión 1.0.0 (decisión M-ML-026 (APROBADO)).
 Salida: `data/processed/rooms.parquet` (fuera de git, columna `synthetic = true`).
-Esquema de features 1.1.0.
+Esquema de features 2.0.0.
 
 ## 1. Resumen
 
