@@ -428,7 +428,29 @@ def test_features_come_from_compute_pair_features_in_the_schema_order(
         assert pair.features == expected
 
 
-def test_frame_has_the_ids_split_seven_features_and_no_labels(pair_set: PairSet, schema: FeatureSchema) -> None:
+def test_schema_2_0_0_keeps_the_same_pairs_splits_and_first_seven_features(
+    students: tuple[SyntheticStudent, ...],
+    rooms: tuple[SyntheticRoom, ...],
+    campuses: dict[str, Campus],
+    params: PairParams,
+    pair_set: PairSet,
+    schema: FeatureSchema,
+) -> None:
+    # ML-04 T02 (M-ML-029): las 3 features nuevas solo agregan columnas; pares y particiones no cambian.
+    first_seven = schema.feature_order[:7]
+    legacy = replace(schema, pair_features=schema.pair_features[:7], feature_order=first_seven)
+    legacy_set = build_pairs(students, rooms, campuses, params, legacy)
+    assert [(p.student_id, p.room_id, p.split) for p in legacy_set.pairs] == [
+        (p.student_id, p.room_id, p.split) for p in pair_set.pairs
+    ]
+    for old, new in zip(legacy_set.pairs, pair_set.pairs, strict=True):
+        assert old.features == {name: new.features[name] for name in first_seven}
+    old_frame = pairs_frame(legacy_set, legacy)
+    new_frame = pairs_frame(pair_set, schema)
+    assert old_frame.equals(new_frame[list(old_frame.columns)])
+
+
+def test_frame_has_the_ids_split_the_schema_features_and_no_labels(pair_set: PairSet, schema: FeatureSchema) -> None:
     frame = pairs_frame(pair_set, schema)
     assert list(frame.columns) == [
         "student_id",
@@ -439,7 +461,7 @@ def test_frame_has_the_ids_split_seven_features_and_no_labels(pair_set: PairSet,
         *schema.feature_order,
         "synthetic",
     ]
-    assert len(schema.feature_order) == 7
+    assert len(schema.feature_order) == 10  # esquema 2.0.0 (M-ML-029)
     assert list(frame.columns) == list(pair_columns(schema))
     assert not [column for column in frame.columns if LABEL_WORDS.search(column)]
     assert len(frame) == len(pair_set.pairs)

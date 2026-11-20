@@ -1,8 +1,8 @@
 {
   "metadata": {
     "description": "Casos por tabla de las restricciones duras (ML-03 T03, ML-03-R03). Candidatos a casos dorados del backend (ML-06).",
-    "spec": "ML-03 1.0.0",
-    "schema_version": "1.1.0",
+    "spec": "ML-03 1.0.0; esquema 2.0.0 (ML-04 T02): sin cambios en las restricciones ni en los casos",
+    "schema_version": "2.0.0",
     "synthetic": true,
     "conventions": "Nombres de campo del esquema; una clave ausente en student equivale a nulo. expected.violated lista todas las restricciones violadas en el orden de hard_constraints del esquema. Las salidas esperadas se escribieron a mano.",
     "hard_constraints": [

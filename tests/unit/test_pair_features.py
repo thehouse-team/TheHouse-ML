@@ -4,6 +4,11 @@ Los casos por tabla viven en `tests/fixtures/pair_feature_cases.json` para
 reutilizarse como casos dorados del backend (ML-06). Sus salidas se calcularon
 a mano, sin este código: los cuartos con distancia > 0 están sobre el meridiano
 del campus, donde haversine = 6371 km por delta_phi.
+
+ML-04 T02 (R02, M-ML-029): esquema 2.0.0 con `distance_ratio`,
+`price_below_min` y `extra_services_ratio` al final de `feature_order`. Los
+valores nuevos de la tabla salieron de un recuento independiente (aritmética
+exacta con fracciones, sin este código).
 """
 
 from __future__ import annotations
@@ -118,6 +123,19 @@ def test_the_table_covers_every_requested_scenario() -> None:
         "budget_max_zero_price_zero",
         "budget_max_zero_price_positive",
         "room_assumed_ranges_exceeded",
+        # Esquema 2.0.0 (ML-04 T02)
+        "distance_ratio_null_max_distance",
+        "distance_ratio_equal_max_distance",
+        "distance_ratio_half",
+        "price_below_min_null_budget_min",
+        "price_equal_budget_min",
+        "price_below_budget_min",
+        "price_far_below_budget_min",
+        "price_zero_with_budget_min",
+        "extras_no_services_requested",
+        "extras_all_eleven_requested",
+        "extras_room_without_extra_services",
+        "extras_room_with_every_service",
     }
     assert required <= ids
     assert len(ids) == len(CASES["cases"]), "ids duplicados"
@@ -215,8 +233,15 @@ def test_only_unbounded_features_can_leave_their_training_range(schema: FeatureS
     # Las features con rango cerrado no pueden rebasarlo por construcción: cobertura (0 a 1) y coincidencias (0/1).
     closed = {feature.name for feature in schema.pair_features if feature.range.max is not None}
     unbounded = {feature.name for feature in schema.pair_features if feature.range.max is None}
-    assert closed == {"services_coverage", "place_type_match", "property_type_match", "pets_compatible"}
-    assert unbounded == {"distance_km", "effective_distance_km", "price_to_budget"}
+    assert closed == {
+        "services_coverage",
+        "place_type_match",
+        "property_type_match",
+        "pets_compatible",
+        "price_below_min",
+        "extra_services_ratio",
+    }
+    assert unbounded == {"distance_km", "effective_distance_km", "price_to_budget", "distance_ratio"}
     for feature in schema.pair_features:
         assert (feature.training_range is not None) == (feature.name in unbounded)
 
@@ -247,6 +272,9 @@ def test_features_come_back_in_the_exact_order_of_the_schema(
         "place_type_match",
         "property_type_match",
         "pets_compatible",
+        "distance_ratio",
+        "price_below_min",
+        "extra_services_ratio",
     )
     assert feature_vector(result, schema) == tuple(float(result[name]) for name in schema.feature_order)
     assert feature_vector(result) == feature_vector(result, schema)

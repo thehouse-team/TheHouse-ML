@@ -1,7 +1,7 @@
 # Datos y modelos (constitution §6 y §7): nunca en git
 data/raw/
 data/processed/
-models/
+/models/
 
 # Python
 __pycache__/

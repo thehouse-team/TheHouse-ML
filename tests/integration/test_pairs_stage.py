@@ -71,6 +71,10 @@ def test_run_pairs_writes_the_parquet_and_the_report(tmp_path: Path) -> None:
         "synthetic",
     ]
     assert bool(frame["synthetic"].all())
+    # Esquema 2.0.0 (ML-04 T02): rangos de las 3 features nuevas; distance_ratio dentro de su training_range.
+    assert frame["distance_ratio"].between(0.0, 60.0).all()
+    assert frame["price_below_min"].between(0.0, 1.0).all()
+    assert frame["extra_services_ratio"].between(0.0, 1.0).all()
     assert set(frame["university_code"]) == CODES
     assert frame.groupby("student_id")["split"].nunique().eq(1).all()  # sin fuga
     for _code, group in frame.groupby("university_code"):
