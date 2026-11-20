@@ -3,7 +3,8 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-03 1.0.0 |
-| Tareas ejecutadas | T01 · Esquema de features (R01); T02 · Cálculo de features de referencia (R02); T03 · Restricciones duras (R03); T04 · Estudiantes sintéticos (R04); T05 · Catálogo sintético de cuartos (R05) y T06 · Conjunto de pares (R06), cada una con sección propia abajo |
+| Tareas ejecutadas | T01 · Esquema de features (R01); T02 · Cálculo de features de referencia (R02); T03 · Restricciones duras (R03); T04 · Estudiantes sintéticos (R04); T05 · Catálogo sintético de cuartos (R05); T06 · Conjunto de pares (R06) y T07 · Pruebas y evidencia (R07, cierre), cada una con sección propia abajo |
+| Estado | **✅ ML-03 COMPLETA (7/7)** — cierre M-ML-028, 2026-11-20; ver «T07» (abajo) y «Resumen final de ML-03» (al final) |
 | Autorización T01 | «EJECUTA ML-03 1.0.0, task T01 (ML-03-R01), en la rama feat/ml-03-schema. Rutas permitidas: src/thehouse_ml/, tests/, data/seed/, memoria.md y specs/ml-03-feature-schema/. Sin dependencias nuevas (nada de jsonschema ni pydantic: valida con la biblioteca estándar)» — César Yael López Trujillo, 2026-11-19 |
 | Autorización T01 (ampliación) | Respuestas del responsable a las advertencias 1–5 y autorización para mover el esquema a `src/thehouse_ml/features/` (ubicación de `specs/ARQUITECTURA.md`), actualizar `specs/ARQUITECTURA.md` (ML-03 con 7 tasks y catálogo sintético de cuartos) y `specs/README.md` (ML-03 en ejecución, 1/7); aprueba `backend_status = "ml_only"` y el radio de 6371 km; sin commit — César Yael López Trujillo, 2026-11-19 |
 | Rama (T01) | `feat/ml-03-schema` |
@@ -13,6 +14,179 @@
 | Decisión | M-ML-022 (APROBADO) |
 
 Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` → `AGENTS.md` → `memoria.md` (M-ML-016 a M-ML-021) → `specs/ARQUITECTURA.md` → `spec.md` (sobre todo §6, §7 y §10), `plan.md` y `task.md` de ML-03.
+
+## T07 · Pruebas y evidencia (cierre de ML-03)
+
+| Campo | Valor |
+| --- | --- |
+| Autorización T07 | «EJECUTA ML-03 1.0.0, task T07 (ML-03-R07), en la rama feat/ml-03-cierre. Rutas permitidas: src/thehouse_ml/, tests/, reports/, memoria.md, specs/ml-03-feature-schema/, specs/README.md, specs/ARQUITECTURA.md (solo lo de ML-03) y .github/workflows/ci.yml (solo para la caché del punto 5). Sin dependencias nuevas de Python» — César Yael López Trujillo, 2026-11-20 |
+| Rama | `feat/ml-03-cierre` |
+| Commit base | `a8b92b1` (merge del PR #21, T06) |
+| Commit (T07) | Sin commit, por instrucción explícita del responsable |
+| Fecha de ejecución | 2026-11-20 |
+| Decisión | M-ML-028 (APROBADO — César Yael López Trujillo, 2026-11-20) |
+| Esquema y parámetros | `feature_schema.json` 1.1.0, `students_params.json`, `rooms_params.json` y `pairs_params.json` **sin cambios** |
+
+Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` → `AGENTS.md` → `CONTRIBUTING.md` → `memoria.md` (M-ML-020 a M-ML-027) → `spec.md`, `plan.md`, `task.md` y `evidence.md` de ML-03 → `specs/ml-02-data-sources/evidence.md` (modelo del cierre de ML-02).
+
+### Qué se hizo
+
+1. **Cobertura.** `pytest --cov-report=term-missing` sobre todo el paquete: los 12 módulos de ML-03 (`features/` y `synthetic/`) superan el 80 %; el menor es `synthetic/students.py` con 91 % (ramas defensivas de validación de parámetros). No hizo falta agregar pruebas de cobertura.
+2. **Reproducibilidad.** `prepare` dos veces seguidas con SHA-256 de todos los archivos versionados (y no ignorados) más `students.parquet`, `rooms.parquet` y `pairs.parquet`, antes y después de la segunda corrida (ver «Reproducibilidad comprobada»).
+3. **Caché del CI (hallazgo de tiempo del job `quality`, 6–8 min por la descarga del INEGI).** En `.github/workflows/ci.yml`, el job `quality` restaura y guarda `data/raw/` con `actions/cache` antes del paso «CLI con las cinco etapas», con la clave `data-raw-${{ runner.os }}-${{ hashFiles('data/sources.toml', 'data/manifests/**') }}`. La acción está fijada a un SHA completo, igual que las demás:
+   - **Versión:** `v6.1.0` · **SHA:** `55cc8345863c7cc4c66a329aec7e433d2d1c52a9`.
+   - **Verificación:** `git ls-remote https://github.com/actions/cache "refs/tags/v6.1.0" "refs/tags/v6.1.0^{}" "refs/tags/v6"` → `55cc8345863c7cc4c66a329aec7e433d2d1c52a9 refs/tags/v6.1.0` y el mismo SHA para `refs/tags/v6`; no existe `refs/tags/v6.1.0^{}`, así que es una etiqueta ligera y el SHA es el del commit. `v6.1.0` es la etiqueta más reciente del repositorio el 2026-11-20.
+   - **Nombres de los jobs sin cambios:** `quality`, `tests-windows`, `dependency-audit` y `secrets-gitleaks` (los exige el ruleset de `main`).
+   - **La seguridad no depende de la caché:** `download_source` trata un archivo que ya está en `data/raw/` como «manual», pero igual recalcula su SHA-256 y tamaño y los compara con `data/sources.toml` (`_check_file`) y con el manifiesto versionado de `data/manifests/`; si no coinciden, lanza `DownloadError` y no escribe el manifiesto. Prueba nueva: `tests/unit/test_download.py::test_a_file_restored_from_the_ci_cache_is_verified_and_rejected_if_altered` (archivo restaurado con el mismo tamaño y un byte alterado → «SHA-256 no coincide», sin descargar ni escribir el manifiesto); ya existía `::test_manifest_hash_mismatch_fails_clearly` (archivo local distinto del manifiesto anterior).
+   - **Prueba del workflow:** `tests/test_ci_workflow.py` (3 pruebas, sin dependencias nuevas: lee el YAML como texto) exige que toda acción use un SHA de 40 caracteres, que los cuatro jobs del ruleset conserven su nombre y que `quality` cachee `data/raw/` con esa clave antes de la CLI.
+4. **Documentos.** `spec.md`, `plan.md` y `task.md` en ✅ COMPLETA (7/7); `specs/README.md` con ML-03 ✅ COMPLETA 7/7; `specs/ARQUITECTURA.md` §6 con lo que entrega ML-03 (`feature_schema.json` 1.1.0, casos dorados y `students`/`rooms`/`pairs` sintéticos); M-ML-028 en `memoria.md` con la herencia para ML-04.
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `115 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 31 source files` (PASS) |
+| `uv run pytest --cov=thehouse_ml --cov-report=term-missing` | **686 passed in 413.81s**; cobertura total **95.60 %** ≥ 80 % (682 de antes + 4 nuevas: 1 en `test_download.py` y 3 en `test_ci_workflow.py`) (PASS) |
+| `uv run coverage report --include="*/thehouse_ml/features/*,*/thehouse_ml/synthetic/*"` | Código nuevo de ML-03: **98.58 %** (1,939 sentencias, 588 ramas; 12 módulos de `features/` y `synthetic/`) (PASS) |
+| `uv run python -m thehouse_ml prepare` (1.ª corrida) | Código 0; `national_baselines` (87 filas), `regional_calibration` (56), `universities.csv` (10), `campus_context` (300), `students` 2,000, `rooms` 3,000, `pairs` 196,605 pares de 2,000 estudiantes y data card (PASS) |
+| `uv run python -m thehouse_ml prepare` (2.ª corrida seguida) | Código 0; misma salida de consola; SHA-256 de los 148 archivos idénticos (ver abajo) (PASS) |
+| `git ls-remote https://github.com/actions/cache …` | `v6.1.0` → `55cc8345863c7cc4c66a329aec7e433d2d1c52a9` (etiqueta ligera) (PASS) |
+
+### Cobertura por módulo de ML-03
+
+| Módulo | Sentencias | Sin cubrir | Ramas | Ramas parciales | Cobertura | Líneas sin cubrir |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `features/__init__.py` | 12 | 0 | 0 | 0 | 100 % | — |
+| `features/campuses.py` | 45 | 0 | 14 | 0 | 100 % | — |
+| `features/constraints.py` | 54 | 0 | 8 | 0 | 100 % | — |
+| `features/loader.py` | 334 | 0 | 132 | 0 | 100 % | — |
+| `features/pairs.py` | 173 | 0 | 62 | 0 | 100 % | — |
+| `synthetic/__init__.py` | 7 | 0 | 0 | 0 | 100 % | — |
+| `synthetic/pairs.py` | 240 | 1 | 72 | 1 | 99 % | 328 (campus fuera del catálogo, defensiva) |
+| `synthetic/pairs_stage.py` | 163 | 1 | 26 | 1 | 99 % | 73 (NaN `float` desde Parquet) |
+| `synthetic/rooms.py` | 357 | 2 | 138 | 2 | 99 % | 403, 525 |
+| `synthetic/rooms_stage.py` | 201 | 1 | 44 | 1 | 99 % | 572 |
+| `synthetic/students.py` | 215 | 14 | 68 | 12 | **90.81 %** (mínimo) | 63, 149, 155, 159-160, 187, 204, 206, 212, 214, 234, 238, 243, 247 (validación defensiva de parámetros) |
+| `synthetic/students_stage.py` | 138 | 0 | 24 | 0 | 100 % | — |
+| **Total código nuevo de ML-03** | **1,939** | **19** | **588** | **17** | **98.58 %** | — |
+
+### Reproducibilidad comprobada
+
+Comando: `sh hashes.sh <salida>` (script en el scratchpad de la sesión, fuera del repo): SHA-256 de `git ls-files -co --exclude-standard` (todos los archivos versionados y los nuevos no ignorados) más `data/processed/students.parquet`, `rooms.parquet` y `pairs.parquet`. Se tomó antes de la 1.ª corrida (h0), después de la 1.ª (h1) y después de la 2.ª (h2), y también `git status --short` antes y después.
+
+| Comprobación | Resultado |
+| --- | --- |
+| Archivos con hash | **148** |
+| h0 = h1 (la 1.ª corrida no cambia nada respecto al árbol de trabajo) | **idéntico** (`cmp` sin diferencias) |
+| h1 = h2 (2.ª corrida seguida) | **idéntico** |
+| `git status --short` antes = después | **idéntico** |
+| Salida de consola de las dos corridas | **idéntica** |
+| SHA-256 de la lista h2 completa | `9851ff1c8af57a131dd2d2a3dc1bd1fcfbe4bb61883b9e2112ac2f1be1b9f899` |
+
+| Archivo | SHA-256 (iguales en h0, h1 y h2) |
+| --- | --- |
+| `data/processed/students.parquet` | `d4ad048ac31392bf98d33437d4bf91ba07839ffeb83d1ebec9842fb49ef373c1` |
+| `data/processed/rooms.parquet` | `e2ab7e8edaac5cbe55f2ce4971ad50841ce521143d23ce42505e89be3d918dca` |
+| `data/processed/pairs.parquet` | `8e6d46906a3a006d5b7ceebb1966574ab570b2bed74e5b905a461fa79e90d11d` (el mismo `8e6d4690…d11d` de T06) |
+| `reports/students_synthetic.md` | `684370f83d040ee480b71d664d91fb75c8d2d9a034d9bb07675a58debe375f5d` |
+| `reports/rooms_catalog.md` | `ce83040d4d2a160a48b714e4c9e8cc91e4a59c017ece8d9f76160625d6726631` |
+| `reports/pairs_summary.md` | `6eeb2f7aef7ae4e3afd3cd82929933055f04137487d43faa026acf21a17d4763` (el mismo `6eeb2f7a…4763` de T06) |
+| `src/thehouse_ml/features/feature_schema.json` | `acd2f5c71b0b58901b1a3cb2e619e3f26f7477dcff1f46c2a5b1cfd13b3a9c73` |
+
+### Trazabilidad R07 → prueba
+
+| Criterio de R07 | Prueba / evidencia |
+| --- | --- |
+| Pruebas unitarias e integración de lo implementado | `tests/unit/test_feature_schema_nv11.py`, `test_feature_schema_validation.py`, `test_campuses.py`, `test_pair_features.py`, `test_hard_constraints.py`, `test_synthetic_students.py`, `test_synthetic_rooms.py`, `test_synthetic_pairs.py`; `tests/integration/test_students_stage.py`, `test_rooms_stage.py`, `test_pairs_stage.py`; trazabilidad por requisito en las secciones T01–T06 |
+| Cobertura ≥ 80 % del código nuevo | Tabla «Cobertura por módulo de ML-03»: total del código nuevo 98.58 %, mínimo por módulo 91 % |
+| ruff y mypy sin errores | «Comandos y resultados» |
+| `evidence.md` con commit, comandos, resultados, hallazgos y coherencia | Esta sección, las tablas de coherencia de abajo y el «Resumen final de ML-03» al final |
+| Reproducibilidad (constitución §9) | «Reproducibilidad comprobada»; `test_running_twice_does_not_change_any_file` de las tres etapas |
+| Caché del CI sin perder la verificación | `test_download.py::test_a_file_restored_from_the_ci_cache_is_verified_and_rejected_if_altered`, `::test_manifest_hash_mismatch_fails_clearly`; `tests/test_ci_workflow.py` (3) |
+
+### Tabla de coherencia — constitución
+
+| § | Regla | Evidencia en el repo | Resultado |
+| --- | --- | --- | --- |
+| §2.4 / §13.2 | el contrato con el backend es `feature_schema.json` con nombres, tipos, rangos y catálogos | `src/thehouse_ml/features/feature_schema.json` 1.1.0; `test_feature_schema_nv11.py` contra el snapshot `data/seed/nv11_catalogs.json` | PASS |
+| §3 / SDD-001 | spec → plan → task → aprobación → «EJECUTA» → evidencia | `specs/ml-03-feature-schema/{spec,plan,task,evidence}.md`; un «EJECUTA» por task en la cabecera de cada sección; M-ML-021 a M-ML-028 | PASS |
+| §4 / SDD-002 | specs independientes | `specs/README.md`: solo ML-03 cambia de estado; ML-04 a ML-07 siguen en borrador | PASS |
+| §5 | stack de la tabla; dependencias solo con decisión M-ML | `pyproject.toml` y `uv.lock` sin cambios en toda ML-03 (biblioteca estándar más pandas/pyarrow de ML-02); `actions/cache` no es dependencia de Python y está autorizada en el «EJECUTA» de T07 | PASS |
+| §6 | `data/raw`, `data/processed` y `models` fuera de git | `.gitignore`; `tests/test_repo_hygiene.py`; `git status` no lista `students.parquet`, `rooms.parquet` ni `pairs.parquet` | PASS |
+| §7.4 | sin datos personales | Ids `S0001`…`S2000` y `R00001`…`R03000`; sin nombres, títulos, descripciones ni anfitriones: `test_synthetic_students.py`, `test_synthetic_rooms.py::test_no_personal_or_gender_field_anywhere`, `test_synthetic_pairs.py::test_frame_has_the_ids_split_seven_features_and_no_labels` | PASS |
+| §7.1–7.3 | fuentes con licencia; sin scraping | ML-03 no descarga nada: usa salidas de ML-02 (INEGI, términos de libre uso) y `data/universities.csv` (ODbL); ningún dato de Inside Airbnb (M-ML-019) | PASS |
+| §8.1 | estudiantes sintéticos desde NV-11 con distribuciones documentadas y semilla fija | `students_params.json` (cada parámetro con `value` y `basis`), semilla 20261119; perfiles validados con `resolve_student` | PASS |
+| §8.2–8.3 | sintéticos etiquetados; sin desempeño real | Columna `synthetic = true` en los tres Parquet; `metadata.synthetic` en parámetros y casos; reportes `reports/students_synthetic.md`, `rooms_catalog.md` y `pairs_summary.md` titulados «DATOS SINTÉTICOS»; ML-03 no produce etiquetas ni métricas de desempeño | PASS |
+| §9 | reproducibilidad | Semillas fijas con espacios de nombres; doble `prepare` con SHA-256 idénticos (arriba); pruebas byte por byte | PASS |
+| §10 | comparar con el modelo base | Fuera de alcance: ML-03 no entrena modelos (ML-04/ML-05) | NO APLICA (no se reporta PASS) |
+| §11.1 | `livingWith` y presupuesto como restricciones duras | `features/constraints.py` (`HC01_budget`, `HC02_living_with`, `HC03_pets`); `test_hard_constraints.py`; candidatos de `pairs.parquet` solo entre los que pasan (`test_no_pair_violates_a_hard_constraint_…`) | PASS |
+| §11.2 | sin género como señal; solo en `livingWith` del estudiante | Ningún campo de género en esquema, perfiles ni Parquet: `test_hard_constraints.py::test_no_gender_field_exists_in_the_profile_or_is_used_by_the_constraints` y pruebas de columnas de T04–T06 | PASS |
+| §11.3 | análisis por segmentos en la evaluación | Fuera de alcance (ML-05); `pairs.parquet` conserva `university_code` y `seed_verified` para hacerlo | NO APLICA |
+| §12 | desglose por factor | Fuera de alcance (ML-04) | NO APLICA |
+| §13.1 | sin pickle | `tests/test_repo_hygiene.py` prohíbe `.pkl`, `.pickle` y `.joblib`; ML-03 solo escribe JSON y Parquet | PASS |
+| §13.4 | casos dorados y paridad | `tests/fixtures/pair_feature_cases.json` (35) y `hard_constraint_cases.json` (27) listos; la paridad Python ↔ ONNX es de ML-06 | Casos: PASS · paridad: NO APLICA (ML-06) |
+| §14 | sin secretos; dependencias fijas; nada sin verificar | Sin secretos (gitleaks en CI); `uv sync --frozen`; acciones fijadas por SHA (`tests/test_ci_workflow.py`); archivos de la caché reverificados por SHA-256 | PASS |
+| §15 / COST-001 | costo $0 | CPU local y GitHub Actions del repositorio público (M-ML-007); `actions/cache` usa el almacenamiento de caché incluido en Actions, sin servicios de pago | PASS |
+| §16 | pruebas unitarias e integración; cobertura ≥ 80 % | 686 pruebas (unitarias, integración, higiene y CI), sin red; cobertura total 95.60 % y 98.58 % en el código nuevo de ML-03 (mínimo 90.81 %) | PASS |
+| §17 | CI con ruff, mypy, pytest+cobertura, pip-audit, gitleaks y pipeline | `.github/workflows/ci.yml`: los cuatro jobs sin cambios de nombre; `quality` corre las cinco etapas, ahora con `data/raw/` en caché | PASS (el efecto de la caché se verá en el CI del PR; hallazgo T07-1) |
+| §18 | versión semántica | `feature_schema.json` 1.0.0 → 1.1.0 (menor, M-ML-023); parámetros 1.0.0; spec 1.0.0 sin bump al cerrar | PASS |
+| §19 | ramas con PR, checks y aprobación ajena; sin commit directo a `main` | `git log --first-parent main`: el único commit que no es merge es el inicial `20b2c19`; ML-03 entró por los PR #15–#21. La aprobación en GitHub no es auditable desde el clon local | PASS con observación |
+| §20–§21 | leer antes; «EJECUTA»; sin métricas sintéticas como reales; sin scraping, pickle ni costos | «Lecturas previas»; autorizaciones por task; `constitution.md` y `AGENTS.md` sin modificar (`git status`) | PASS |
+
+### Tabla de coherencia — AGENTS.md
+
+| Regla | Evidencia en el repo | Resultado |
+| --- | --- | --- |
+| Leer constitution → AGENTS → memoria → spec/plan/task | «Lecturas previas» de cada sección | PASS |
+| Estado vigente: responsable César (M-ML-011); cada task con su «EJECUTA» | Autorizaciones T01–T07 firmadas por César Yael López Trujillo | PASS |
+| Aprobar spec / implementar tasks con «Apruebo» y «EJECUTA» | M-ML-021 (spec) y M-ML-022 a M-ML-028 (tasks) | PASS |
+| Descargar datos de terceros solo con spec de datos y fuente registrada | ML-03 no descargó nada; la caché del CI guarda lo que ya descarga `download` (fuentes de M-ML-003) | PASS |
+| Agregar dependencias solo con decisión M-ML | Sin dependencias nuevas de Python en ML-03 | PASS |
+| Publicar un artefacto (release) | No hay artefactos en ML-03 | NO APLICA |
+| Cambios en GitHub con permiso explícito | Solo el archivo `ci.yml` (ruta autorizada en el «EJECUTA» de T07); ningún cambio de ruleset, secretos ni configuración del repositorio | PASS |
+| Merge solo con aprobación de otra persona | PR #15–#21 mezclados en GitHub; T07 sin commit ni PR; el agente no mezcla | PASS |
+| Un plan aprobado no habilita tareas fuera de él | Solo T07; la caché del CI es el punto 5 del «EJECUTA» | PASS |
+| Flujo: implementar → probar → coherencia → seguridad y licencias | Cada sección T01–T07 tiene comandos, tabla de coherencia y revisión de seguridad | PASS |
+| Un control no ejecutado no se reporta como PASS | §10, §11.3, §12 y la paridad (§13.4) en NO APLICA; el efecto de la caché en el CI no se reporta como PASS (hallazgo T07-1) | PASS |
+| Cerrar una task solo con aceptación y evidencia reproducible | Comandos y resultados de cada sección; doble `prepare` con SHA-256 | PASS |
+| Datos: nunca subir `raw`/`processed`/`models`; sin datos personales; SHA-256 en `data/manifests/` | `.gitignore`, `test_repo_hygiene.py`, pruebas de columnas; ML-03 no agrega descargas | PASS |
+| Modelos y métricas: base por reglas, sintéticas etiquetadas, solo ONNX, cuatro archivos por artefacto | Sin modelos en ML-03; todo lo sintético etiquetado | NO APLICA / PASS en etiquetado |
+| Rutas protegidas: `constitution.md` y `AGENTS.md` sin editar; sin secretos, scraping, pago ni commit directo a `main` | `git status`; gitleaks; sin red en las pruebas | PASS |
+| Resultado de revisión PASS / PASS WITH WARNINGS / BLOCKED | Resultado por task y global | PASS |
+| Convenciones: documentos en español, código en inglés, decisiones M-ML, specs con cuatro archivos | Documentos de ML-03 en español; código y pruebas en inglés; M-ML-021 a M-ML-028 | PASS |
+| Cierre: qué se hizo, qué se verificó, qué queda pendiente y qué espera aprobación | «Resumen final de ML-03» | PASS |
+
+### Tabla de coherencia — decisiones M-ML-021 a M-ML-027
+
+| Decisión | Evidencia en el repo | Resultado |
+| --- | --- | --- |
+| M-ML-021 — ML-03 1.0.0 aprobada: 2,000 estudiantes, ~3,000 cuartos a ≤ 30 km, renta y servicios calibrados, umbral ≥ 90 %, parámetros en JSON | `students_params.json` (2,000), `rooms_params.json` (3,000, tope 30 km), `pairs_params.json` (máximo 200, `coverage.min_share` 0.90); `PairsError` si no se cumple el umbral | PASS |
+| M-ML-022 — esquema 1.0.0, snapshot de NV-11 verificado y reglas para faltantes; factores de transporte | `feature_schema.json`, `data/seed/nv11_catalogs.json`; `test_feature_schema_nv11.py` (`::test_missing_rules_of_m_ml_022`, `::test_transport_factors_cover_the_transport_catalog`) | PASS |
+| M-ML-023 — una sola implementación de las features; esquema 1.1.0 con `training_range` | `features/pairs.py::compute_pair_features`; `tests/fixtures/pair_feature_cases.json` (35); `test_pair_features.py` (distancia > 30 km y `price_to_budget` 3000 válidos) | PASS |
+| M-ML-024 — restricciones duras desde el esquema; `filter_rooms` | `features/constraints.py`; `tests/fixtures/hard_constraint_cases.json` (27); `test_hard_constraints.py` (texto `excludes_when` fijado) | PASS |
+| M-ML-025 — generador de estudiantes (semilla 20261119, factor 1.3, ±10 %) | `synthetic/students.py`, `students_params.json`; `test_synthetic_students.py` (calibración por campus); `reports/students_synthetic.md` | PASS |
+| M-ML-026 — catálogo de cuartos (semilla 20261905, multiplicadores por `placeType`, Censo por municipio, ≥ 40 `women`/`men`) | `synthetic/rooms.py`, `rooms_params.json`; `test_synthetic_rooms.py`; `reports/rooms_catalog.md` | PASS; `Property.AreaM2` por confirmar con el backend |
+| M-ML-027 — pares: candidatos que pasan HC01–HC03 hasta 200; partición 70/15/15 por estudiante sin fuga | `synthetic/pairs.py`, `pairs_stage.py`, `pairs_params.json`; `test_synthetic_pairs.py` (37) y `test_pairs_stage.py` (5); `reports/pairs_summary.md` | PASS |
+
+### Hallazgos de T07
+
+| # | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| T07-1 | El job `quality` tarda 6–8 min por la descarga del INEGI en cada corrida. | ADVERTENCIA | **Cambio implementado** (caché de `data/raw/`, `actions/cache` v6.1.0 por SHA); **el ahorro no se puede verificar en local**: se comprueba en el CI del PR (la primera corrida no encuentra la caché y la guarda; las siguientes la restauran) |
+| T07-2 | Alcance de la caché en GitHub Actions: una caché guardada en la rama de un PR solo la ven esa rama y sus derivadas; la que se guarda en `main` (el push del merge corre el CI) la ven todos los PR. Se guarda solo si el job termina bien. Si cambia `sources.toml` o un manifiesto, la clave cambia y se descarga de nuevo. | INFORMATIVO | Documentado; comportamiento esperado |
+| T07-3 | Se agrega una acción de terceros nueva al CI (`actions/cache`, de GitHub). No es dependencia de Python; está autorizada en el «EJECUTA» y fijada por SHA verificado. | INFORMATIVO | Registrado en M-ML-028 |
+| T07-4 | `synthetic/students.py` es el módulo de ML-03 con menor cobertura (91 %): las líneas sin cubrir son ramas defensivas de validación de parámetros. | INFORMATIVO | Sin acción (≥ 80 %) |
+| T07-5 | La suite completa tarda ~9 min en local (las pruebas de T04–T06 generan los 2,000 estudiantes y 3,000 cuartos); la caché del CI no reduce ese tiempo. | INFORMATIVO | Sin acción en ML-03 |
+| T07-6 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR de T07 |
+
+### Revisión de T07
+
+- **Constitución:** §2, §3–§9, §11.1–11.2, §13.1, §14–§21 verificados en las tablas; §10, §11.3, §12 y la paridad de §13.4 en NO APLICA, no como PASS.
+- **AGENTS / memoria:** «EJECUTA» del responsable vigente con rutas; solo se tocaron rutas autorizadas (`git status`); M-ML-028 registra el cierre y la herencia para ML-04; `constitution.md` y `AGENTS.md` intactos.
+- **Seguridad y licencias:** sin descargas, sin red en las pruebas, sin secretos, sin datos personales y sin dependencias nuevas de Python. La caché del CI no relaja la verificación: todo archivo restaurado se compara por SHA-256 y tamaño con `sources.toml` y los manifiestos.
+- **Resultado:** **PASS.** T07 cumple R07: 686 pruebas en verde, cobertura total 95.60 % y 98.58 % en el código nuevo de ML-03 (todos los módulos ≥ 90.81 %), ruff y mypy sin errores, dos corridas de `prepare` con SHA-256 idénticos en 148 archivos (incluidos los tres Parquet sintéticos), tablas de coherencia completas y caché del CI con la acción fijada por SHA verificado y la verificación por SHA-256 demostrada con prueba. El ahorro de tiempo de la caché queda por observar en el CI del PR (hallazgo T07-1); no se reporta como PASS. Sin commit, por instrucción explícita del responsable.
 
 ## T01 · Esquema de features
 
@@ -837,3 +1011,104 @@ Origen: hallazgos 2 y 9 de T06 y aprobación de M-ML-027 (César Yael López Tru
 
 1. **Features constantes dentro de los candidatos:** como los candidatos ya pasan HC03 y HC01, `pets_compatible` vale siempre **1** y `price_to_budget` es siempre **≤ 1** en `pairs.parquet` (`reports/pairs_summary.md` §7: mínimo, mediana y máximo de `pets_compatible` 1.000; máximo de `price_to_budget` 1.000). ML-04 decide si `pets_compatible` se conserva como feature del modelo (con este conjunto no aporta información) o queda solo como restricción; cualquier cambio de las features o de su orden es un cambio de `feature_schema.json` con su versión.
 2. **Estudiantes con un solo candidato:** hay estudiantes con 1 candidato (con los datos de ML-02, 1: `S1078`, TESJI, `train`); con un solo cuarto no hay orden que medir. En ML-05 las métricas de ranking se calculan **solo con estudiantes de 2 o más candidatos**, y el reporte dice cuántos quedan fuera (por partición y por campus, con y sin las `seed_sin_verificar`).
+
+## Resumen final de ML-03 (cierre T07, 2026-11-20)
+
+### Pull requests mezclados en `main` y sus commits
+
+Verificado con `git log --first-parent --format="%h %p | %s" main` y `git log <merge>^1..<merge>^2`. El commit inicial del repositorio es `20b2c19` y es el único commit de `main` que no es un merge (`git rev-list --first-parent --no-merges main` → 1). ML-03 entró a `main` solo por PR:
+
+| PR | Rama | Contenido | Commit de merge en `main` | Commit de la task |
+| --- | --- | --- | --- | --- |
+| #15 | `docs/ml-03-spec` | Spec 1.0.0 aprobada (M-ML-021) | `ea3b615` | `b3d5326` |
+| #16 | `feat/ml-03-schema` | T01 · `feature_schema.json` contra NV-11 (M-ML-022) | `5376da9` | `2aa5061` |
+| #17 | `feat/ml-03-pair-features` | T02 · features del par y esquema 1.1.0 (M-ML-023) | `ed927b3` | `203574f` |
+| #18 | `feat/ml-03-constraints` | T03 · restricciones duras (M-ML-024) | `f776f00` | `1af7bab` |
+| #19 | `feat/ml-03-students` | T04 · estudiantes sintéticos (M-ML-025) | `f7960b7` | `e2c2d25` |
+| #20 | `feat/ml-03-rooms` | T05 · catálogo sintético de cuartos (M-ML-026) | `e2a0679` | `5abc666` |
+| #21 | `feat/ml-03-pairs` | T06 · conjunto de pares (M-ML-027) | `a8b92b1` | `f94e3da` |
+
+T07 se entrega en `feat/ml-03-cierre` (base `a8b92b1`) **sin commit ni PR**, por instrucción explícita del responsable.
+
+### Comandos ejecutados y resultado
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | 115 files already formatted — PASS |
+| `uv run ruff check .` | All checks passed! — PASS |
+| `uv run mypy src` | Success: no issues found in 31 source files — PASS |
+| `uv run pytest --cov=thehouse_ml --cov-report=term-missing` | 686 passed in 413.81s; cobertura 95.60 % — PASS |
+| `uv run coverage report --include="*/thehouse_ml/features/*,*/thehouse_ml/synthetic/*"` | 98.58 % en el código nuevo de ML-03 — PASS |
+| `uv run python -m thehouse_ml prepare` (dos veces seguidas) | Código 0 las dos veces; SHA-256 de 148 archivos idénticos (incluidos `students.parquet`, `rooms.parquet` y `pairs.parquet`); `git status` idéntico — PASS |
+| `git ls-remote https://github.com/actions/cache "refs/tags/v6.1.0" "refs/tags/v6.1.0^{}" "refs/tags/v6"` | `55cc8345863c7cc4c66a329aec7e433d2d1c52a9` (etiqueta ligera) — PASS |
+| `git log --first-parent main` | Solo merges de PR desde `20b2c19` — PASS |
+
+No se ejecutaron `pip-audit` ni gitleaks en local (corren en el CI: jobs `dependency-audit` y `secrets-gitleaks`); ML-03 no cambió dependencias. No se reportan como PASS local.
+
+### Cobertura
+
+| Ámbito | Cobertura |
+| --- | ---: |
+| Total de `src/thehouse_ml` | **95.60 %** (mínimo exigido 80 %) |
+| Código nuevo de ML-03 (12 módulos de `features/` y `synthetic/`) | **98.58 %** |
+| Módulo de ML-03 con menor cobertura | `synthetic/students.py` **90.81 %** |
+| Módulos modificados por ML-03 fuera de esas carpetas | `stages.py` y `cli.py` **100 %** |
+| Pruebas | **686** (682 al cerrar T06 + 4 de T07) |
+
+### Estado final de los hallazgos
+
+| Origen | # | Hallazgo | Estado final |
+| --- | --- | --- | --- |
+| T01 | 1 | Snapshot de NV-11 sin copia local del backend | RESUELTO — verificado por el responsable en `ea10a4c` |
+| T01 | 2 | Tipo del presupuesto `integer` | RESUELTO — `int?` confirmado |
+| T01 | 3 | Rangos del cuarto que no vienen de NV-11 | RESUELTO como SUPUESTO documentado (`range_basis`) |
+| T01 | 4 | Factores de transporte ausentes de §10 | RESUELTO (M-ML-022) |
+| T01 | 5 | `synthetic` con `backend_status = "ml_only"` | APROBADO |
+| T01 | 6 | Distancia con rango 0–30 | RESUELTO en T02 (M-ML-023, `training_range`) |
+| T01 | 7, 8, 11 | Ubicación del módulo, índice y total de tasks | RESUELTOS |
+| T01 | 9 | Aviso al backend de los campos `missing_in_property` | RESUELTO (aviso enviado el 2026-11-19); **RK03 sigue ABIERTO** |
+| T01 | 10 | Sin commit ni PR | CERRADO — PR #16 mezclado |
+| T02 | 1, 2, 3, 4, 9 | Rangos de distancia y `price_to_budget`, presupuesto 0, rangos del cuarto | RESUELTOS (M-ML-023, esquema 1.1.0) |
+| T02 | 5, 10 | Campos sin feature; features que no rebasan su rango | INFORMATIVOS — coherentes con el esquema |
+| T02 | 6 | Distancias orientativas de los campus sin verificar | RESUELTO en T06 (`seed_verified` en el Parquet; totales con y sin ellos) |
+| T02 | 7 | Aviso al backend (NV-12) | RESUELTO (aviso enviado); **RK03 ABIERTO** |
+| T02 | 8 | Sin commit ni PR | CERRADO — PR #17 mezclado |
+| T03 | 1, 4 | Esquema sin cambios; implicación HC01 → `price_to_budget` ≤ 1 en un solo sentido | INFORMATIVOS — documentados |
+| T03 | 2 | `excludes_when` como texto, no como expresión | MITIGADO — prueba que fija el texto |
+| T03 | 3 | `women`/`men` no ven cuartos `any` | RESUELTO en T05–T06 (≥ 40 por campus; cobertura 100 %) |
+| T03 | 5 | Decisiones de implementación nuevas | RESUELTO (M-ML-024) |
+| T03 | 6 | Sin commit ni PR | CERRADO — PR #18 mezclado |
+| T04 | 1 | Valores SUPUESTO del agente | RESUELTO (M-ML-025) |
+| T04 | 2 | Renta p50 estatal, no municipal | ABIERTO — limitación documentada (sin fuente municipal de renta) |
+| T04 | 3 | Renta de vivienda completa, no de cuarto | ABIERTO — limitación documentada; mitigada con multiplicadores por `placeType` (T05); riesgo RK02 hasta ML-07 |
+| T04 | 4 | Tolerancia ±10 % con objetivos bajos | INFORMATIVO — documentado |
+| T04 | 5 | 55.1 % limitado por `livingWith` | RESUELTO en T05 (0.25 · 0.25 · 0.50, ≥ 40 por campus) |
+| T04 | 6 | Distribuciones sin fuente pública por campus | ABIERTO — riesgo RK02 hasta ML-07 |
+| T04 | 7 | Sin commit ni PR | CERRADO — PR #19 mezclado |
+| T05 | 1 | Valores SUPUESTO del agente | RESUELTO (M-ML-026) |
+| T05 | 2 | 200 candidatos no pueden ser todos compatibles | RESUELTO en T06 (M-ML-027: hasta 200) |
+| T05 | 3 | Semántica de `Property.AreaM2` | **ABIERTO — acción pendiente del responsable con el backend** (heredado en M-ML-028) |
+| T05 | 4 | Renta estatal y Censo de todas las viviendas | ABIERTO — riesgo RK02 (ML-07) |
+| T05 | 5, 6 | Intervalos pequeños del histograma; distancias orientativas | INFORMATIVOS — sin acción / marcados |
+| T05 | 7 | Sin commit ni PR | CERRADO — PR #20 mezclado |
+| T06 | 1, 8 | «EJECUTA» truncado; M-ML-027 PROPUESTO | RESUELTOS |
+| T06 | 2 | `pets_compatible` constante (1) y `price_to_budget` ≤ 1 en los candidatos | ABIERTO — **heredado por ML-04** (M-ML-028, punto 4) |
+| T06 | 3, 5 | Sin negativos por restricción; muestra de 200 | Por diseño (M-ML-027) |
+| T06 | 4 | Cuartos compartidos entre particiones | Documentado — **heredado por ML-04/ML-05** (M-ML-028, punto 6) |
+| T06 | 6, 7 | Umbral en CI con histogramas agrupados; duración de las pruebas | INFORMATIVOS — sin acción |
+| T06 | 9 | Estudiantes con 1 solo candidato | ABIERTO — **heredado por ML-05** (M-ML-028, punto 5) |
+| T07 | 1 | Duración del job `quality` por la descarga del INEGI | IMPLEMENTADO (caché `actions/cache` v6.1.0 por SHA); **ahorro por verificar en el CI del PR** |
+| T07 | 2, 3, 4, 5 | Alcance de la caché; acción nueva en el CI; `students.py` 90.81 %; duración de la suite | INFORMATIVOS — documentados |
+| T07 | 6 | Sin commit ni PR | **Se cierra al mezclar el PR de T07** |
+| Spec | RK03 | Contrato del cuarto no implementado en el backend (coordenadas, `placeType`, `propertyType`, mascotas, `livingWith`, servicios) | **ABIERTO — pendiente del backend (NV-12)**; sin esos campos el modelo no se puede usar en producción |
+| Spec | — | `Property.AreaM2` (espacio ofrecido o inmueble) | **ABIERTO — pendiente de confirmar con el backend** |
+
+### Pendiente y decisiones que esperan aprobación
+
+- **Pendientes del backend:** NV-12 (RK03) y la semántica de `Property.AreaM2`.
+- **Pendiente del CI:** observar en el PR de T07 (y en el push a `main` tras el merge) que la caché se guarda y se restaura y que el tiempo de `quality` baja.
+- **Decisiones:** M-ML-028 registrada como APROBADO según el «EJECUTA» de T07; ML-04 sigue en borrador y requiere su propia aprobación y «EJECUTA».
+
+### Resultado global
+
+**PASS WITH WARNINGS.** ML-03 1.0.0 queda **✅ COMPLETA (7/7)**: los 7 requisitos tienen evidencia (R01–R06 en sus secciones y R07 en «T07»), 686 pruebas en verde, cobertura de 95.60 % total y 98.58 % en el código nuevo, ruff y mypy sin errores, `prepare` reproducible byte por byte y coherencia completa con la constitución, `AGENTS.md` y M-ML-021 a M-ML-027. Advertencias que no bloquean el cierre: **RK03 abierto** y **`Property.AreaM2` por confirmar**, ambos pendientes del backend; limitaciones de calibración documentadas (T04-2, T04-3, T04-6 y T05-4; riesgo RK02 hasta ML-07); notas heredadas por ML-04/ML-05 (T06-2, T06-4 y T06-9); y el ahorro de la caché del CI por verificar en el PR (T07-1). T07-6 se cierra al mezclar el PR de T07. Todo lo que no se cumplió se reporta aquí y no se oculta. Sin dependencias nuevas de Python, sin descargas, sin secretos y sin commit, según lo autorizado.

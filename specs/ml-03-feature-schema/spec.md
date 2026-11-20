@@ -8,14 +8,14 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-19 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 completas (7/7); cierre M-ML-028, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0 |
 | Tasks | `task.md` 1.0.0 |
 | Precondición | ML-02 completa ✅ (M-ML-020); catálogos de NV-11 verificados en el commit `ea10a4c` del backend |
 | Relación con el backend | El esquema de preferencias de NV-11 es la entrada del modelo; `feature_schema.json` es el contrato con NV-23 |
 
-Spec en borrador para revisión humana. No autoriza código, descargas de datos, dependencias ni cambios en GitHub: la ejecución requiere aprobación y «EJECUTA».
+Spec aprobada (1.0.0, M-ML-021). Cada task se ejecutó con su «EJECUTA»: T01 (M-ML-022), T02 (M-ML-023), T03 (M-ML-024), T04 (M-ML-025), T05 (M-ML-026) y T06 (M-ML-027) el 2026-11-19, y T07 (ML-03-R07: pruebas, evidencia, revisión de coherencia y cierre) el 2026-11-20 en la rama `feat/ml-03-cierre` (M-ML-028). ML-03 queda **COMPLETA**: 7 de 7 tasks.
 
 ## 1. Contexto
 
@@ -125,10 +125,10 @@ Se registran en `memoria.md` (M-ML-021, APROBADO).
 | Tasks | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 6 (T01, T02, T03, T04, T05, T06) |
+| Tasks completadas | 7 (T01–T07) |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 completas (7/7); cierre M-ML-028, ver `evidence.md`** |
 
 ## 15. Aprobación
 
-Aprobada por César Yael López Trujillo el 2026-11-19 (ML-03 1.0.0; decisión registrada como M-ML-021). Para ejecutar se requiere además «EJECUTA» con versión, tasks y rutas permitidas.
+Aprobada por César Yael López Trujillo el 2026-11-19 (ML-03 1.0.0; decisión registrada como M-ML-021). Ejecutada con un «EJECUTA» por task (M-ML-022 a M-ML-027) y cerrada con T07 el 2026-11-20 (M-ML-028). No se sube la versión 1.0.0: la constitución y `AGENTS.md` no exigen un bump al cerrar.
