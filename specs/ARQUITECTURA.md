@@ -15,7 +15,7 @@ TheHouse ayuda a estudiantes a encontrar cuarto cerca de su universidad. **Smart
 `TheHouse-ML` es el proyecto de Machine Learning que construye ese cálculo:
 
 - **Entrada:** el perfil de búsqueda del estudiante (presupuesto, distancia máxima, servicios que necesita, con quién quiere vivir, tipo de lugar, mascotas, transporte, universidad) y los datos públicos de un cuarto (renta, ubicación, servicios, tipo, reglas).
-- **Salida:** un **puntaje de 0 a 100** con su **desglose por factor**, por ejemplo: presupuesto 28/30, distancia 20/25, servicios 15/20, tipo de lugar 10/10, modalidad 7/10, extras 3/5 → **83**.
+- **Salida:** un **puntaje de 0 a 100** con su **desglose por factor**, por ejemplo (ML-04 1.0.0): presupuesto 25.5/30, distancia 17.0/25, servicios 13.3/20, tipo de lugar 10.0/10, tipo de inmueble 10.0/10, extras 2.1/5 → **78** (el total redondea la suma sin redondear de los factores).
 - **Entregable:** un archivo de modelo **ONNX** versionado, con su esquema de entrada, su ficha técnica y su reporte de evaluación. El backend lo carga y lo ejecuta; este proyecto **no es un servidor**.
 
 Todo el proyecto se hace en **Python 3.12**, con herramientas gratuitas (pandas, scikit-learn, LightGBM, ONNX) y costo $0.
@@ -83,7 +83,8 @@ TheHouse-ML/
 │   ├── data/                        ML-02  sources, download, manifest, national, regional, campus, rooms, universities, mappings/
 │   ├── features/                    ML-03  schema, pairs, constraints (restricciones duras)
 │   ├── synthetic/                   ML-03  generadores con semilla de estudiantes y del catálogo sintético de cuartos
-│   ├── models/                      ML-04  baseline (reglas)  ·  ML-05 labels, train
+│   ├── models/                      ML-04  baseline (reglas)  ·  ML-05 train
+│   │                                (las etiquetas sintéticas de ML-04 van en synthetic/)
 │   ├── evaluation/                  ML-04/05  métricas de ranking, reportes, segmentos
 │   ├── export/                      ML-06  onnx, golden cases, paquete de entrega
 │   └── signals/                     ML-07  ingesta de la exportación anonimizada
@@ -127,12 +128,12 @@ Todo requisito tiene al menos una task y toda task tiene un requisito. El últim
 | **ML-01** | Base del proyecto | Paquete Python con `uv`, comando con las 5 etapas vacías, calidad automática y CI | `pyproject.toml`, `uv.lock`, `cli.py`, `ci.yml`, prueba de que no se suben datos | 5 | Constitution 1.0.0 |
 | **ML-02** | Datos | Bases **nacionales** de INEGI (renta, tenencia, servicios) ponderadas, **calibradas** a los 7 municipios de la región con respaldo estado → país, entorno de cada campus (DENUE), universidades verificadas y bases para el catálogo **sintético** de cuartos de ML-03 (Inside Airbnb descartada por M-ML-019) | `sources.toml`, manifiestos SHA-256, `national_baselines`, `regional_calibration`, `campus_context`, `universities.csv`, `reports/data_card.md` | 9 | ML-01; licencias de M-ML-003 aprobadas |
 | **ML-03** | Esquema de features | Qué entra al modelo (estudiante, cuarto, par), restricciones duras (presupuesto, `livingWith`, mascotas), estudiantes sintéticos y catálogo **sintético** de cuartos (~3,000 cuartos entre los 10 campuses, calibrado con ML-02) | **✅ COMPLETA (M-ML-028):** `feature_schema.json` **1.1.0** validado contra NV-11 (`src/thehouse_ml/features/`, 7 features del par y restricciones duras HC01–HC03), casos dorados `tests/fixtures/pair_feature_cases.json` y `hard_constraint_cases.json`; `prepare` genera, **sintéticos y etiquetados**, `data/processed/students.parquet` (2,000), `rooms.parquet` (3,000) y `pairs.parquet` (candidatos que pasan las restricciones, hasta 200 por estudiante; partición 70/15/15 por estudiante sin fuga) con sus reportes en `reports/` | 7 | ML-02; NV-11 del backend |
-| **ML-04** | Modelo base por reglas | Puntaje determinista 0–100 con pesos: presupuesto 30, distancia 25, servicios 20, tipo de lugar 10, modalidad 10, extras 5 | Función de puntaje, pesos versionados, ≥ 50 casos dorados, reporte del modelo base | 5 | ML-03 |
+| **ML-04** | Modelo base por reglas | **✅ 1.0.0 aprobada (M-ML-029), sin ejecutar.** Puntaje determinista 0–100 (`baseline-1.0.0`) con pesos: presupuesto 30, distancia 25, servicios esenciales 20, tipo de lugar 10, tipo de inmueble (modalidad) 10, extras 5; esquema **2.0.0** (mayor) con `distance_ratio`, `price_below_min` y `extra_services_ratio`; etiquetas sintéticas de relevancia 0–3 | Configuración versionada, función de puntaje con `matchScore` y `breakdown`, `labels.parquet` sintético, ≥ 50 casos dorados, reporte con NDCG@10, NDCG@5, Precision@5 y MAP en test con intervalos bootstrap y segmentos (referencia de ML-05) | 7 | ML-03 |
 | **ML-05** | Modelo entrenado | Regresión logística y LightGBM (LambdaRank) con validación cruzada por estudiante; se promueve solo si supera al modelo base | Métricas NDCG@10, Precision@5, MAP (media ± desviación), ablación, segmentos, `reports/model_card.md` | 6 | ML-04 |
 | **ML-06** | Artefacto ONNX | Exportar el modelo promovido y comprobar que da lo mismo en Python y en ONNX; 200 cuartos en < 20 ms | Release `model-vX.Y.Z` con 6 archivos y hashes, `docs/backend-integration.md` | 6 | ML-05 |
 | **ML-07** | Señales reales | Evaluar y reentrenar con favoritos y visitas anonimizados de la app | Ingesta validada, métricas reales con partición temporal, nueva versión si mejora | 4 | Spec del backend que exporte señales; volumen mínimo |
 
-Total: 7 specs, 42 tasks.
+Total: 7 specs, 44 tasks.
 
 ## 7. Qué significa cada resultado
 
