@@ -7,7 +7,9 @@ import hashlib
 import json
 import shutil
 from collections.abc import Callable
+from functools import cache
 from pathlib import Path
+from typing import Any
 
 from thehouse_ml.manifests import Manifest, ManifestFile, write_manifest
 from thehouse_ml.sources import FileSpec, SourceSpec
@@ -156,3 +158,65 @@ def write_osm_project(root: Path, *, with_responses: bool = True) -> tuple[str, 
     )
     write_manifest(root / "data" / "manifests" / "openstreetmap.json", Manifest("openstreetmap", files))
     return codes
+
+
+# ---------------------------------------------------------------------------
+# ML-03 T06: estudiantes y cuartos sintéticos desde insumos versionados (sin red ni data/processed)
+# ---------------------------------------------------------------------------
+
+# Renta p50 estatal de la ENVI 2020 en pesos de jul-2024 (reports/regional_calibration.md, M-ML-015).
+STATE_P50 = {"13": 1872.167721, "15": 2496.223627}
+# Histogramas agrupados (≥ 30 viviendas por celda) que publica reports/data_card.md §7, en pesos de jul-2024.
+STATE_HISTOGRAM_BINS = {
+    "13": ((500, 1500, 32597), (1500, 2000, 16127), (2000, 7500, 32551)),
+    "15": ((500, 1500, 165766), (1500, 2000, 137990), (2000, 2500, 129732), (2500, 3500, 121903), (3500, None, 183989)),
+}
+CENSUS_COLUMNS = {"wifi": "Internet", "electricity": "Electricidad", "water": "Agua entubada", "gas": "Gas"}
+
+
+def published_census() -> dict[str, dict[str, float]]:
+    """Proporciones del Censo por municipio, tal como las publica reports/regional_calibration.md."""
+    lines = (REPO_ROOT / "reports" / "regional_calibration.md").read_text(encoding="utf-8").splitlines()
+    header_index = next(i for i, line in enumerate(lines) if line.startswith("| Clave | Municipio"))
+    header = [cell.strip() for cell in lines[header_index].strip("|").split("|")]
+    result: dict[str, dict[str, float]] = {}
+    for line in lines[header_index + 2 :]:
+        if not line.startswith("|"):
+            break
+        cells = dict(zip(header, (cell.strip() for cell in line.strip("|").split("|")), strict=True))
+        result[cells["Clave"]] = {
+            service: float(cells[column].split("%")[0]) / 100.0 for service, column in CENSUS_COLUMNS.items()
+        }
+    return result
+
+
+@cache
+def versioned_synthetic_data() -> tuple[tuple[Any, ...], tuple[Any, ...], dict[str, Any]]:
+    """Los 2,000 estudiantes (T04) y los 3,000 cuartos (T05) generados solo con insumos versionados."""
+    from thehouse_ml.features import default_schema, load_campuses
+    from thehouse_ml.synthetic import (
+        CampusInputs,
+        HistogramBin,
+        generate_rooms,
+        generate_students,
+        load_params,
+        load_room_params,
+    )
+
+    schema = default_schema()
+    campuses = load_campuses(REPO_ROOT / "data" / "universities.csv")
+    student_params = load_params(schema)
+    rent_p50 = {code: STATE_P50[clave[:2]] for code, clave in student_params.municipio_by_campus.items()}
+    students = generate_students(student_params, rent_p50, campuses, schema)
+    room_params = load_room_params(schema)
+    census = published_census()
+    inputs = {
+        code: CampusInputs(
+            STATE_P50[clave[:2]],
+            tuple(HistogramBin(lower, upper, weight) for lower, upper, weight in STATE_HISTOGRAM_BINS[clave[:2]]),
+            census[clave],
+        )
+        for code, clave in room_params.municipio_by_campus.items()
+    }
+    rooms = generate_rooms(room_params, inputs, campuses, schema)
+    return tuple(students), tuple(rooms), campuses

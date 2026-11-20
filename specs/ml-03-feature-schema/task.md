@@ -11,7 +11,7 @@
 | Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 5 |
+| Tasks completadas | 6 |
 
 ## Reglas de esta lista
 
@@ -33,7 +33,7 @@
 
 ## F3 — Calidad, seguridad y datos
 
-- [ ] **T06 · Conjunto de pares** — Requisito: ML-03-R06 · Aceptación: Pares candidatos por estudiante con partición por estudiante para entrenamiento, validación y prueba, sin fuga; prueba de que la mayoría de los estudiantes tiene al menos un cuarto que pasa las restricciones duras (≥ 90 % de estudiantes con al menos un cuarto compatible; necesario el catálogo de cuartos T05).
+- [x] **T06 · Conjunto de pares** — Requisito: ML-03-R06 · Aceptación: Pares candidatos por estudiante con partición por estudiante para entrenamiento, validación y prueba, sin fuga; prueba de que la mayoría de los estudiantes tiene al menos un cuarto que pasa las restricciones duras (≥ 90 % de estudiantes con al menos un cuarto compatible; necesario el catálogo de cuartos T05).
 
 ## F4 — Evidencia
 
@@ -48,5 +48,5 @@
 | T03 | R03 | F2 | COMPLETA (M-ML-024; `evidence.md`) |
 | T04 | R04 | F2 | COMPLETA (M-ML-025; `evidence.md`) |
 | T05 | R05 | F2 | COMPLETA (M-ML-026; `evidence.md`) |
-| T06 | R06 | F3 | ABIERTA |
+| T06 | R06 | F3 | COMPLETA (M-ML-027; `evidence.md`) |
 | T07 | R07 | F4 | ABIERTA |

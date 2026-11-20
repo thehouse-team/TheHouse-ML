@@ -3,7 +3,7 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-03 1.0.0 |
-| Tareas ejecutadas | T01 · Esquema de features (R01); T02 · Cálculo de features de referencia (R02); T03 · Restricciones duras (R03); T04 · Estudiantes sintéticos (R04) y T05 · Catálogo sintético de cuartos (R05), cada una con sección propia abajo |
+| Tareas ejecutadas | T01 · Esquema de features (R01); T02 · Cálculo de features de referencia (R02); T03 · Restricciones duras (R03); T04 · Estudiantes sintéticos (R04); T05 · Catálogo sintético de cuartos (R05) y T06 · Conjunto de pares (R06), cada una con sección propia abajo |
 | Autorización T01 | «EJECUTA ML-03 1.0.0, task T01 (ML-03-R01), en la rama feat/ml-03-schema. Rutas permitidas: src/thehouse_ml/, tests/, data/seed/, memoria.md y specs/ml-03-feature-schema/. Sin dependencias nuevas (nada de jsonschema ni pydantic: valida con la biblioteca estándar)» — César Yael López Trujillo, 2026-11-19 |
 | Autorización T01 (ampliación) | Respuestas del responsable a las advertencias 1–5 y autorización para mover el esquema a `src/thehouse_ml/features/` (ubicación de `specs/ARQUITECTURA.md`), actualizar `specs/ARQUITECTURA.md` (ML-03 con 7 tasks y catálogo sintético de cuartos) y `specs/README.md` (ML-03 en ejecución, 1/7); aprueba `backend_status = "ml_only"` y el radio de 6371 km; sin commit — César Yael López Trujillo, 2026-11-19 |
 | Rama (T01) | `feat/ml-03-schema` |
@@ -711,3 +711,129 @@ Origen: hallazgo 2 de T05 y aprobación de M-ML-026 (César Yael López Trujillo
 
 1. **Candidatos por estudiante:** como solo **21.2 %** de los estudiantes tiene 200 o más cuartos compatibles (los `women` y `men`, como máximo 84), se propone que los candidatos de cada estudiante sean **los cuartos de su campus que pasan las restricciones duras** (`filter_rooms`, HC01–HC03), **hasta un máximo de 200**; si hay más, se toma una muestra con semilla fija. No se incluyen cuartos que no pasan las restricciones duras. Se registrará en T06 como aclaración de M-ML-021 («hasta 200» candidatos por estudiante).
 2. **Estimación del umbral:** la tabla de «Hallazgo obligatorio» de T05 salió de un script de exploración en el scratchpad de la sesión (fuera del repo, no versionado). No se copia al repositorio: T06 implementa la prueba formal de ≥ 90 % con `filter_rooms` sobre `students.parquet` y `rooms.parquet`, y esa prueba sustituye a la estimación.
+
+## T06 · Conjunto de pares
+
+| Campo | Valor |
+| --- | --- |
+| Autorización T06 | «EJECUTA ML-03 1.0.0, task T06 (ML-03-R06), en la rama feat/ml-03-pairs. Rutas permitidas: src/thehouse_ml/ (incluido src/thehouse_ml/synthetic/ y features/), tests/, reports/, memoria.md, specs/ml-03-feature-schema/ y specs/README.md (solo la fila de ML-03). Sin dependencias nuevas. No modifiques feature_schema.json, students_params.json ni rooms_params.json» — César Yael López Trujillo, 2026-11-19. El mensaje llegó truncado en el punto 6; el responsable lo completó el mismo día (punto 6: pruebas de fuga, proporciones 70/15/15 con tolerancia documentada, restricciones, máximo de 200, campus, features y reproducibilidad; punto 7: marcar T06 completa solo si todo pasa y actualizar `evidence.md`, `task.md`, `spec.md` §14 y `specs/README.md` con ML-03 6/7) y pidió no hacer commit |
+| Rama | `feat/ml-03-pairs` |
+| Commit base | `e2a0679` (merge del PR #20, T05) |
+| Commit (T06) | Sin commit, por instrucción explícita del responsable |
+| Fecha de ejecución | 2026-11-19 |
+| Decisión | M-ML-027 (APROBADO — César Yael López Trujillo — 2026-11-19, con los valores propuestos sin cambios) |
+| Esquema | `feature_schema.json` **1.1.0, sin cambios**; `students_params.json` y `rooms_params.json` **sin cambios** |
+
+Lecturas previas: `constitution.md` (§8) → `AGENTS.md` → `memoria.md` (M-ML-021 a M-ML-026) → `spec.md`, `plan.md`, `task.md` y `evidence.md` de ML-03 (sobre todo la «Nota para T06») → `src/thehouse_ml/features/` y `src/thehouse_ml/synthetic/`.
+
+### Qué se hizo
+
+1. **`src/thehouse_ml/synthetic/pairs_params.json`** (en git, empaquetado) — 5 parámetros `{value, basis}`: `seed` 20261120, `candidates.max_per_student` 200, `split.fractions` 0.70 · 0.15 · 0.15, `split.stratify_by` `university_code` y `coverage.min_share` 0.90. Metadatos `synthetic: true` y `decision: "M-ML-027 (APROBADO)"` (antes `PROPUESTO`; ningún valor cambió al aprobar).
+2. **`src/thehouse_ml/synthetic/pairs.py`** — módulo **puro** (sin I/O, red ni reloj): `load_params`/`parse_params` validan los parámetros; `split_sizes` (mayor residuo, al menos 1 por partición) y `assign_splits` (partición por estudiante, estratificada por campus, `random.Random("pairs:split:<seed>:<code>")`); `choose_candidates` (todos los permitidos hasta 200; si hay más, muestra uniforme sin reemplazo con `random.Random("pairs:candidates:<seed>:<student_id>")`, en orden de `room_id`); `build_pairs` usa `filter_rooms` (T03) con los cuartos del campus del estudiante y `compute_pair_features` (T02) para cada candidato; `coverage` calcula el umbral por campus y total, con o sin las `seed_sin_verificar`.
+3. **`src/thehouse_ml/synthetic/pairs_stage.py`** — etapa `run_pairs` de `prepare`: lee `students.parquet` y `rooms.parquet` (conversión Parquet → `StudentProfile`/`Room` con `student_from_record`/`room_from_record`, nulos de NV-11 conservados), escribe `data/processed/pairs.parquet` (fuera de git; `student_id`, `room_id`, `university_code`, `seed_verified`, `split`, las 7 features en el orden del esquema —`integer` → int64, `number` → float64— y `synthetic = true`) y `reports/pairs_summary.md` («DATOS SINTÉTICOS», sin fechas ni rutas absolutas). Después comprueba el umbral y lanza `PairsError` si no se cumple (la CLI devuelve 1). Sin insumos, la etapa se omite con un mensaje.
+4. **`stages.py`, `cli.py` y `synthetic/__init__.py`** — `prepare` corre `run_pairs` después de `run_rooms` y antes de la data card; la CLI devuelve 1 con `PairParamsError`, `PairSetError` o `PairsError`; el paquete exporta `build_pairs` y los parámetros.
+5. **Pruebas** — `tests/unit/test_synthetic_pairs.py` (37, dos agregadas al completar el punto 6: proporciones 70/15/15 con tolerancia y comprobación exhaustiva de todos los pares) y `tests/integration/test_pairs_stage.py` (5); `tests/unit/test_stages.py` con el orden nuevo de `prepare`; `tests/conftest.py` con `versioned_synthetic_data()`, que genera los 2,000 estudiantes y los 3,000 cuartos solo con insumos versionados (renta p50 de `reports/regional_calibration.md` e histogramas agrupados de `reports/data_card.md` §7).
+6. **Documentos** — M-ML-027 (APROBADO) en `memoria.md`; T06 marcada en `task.md`; `spec.md` §14 con 6 tasks; fila de ML-03 en `specs/README.md` (6/7); «Nota para ML-04/ML-05» al final de esta sección.
+
+### Regla de candidatos y partición
+
+- **Candidatos:** cuartos **del campus del estudiante** que pasan HC01–HC03, hasta 200. No entran cuartos excluidos ni de otros campus. Los cuartos más lejos que `maxDistanceKm` **sí** entran (M-ML-023): 51,794 pares (26.3 %).
+- **Partición por estudiante**, no por par: cada `student_id` está en una sola partición. La partición se calcula antes que los candidatos y no depende del catálogo, así que un estudiante sin candidatos conserva su partición y no aporta pares.
+- **Los cuartos se repiten entre particiones:** son el catálogo, como en una app real (todos los estudiantes ven los mismos cuartos). Con los datos de ML-02, **2,751 de 2,893** cuartos con algún par aparecen en más de una partición. Por eso la evaluación de ML-04/ML-05 mide la generalización a **estudiantes nuevos** sobre el mismo catálogo, no a cuartos nuevos.
+- **Tolerancia documentada de las proporciones 70/15/15:** estudiantes — en cada campus, cada partición difiere de fracción por n en **menos de 1 estudiante** (mayor residuo; con 200 por campus es exacto, 140 · 30 · 30) y **±0.5 puntos** en el total; pares — **±3 puntos** por partición, porque el número de candidatos varía por estudiante. Con los datos de ML-02: estudiantes 70.0 / 15.0 / 15.0 % y pares 69.2 / 15.2 / 15.6 % (train / validation / test).
+
+### Resultados con los datos de ML-02 (`reports/pairs_summary.md`)
+
+| Campus | Verificado | Estudiantes train · val · test | Pares train · val · test | Candidatos mín. · mediana · máx. | Con muestra (> 200) | Con ≥ 1 candidato |
+| --- | --- | --- | --- | --- | ---: | ---: |
+| UTTT | sí | 140 · 30 · 30 | 12,107 · 3,261 · 2,784 | 5 · 58 · 200 | 35 | 100.0 % |
+| UAEH-ESTE | sí | 140 · 30 · 30 | 13,470 · 2,857 · 3,377 | 6 · 58 · 200 | 43 | 100.0 % |
+| UAEH-ESTL | sí | 140 · 30 · 30 | 14,810 · 3,399 · 2,718 | 8 · 70 · 200 | 43 | 100.0 % |
+| UAEH-ESAT | sí | 140 · 30 · 30 | 13,741 · 2,858 · 2,791 | 7 · 61 · 200 | 40 | 100.0 % |
+| ITSOEH | sí | 140 · 30 · 30 | 13,722 · 3,082 · 3,120 | 4 · 65 · 200 | 41 | 100.0 % |
+| TESJI | **no** | 140 · 30 · 30 | 13,982 · 2,715 · 3,214 | 1 · 66 · 200 | 44 | 100.0 % |
+| UMB-JILO | sí | 140 · 30 · 30 | 12,505 · 2,718 · 3,472 | 10 · 60 · 200 | 39 | 100.0 % |
+| UMB-VDC | **no** | 140 · 30 · 30 | 14,061 · 2,985 · 3,297 | 8 · 61.5 · 200 | 50 | 100.0 % |
+| UCAN | **no** | 140 · 30 · 30 | 14,255 · 2,988 · 3,690 | 8 · 71.5 · 200 | 44 | 100.0 % |
+| UNE-TULA | sí | 140 · 30 · 30 | 13,340 · 2,994 · 2,292 | 5 · 55 · 200 | 41 | 100.0 % |
+| **Total** | — | 1,400 · 300 · 300 | 135,993 · 29,857 · 30,755 | 1 · 62 · 200 | 420 | **100.0 %** |
+| **Total sin `seed_sin_verificar`** | — | 980 · 210 · 210 | 93,695 · 21,169 · 20,554 | 4 · 61 · 200 | 282 | **100.0 %** |
+
+Candidatos por estudiante (total): mínimo 1, p25 44, mediana 62, p75 182, máximo 200. Exclusiones sobre 600,000 pares evaluados (estudiantes por cuartos de su campus): 387,954 excluidos (64.7 %); `HC01_budget` 213,960 (35.7 %), `HC02_living_with` 248,792 (41.5 %) y `HC03_pets` 40,745 (6.8 %); sin las `seed_sin_verificar`, 274,200 de 420,000 (65.3 %). Estudiantes sin candidatos: 0.
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `114 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 31 source files` (PASS) |
+| `uv run pytest --cov=thehouse_ml` | **682 passed** en 414 s; cobertura total **95.60 %** ≥ 80 %; `synthetic/pairs.py` **99 %** (sin cubrir: línea 328, estudiante con campus fuera del catálogo, defensiva), `synthetic/pairs_stage.py` **99 %** (sin cubrir: línea 73, NaN de tipo `float` en la conversión desde Parquet), `synthetic/__init__.py`, `stages.py` y `cli.py` 100 % (PASS) |
+| `uv run python -m thehouse_ml prepare` (dos veces, tras la aprobación) | Código 0 las dos veces; `pairs: 196605 pares sintéticos de 2000 estudiantes -> data/processed/pairs.parquet; reporte reports/pairs_summary.md`. SHA-256 de los 147 archivos (versionados y no ignorados más `students.parquet`, `rooms.parquet` y `pairs.parquet`) idéntico entre corridas: `pairs.parquet` `8e6d4690…d11d` (el mismo que antes de aprobar: los datos no cambiaron), `reports/pairs_summary.md` `6eeb2f7a…4763` (solo cambia el texto de la decisión, ahora APROBADO) (PASS) |
+
+### Trazabilidad R06 → prueba
+
+| Criterio | Prueba |
+| --- | --- |
+| Parámetros con valor y base; sintéticos; M-ML-027; 200, 70/15/15, campus, 90 %; semilla propia | `test_synthetic_pairs.py::test_every_parameter_has_a_value_and_a_documented_basis`, `::test_parameters_are_marked_synthetic_and_approved_as_m_ml_027`, `::test_requested_values_are_in_the_params` |
+| Parámetros inválidos rechazados | `::test_invalid_parameters_are_rejected[*]` (12), `::test_missing_unknown_and_unexplained_parameters_are_rejected`, `::test_load_params_reads_an_explicit_path_and_reports_invalid_json` |
+| **Umbral formal ≥ 90 %** (en total, por campus y sin las `seed_sin_verificar`), con recuento independiente de `filter_rooms` | `::test_at_least_ninety_percent_of_students_have_a_room_that_passes_the_hard_constraints`, `::test_coverage_below_the_threshold_does_not_meet`; con los datos reales, la etapa (`test_pairs_stage.py::test_threshold_not_met_is_an_error_and_the_report_says_so`, `::test_cli_reports_pairs_errors_with_exit_code_one`) y la doble corrida de `prepare` |
+| **Sin fuga:** ningún estudiante en dos particiones; particiones disjuntas; cada par con la partición de su estudiante | `::test_no_student_appears_in_two_splits`, `test_pairs_stage.py::test_run_pairs_writes_the_parquet_and_the_report` |
+| Cada campus en las tres particiones (140 · 30 · 30); cuotas por mayor residuo | `::test_every_campus_appears_in_the_three_splits_with_140_30_30`, `::test_split_sizes_use_the_largest_remainder_and_fill_every_split` |
+| Proporciones 70/15/15 dentro de la tolerancia documentada (estudiantes por campus < 1 estudiante y ±0.5 puntos en total; pares ±3 puntos) | `::test_split_proportions_are_70_15_15_within_the_documented_tolerance` |
+| **Todos** los pares (no una muestra): ninguno viola una restricción dura, todos los candidatos son del campus del estudiante y ninguno tiene más de 200 | `::test_no_pair_violates_a_hard_constraint_every_candidate_is_from_its_campus_and_at_most_200` (además de la muestra con `check_hard_constraints` de `::test_every_pair_passes_the_hard_constraints_and_is_from_the_student_campus`) |
+| Cuartos repetidos entre particiones (documentado) | `::test_rooms_may_repeat_across_splits_because_they_are_the_catalog` |
+| Partición independiente del orden y de los cuartos; cambia con la semilla | `::test_split_does_not_depend_on_rooms_and_changes_with_the_seed` |
+| Candidatos = cuartos del campus que pasan HC01–HC03, hasta 200 (muestra fija si hay más) | `::test_candidates_are_the_compatible_rooms_of_the_campus_up_to_the_maximum`, `::test_every_pair_passes_the_hard_constraints_and_is_from_the_student_campus`, `::test_choose_candidates_is_a_fixed_uniform_sample_in_room_order` |
+| Cuartos más lejos que `maxDistanceKm` sí son candidatos | `::test_rooms_farther_than_max_distance_are_candidates` |
+| Estudiantes con 0 candidatos: sin pares, contados, con exclusiones por restricción | `::test_student_without_candidates_generates_no_pairs_but_is_counted` |
+| 7 features con `compute_pair_features`, en el orden del esquema | `::test_features_come_from_compute_pair_features_in_the_schema_order` |
+| Columnas pedidas, `synthetic = true`, **sin etiquetas** | `::test_frame_has_the_ids_split_seven_features_and_no_labels` |
+| Reproducibilidad (Parquet byte por byte); otra semilla → otros pares | `::test_same_inputs_give_the_same_pairs_byte_for_byte`, `test_pairs_stage.py::test_running_twice_does_not_change_any_file` y la doble corrida de `prepare` |
+| Parquet → objetos sin pérdida (nulos de NV-11) | `::test_parquet_round_trip_keeps_students_and_rooms` |
+| Reporte «DATOS SINTÉTICOS» con particiones, distribución de candidatos, exclusiones HC01–HC03 y cobertura, con y sin las `seed_sin_verificar` | `::test_report_is_synthetic_and_shows_numbers_with_and_without_unverified_campuses`, `test_pairs_stage.py::test_run_pairs_writes_the_parquet_and_the_report` |
+| Entradas inválidas y etapa sin insumos | `::test_invalid_inputs_are_errors`, `test_pairs_stage.py::test_without_inputs_the_stage_is_skipped` |
+| Orden de `prepare` | `test_stages.py::test_prepare_generates_the_data_card_after_the_other_outputs` |
+
+### Tabla de coherencia
+
+| Regla | Evidencia | Resultado |
+| --- | --- | --- |
+| Constitution §8: sintéticos honestos | Parquet con `synthetic = true`; reporte «DATOS SINTÉTICOS»; sin etiquetas ni métricas de desempeño | PASS |
+| Constitution §7 y §11: sin datos personales ni género | Solo ids `S…`/`R…`, campus, partición y features; `livingWith` solo en HC02 | PASS |
+| Constitution §9: reproducibilidad | Semilla fija con espacios de nombres; `prepare` dos veces sin cambios | PASS |
+| Spec §7 regla 2 / M-ML-023: una sola implementación de las features | `compute_pair_features` de T02; prueba de igualdad y de orden | PASS |
+| M-ML-024: restricciones con `filter_rooms` | Candidatos y exclusiones salen de `filter_rooms`; prueba con `check_hard_constraints` | PASS |
+| M-ML-023: la distancia no es restricción dura | 26.3 % de los pares más lejos que `maxDistanceKm`; prueba dedicada | PASS |
+| M-ML-021: umbral ≥ 90 % | 100 % en los 10 campus, en total y sin las `seed_sin_verificar`; la etapa falla si no se cumple | PASS |
+| M-ML-017 / spec §7 regla 4: 3 campus sin verificar | `seed_verified` en el Parquet; totales con y sin ellos en todas las tablas | PASS |
+| AGENTS: sin dependencias nuevas | Solo biblioteca estándar más pandas/pyarrow ya instalados; `pyproject.toml` y `uv.lock` sin cambios | PASS |
+| AGENTS: `data/processed/` fuera de git | `pairs.parquet` ignorado (`git status` no lo lista) | PASS |
+| `feature_schema.json`, `students_params.json` y `rooms_params.json` sin cambios | `git status` no los lista | PASS |
+| AGENTS: rutas permitidas | `git status` solo lista `src/thehouse_ml/`, `tests/`, `reports/`, `memoria.md`, `specs/ml-03-feature-schema/` y la fila de ML-03 en `specs/README.md` | PASS |
+
+### Hallazgos
+
+| # | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| 1 | El «EJECUTA» llegó truncado en el punto 6. | ADVERTENCIA | **RESUELTO** — el responsable confirmó la interpretación y completó los puntos 6 y 7; cada criterio del punto 6 tiene su prueba (tabla de trazabilidad) y se agregaron las dos que faltaban |
+| 2 | Dentro de los candidatos, `pets_compatible` vale siempre 1 y `price_to_budget` ≤ 1, porque HC03 y HC01 ya filtran. | ADVERTENCIA | Para ML-04 («Nota para ML-04/ML-05», punto 1); el esquema no cambia en T06 |
+| 3 | El conjunto no trae negativos por restricción: todos los candidatos son compatibles y ML-04 debe etiquetar la relevancia dentro de los compatibles. | INFORMATIVO | Por diseño (M-ML-027) |
+| 4 | Los cuartos se repiten entre particiones (2,751 de 2,893): la evaluación mide la generalización a estudiantes nuevos, no a cuartos nuevos. | INFORMATIVO | Documentado aquí y en el reporte |
+| 5 | 420 estudiantes (21 %) tienen más de 200 cuartos compatibles y reciben una muestra de 200. | INFORMATIVO | Por diseño (M-ML-021 aclarada en M-ML-027) |
+| 6 | La prueba formal del umbral en CI usa el catálogo generado con los histogramas agrupados versionados (no idéntico a `rooms.parquet`); sobre los datos reales la comprueba la etapa `prepare`, que falla si no se cumple. Los dos dan 100 %. | INFORMATIVO | Sin acción |
+| 7 | Las pruebas de pares tardan unos 35–45 s (generan los 2,000 estudiantes y 3,000 cuartos una vez por sesión). | INFORMATIVO | Sin acción |
+| 8 | M-ML-027 estaba PROPUESTO (semilla 20261120, porcentajes 70/15/15, regla de candidatos). | ADVERTENCIA | **RESUELTO** — APROBADO por César Yael López Trujillo — 2026-11-19, sin cambios en los valores |
+| 9 | Con los datos de ML-02, 1 estudiante (`S1078`, TESJI, campus sin verificar, partición `train`) tiene un solo candidato; 1,999 tienen 2 o más. Con un solo candidato no hay ranking que evaluar. | ADVERTENCIA | Para ML-05 («Nota para ML-04/ML-05», punto 2) |
+
+### Revisión y resultado
+
+- **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas. Insumos: `students.parquet` y `rooms.parquet` (sintéticos de T04 y T05) y `data/universities.csv` (ODbL, M-ML-016/M-ML-017). El reporte solo publica agregados de datos sintéticos.
+- **Resultado:** **PASS** — la aceptación de R06 se cumple (pares candidatos por estudiante, partición por estudiante sin fuga para entrenamiento, validación y prueba, y prueba de ≥ 90 % con 100 % en todos los campus), cada criterio del punto 6 tiene su prueba en verde, los cinco controles pasan y M-ML-027 quedó APROBADO (hallazgos 1 y 8 resueltos). Los hallazgos 2 y 9 no bloquean T06: pasan a la nota de abajo.
+
+### Nota para ML-04/ML-05
+
+Origen: hallazgos 2 y 9 de T06 y aprobación de M-ML-027 (César Yael López Trujillo, 2026-11-19). Es una indicación del responsable para ML-04 y ML-05; no se ejecuta en T06.
+
+1. **Features constantes dentro de los candidatos:** como los candidatos ya pasan HC03 y HC01, `pets_compatible` vale siempre **1** y `price_to_budget` es siempre **≤ 1** en `pairs.parquet` (`reports/pairs_summary.md` §7: mínimo, mediana y máximo de `pets_compatible` 1.000; máximo de `price_to_budget` 1.000). ML-04 decide si `pets_compatible` se conserva como feature del modelo (con este conjunto no aporta información) o queda solo como restricción; cualquier cambio de las features o de su orden es un cambio de `feature_schema.json` con su versión.
+2. **Estudiantes con un solo candidato:** hay estudiantes con 1 candidato (con los datos de ML-02, 1: `S1078`, TESJI, `train`); con un solo cuarto no hay orden que medir. En ML-05 las métricas de ranking se calculan **solo con estudiantes de 2 o más candidatos**, y el reporte dice cuántos quedan fuera (por partición y por campus, con y sin las `seed_sin_verificar`).
