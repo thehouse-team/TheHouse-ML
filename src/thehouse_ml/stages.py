@@ -4,7 +4,7 @@ Las etapas aún no implementadas informan qué spec las cubre y terminan sin
 error. ML-02 T02 implementa ``download``; T03, T04, T05 y T07 implementan
 ``prepare`` (bases nacionales, calibración regional, entorno DENUE de los campus
 y universidades verificadas); ML-03 T04 agrega los estudiantes sintéticos y
-T05 el catálogo sintético de cuartos.
+T05 el catálogo sintético de cuartos y T06 el conjunto de pares.
 """
 
 from __future__ import annotations
@@ -17,6 +17,7 @@ from thehouse_ml.download import Fetcher, run_download
 from thehouse_ml.national import run_prepare
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.regional import run_regional
+from thehouse_ml.synthetic.pairs_stage import run_pairs
 from thehouse_ml.synthetic.rooms_stage import run_rooms
 from thehouse_ml.synthetic.students_stage import run_students
 from thehouse_ml.universities import run_universities
@@ -33,7 +34,7 @@ class Stage:
 
 STAGES: tuple[Stage, ...] = (
     Stage("download", "Descarga las fuentes registradas y verifica su SHA-256.", "ML-02"),
-    Stage("prepare", "Limpia, pondera, calibra y genera estudiantes y cuartos sintéticos.", "ML-02"),
+    Stage("prepare", "Limpia, pondera, calibra y genera estudiantes, cuartos y pares sintéticos.", "ML-02"),
     Stage("train", "Entrena el modelo base y los modelos candidatos.", "ML-04"),
     Stage("evaluate", "Evalúa los modelos contra el modelo base y escribe los reportes.", "ML-04"),
     Stage("export", "Exporta el modelo promovido a ONNX con su paquete de entrega.", "ML-06"),
@@ -64,7 +65,7 @@ def run_stage(name: str, paths: ProjectPaths, source: str | None = None, fetcher
         return (
             f"{run_prepare(paths)}\n{run_regional(paths)}\n{run_universities(paths)}\n"
             f"{run_denue(paths)}\n{run_students(paths)}\n{run_rooms(paths)}\n"
-            f"{run_data_card(paths)}"
+            f"{run_pairs(paths)}\n{run_data_card(paths)}"
         )
     del source, fetcher  # Las etapas vacías no leen ni escriben archivos.
     return f"{stage.name}: pendiente de {stage.spec}"

@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "params_version": "1.0.0",
+    "spec": "ML-03 1.0.0, T06 (ML-03-R06)",
+    "decision": "M-ML-027 (APROBADO)",
+    "synthetic": true,
+    "description": "Parámetros del conjunto de pares estudiante-cuarto. Cada parámetro lleva su base: «calibrado: <fuente>» o «SUPUESTO documentado». Los pares salen de estudiantes y cuartos sintéticos (constitución §8) y no llevan etiquetas: la relevancia y el puntaje son de ML-04/ML-05."
+  },
+  "parameters": {
+    "seed": {
+      "value": 20261120,
+      "basis": "SUPUESTO documentado: semilla fija (constitución §9), distinta de la de estudiantes (20261119) y de cuartos (20261905). La partición usa random.Random(\"pairs:split:<seed>:<code>\") por campus y la muestra de candidatos random.Random(\"pairs:candidates:<seed>:<student_id>\") por estudiante."
+    },
+    "candidates.max_per_student": {
+      "value": 200,
+      "basis": "calibrado: M-ML-021 (spec ML-03 §10: 200 candidatos por estudiante), aclarado por M-ML-027 como máximo: los candidatos son los cuartos del campus del estudiante que pasan las restricciones duras (filter_rooms, M-ML-024), hasta 200; si hay más, muestra uniforme sin reemplazo con la semilla de arriba."
+    },
+    "split.fractions": {
+      "value": {"train": 0.70, "validation": 0.15, "test": 0.15},
+      "basis": "SUPUESTO documentado: 70 % entrenamiento, 15 % validación y 15 % prueba, indicado por el responsable en el «EJECUTA» de T06. La partición es por estudiante (un estudiante en una sola partición); los cuartos son el catálogo y pueden repetirse entre particiones."
+    },
+    "split.stratify_by": {
+      "value": "university_code",
+      "basis": "SUPUESTO documentado: estratificada por campus para que cada campus aparezca en las tres particiones (indicación del responsable, T06). Cuotas por campus con el método del mayor residuo; con 200 estudiantes por campus son 140 · 30 · 30."
+    },
+    "coverage.min_share": {
+      "value": 0.90,
+      "basis": "calibrado: umbral aprobado en M-ML-021 (spec ML-03 §10 y ML-03-R06): al menos 90 % de los estudiantes, en total y en cada campus, tiene al menos un cuarto de su campus que pasa las restricciones duras."
+    }
+  }
+}
