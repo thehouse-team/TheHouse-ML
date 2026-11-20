@@ -92,8 +92,10 @@ class NonScoringFeature:
 class RoundingRules:
     """Reglas de redondeo y de orden (spec ML-04 §6.3)."""
 
+    factor_pre_round_decimals: int
     factor_decimals: int
     factor_mode: str
+    factor_formula: str
     total_pre_round_decimals: int
     total_mode: str
     total_formula: str
@@ -274,8 +276,10 @@ def _read_rounding(reader: _Reader, raw: object, total_points: int) -> RoundingR
     if score_range != [0, total_points]:
         reader.problems.append(f"rounding.total.range: se esperaba [0, {total_points}], llegó {score_range!r}")
     rules = RoundingRules(
+        factor_pre_round_decimals=reader.integer(factor, "pre_round_decimals", "rounding.factor_points"),
         factor_decimals=reader.integer(factor, "decimals", "rounding.factor_points"),
         factor_mode=reader.choice(factor, "mode", "rounding.factor_points", ROUNDING_MODES),
+        factor_formula=reader.text(factor, "formula", "rounding.factor_points"),
         total_pre_round_decimals=reader.integer(total, "pre_round_decimals", "rounding.total"),
         total_mode=reader.choice(total, "mode", "rounding.total", ROUNDING_MODES),
         total_formula=reader.text(total, "formula", "rounding.total"),

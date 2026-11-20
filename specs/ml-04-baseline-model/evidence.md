@@ -3,14 +3,15 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-04 1.0.0 |
-| Tareas ejecutadas | T02 · Esquema 2.0.0 y features nuevas (R02) y, después, T01 · Configuración versionada (R01), cada una con sección propia abajo |
-| Estado | **🟡 EN EJECUCIÓN — 2/7** (T01 y T02 completas; T03–T07 abiertas) |
-| Autorización | «EJECUTA ML-04 1.0.0, tasks T02 y después T01 (en ese orden, porque T01 valida contra las features de T02), en la rama feat/ml-04-config-schema. Rutas permitidas: src/thehouse_ml/ (features/ y el módulo del modelo base donde indique specs/ARQUITECTURA.md), tests/, reports/ (solo lo que regenere prepare), memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). data/processed/ se regenera pero sigue fuera de git. Sin dependencias nuevas. No modifiques students_params.json, rooms_params.json ni pairs_params.json» — César Yael López Trujillo, 2026-11-20 |
-| Rama | `feat/ml-04-config-schema` |
-| Commit base | `fac23bc` (merge del PR #23, spec ML-04 1.0.0 aprobada) |
-| Commit | Sin commit, por instrucción explícita del responsable |
+| Tareas ejecutadas | T02 · Esquema 2.0.0 y features nuevas (R02) y, después, T01 · Configuración versionada (R01); en una segunda ejecución, T03 · Puntaje y desglose (R03). Cada una con sección propia abajo |
+| Estado | **🟡 EN EJECUCIÓN — 3/7** (T01, T02 y T03 completas; T04–T07 abiertas) |
+| Autorización (T02 y T01) | «EJECUTA ML-04 1.0.0, tasks T02 y después T01 (en ese orden, porque T01 valida contra las features de T02), en la rama feat/ml-04-config-schema. Rutas permitidas: src/thehouse_ml/ (features/ y el módulo del modelo base donde indique specs/ARQUITECTURA.md), tests/, reports/ (solo lo que regenere prepare), memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). data/processed/ se regenera pero sigue fuera de git. Sin dependencias nuevas. No modifiques students_params.json, rooms_params.json ni pairs_params.json» — César Yael López Trujillo, 2026-11-20 |
+| Rama (T02 y T01) | `feat/ml-04-config-schema` (commit base `fac23bc`; mezclada en el PR #24, `643f94e`) |
+| Autorización (T03) | «EJECUTA ML-04 1.0.0, task T03 (ML-04-R03), en la rama feat/ml-04-score. Rutas permitidas: src/thehouse_ml/models/, src/thehouse_ml/features/ (solo para reutilizar, no cambiar el esquema), tests/, memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). Sin dependencias nuevas (nada de hypothesis: las pruebas de propiedades usan rejillas o random.Random con semilla). No modifiques feature_schema.json (2.0.0) ni baseline_params.json (baseline-1.0.0)» — César Yael López Trujillo, 2026-11-20 |
+| Rama (T03) | `feat/ml-04-score` (commit base `643f94e`, merge del PR #24) |
+| Commit | Sin commit, por instrucción explícita del responsable (las dos ejecuciones) |
 | Fecha de ejecución | 2026-11-20 |
-| Decisiones | M-ML-029 (APROBADO); M-ML-030 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que la spec no fijaba y la resolución de H1 y H2) |
+| Decisiones | M-ML-029 (APROBADO); M-ML-030 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que la spec no fijaba y la resolución de H1 y H2); M-ML-031 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que T03 decidió y la corrección del redondeo por factor de T03-H1) |
 
 Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§10–§13 y §18) → `AGENTS.md` → `memoria.md` (M-ML-022 a M-ML-029) → `specs/ARQUITECTURA.md` → `spec.md` (sobre todo §6 y §10), `plan.md` y `task.md` de ML-04 → `src/thehouse_ml/features/` y `specs/ml-03-feature-schema/evidence.md` (formato).
 
@@ -168,3 +169,158 @@ La invariancia también queda como prueba reproducible sin `data/processed/`: `t
 - **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas. Casos y pares son sintéticos; coordenadas de campus de `data/universities.csv` (ODbL, M-ML-016/M-ML-017).
 - **Verificación de cambios menores (pedida por el responsable):** `git diff` de `reports/students_synthetic.md` y `reports/rooms_catalog.md` = 1 línea cada uno («Esquema de features 1.1.0» → «2.0.0»); `tests/fixtures/hard_constraint_cases.json` = 2 líneas (`spec` y `schema_version`). Ningún valor ni caso cambió.
 - **Resultado:** **PASS** (T01 y T02) — se cumple la aceptación de R02 y R01; ruff, mypy y pytest pasan; `prepare` es reproducible; H1 y H2 están resueltos y M-ML-030 está APROBADO. Queda fuera del resultado el aviso al backend (H5, acción del responsable).
+
+---
+
+## T03 · Puntaje y desglose
+
+Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§11 y §12) → `AGENTS.md` → `memoria.md` (M-ML-029 y M-ML-030) → `spec.md` (sobre todo §6.2–§6.4 y §10), `plan.md`, `task.md` y esta evidencia → `src/thehouse_ml/models/` y `src/thehouse_ml/features/`.
+
+### Qué se hizo
+
+1. **`src/thehouse_ml/models/baseline_score.py`** (nuevo), exportado por `thehouse_ml.models`. Puro: sin I/O, red ni aleatoriedad. Pesos, curvas, decimales y versión salen de `baseline_params.json`; el orden de las features, de `feature_schema.json`.
+
+   ```python
+   def score_features(features: Sequence[float], config: BaselineConfig | None = None,
+                      schema: FeatureSchema | None = None) -> ScoreResult
+   def score_pair(student: StudentProfile, room: Room, campuses: Mapping[str, Campus],
+                  config: BaselineConfig | None = None,
+                  schema: FeatureSchema | None = None) -> ScoreResult | ExcludedPair
+   def rank(candidates: Iterable[ScoredRoom]) -> list[ScoredRoom]
+   def match_score(raw_total: float, config: BaselineConfig | None = None) -> int
+   def factor_points(raw_points: float, config: BaselineConfig | None = None) -> float
+   def round_half_up(value: float, decimals: int) -> float
+
+   # dataclasses congeladas
+   FactorScore(factor, feature, value, raw_points, points, max_points)
+   ScoreResult(model_version, feature_schema_version, match_score, raw_total, breakdown)
+       # + reported_sum, to_dict(include_raw=False)
+   ExcludedPair(model_version, feature_schema_version, violated)  # + to_dict()
+   ScoredRoom(room_id, score)
+   class ScoreInputError(ValueError)
+   ```
+
+   - `score_features` recibe las 10 features en el orden de `feature_order` (lo que recibirá el ONNX y calculará NV-23), valida el vector (longitud, finitos, rango del esquema, enteros en las `integer`) y calcula por factor `peso × curva(feature)`; `raw_total` es la suma en el orden de la configuración; los puntos del desglose son `floor(round6(puntos) × 10 + 0.5) / 10` (`factor_points`) y `matchScore = floor(round6(raw_total) + 0.5)`.
+   - `score_pair` = `check_hard_constraints` → si se excluye, `ExcludedPair` con las restricciones violadas y **sin puntaje** (constitución §11.1; no calcula features) → si pasa, `compute_pair_features` → `feature_vector` → `score_features`. Una sola implementación de cada paso.
+   - `rank` ordena por `raw_total` descendente y `room_id` ascendente (M-ML-029).
+   - Redondeo «mitad hacia arriba» con el algoritmo de .NET `MidpointRounding.AwayFromZero` (M-ML-031 decisión 2).
+2. **`src/thehouse_ml/models/__init__.py`** — exporta la API nueva.
+3. **Corrección del redondeo por factor (T03-H1, M-ML-031 decisión 10, autorizada por el responsable):** `baseline-1.0.0` no se ha publicado, así que se corrige **sin cambiar la versión**:
+   - `baseline_params.json`: `rounding.factor_points` agrega `pre_round_decimals: 6` y `formula: "floor(round6(puntos sin redondear) * 10 + 0.5) / 10"` y corrige su descripción; la nota `dotnet` pide round6 antes de redondear, con `double` o con `decimal`, y `MidpointRounding.AwayFromZero`; `metadata.changelog` (nuevo) registra la versión inicial (M-ML-029/M-ML-030) y esta corrección (M-ML-031, T03-H1). Pesos, curvas, factores y el resto del redondeo no cambian.
+   - `baseline_config.py`: `RoundingRules` agrega `factor_pre_round_decimals` y `factor_formula`, leídos y validados como los demás campos.
+   - `tests/unit/test_baseline_config.py`: `test_rounding_rules_of_m_ml_029` comprueba los campos nuevos, la nota de .NET y el changelog; 2 casos rotos nuevos (sin `pre_round_decimals`, sin `formula`).
+4. **`tests/unit/test_baseline_score.py`** (nuevo, 168 pruebas) — sin red; propiedades con rejillas y `random.Random("score:20261120:<salt>")`; sin dependencias nuevas.
+5. `feature_schema.json` (2.0.0) **sin cambios**; `src/thehouse_ml/features/` solo se reutiliza.
+
+### Formato de salida (JSON)
+
+Contrato (spec §6.4): `matchScore` con el nombre y tipo de `ExplainMatchRequest` de `TheHouse-GenAI`; `breakdown` es el campo nuevo propuesto. Ejemplo de la §6.4 calculado por `score_features` (`ScoreResult.to_dict()`):
+
+```json
+{
+  "modelVersion": "baseline-1.0.0",
+  "featureSchemaVersion": "2.0.0",
+  "matchScore": 78,
+  "breakdown": [
+    {"factor": "budget", "points": 25.5, "maxPoints": 30, "feature": "price_below_min", "value": 0.15},
+    {"factor": "distance", "points": 17.0, "maxPoints": 25, "feature": "distance_ratio", "value": 0.66},
+    {"factor": "essential_services", "points": 13.3, "maxPoints": 20, "feature": "services_coverage", "value": 0.6666666666666666},
+    {"factor": "place_type", "points": 10.0, "maxPoints": 10, "feature": "place_type_match", "value": 1},
+    {"factor": "property_type", "points": 10.0, "maxPoints": 10, "feature": "property_type_match", "value": 1},
+    {"factor": "extras", "points": 2.1, "maxPoints": 5, "feature": "extra_services_ratio", "value": 0.42857142857142855}
+  ]
+}
+```
+
+| Campo | Tipo | Regla |
+| --- | --- | --- |
+| `modelVersion` | texto | `metadata.model_version` de `baseline_params.json` |
+| `featureSchemaVersion` | texto | versión del esquema cargado |
+| `matchScore` | entero 0–100 | `floor(round6(Σ puntos sin redondear) + 0.5)`, mitad hacia arriba |
+| `breakdown[]` | lista | un elemento por factor, en el orden de la configuración (= tabla §6.2) |
+| `breakdown[].factor` | texto | `id` del factor |
+| `breakdown[].points` | número, 1 decimal | `floor(round6(puntos) × 10 + 0.5) / 10`, mitad hacia arriba |
+| `breakdown[].maxPoints` | entero | peso del factor (suman 100) |
+| `breakdown[].feature` | texto | feature del esquema que usa el factor |
+| `breakdown[].value` | número | valor de la feature **sin redondear** (entero en las features `integer`); los 6 decimales del ejemplo de la §6.4 son de presentación |
+
+- **Valores crudos** (`to_dict(include_raw=True)`, para reportes y casos dorados; **no** forman parte del contrato con `TheHouse-GenAI`): agrega `rawTotal` (77.97619047619047) después de `matchScore` y `rawPoints` en cada factor (25.5, 17.0, 13.333333333333332, 10.0, 10.0, 2.142857142857143).
+- **Par excluido** (`ExcludedPair.to_dict()`), sin `matchScore` ni `breakdown`:
+
+  ```json
+  {"modelVersion": "baseline-1.0.0", "featureSchemaVersion": "2.0.0", "excluded": true, "violatedConstraints": ["HC01_budget"]}
+  ```
+
+- Coherencia del ejemplo: suma sin redondear 77.976190 → `matchScore` 78 (diferencia 0.024 ≤ 0.5); suma reportada 77.9 (diferencia 0.076 ≤ 0.3).
+
+### Trazabilidad R03 → prueba
+
+Todas en `tests/unit/test_baseline_score.py`.
+
+| Criterio | Prueba |
+| --- | --- |
+| Ejemplo de la §6.4: total 78 y puntos 25.5 · 17.0 · 13.3 · 10.0 · 10.0 · 2.1 | `test_the_example_of_spec_6_4_scores_78`, `test_the_json_output_is_the_format_of_spec_6_4` |
+| Formato JSON serializable, `matchScore` entero, claves de la §6.4 | `test_the_json_output_is_the_format_of_spec_6_4`, `test_include_raw_adds_the_unrounded_values` |
+| Pesos y curvas leídos de la configuración (nada escrito a mano) | `test_weights_and_curves_are_read_from_the_config` (configuración alterada: 66.926190 → 67, calculado a mano), `test_the_breakdown_follows_the_config_order_and_weights` |
+| Monotonía en precio (`price_below_min` sube → el puntaje no sube) | `test_price_monotonicity[a,b]` (rejilla 0–1 con paso 0.01 × 200 bases aleatorias con semilla, cada una) |
+| Monotonía en distancia (`distance_ratio` sube → el puntaje no sube) | `test_distance_monotonicity[a,b]` (rejilla 0–3 con paso 0.01 más 10, 59.797, 60 y 1000 × 200 bases), `test_distance_curve_at_its_breakpoints` |
+| Total entre 0 y 100 | `test_total_is_between_0_and_100` (2,000 vectores con semilla), `test_the_total_is_between_0_and_100_on_the_corners_of_the_grid` (256 esquinas) |
+| Features perfectas → 100; todo en 0 → 0 | `test_perfect_features_score_100`, `test_the_worst_features_score_0`, `test_a_vector_of_zeros_only_keeps_budget_and_distance` (vector literal de ceros = 55; M-ML-031 decisión 9) |
+| Coherencia: diferencia entre la suma reportada y `raw_total` ≤ 0.3 (≤ 0.05 por factor) y entre `matchScore` y `raw_total` ≤ 0.5 | `test_the_breakdown_is_coherent_with_the_total` (2,000 vectores; tolerancias leídas de la configuración) |
+| Redondeo en los bordes, calculado a mano | `test_match_score_rounding_edges` (17: 77.5 → 78, 77.4999995 → 78, 77.5000004 → 78, 77.4999994 → 77, 77.49999949 → 77, 2.5 → 3, 99.5 → 100…), `test_round_half_up` (13), `test_a_total_of_exactly_77_5_from_features_scores_78`, `test_factor_points_ending_in_5_round_up_from_features`, `test_factor_points_are_pre_rounded_to_6_decimals` (3, a mano: 13.35 → 13.4, 24.35 → 24.4, 2.35 → 2.4; en binary64 quedan en 13.349999999999998, 24.349999999999998 y 2.3499999999999996 y sin round6 bajarían), `test_factor_points_rounding_edges` (6) |
+| Pares excluidos sin puntaje | `test_an_excluded_pair_has_no_score` (HC01, HC02, HC03 y las tres), `test_an_excluded_pair_does_not_need_campus_coordinates`, `test_hard_constraint_cases` (27 casos de ML-03) |
+| Una sola implementación de cada paso | `test_a_pair_that_passes_is_scored_with_its_features` (`score_pair` = `score_features(feature_vector(compute_pair_features(…)))`), `test_pair_feature_cases` (48 casos de `pair_feature_cases.json`) |
+| `pets_compatible` y las demás features que no puntúan no afectan el resultado | `test_non_scoring_features_do_not_change_the_result[distance_km, effective_distance_km, price_to_budget, pets_compatible]`, `test_pets_compatible_does_not_change_the_example` |
+| Desempate por `room_id` | `test_rank_breaks_ties_by_room_id_ascending`, `test_rank_orders_by_unrounded_total_descending` (99.85 y 99.7 dan 100 y se ordenan por la suma sin redondear), `test_rank_is_stable_against_input_order` |
+| Entradas inválidas y esquema incompatible | `test_invalid_vectors_are_rejected` (11), `test_every_problem_of_a_vector_is_reported_at_once`, `test_an_incompatible_schema_is_rejected`, `test_a_config_feature_missing_from_the_schema_order_is_rejected` |
+| Determinismo | `test_the_result_is_deterministic` |
+
+### Comandos y resultados (T03)
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `122 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 34 source files` (PASS) |
+| `uv run pytest tests/unit/test_baseline_score.py tests/unit/test_baseline_config.py --cov=thehouse_ml.models` (tras la corrección de T03-H1) | **246 passed** (168 + 78); `models/` **100 %** (PASS) |
+| `uv run pytest --cov=thehouse_ml` (suite completa, con la corrección de T03-H1) | **1046 passed** en 945.7 s (15 min 46 s), código 0; cobertura total **96.01 %** ≥ 80 %; código nuevo o cambiado: `models/baseline_score.py` **100 %** (125 sentencias, 34 ramas), `models/baseline_config.py` **100 %** (256 sentencias, 88 ramas), `models/__init__.py` 100 % (PASS) |
+
+### Tabla de coherencia (T03)
+
+| Regla | Evidencia | Resultado |
+| --- | --- | --- |
+| Constitución §11.1: los pares que violan restricciones duras no se recomiendan | `score_pair` devuelve `ExcludedPair` sin `matchScore`; `ScoredRoom` solo acepta `ScoreResult`, así que un excluido no entra al ranking | PASS |
+| Constitución §11.2: sin atributos sensibles | Solo las 6 features de la configuración puntúan; ninguna depende de género, edad u origen; las que no puntúan no cambian el resultado (prueba) | PASS |
+| Constitución §12: desglose por factor que suma el total antes de redondear | `raw_total` = suma de `raw_points`; tolerancias de la §6.3 probadas en 2,000 vectores | PASS |
+| Spec §6.2: pesos y curvas | Leídos de `baseline_params.json` (sin cambios en pesos ni curvas); con otra configuración el resultado cambia como se calcula a mano | PASS |
+| Spec §6.3: redondeo y ranking | `floor(round6(Σ) + 0.5)`; por factor `floor(round6(puntos) × 10 + 0.5) / 10` (1 decimal, mitad hacia arriba, con la corrección de T03-H1); ranking por suma sin redondear y `room_id` | PASS |
+| Spec §6.4: formato y `TheHouse-GenAI` | `matchScore` entero 0–100 y `breakdown` con las claves del ejemplo; total 78 en el ejemplo | PASS |
+| Constitución §2.4 / M-ML-030: el contrato es el esquema | Vector en el orden de `feature_order`; configuración compatible con el esquema (misma mayor) | PASS |
+| AGENTS / constitución §5: sin dependencias nuevas | Solo biblioteca estándar; `pyproject.toml` y `uv.lock` sin cambios; sin `hypothesis` | PASS |
+| AGENTS: rutas permitidas | `git status`: `src/thehouse_ml/models/` (`__init__.py`, `baseline_score.py`, `baseline_config.py` y `baseline_params.json`; este último con la autorización expresa de M-ML-031 para corregir el redondeo por factor sin cambiar la versión), `tests/unit/test_baseline_score.py` y `test_baseline_config.py`, `memoria.md`, `specs/ml-04-baseline-model/` y la fila de ML-04 de `specs/README.md`; `feature_schema.json` y `src/thehouse_ml/features/` sin cambios | PASS |
+| AGENTS: un control no ejecutado no se reporta como PASS | La paridad con .NET no se ejecuta aquí (casos dorados en T05; backend en NV-23) | No ejecutado (fuera de alcance) |
+
+### Hallazgos (T03)
+
+| # | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| T03-H1 | `baseline_params.json` redondeaba cada factor a 1 decimal **sin** pre-redondeo a 6 decimales: con ruido de binary64, un factor que a mano termina en .x5 bajaba (`price_below_min` 0.555 → 13.349999999999998 → 13.3; a mano, 13.4). | ADVERTENCIA | **RESUELTO (M-ML-031, APROBADO)**: por factor `floor(round6(puntos) × 10 + 0.5) / 10`; `baseline_params.json` corregido sin cambiar la versión (no publicada) y con changelog; 3 casos a mano y 6 bordes con prueba |
+| T03-H2 | «Todo en 0 → 0» se interpreta como todas las curvas en 0; el vector literal de ceros da 55 porque `price_below_min` = 0 y `distance_ratio` = 0 son los mejores valores. | INFORMATIVO | APROBADO (M-ML-031 decisión 9) |
+| T03-H3 | El formato del par excluido (`excluded`, `violatedConstraints`) y `breakdown` son propuestas que el responsable coordina con `TheHouse-GenAI` y el backend. | INFORMATIVO (dependencia externa) | Acción del responsable |
+| T03-H4 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR |
+
+### Nota para el backend (NV-23, paridad)
+
+Para obtener los mismos `matchScore` y `points` que Python:
+
+1. Evaluar las curvas y sumar los puntos de los factores **en el orden de `baseline_params.json`**, de izquierda a derecha.
+2. **Aplicar round6 antes de redondear**, tanto en el total como en cada factor, **con `double` o con `decimal`**:
+   - total: `Math.Round(Math.Round(sum, 6, MidpointRounding.AwayFromZero), MidpointRounding.AwayFromZero)`;
+   - cada factor: `Math.Round(Math.Round(points, 6, MidpointRounding.AwayFromZero), 1, MidpointRounding.AwayFromZero)`.
+3. Usar siempre `MidpointRounding.AwayFromZero`; el `Math.Round` por omisión (`ToEven`, mitad al par) **no** es compatible (2.5 → 2 en lugar de 3).
+4. Con `decimal`, 30 × (1 − 0.555) da 13.35 exacto; con `double`, 13.349999999999998. Con round6 los dos dan 13.4; sin round6, `double` daría 13.3. Casos de comprobación: 13.35 → 13.4, 24.35 → 24.4, 2.35 → 2.4, total 77.4999995 → 78 y 77.4999994 → 77. T05 entregará ≥ 50 casos dorados con estos bordes.
+
+### Revisión y resultado (T03)
+
+- **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas; las pruebas usan vectores generados con semilla y los casos sintéticos de ML-03.
+- **Resultado:** **PASS** (T03) — se cumple la aceptación de R03: `matchScore` 0–100 con `breakdown` en el formato de la §6.4 (ejemplo = 78), pares excluidos sin puntaje, redondeo de la §6.3 con round6 también por factor (T03-H1 resuelto), propiedades de monotonía, rango y coherencia probadas; ruff, mypy y la suite completa pasan; M-ML-031 APROBADO. Quedan fuera del resultado la coordinación de `breakdown` y del formato del par excluido con `TheHouse-GenAI` y el backend (T03-H3, acción del responsable) y la paridad .NET (T05 / NV-23).
