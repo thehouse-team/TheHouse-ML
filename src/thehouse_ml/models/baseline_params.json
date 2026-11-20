@@ -7,7 +7,11 @@
     "feature_schema_version": "2.0.0",
     "schema_compatibility": "Misma versión mayor del esquema y versión del esquema ≥ feature_schema_version (semver).",
     "weights_fixed_before_labels": "Pesos, curvas y redondeo se fijan antes de generar las etiquetas sintéticas y no se ajustan con ellas (spec ML-04 §7 reglas 2 y 3); cambiarlos requiere una versión baseline-x.y.z nueva.",
-    "sensitive_attributes": "Ningún factor usa género, edad u origen; el género no existe en el esquema (constitution §11.2)."
+    "sensitive_attributes": "Ningún factor usa género, edad u origen; el género no existe en el esquema (constitution §11.2).",
+    "changelog": [
+      {"version": "baseline-1.0.0", "date": "2026-11-20", "decision": "M-ML-029, M-ML-030", "change": "Versión inicial: factores, pesos, curvas y redondeo de la spec ML-04 §6.2–6.3."},
+      {"version": "baseline-1.0.0", "date": "2026-11-20", "decision": "M-ML-031 (T03-H1)", "change": "Corrección antes de publicar (sin cambio de versión: baseline-1.0.0 no se ha publicado): los puntos de cada factor también se redondean a 6 decimales antes de 1 decimal, floor(round6(puntos) × 10 + 0.5) / 10, igual que el total, para absorber el error de punto flotante (30 × (1 − 0.555) = 13.349999999999998 → 13.4, como a mano)."}
+    ]
   },
   "total_points": 100,
   "curve_semantics": {
@@ -72,7 +76,13 @@
     {"feature": "pets_compatible", "reason": "Constante (1) en los candidatos: HC03 ya es restricción dura (M-ML-028)."}
   ],
   "rounding": {
-    "factor_points": {"decimals": 1, "mode": "half_up", "description": "Puntos de cada factor en el desglose con 1 decimal, mitad hacia arriba."},
+    "factor_points": {
+      "pre_round_decimals": 6,
+      "decimals": 1,
+      "mode": "half_up",
+      "formula": "floor(round6(puntos sin redondear) * 10 + 0.5) / 10",
+      "description": "Puntos de cada factor en el desglose: se redondean a 6 decimales (absorbe el error de punto flotante, igual que el total) y después a 1 decimal, mitad hacia arriba."
+    },
     "total": {
       "pre_round_decimals": 6,
       "mode": "half_up",
@@ -82,6 +92,6 @@
     },
     "ranking": {"order_by": "unrounded_sum", "direction": "desc", "tie_breaker": "room_id", "tie_breaker_direction": "asc"},
     "tolerances": {"total_vs_unrounded_sum": 0.5, "reported_sum_vs_unrounded_sum": 0.3},
-    "dotnet": "En .NET: Math.Round(x, 6, MidpointRounding.AwayFromZero) y después Math.Round(x, MidpointRounding.AwayFromZero), y Math.Round(points, 1, MidpointRounding.AwayFromZero) por factor. El Math.Round por omisión (mitad al par, ToEven) NO es compatible."
+    "dotnet": "En .NET, con double o con decimal, aplicar round6 antes de redondear: total = Math.Round(Math.Round(sum, 6, MidpointRounding.AwayFromZero), MidpointRounding.AwayFromZero); cada factor = Math.Round(Math.Round(points, 6, MidpointRounding.AwayFromZero), 1, MidpointRounding.AwayFromZero). El Math.Round por omisión (mitad al par, ToEven) NO es compatible."
   }
 }

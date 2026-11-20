@@ -155,7 +155,8 @@ def test_every_schema_feature_scores_or_has_a_reason(config: BaselineConfig, sch
 
 def test_rounding_rules_of_m_ml_029(config: BaselineConfig, raw_config: dict[str, Any]) -> None:
     rules = config.rounding
-    assert (rules.factor_decimals, rules.factor_mode) == (1, "half_up")
+    assert (rules.factor_pre_round_decimals, rules.factor_decimals, rules.factor_mode) == (6, 1, "half_up")
+    assert rules.factor_formula == "floor(round6(puntos sin redondear) * 10 + 0.5) / 10"
     assert (rules.total_pre_round_decimals, rules.total_mode) == (6, "half_up")
     assert rules.total_formula == "floor(round6(Σ puntos sin redondear) + 0.5)"
     assert (rules.ranking_order_by, rules.ranking_direction) == ("unrounded_sum", "desc")
@@ -163,6 +164,9 @@ def test_rounding_rules_of_m_ml_029(config: BaselineConfig, raw_config: dict[str
     assert (rules.total_tolerance, rules.breakdown_tolerance) == (0.5, 0.3)
     assert "MidpointRounding.AwayFromZero" in rules.dotnet
     assert "ToEven" in rules.dotnet
+    assert "round6 antes de redondear" in rules.dotnet
+    assert "decimal" in rules.dotnet
+    assert raw_config["metadata"]["changelog"][-1]["decision"] == "M-ML-031 (T03-H1)"
     assert raw_config["rounding"]["total"]["range"] == [0, 100]
 
 
@@ -275,6 +279,8 @@ def test_a_later_minor_schema_is_accepted(raw_config: dict[str, Any], schema: Fe
         # Redondeo
         (lambda d: d["rounding"]["factor_points"].update(mode="half_even"), "'half_even' no soportado"),
         (lambda d: d["rounding"]["factor_points"].update(decimals=-1), "entero no negativo"),
+        (lambda d: d["rounding"]["factor_points"].pop("pre_round_decimals"), "factor_points.pre_round_decimals"),
+        (lambda d: d["rounding"]["factor_points"].pop("formula"), "factor_points.formula"),
         (lambda d: d["rounding"]["total"].update(range=[0, 10]), "rounding.total.range"),
         (lambda d: d["rounding"]["ranking"].update(tie_breaker="price_mxn"), "'price_mxn' no soportado"),
         (lambda d: d["rounding"]["tolerances"].update(total_vs_unrounded_sum=-0.5), "no puede ser negativa"),
