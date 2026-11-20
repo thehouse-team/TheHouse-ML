@@ -8,18 +8,18 @@
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-20 (M-ML-029) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02 y T03 completas (3/7); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02, T03 y T04 completas (4/7); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 3 |
+| Tasks completadas | 4 |
 
 ## Reglas de esta lista
 
-1. T01, T02 y T03 completas (2026-11-20, evidencia en `evidence.md`); T04–T07 abiertas.
+1. T01, T02, T03 y T04 completas (2026-11-20, evidencia en `evidence.md`); T05–T07 abiertas.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA».
 4. Un control no ejecutado no se reporta como PASS.
-5. Las decisiones 1–5 de la spec §10 están APROBADO (M-ML-029). T04 y T06 no se cierran hasta que se aprueben, con su M-ML, los valores SUPUESTO de la spec §6.5 y §6.6.
+5. Las decisiones 1–5 de la spec §10 están APROBADO (M-ML-029). Los valores SUPUESTO de la spec §6.5 quedaron aprobados con M-ML-032 (T04); T06 no se cierra hasta que se aprueben, con su M-ML, los de la §6.6.
 
 ## F1 — Diseño y contrato
 
@@ -29,7 +29,7 @@
 ## F2 — Implementación
 
 - [x] **T03 · Puntaje y desglose** — Requisito: ML-04-R03 · Decisiones: 2, 3 · Aceptación: `matchScore` 0–100 (nombre de `TheHouse-GenAI`) con `breakdown` por factor (campo nuevo propuesto) en el formato de la spec §6.4; pares excluidos sin puntaje; redondeo de la §6.3; pruebas de propiedades: monotonía en precio y en distancia, total entre 0 y 100 y desglose coherente.
-- [ ] **T04 · Simulador de etiquetas sintéticas** — Requisito: ML-04-R04 · Decisión: 4 · Aceptación: semilla fija y `labels_params.json` 1.0.0; pesos ocultos distintos de los del modelo base más ruido; relevancia 0–3 dentro de los candidatos de cada estudiante; `data/processed/labels.parquet` fuera de git, reproducible y con `synthetic = true`; reporte con la advertencia de que no son preferencias reales y se reemplazan en ML-07.
+- [x] **T04 · Simulador de etiquetas sintéticas** — Requisito: ML-04-R04 · Decisión: 4 · Aceptación: semilla fija y `labels_params.json` 1.0.0; pesos ocultos distintos de los del modelo base más ruido; relevancia 0–3 dentro de los candidatos de cada estudiante; `data/processed/labels.parquet` fuera de git, reproducible y con `synthetic = true`; reporte con la advertencia de que no son preferencias reales y se reemplazan en ML-07.
 - [ ] **T05 · Casos dorados** — Requisito: ML-04-R05 · Decisiones: 2, 3 · Aceptación: al menos 50 casos (entradas, features, desglose y total) calculados a mano o con un recuento independiente, con los casos límite del plan, exportados para la prueba de paridad del backend.
 
 ## F3 — Calidad, seguridad y datos
@@ -47,7 +47,7 @@
 | T01 | R01 | F1 | Decisiones 2 y 3 | COMPLETA — PASS (M-ML-030) |
 | T02 | R02 | F1 | Decisión 1 | COMPLETA — PASS (M-ML-030) |
 | T03 | R03 | F2 | T01, T02 | COMPLETA — PASS (M-ML-031) |
-| T04 | R04 | F2 | T02, decisión 4 | ABIERTA |
+| T04 | R04 | F2 | T02, decisión 4 | COMPLETA — PASS (M-ML-032) |
 | T05 | R05 | F2 | T03 | ABIERTA |
 | T06 | R06 | F3 | T03, T04, decisión 5 | ABIERTA |
 | T07 | R07 | F4 | T01–T06 | ABIERTA |
