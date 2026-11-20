@@ -120,6 +120,30 @@ def test_manifest_hash_mismatch_fails_clearly(tmp_path: Path) -> None:
         download_source(source, paths, fixture_fetcher())
 
 
+def test_a_file_restored_from_the_ci_cache_is_verified_and_rejected_if_altered(tmp_path: Path) -> None:
+    """ML-03 T07: la caché de data/raw/ del CI no evita la verificación.
+
+    Un archivo que ya está en data/raw/ (restaurado de la caché) con el mismo
+    tamaño pero otro contenido se rechaza por SHA-256 sin descargar nada ni
+    escribir el manifiesto.
+    """
+    paths = _paths(tmp_path)
+    name = "envi_2020_base_de_datos_csv.zip"
+    source = make_source("envi", ("P5_1",), (make_file(name),))
+    original = fixture_bytes(name)
+    local = paths.data_raw / "envi" / name
+    local.parent.mkdir(parents=True)
+    local.write_bytes(original[:-1] + bytes([original[-1] ^ 0xFF]))
+
+    def forbidden_fetch(_url: str, _destination: Path) -> None:
+        raise AssertionError("Un archivo restaurado de la caché no debe descargarse")
+
+    with pytest.raises(DownloadError, match="SHA-256 no coincide"):
+        download_source(source, paths, forbidden_fetch)
+
+    assert not manifest_path(paths, "envi").exists()
+
+
 def test_size_mismatch_fails(tmp_path: Path) -> None:
     paths = _paths(tmp_path)
     source = make_source("envi", ("P5_1",), (make_file("envi_2020_base_de_datos_csv.zip", size_bytes=1),))

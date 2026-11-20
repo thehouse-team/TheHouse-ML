@@ -8,14 +8,14 @@
 | Fecha | 2026-11-07 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-19 |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 completas (7/7); cierre M-ML-028, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 6 |
+| Tasks completadas | 7 |
 
 ## Reglas de esta lista
 
-1. Todas las tasks están abiertas; escribir este documento no completa ninguna.
+1. Escribir este documento no completa ninguna task; las 7 se completaron con su «EJECUTA» y su evidencia (M-ML-022 a M-ML-028).
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA».
 4. Un control no ejecutado no se reporta como PASS.
@@ -37,7 +37,7 @@
 
 ## F4 — Evidencia
 
-- [ ] **T07 · Pruebas y evidencia** — Requisito: ML-03-R07 · Aceptación: Pruebas unitarias e integración de lo implementado con cobertura ≥ 80 % del código nuevo; ruff y mypy sin errores; `evidence.md` con commit, comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`.
+- [x] **T07 · Pruebas y evidencia** — Requisito: ML-03-R07 · Aceptación: Pruebas unitarias e integración de lo implementado con cobertura ≥ 80 % del código nuevo; ruff y mypy sin errores; `evidence.md` con commit, comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`.
 
 ## Matriz task → requisito
 
@@ -49,4 +49,4 @@
 | T04 | R04 | F2 | COMPLETA (M-ML-025; `evidence.md`) |
 | T05 | R05 | F2 | COMPLETA (M-ML-026; `evidence.md`) |
 | T06 | R06 | F3 | COMPLETA (M-ML-027; `evidence.md`) |
-| T07 | R07 | F4 | ABIERTA |
+| T07 | R07 | F4 | COMPLETA (M-ML-028; `evidence.md`) |

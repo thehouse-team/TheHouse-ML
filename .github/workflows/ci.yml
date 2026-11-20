@@ -53,6 +53,17 @@ jobs:
       - name: Pruebas y cobertura (mínimo 80 %)
         run: uv run pytest --cov=thehouse_ml --cov-report=term-missing --cov-report=xml --junitxml=test-results.xml
 
+      # ML-03 T07: caché de los datos crudos del INEGI para no descargarlos en
+      # cada corrida. La clave cambia si cambia el registro de fuentes o algún
+      # manifiesto. No sustituye la verificación: `download` recalcula el
+      # SHA-256 y el tamaño de cada archivo restaurado contra sources.toml y
+      # contra data/manifests/ y falla si no coinciden.
+      - name: Caché de datos crudos (data/raw/)
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: data/raw/
+          key: data-raw-${{ runner.os }}-${{ hashFiles('data/sources.toml', 'data/manifests/**') }}
+
       - name: CLI con las cinco etapas
         run: |
           uv run python -m thehouse_ml --help
