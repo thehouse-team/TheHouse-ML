@@ -52,6 +52,7 @@ def test_prepare_generates_the_data_card_after_the_other_outputs(
         "run_students",
         "run_rooms",
         "run_pairs",
+        "run_labels",
         "run_data_card",
     ):
         monkeypatch.setattr(stages, stage_name, fake(stage_name))
@@ -66,6 +67,7 @@ def test_prepare_generates_the_data_card_after_the_other_outputs(
         "run_students",
         "run_rooms",
         "run_pairs",
+        "run_labels",
         "run_data_card",
     ]
     assert "run_data_card: ok" in output

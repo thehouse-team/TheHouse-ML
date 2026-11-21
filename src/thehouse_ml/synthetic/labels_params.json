@@ -1,0 +1,46 @@
+{
+  "metadata": {
+    "params_version": "1.0.0",
+    "spec": "ML-04 1.0.0, T04 (ML-04-R04)",
+    "decision": "M-ML-032 (APROBADO)",
+    "synthetic": true,
+    "description": "Parámetros del simulador de etiquetas sintéticas de relevancia. Cada parámetro lleva su base: «calibrado: <fuente>» o «SUPUESTO documentado». Las etiquetas NO son preferencias reales: son una utilidad oculta documentada más ruido (constitución §8.2), con riesgo de circularidad (ML-04-RK02), y se reemplazan con señales reales en ML-07. El simulador no usa el modelo base (thehouse_ml.models) ni ningún atributo sensible o de género (constitución §11)."
+  },
+  "parameters": {
+    "seed": {
+      "value": 20261121,
+      "basis": "SUPUESTO documentado: semilla fija (constitución §9), distinta de las de estudiantes (20261119), cuartos (20261905) y pares (20261120). Cada estudiante usa random.Random(\"labels:<seed>:<student_id>\") (spec ML-04 §6.5): primero 6 normales estándar para los multiplicadores, en el orden de los factores de utility.base_weights, y después una normal de ruido por candidato, en orden de room_id."
+    },
+    "utility.base_weights": {
+      "value": {"budget": 20, "distance": 35, "essential_services": 20, "place_type": 10, "property_type": 5, "extras": 10},
+      "basis": "SUPUESTO documentado: propuesta de la spec ML-04 §6.5 (20 · 35 · 20 · 10 · 5 · 10, total 100), distinta de baseline-1.0.0 (30 · 25 · 20 · 10 · 10 · 5) en 4 de 6 factores: más peso a distancia y extras, menos a presupuesto y tipo de inmueble. Mismos ids de factor que baseline_params.json para comparar; el orden de esta tabla es el orden de los multiplicadores."
+    },
+    "utility.curves": {
+      "value": {
+        "budget": {"feature": "price_to_budget", "shape": "one_minus"},
+        "distance": {"feature": "effective_distance_km", "shape": "exp_decay", "scale_km": 3.0},
+        "essential_services": {"feature": "services_coverage", "shape": "identity"},
+        "place_type": {"feature": "place_type_match", "shape": "identity"},
+        "property_type": {"feature": "property_type_match", "shape": "identity"},
+        "extras": {"feature": "extra_services_ratio", "shape": "identity"}
+      },
+      "basis": "SUPUESTO documentado (indicado por el responsable en el «EJECUTA» de T04; cambia la frase «f de la §6.2» de la spec §6.5, ver M-ML-032): la forma de la utilidad oculta difiere del modelo base en 2 factores para que un modelo entrenado tenga algo que aprender que las reglas no capturan. Curvas: identity = min(x, 1), one_minus = 1 − min(x, 1), exp_decay = exp(−x / scale_km), siempre en [0, 1]. Presupuesto: 1 − price_to_budget (en los candidatos price_to_budget ≤ 1 por HC01, así que el recorte no actúa; prefiere lo más barato dentro del presupuesto; el baseline usa 1 − price_below_min, que es plano entre budget.min y budget.max y no puntúa price_to_budget). Distancia: exp(−effective_distance_km / 3 km), caída suave sin corte (vale 0.72 a 1 km, 0.51 a 2 km, 0.37 a 3 km, 0.19 a 5 km y 0.04 a 10 km); el baseline usa distance_ratio con meseta hasta 0.5 y corte en 1, y no puntúa effective_distance_km. La escala de 3 km es del orden del p75 de effective_distance_km en los candidatos (3.2 km en data/processed/pairs.parquet; media 2.6 km en reports/pairs_summary.md). Servicios, tipo de lugar, tipo de inmueble y extras: identidad, igual que el baseline. pets_compatible y distance_km no entran (pets_compatible es constante 1 en los candidatos, M-ML-028)."
+    },
+    "weights.multiplier_sigma": {
+      "value": 0.3,
+      "basis": "SUPUESTO documentado: propuesta de la spec ML-04 §6.5. Cada peso base se multiplica por exp(0.3 × z), z normal estándar (multiplicador lognormal de mediana 1; p5–p95 ≈ 0.61–1.64), y los 6 pesos se renormalizan para sumar 100. Así cada estudiante sintético tiene preferencias propias."
+    },
+    "noise.sigma": {
+      "value": 5.0,
+      "basis": "SUPUESTO documentado: propuesta de la spec ML-04 §6.5. Ruido gaussiano de media 0 y desviación 5 puntos (en la escala 0–100 de la utilidad), independiente por par, sumado a la utilidad antes de ordenar."
+    },
+    "relevance.bands": {
+      "value": {"3": 0.10, "2": 0.10, "1": 0.10},
+      "basis": "SUPUESTO documentado (indicado por el responsable en el «EJECUTA» de T04; sustituye la propuesta 10/20/30 de la spec §6.5): dentro de los n candidatos de cada estudiante, ordenados por utilidad descendente y room_id ascendente en empates, la posición r (desde 1) recibe 3 si r ≤ ⌈0.10 n⌉, 2 si r ≤ ⌈0.20 n⌉, 1 si r ≤ ⌈0.30 n⌉ y 0 en otro caso (cortes acumulados con redondeo hacia arriba y aritmética exacta). Pocos candidatos: n = 1 → [3]; n = 2 → [3, 0]; n = 3 → [3, 0, 0]; n = 4 → [3, 1, 0, 0]; n = 5 → [3, 1, 0, 0, 0]; n = 10 → [3, 2, 1, 0 × 7]; n = 200 → 20 · 20 · 20 · 140. Todo estudiante con al menos 1 candidato tiene al menos un 3."
+    },
+    "check.spearman_range": {
+      "value": [0.3, 0.9],
+      "basis": "SUPUESTO documentado (indicado por el responsable en el «EJECUTA» de T04): la correlación de Spearman entre la suma sin redondear del baseline (score_features, T03) y la utilidad oculta, sobre todos los pares candidatos, debe quedar en [0.3, 0.9]: positiva (las etiquetas miden algo que el baseline intenta capturar) y claramente menor que 1 (no circular, ML-04-RK02). prepare falla con LabelsError fuera del rango."
+    }
+  }
+}
