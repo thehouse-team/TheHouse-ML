@@ -8,7 +8,7 @@
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-20 (M-ML-029) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02, T03, T04, T05 y T06 completas (6/7); ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 (7/7), 2026-11-20 a 2026-11-23; cierre M-ML-035, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0 |
 | Tasks | `task.md` 1.0.0 |
@@ -201,10 +201,12 @@ Se registran en `memoria.md` (M-ML-029, APROBADO). Los valores marcados SUPUESTO
 | Tasks | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 6 (T01, T02, T03, T04, T05, T06) |
+| Tasks completadas | 7 (T01–T07) |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02, T03, T04, T05 y T06 completas (6/7); ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 (7/7), 2026-11-20 a 2026-11-23; cierre M-ML-035, ver `evidence.md`** |
 
 ## 15. Aprobación
 
 Aprobada por César Yael López Trujillo el 2026-11-20 («Apruebo ML-04 1.0.0», M-ML-029), con las decisiones 1–5 de la §10 en APROBADO. Para ejecutar se requiere «EJECUTA» con versión, tasks y rutas permitidas; T02 modifica código y datos de ML-03 (`src/thehouse_ml/features/`, `tests/fixtures/pair_feature_cases.json` y `data/processed/pairs.parquet`), por lo que su «EJECUTA» debe autorizar esas rutas.
+
+Ejecutada con un «EJECUTA» por task: T02 y T01 (M-ML-030), T03 (M-ML-031) y T04 (M-ML-032) el 2026-11-20; T05 (M-ML-033) y T06 (M-ML-034) el 2026-11-23; y cerrada con T07 (ML-04-R07: pruebas, evidencia, revisión de coherencia y cierre) el 2026-11-23 en la rama `feat/ml-04-cierre` (M-ML-035). ML-04 queda **COMPLETA**: 7 de 7 tasks. No se sube la versión 1.0.0: la constitución y `AGENTS.md` no exigen un bump al cerrar.

@@ -8,14 +8,14 @@
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-20 (M-ML-029) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02, T03, T04, T05 y T06 completas (6/7); ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 (7/7), 2026-11-20 a 2026-11-23; cierre M-ML-035, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 6 |
+| Tasks completadas | 7 |
 
 ## Reglas de esta lista
 
-1. T01, T02, T03 y T04 completas (2026-11-20) y T05 y T06 completas (2026-11-23), con evidencia en `evidence.md`; T07 abierta.
+1. T01, T02, T03 y T04 completas (2026-11-20) y T05, T06 y T07 completas (2026-11-23), con evidencia en `evidence.md`; ML-04 cerrada con M-ML-035.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA».
 4. Un control no ejecutado no se reporta como PASS.
@@ -38,7 +38,7 @@
 
 ## F4 — Evidencia
 
-- [ ] **T07 · Pruebas y evidencia** — Requisito: ML-04-R07 · Aceptación: pruebas unitarias e integración de lo implementado con cobertura ≥ 80 % del código nuevo; ruff y mypy sin errores; `evidence.md` con commit, comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`.
+- [x] **T07 · Pruebas y evidencia** — Requisito: ML-04-R07 · Aceptación: pruebas unitarias e integración de lo implementado con cobertura ≥ 80 % del código nuevo; ruff y mypy sin errores; `evidence.md` con commit, comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`.
 
 ## Matriz task → requisito
 
@@ -50,4 +50,4 @@
 | T04 | R04 | F2 | T02, decisión 4 | COMPLETA — PASS (M-ML-032) |
 | T05 | R05 | F2 | T03 | COMPLETA — PASS (M-ML-033) |
 | T06 | R06 | F3 | T03, T04, decisión 5 | COMPLETA — PASS (M-ML-034) |
-| T07 | R07 | F4 | T01–T06 | ABIERTA |
+| T07 | R07 | F4 | T01–T06 | COMPLETA — PASS (M-ML-035) |

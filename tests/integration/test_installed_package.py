@@ -30,4 +30,4 @@ def test_console_script_runs_a_stage(tmp_path: Path) -> None:
     result = subprocess.run([executable, "--root", str(tmp_path), "train"], capture_output=True, text=True, check=False)
 
     assert result.returncode == 0
-    assert result.stdout.strip() == "train: pendiente de ML-04"
+    assert result.stdout.strip() == "train: pendiente de ML-05"
