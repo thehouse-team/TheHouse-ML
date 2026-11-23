@@ -3,15 +3,15 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-04 1.0.0 |
-| Tareas ejecutadas | T02 · Esquema 2.0.0 y features nuevas (R02) y, después, T01 · Configuración versionada (R01); en una segunda ejecución, T03 · Puntaje y desglose (R03); en una tercera, T04 · Simulador de etiquetas sintéticas (R04); en una cuarta, T05 · Casos dorados (R05). Cada una con sección propia abajo |
-| Estado | **🟡 EN EJECUCIÓN — 5/7** (T01, T02, T03, T04 y T05 completas; T06 y T07 abiertas) |
+| Tareas ejecutadas | T02 · Esquema 2.0.0 y features nuevas (R02) y, después, T01 · Configuración versionada (R01); en una segunda ejecución, T03 · Puntaje y desglose (R03); en una tercera, T04 · Simulador de etiquetas sintéticas (R04); en una cuarta, T05 · Casos dorados (R05); en una quinta, T06 · Reporte del modelo base (R06). Cada una con sección propia abajo |
+| Estado | **🟡 EN EJECUCIÓN — 6/7** (T01, T02, T03, T04, T05 y T06 completas; T07 abierta) |
 | Autorización (T02 y T01) | «EJECUTA ML-04 1.0.0, tasks T02 y después T01 (en ese orden, porque T01 valida contra las features de T02), en la rama feat/ml-04-config-schema. Rutas permitidas: src/thehouse_ml/ (features/ y el módulo del modelo base donde indique specs/ARQUITECTURA.md), tests/, reports/ (solo lo que regenere prepare), memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). data/processed/ se regenera pero sigue fuera de git. Sin dependencias nuevas. No modifiques students_params.json, rooms_params.json ni pairs_params.json» — César Yael López Trujillo, 2026-11-20 |
 | Rama (T02 y T01) | `feat/ml-04-config-schema` (commit base `fac23bc`; mezclada en el PR #24, `643f94e`) |
 | Autorización (T03) | «EJECUTA ML-04 1.0.0, task T03 (ML-04-R03), en la rama feat/ml-04-score. Rutas permitidas: src/thehouse_ml/models/, src/thehouse_ml/features/ (solo para reutilizar, no cambiar el esquema), tests/, memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). Sin dependencias nuevas (nada de hypothesis: las pruebas de propiedades usan rejillas o random.Random con semilla). No modifiques feature_schema.json (2.0.0) ni baseline_params.json (baseline-1.0.0)» — César Yael López Trujillo, 2026-11-20 |
 | Rama (T03) | `feat/ml-04-score` (commit base `643f94e`, merge del PR #24) |
 | Commit | Sin commit, por instrucción explícita del responsable (las dos ejecuciones) |
 | Fecha de ejecución | 2026-11-20 |
-| Decisiones | M-ML-029 (APROBADO); M-ML-030 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que la spec no fijaba y la resolución de H1 y H2); M-ML-031 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que T03 decidió y la corrección del redondeo por factor de T03-H1); M-ML-032 (**APROBADO**, César Yael López Trujillo, 2026-11-20: parámetros de las etiquetas sintéticas y desviaciones T04-H1 a T04-H3); M-ML-033 (**APROBADO**, César Yael López Trujillo, 2026-11-23: formato y casos de T05, con la decisión 7 del perfil incompleto) |
+| Decisiones | M-ML-029 (APROBADO); M-ML-030 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que la spec no fijaba y la resolución de H1 y H2); M-ML-031 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que T03 decidió y la corrección del redondeo por factor de T03-H1); M-ML-032 (**APROBADO**, César Yael López Trujillo, 2026-11-20: parámetros de las etiquetas sintéticas y desviaciones T04-H1 a T04-H3); M-ML-033 (**APROBADO**, César Yael López Trujillo, 2026-11-23: formato y casos de T05, con la decisión 7 del perfil incompleto); M-ML-034 (**APROBADO**, César Yael López Trujillo, 2026-11-23: valores SUPUESTO de la evaluación y dos desviaciones de T06) |
 
 Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§10–§13 y §18) → `AGENTS.md` → `memoria.md` (M-ML-022 a M-ML-029) → `specs/ARQUITECTURA.md` → `spec.md` (sobre todo §6 y §10), `plan.md` y `task.md` de ML-04 → `src/thehouse_ml/features/` y `specs/ml-03-feature-schema/evidence.md` (formato).
 
@@ -606,3 +606,110 @@ En `transport_car` el recuento y el paquete calculan la distancia con haversine 
 
 - **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas; entradas sintéticas y coordenadas de campus de `data/universities.csv` (ya en git).
 - **Resultado:** **PASS** (T05) — se cumple la aceptación de R05: 81 casos (≥ 50) con entradas, 10 features, desglose y total, exclusión o perfil incompleto, calculados con un recuento independiente y con los casos límite de la §6.2–6.3; el paquete coincide en todos; ruff, mypy y las pruebas afectadas pasan. M-ML-033 **APROBADO** por César Yael López Trujillo el 2026-11-23 con las desviaciones T05-H2 a T05-H4 y la decisión 7 (T05-H7 resuelto); el encabezado del archivo dice `M-ML-033 (APROBADO)`. T05 completa; ML-04 en 5/7.
+
+## T06 · Reporte del modelo base
+
+| Campo | Valor |
+| --- | --- |
+| Autorización | «EJECUTA ML-04 1.0.0, task T06 (ML-04-R06), en la rama feat/ml-04-report. Rutas permitidas: src/thehouse_ml/ (models/ para el reporte y un módulo de métricas de ranking reutilizable por ML-05; synthetic/ y features/ solo para reutilizar), tests/, reports/, memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). Sin dependencias nuevas. No modifiques feature_schema.json, baseline_params.json ni los params de students, rooms, pairs o labels» — César Yael López Trujillo, 2026-11-23 |
+| Rama | `feat/ml-04-report` (commit base `683d834`, merge del PR #27) |
+| Commit | Sin commit, por instrucción explícita del responsable |
+| Fecha de ejecución | 2026-11-23 |
+| Decisión | M-ML-034 (**APROBADO**, César Yael López Trujillo, 2026-11-23, con los valores SUPUESTO y las desviaciones T06-H2 y T06-H3) |
+
+Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§10, §11.3 y §12) → `AGENTS.md` → `memoria.md` (M-ML-027 a M-ML-033, nota para ML-05 de M-ML-032) → `spec.md` (R06, §6.6 y decisión 5), `plan.md`, `task.md` → `specs/ARQUITECTURA.md` (§3 etapas y §4 estructura) → `src/thehouse_ml/models/` y `src/thehouse_ml/synthetic/`.
+
+### Qué se hizo
+
+1. **`src/thehouse_ml/evaluation/ranking.py`** (nuevo, puro, reutilizable por ML-05): `dcg_at_k`, `ndcg_at_k`, `precision_at_k`, `average_precision`, `student_metrics`, `percentile` y `bootstrap_means` (bootstrap pareado por estudiante con intervalo percentil). Definiciones y tratamiento del estudiante sin relevantes en el docstring y en M-ML-034.
+2. **`src/thehouse_ml/models/baseline_eval_params.json`** (nuevo, 1.0.0; `M-ML-034 (APROBADO)` tras la aprobación, sin cambiar ningún valor): partición, mínimo de candidatos, umbral de relevancia, bootstrap, semilla del orden al azar, rangos de presupuesto y regla del ejemplo, cada uno con `value` y `basis`.
+3. **`src/thehouse_ml/models/baseline_report.py`** (nuevo): etapa `evaluate`. Une `pairs.parquet` con `labels.parquet` por (`student_id`, `room_id`) (uno a uno, misma partición, `synthetic = true`), puntúa con `score_features` y ordena con `rank` (T03), calcula baseline, azar e ideal por estudiante, segmentos y bootstrap, y escribe `reports/baseline_report.md` y `reports/baseline_metrics.json`.
+4. **`src/thehouse_ml/stages.py`** y **`cli.py`**: `evaluate` llama a `run_evaluate`; `EvaluationError` sale con código 1. `train` y `export` siguen pendientes.
+5. **Pruebas nuevas:** `tests/unit/test_ranking_metrics.py` (ejemplos a mano), `tests/unit/test_baseline_report.py` (parámetros, exclusiones, órdenes, explicaciones) y `tests/integration/test_evaluate_stage.py` (etapa completa con 2 campus). `tests/unit/test_cli.py`: `evaluate` deja de ser etapa vacía y se prueba su omisión sin entradas.
+6. **Sin cambios** en `feature_schema.json`, `baseline_params.json` ni los params de estudiantes, cuartos, pares o etiquetas; `data/processed/` no se regeneró (la etapa solo lee).
+
+### Resultado con los datos de ML-03 y T04 (DATOS SINTÉTICOS)
+
+Partición test: 300 estudiantes, **300 evaluados**, 0 con menos de 2 candidatos, 0 sin cuarto relevante. Media e IC 95 % (bootstrap por estudiante, 1,000 remuestreos, semilla 20261122):
+
+| Segmento | Estudiantes | NDCG@10 | NDCG@5 | Precision@5 | MAP |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Total | 300 | 0.527 [0.503, 0.550] | 0.535 [0.507, 0.560] | 0.586 [0.557, 0.615] | 0.503 [0.485, 0.522] |
+| Sin `seed_sin_verificar` | 210 | 0.511 [0.480, 0.539] | 0.515 [0.480, 0.548] | 0.576 [0.536, 0.613] | 0.494 [0.469, 0.519] |
+| `budget.max` ≤ $2,000 | 73 | 0.568 [0.525, 0.608] | 0.583 [0.536, 0.631] | 0.666 [0.608, 0.723] | 0.561 [0.523, 0.601] |
+| `budget.max` $2,001–$3,500 | 158 | 0.534 [0.503, 0.566] | 0.535 [0.496, 0.571] | 0.570 [0.533, 0.606] | 0.494 [0.469, 0.519] |
+| `budget.max` > $3,500 | 69 | 0.468 [0.410, 0.518] | 0.485 [0.419, 0.545] | 0.539 [0.469, 0.606] | 0.463 [0.421, 0.501] |
+
+Por campus (30 estudiantes cada uno) en `reports/baseline_report.md` §4. Contra el azar (total): NDCG@10 azar 0.197 [0.182, 0.214], diferencia **+0.330 [+0.302, +0.355]** (41 % de la brecha azar → ideal); Precision@5 azar 0.204, techo 0.983; MAP azar 0.251. El intervalo de la diferencia baseline − azar queda por encima de 0 en todos los segmentos y métricas.
+
+### Trazabilidad R06 → prueba
+
+| Criterio | Prueba |
+| --- | --- |
+| NDCG@10/@5 con `2^rel − 1` y `log2`, Precision@5 y MAP con relevante ≥ 2, a mano | `tests/unit/test_ranking_metrics.py` (DCG, NDCG, corte en k, Precision con denominador fijo, AP = 13/18, AP con la lista completa) |
+| Estudiante sin cuarto relevante (tratamiento documentado) | `test_student_without_any_relevant_room_has_undefined_ap_and_is_excluded`, `test_students_with_one_candidate_or_no_relevant_room_are_excluded_and_counted` |
+| Solo test y estudiantes con ≥ 2 candidatos; cuántos quedan fuera | `test_only_test_students_with_two_or_more_candidates_are_evaluated`, `test_students_with_one_candidate_or_no_relevant_room_are_excluded_and_counted` |
+| Baseline = `score_features` + `rank`; unión por (`student_id`, `room_id`) | `test_baseline_metrics_match_an_independent_recomputation`, `test_join_labels_requires_one_label_per_pair_with_the_same_split`, `test_labels_that_do_not_match_the_pairs_are_an_error` |
+| No lee `labels_hidden_utility.parquet` ni `labels_hidden_weights.parquet` | `test_evaluate_never_reads_the_hidden_label_files` (espía de `pd.read_parquet`, archivos borrados, salida idéntica) |
+| Bootstrap por estudiante, 1,000, 95 %, semilla fija; pareado | `test_bootstrap_*`, `test_percentile_interpolates_linearly`, `test_packaged_params_hold_the_supuestos_of_m_ml_034`, `test_every_segment_has_intervals_and_the_baseline_beats_random` |
+| Segmentos: total, campus, sin `seed_sin_verificar`, presupuesto | `test_every_segment_has_intervals_and_the_baseline_beats_random`, `test_budget_ranges_are_inclusive_and_cover_every_value` |
+| Azar (piso) e ideal (techo) | `test_random_order_is_seeded_per_student_and_independent_of_input_order`, `test_ideal_order_sorts_by_relevance_then_room_id`; ideal NDCG = MAP = 1 en cada segmento |
+| Reporte: «DATOS SINTÉTICOS», versiones, distribución, ejemplo, tablas | `test_report_and_metrics_are_marked_synthetic_with_versions`, `test_report_has_distribution_example_and_tables`, `test_explain_factor_describes_each_factor` |
+| Sin datos personales | `test_outputs_have_no_personal_or_sensitive_fields` |
+| Dos corridas sin cambios | `test_running_twice_does_not_change_any_file` y doble corrida real (abajo) |
+
+### Comandos y resultados (T06)
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `137 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 39 source files` (PASS) |
+| `uv run pytest tests/unit/test_ranking_metrics.py tests/unit/test_baseline_report.py tests/unit/test_cli.py tests/unit/test_stages.py tests/integration/test_evaluate_stage.py tests/integration/test_installed_package.py` (afectadas) | **93 passed** (PASS; corregido: la evidencia previa decía 104 por error) |
+| `uv run pytest --cov=thehouse_ml --cov-report=term-missing` (suite completa) | **1678 passed** en 10 min 39 s; cobertura total **96 %**; `evaluation/ranking.py` **100 %**, `models/baseline_report.py` **97 %**, `stages.py` y `cli.py` 100 % (PASS) |
+| `uv run python -m thehouse_ml evaluate` ×2 | ~7 s cada una; SHA-256 iguales en las dos corridas: `baseline_report.md` `216e6dc7…227c6b37b`, `baseline_metrics.json` `2ba0242f…3bda7eb5` (PASS). Tras la aprobación (solo cambia el texto de la decisión): `3b554e9b…bbe924f30` y `df36b2f1…49d05561`, iguales en dos corridas (PASS) |
+
+### Tabla de coherencia (T06)
+
+| Norma | Verificación | Resultado |
+| --- | --- | --- |
+| Constitución §8.2 y §20.3 | Título y aviso «DATOS SINTÉTICOS — ETIQUETAS SINTÉTICAS» en el reporte; `synthetic: true` y advertencia en el JSON | PASS |
+| Constitución §10.1–10.3 | NDCG@10, Precision@5 y MAP por estudiante en test, sin fuga (partición de ML-03), con intervalos; JSON como referencia de ML-05 | PASS |
+| Constitución §11.2–11.3 | Segmentos por campus y presupuesto; ningún factor ni segmento usa género, edad u origen | PASS |
+| Constitución §12 | Ejemplo con desglose por factor y salida §6.4; nota de la suma antes de redondear | PASS |
+| Constitución §9 | Semillas fijas documentadas; doble corrida con el mismo SHA-256 | PASS |
+| Spec §7 regla 3 | El baseline no se ajusta con las etiquetas (solo se mide) | PASS |
+| M-ML-032 | Solo `labels.parquet`; los archivos ocultos no se leen (prueba) | PASS |
+| `specs/ARQUITECTURA.md` §3–4 | Etapa `evaluate` (ML-04/05) y métricas en `evaluation/` | PASS |
+| AGENTS: sin dependencias nuevas | Biblioteca estándar y pandas | PASS |
+| AGENTS: rutas permitidas | `src/thehouse_ml/` (`evaluation/`, `models/`, `stages.py`, `cli.py`), `tests/`, `reports/`, `memoria.md`, `specs/ml-04-baseline-model/` | PASS |
+| AGENTS: un control no ejecutado no se reporta como PASS | Todos los controles de arriba se ejecutaron | PASS |
+
+### Hallazgos (T06)
+
+| # | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| T06-H1 | Umbral de relevancia, bootstrap y rangos de presupuesto son SUPUESTO (spec §6.6). | BLOQUEANTE para cerrar T06 | **RESUELTO** (M-ML-034 APROBADO) |
+| T06-H2 | La spec §6.6.4 propone `random.Random("bootstrap:<seed>")`; se usa una semilla por segmento (`bootstrap:<seed>:<segment_id>`) para que los segmentos no dependan entre sí. | ADVERTENCIA (desviación menor) | **APROBADO** (M-ML-034 decisión 4) |
+| T06-H3 | La etapa es `evaluate` (ARQUITECTURA §3) y las métricas van en `evaluation/` (ARQUITECTURA §4), además de `models/` que nombra el «EJECUTA»; ambas dentro de `src/thehouse_ml/`. | INFORMATIVO | **APROBADO** (M-ML-034 decisión 1) |
+| T06-H4 | Los segmentos de un campus tienen 30 estudiantes: intervalos anchos que no permiten comparar campus; el reporte lo dice. | INFORMATIVO | Aceptado |
+| T06-H5 | ARQUITECTURA §3 nombra `reports/metrics.json` para `evaluate`; T06 escribe `reports/baseline_metrics.json` (spec §6.6 y «EJECUTA»). ARQUITECTURA no está en las rutas permitidas. | ADVERTENCIA (coherencia documental) | Se resuelve en T07 (indicación del responsable) |
+| T06-H6 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR |
+
+### Revisión y resultado (T06)
+
+- **Seguridad y licencias:** sin descargas, sin red, sin secretos ni datos personales (solo ids sintéticos), sin dependencias nuevas.
+- **Resultado (antes de la aprobación):** **PASS WITH WARNINGS** — los controles técnicos pasaban y se cumplía la aceptación de R06; T06 quedó abierta hasta la aprobación de M-ML-034 (T06-H1). Resultado final en «Cierre tras la aprobación (T06)». Al aprobarse: `baseline_eval_params.json` pasa a `M-ML-034 (APROBADO)`, se regenera con `evaluate` y se actualizan `task.md`, `spec.md` §14 y `specs/README.md` (6/7).
+
+### Nota para ML-05
+
+- **Referencia:** `reports/baseline_metrics.json` (mismas etiquetas, estudiantes de test y definiciones de `thehouse_ml.evaluation`); `per_student_baseline` permite comparaciones pareadas por estudiante. Un modelo entrenado solo se promueve si supera esta referencia (constitución §10.1).
+- **Segmento más débil: `budget.max` > $3,500** (69 estudiantes): NDCG@10 **0.468 [0.410, 0.518]**, frente a 0.568 en ≤ $2,000 y 0.534 en $2,001–$3,500. Motivo (señalado por el responsable): el baseline puntúa igual cualquier renta dentro del presupuesto (factor `budget` = `1 − price_below_min`, plano entre `budget.min` y `budget.max`), mientras que la utilidad oculta prefiere lo más barato dentro del presupuesto (`1 − price_to_budget`, M-ML-032). Con un presupuesto amplio, más candidatos empatan en ese factor y el baseline no distingue lo que las etiquetas sí premian. **Es el patrón principal que el modelo entrenado debería aprender** (`price_to_budget` sigue en el esquema como feature).
+- Es una explicación por el diseño del simulador; T06 no hizo un análisis de ablación. ML-05 puede confirmarla comparando su NDCG@10 por rango de presupuesto con esta tabla: la mejora debería ser mayor en > $3,500.
+- Todo esto es sobre **datos sintéticos**: lo que ML-05 aprenda aquí es la función del simulador (ML-04-RK02), no preferencias reales.
+
+### Cierre tras la aprobación (T06)
+
+- M-ML-034 **APROBADO** por César Yael López Trujillo el 2026-11-23: valores SUPUESTO (relevante si `relevance ≥ 2`; bootstrap 1,000 con intervalo percentil del 95 % y semilla 20261122; rangos ≤ $2,000, $2,001–$3,500 y > $3,500) y las desviaciones T06-H2 (semilla por segmento) y T06-H3 (métricas en `evaluation/`). T06-H5 se resuelve en T07.
+- `baseline_eval_params.json` pasa a `M-ML-034 (APROBADO)` sin cambiar valores; reportes regenerados con `evaluate` (mismas cifras; dos corridas con el mismo SHA-256).
+- **Resultado final (T06): PASS.** T06 completa; ML-04 en 6/7.

@@ -5,7 +5,8 @@ error. ML-02 T02 implementa ``download``; T03, T04, T05 y T07 implementan
 ``prepare`` (bases nacionales, calibración regional, entorno DENUE de los campus
 y universidades verificadas); ML-03 T04 agrega los estudiantes sintéticos y
 T05 el catálogo sintético de cuartos y T06 el conjunto de pares; ML-04 T04 agrega
-las etiquetas sintéticas de relevancia.
+las etiquetas sintéticas de relevancia y T06 implementa ``evaluate`` (métricas y
+reporte del modelo base).
 """
 
 from __future__ import annotations
@@ -15,6 +16,7 @@ from dataclasses import dataclass
 from thehouse_ml.data_card import run_data_card
 from thehouse_ml.denue import run_denue
 from thehouse_ml.download import Fetcher, run_download
+from thehouse_ml.models.baseline_report import run_evaluate
 from thehouse_ml.national import run_prepare
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.regional import run_regional
@@ -69,5 +71,8 @@ def run_stage(name: str, paths: ProjectPaths, source: str | None = None, fetcher
             f"{run_denue(paths)}\n{run_students(paths)}\n{run_rooms(paths)}\n"
             f"{run_pairs(paths)}\n{run_labels(paths)}\n{run_data_card(paths)}"
         )
+    if name == "evaluate":
+        del source, fetcher  # La etapa evaluate no usa red ni filtro de fuente.
+        return run_evaluate(paths)
     del source, fetcher  # Las etapas vacías no leen ni escriben archivos.
     return f"{stage.name}: pendiente de {stage.spec}"
