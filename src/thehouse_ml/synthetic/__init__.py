@@ -1,11 +1,19 @@
-"""Datos sintéticos de ML-03 (constitución §8): estudiantes (T04), catálogo de cuartos (T05) y pares (T06).
+"""Datos sintéticos (constitución §8): estudiantes, cuartos y pares (ML-03 T04-T06) y etiquetas (ML-04 T04).
 
-`students_params.json`, `rooms_params.json` y `pairs_params.json` viven junto a este módulo y se
-empaquetan con él.
+`students_params.json`, `rooms_params.json`, `pairs_params.json` y `labels_params.json` viven junto a
+este módulo y se empaquetan con él.
 """
 
 from __future__ import annotations
 
+from thehouse_ml.synthetic.labels import (
+    LabelInput,
+    LabelParams,
+    LabelParamsError,
+    LabelSet,
+    simulate_labels,
+)
+from thehouse_ml.synthetic.labels import load_params as load_label_params
 from thehouse_ml.synthetic.pairs import (
     PairParams,
     PairParamsError,
@@ -39,6 +47,10 @@ from thehouse_ml.synthetic.students import (
 __all__ = [
     "CampusInputs",
     "HistogramBin",
+    "LabelInput",
+    "LabelParams",
+    "LabelParamsError",
+    "LabelSet",
     "PairParams",
     "PairParamsError",
     "PairSet",
@@ -54,10 +66,12 @@ __all__ = [
     "build_pairs",
     "generate_rooms",
     "generate_students",
+    "load_label_params",
     "load_pair_params",
     "load_params",
     "load_room_params",
     "parse_params",
     "room_record",
+    "simulate_labels",
     "student_record",
 ]

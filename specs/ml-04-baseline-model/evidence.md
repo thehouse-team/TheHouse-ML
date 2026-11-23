@@ -3,15 +3,15 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-04 1.0.0 |
-| Tareas ejecutadas | T02 · Esquema 2.0.0 y features nuevas (R02) y, después, T01 · Configuración versionada (R01); en una segunda ejecución, T03 · Puntaje y desglose (R03). Cada una con sección propia abajo |
-| Estado | **🟡 EN EJECUCIÓN — 3/7** (T01, T02 y T03 completas; T04–T07 abiertas) |
+| Tareas ejecutadas | T02 · Esquema 2.0.0 y features nuevas (R02) y, después, T01 · Configuración versionada (R01); en una segunda ejecución, T03 · Puntaje y desglose (R03); en una tercera, T04 · Simulador de etiquetas sintéticas (R04). Cada una con sección propia abajo |
+| Estado | **🟡 EN EJECUCIÓN — 4/7** (T01, T02, T03 y T04 completas; T05–T07 abiertas) |
 | Autorización (T02 y T01) | «EJECUTA ML-04 1.0.0, tasks T02 y después T01 (en ese orden, porque T01 valida contra las features de T02), en la rama feat/ml-04-config-schema. Rutas permitidas: src/thehouse_ml/ (features/ y el módulo del modelo base donde indique specs/ARQUITECTURA.md), tests/, reports/ (solo lo que regenere prepare), memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). data/processed/ se regenera pero sigue fuera de git. Sin dependencias nuevas. No modifiques students_params.json, rooms_params.json ni pairs_params.json» — César Yael López Trujillo, 2026-11-20 |
 | Rama (T02 y T01) | `feat/ml-04-config-schema` (commit base `fac23bc`; mezclada en el PR #24, `643f94e`) |
 | Autorización (T03) | «EJECUTA ML-04 1.0.0, task T03 (ML-04-R03), en la rama feat/ml-04-score. Rutas permitidas: src/thehouse_ml/models/, src/thehouse_ml/features/ (solo para reutilizar, no cambiar el esquema), tests/, memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). Sin dependencias nuevas (nada de hypothesis: las pruebas de propiedades usan rejillas o random.Random con semilla). No modifiques feature_schema.json (2.0.0) ni baseline_params.json (baseline-1.0.0)» — César Yael López Trujillo, 2026-11-20 |
 | Rama (T03) | `feat/ml-04-score` (commit base `643f94e`, merge del PR #24) |
 | Commit | Sin commit, por instrucción explícita del responsable (las dos ejecuciones) |
 | Fecha de ejecución | 2026-11-20 |
-| Decisiones | M-ML-029 (APROBADO); M-ML-030 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que la spec no fijaba y la resolución de H1 y H2); M-ML-031 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que T03 decidió y la corrección del redondeo por factor de T03-H1) |
+| Decisiones | M-ML-029 (APROBADO); M-ML-030 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que la spec no fijaba y la resolución de H1 y H2); M-ML-031 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que T03 decidió y la corrección del redondeo por factor de T03-H1); M-ML-032 (**APROBADO**, César Yael López Trujillo, 2026-11-20: parámetros de las etiquetas sintéticas y desviaciones T04-H1 a T04-H3) |
 
 Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§10–§13 y §18) → `AGENTS.md` → `memoria.md` (M-ML-022 a M-ML-029) → `specs/ARQUITECTURA.md` → `spec.md` (sobre todo §6 y §10), `plan.md` y `task.md` de ML-04 → `src/thehouse_ml/features/` y `specs/ml-03-feature-schema/evidence.md` (formato).
 
@@ -324,3 +324,132 @@ Para obtener los mismos `matchScore` y `points` que Python:
 
 - **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas; las pruebas usan vectores generados con semilla y los casos sintéticos de ML-03.
 - **Resultado:** **PASS** (T03) — se cumple la aceptación de R03: `matchScore` 0–100 con `breakdown` en el formato de la §6.4 (ejemplo = 78), pares excluidos sin puntaje, redondeo de la §6.3 con round6 también por factor (T03-H1 resuelto), propiedades de monotonía, rango y coherencia probadas; ruff, mypy y la suite completa pasan; M-ML-031 APROBADO. Quedan fuera del resultado la coordinación de `breakdown` y del formato del par excluido con `TheHouse-GenAI` y el backend (T03-H3, acción del responsable) y la paridad .NET (T05 / NV-23).
+
+## T04 · Simulador de etiquetas sintéticas
+
+| Campo | Valor |
+| --- | --- |
+| Autorización | «EJECUTA ML-04 1.0.0, task T04 (ML-04-R04), en la rama feat/ml-04-labels. Rutas permitidas: src/thehouse_ml/ (synthetic/ para el simulador; models/ y features/ solo para reutilizar), tests/, reports/, memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). data/processed/ se regenera fuera de git. Sin dependencias nuevas. No modifiques feature_schema.json, baseline_params.json ni los params de students, rooms o pairs» — César Yael López Trujillo, 2026-11-20 |
+| Rama | `feat/ml-04-labels` (commit base `85d1e4b`, merge del PR #25) |
+| Commit | Sin commit, por instrucción explícita del responsable |
+| Decisión | M-ML-032 (**APROBADO**, César Yael López Trujillo, 2026-11-20, con los valores propuestos y las desviaciones T04-H1, T04-H2 y T04-H3) |
+
+Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§8, §10 y §11) → `AGENTS.md` → `memoria.md` (M-ML-025 a M-ML-031) → `spec.md` (sobre todo §6.5, §6.6, §10 decisión 4 y ML-04-RK02), `plan.md`, `task.md` y esta evidencia → `src/thehouse_ml/synthetic/` y `src/thehouse_ml/models/`.
+
+### Qué se hizo
+
+1. **`src/thehouse_ml/synthetic/labels_params.json` 1.0.0** (nuevo, en git; `metadata.synthetic = true`, `decision = "M-ML-032 (APROBADO)"`; se pasó de PROPUESTO a APROBADO sin cambiar ningún valor). Cada parámetro con `value` y `basis` «SUPUESTO documentado»:
+
+   | Parámetro | Valor | Nota |
+   | --- | --- | --- |
+   | `seed` | 20261121 | distinta de 20261119 · 20261905 · 20261120 |
+   | `utility.base_weights` | 20 · 35 · 20 · 10 · 5 · 10 | baseline 30 · 25 · 20 · 10 · 10 · 5 |
+   | `utility.curves` | presupuesto `1 − price_to_budget`; distancia `exp(−effective_distance_km / 3)`; el resto identidad | baseline: `1 − price_below_min` y `distance_ratio` por tramos |
+   | `weights.multiplier_sigma` | 0.3 | `exp(0.3 · z)` por factor, renormalizado a 100 |
+   | `noise.sigma` | 5.0 | puntos, por par |
+   | `relevance.bands` | 3: 0.10 · 2: 0.10 · 1: 0.10 | cortes acumulados ⌈0.1 n⌉, ⌈0.2 n⌉, ⌈0.3 n⌉ |
+   | `check.spearman_range` | [0.3, 0.9] | `prepare` falla fuera del rango |
+
+2. **`src/thehouse_ml/synthetic/labels.py`** (nuevo): `load_params`/`parse_params` (validación con la biblioteca estándar: factores y orden, pesos > 0 que suman 100, formas `identity`/`one_minus`/`exp_decay`, features del esquema, bandas en (0, 1) que no suman más de 1, rango de Spearman, base de cada parámetro y `metadata.synthetic`), `simulate_labels(pairs, params) -> LabelSet`, `hidden_weights`, `utility`, `grade_cutoffs` y `relevance_by_position`. Puro (sin I/O, red ni reloj); entrada `LabelInput(student_id, room_id, features)`; **no** importa `thehouse_ml.models`; independiente del orden de entrada; una etiqueta por par, en orden de `student_id` y `room_id`; rechaza pares duplicados y features faltantes, no finitas o negativas.
+3. **`src/thehouse_ml/synthetic/labels_stage.py`** (nuevo): `run_labels(paths)` lee `pairs.parquet`, escribe `labels.parquet`, `labels_hidden_utility.parquet`, `labels_hidden_weights.parquet` (los tres fuera de git) y `reports/labels_synthetic.md`; calcula Spearman (Pearson de rangos promedio, sin scipy) entre `score_features(...).raw_total` (T03) y la utilidad oculta; `LabelsError` si sale de [0.3, 0.9] (después de escribir el reporte) o si faltan columnas. Sin `pairs.parquet`, se omite con mensaje.
+4. **`stages.py`** (`prepare` corre `run_labels` después de `run_pairs` y antes de la data card), **`cli.py`** (código 1 con `LabelsError`, `LabelParamsError` y `LabelInputError`) y **`synthetic/__init__.py`** (exporta la API).
+5. **Pruebas:** `tests/unit/test_synthetic_labels.py` (nuevo, 290 pruebas), `tests/integration/test_labels_stage.py` (nuevo, 10) y `tests/unit/test_stages.py` (orden de las etapas con `run_labels`).
+6. `feature_schema.json`, `baseline_params.json`, `students_params.json`, `rooms_params.json` y `pairs_params.json` **sin cambios**; `models/` y `features/` solo se reutilizan.
+
+### Resultado con los datos de ML-03
+
+Relevancia (de `reports/labels_synthetic.md`):
+
+| Grupo | Estudiantes | Pares | 3 | 2 | 1 | 0 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| `train` | 1,400 | 135,993 | 14,097 (10.4 %) | 13,543 (10.0 %) | 13,653 (10.0 %) | 94,700 (69.6 %) |
+| `validation` | 300 | 29,857 | 3,092 (10.4 %) | 2,972 (10.0 %) | 3,002 (10.1 %) | 20,791 (69.6 %) |
+| `test` | 300 | 30,755 | 3,173 (10.3 %) | 3,073 (10.0 %) | 3,088 (10.0 %) | 21,421 (69.7 %) |
+| **Total** | 2,000 | 196,605 | 20,362 (10.4 %) | 19,588 (10.0 %) | 19,743 (10.0 %) | 136,912 (69.6 %) |
+
+Por campus, las proporciones de 3, 2 y 1 quedan entre 9.9 % y 10.4 % y la de 0 entre 69.6 % y 69.7 % en los 10 campus. La relevancia 3 supera el 10 % porque ⌈0.1 n⌉ redondea hacia arriba.
+
+| Control de no circularidad (ML-04-RK02) | Valor |
+| --- | ---: |
+| Spearman baseline (suma sin redondear) – utilidad oculta, todos los pares | **0.513** |
+| Rango documentado | [0.3, 0.9] — cumple |
+| Mediana por estudiante (1,999 con series no constantes) | 0.547 |
+| p25 – p75 por estudiante | 0.377 – 0.685 |
+
+Estudiantes con pocos candidatos: 1 con un candidato (`S1078`, relevancia 3), 0 con dos y 23 con 3–9.
+
+### Trazabilidad R04 → prueba
+
+| Criterio | Prueba |
+| --- | --- |
+| Semilla fija y distinta de estudiantes, cuartos y pares | `test_seed_is_fixed_and_distinct_from_students_rooms_and_pairs` |
+| `labels_params.json` versionado, sintético, con base por parámetro y validado | `test_packaged_params_load_and_declare_synthetic`, `test_invalid_params_are_rejected` (15), `test_non_object_params_are_rejected` |
+| Pesos ocultos distintos del baseline y renormalizados a 100 | `test_hidden_base_weights_differ_from_the_baseline_and_sum_to_100`, `test_hidden_weights_are_renormalized_per_student`, `test_hidden_weights_use_the_lognormal_multipliers`, `test_hidden_weights_are_per_student_and_sum_to_100` (integración) |
+| Forma de la utilidad distinta (presupuesto y distancia) | `test_utility_shape_differs_from_the_baseline_in_budget_and_distance`, `test_curves_are_bounded_in_zero_one`, `test_without_noise_or_variation_utility_is_the_weighted_sum` (a mano) |
+| Relevancia 0–3 por posición con la regla de pocos candidatos | `test_relevance_for_few_candidates` (n = 1…6 y 10), `test_relevance_counts_follow_the_cumulative_ceiling_cuts` (n = 1…250), `test_two_hundred_candidates_split_20_20_20_140`, `test_relevance_per_student_follows_utility_and_the_cuts`, `test_ties_in_utility_are_broken_by_room_id`, `test_relevance_proportions_per_student_follow_the_cuts` (integración) |
+| Misma semilla → mismas etiquetas; otra semilla las cambia | `test_same_seed_gives_the_same_labels_and_another_seed_changes_them` |
+| Una etiqueta por par, ninguna fuera de los candidatos | `test_exactly_one_label_per_input_pair_in_order`, `test_run_labels_writes_one_synthetic_label_per_candidate_pair` (integración, `merge` exterior con `pairs.parquet`) |
+| Correlación baseline–utilidad en [0.3, 0.9] | `test_report_is_marked_synthetic_and_the_correlation_is_in_range`, `test_correlation_out_of_range_is_an_error_and_the_report_says_so`, `test_spearman_known_values` |
+| Sin campos personales ni de género | `test_simulator_has_no_personal_or_gender_fields`, `test_outputs_have_no_personal_or_gender_columns`, `test_simulator_does_not_import_the_baseline` |
+| Reporte «DATOS SINTÉTICOS — NO SON PREFERENCIAS REALES» con advertencia de ML-07 | `test_report_is_marked_synthetic_and_the_correlation_is_in_range` |
+| Reproducible byte por byte (dos corridas) | `test_running_twice_does_not_change_any_file` (SHA-256 de pares, etiquetas, archivos ocultos y reporte) y doble `prepare` abajo |
+| Omisión y errores | `test_without_pairs_the_stage_is_skipped`, `test_missing_feature_columns_are_an_error`, `test_cli_reports_label_errors_with_exit_code_one`, `test_duplicate_pairs_and_bad_features_are_rejected` |
+
+### Comandos y resultados (T04)
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `127 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 36 source files` (PASS) |
+| `uv run pytest tests/unit/test_synthetic_labels.py tests/integration/test_labels_stage.py tests/unit/test_stages.py tests/unit/test_cli.py` | 290 + 27 passed (PASS) |
+| `uv run pytest --cov=thehouse_ml` (suite completa) | **1346 passed** en 1388.4 s (23 min 8 s), código 0; cobertura total **95.96 %** ≥ 80 %; código nuevo: `synthetic/labels.py` **94 %** (255 sentencias), `synthetic/labels_stage.py` **97 %** (171 sentencias), `stages.py` y `cli.py` 100 % (PASS) |
+| `uv run python -m thehouse_ml prepare` (dos veces) | código 0 las dos; `labels: 196605 etiquetas sintéticas de 2000 estudiantes (Spearman con el baseline 0.513)`; SHA-256 de todos los `data/processed/*.parquet` y `reports/*.md` **idénticos** entre corridas; ningún otro archivo versionado cambia (PASS) |
+
+SHA-256 tras las dos corridas: `labels.parquet` `b720f056…cdd54`, `labels_hidden_utility.parquet` `ddf71238…6acff`, `labels_hidden_weights.parquet` `086a8fd2…03525`, `reports/labels_synthetic.md` `9bf89886…5b9ac`.
+
+### Tabla de coherencia (T04)
+
+| Regla | Evidencia | Resultado |
+| --- | --- | --- |
+| Constitución §8.2: las etiquetas de una utilidad se declaran y no son desempeño real | Título «DATOS SINTÉTICOS — NO SON PREFERENCIAS REALES», advertencia de utilidad + ruido, ML-04-RK02 y ML-07; `synthetic = true` en los tres Parquet y en `labels_params.json` | PASS |
+| Constitución §9: semilla fija y reproducible | Semilla 20261121 por estudiante; doble `prepare` con el mismo SHA-256 | PASS |
+| Constitución §11.2 y spec §8: sin atributos sensibles | El simulador solo recibe ids y 6 features del par; sin columnas personales ni de género (prueba) | PASS |
+| Spec §6.5 / ML-04-RK02: pesos ocultos distintos, variación por estudiante y ruido | 4 de 6 pesos distintos, 2 curvas distintas, lognormal 0.3, ruido 5; Spearman 0.513 en [0.3, 0.9] | PASS |
+| Spec §7 regla 3: el baseline no se ajusta con las etiquetas | `baseline_params.json` sin cambios; el simulador no importa `thehouse_ml.models` (prueba) | PASS |
+| AGENTS: datos fuera de git | `labels*.parquet` en `data/processed/` (ignorado); `git status` sin ellos | PASS |
+| AGENTS / constitución §5: sin dependencias nuevas | Biblioteca estándar y pandas; Spearman sin scipy; `pyproject.toml` y `uv.lock` sin cambios | PASS |
+| AGENTS: rutas permitidas | `src/thehouse_ml/synthetic/` (nuevos `labels.py`, `labels_stage.py`, `labels_params.json`; `__init__.py`), `stages.py`, `cli.py`, `tests/`, `reports/labels_synthetic.md`, `memoria.md`, `specs/ml-04-baseline-model/evidence.md`; params protegidos sin cambios | PASS |
+| Spec §6.5: valores SUPUESTO fijados con su M-ML | M-ML-032 **APROBADO** (César Yael López Trujillo, 2026-11-20) | PASS |
+
+### Hallazgos (T04)
+
+| # | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| T04-H1 | La spec §6.5 dice «Σ peso oculto × `f` de la §6.2»; por el «EJECUTA», presupuesto y distancia usan otras features y curvas (`1 − price_to_budget`, `exp(−effective_distance_km / 3)`). | ADVERTENCIA (desviación del texto de la spec) | **APROBADO** (M-ML-032) |
+| T04-H2 | Bandas 10/10/10 % en lugar de la propuesta 10/20/30 % de la spec §6.5, por el «EJECUTA». Con ⌈·⌉ acumulado, 2 o 3 candidatos solo dan un 3 y el resto 0. | ADVERTENCIA (desviación de una propuesta SUPUESTO) | **APROBADO** (M-ML-032) |
+| T04-H3 | La spec ponía `utility` en `labels.parquet`; va aparte en `labels_hidden_utility.parquet` (y los pesos en `labels_hidden_weights.parquet`), por el «EJECUTA». `labels.parquet` agrega `labels_params_version`, que pide la spec. | INFORMATIVO | **APROBADO** (M-ML-032) |
+| T04-H4 | `price_to_budget` no tiene tope en el esquema (`[0, ∞)`); las curvas se acotan a [0, 1] con `min(x, 1)`. En los candidatos `price_to_budget` ≤ 1 (HC01), así que el recorte no actúa. | INFORMATIVO | Documentado en `labels_params.json` |
+| T04-H5 | `utility` es binary64 con `math.exp` y `random.gauss`: los bytes de `labels_hidden_utility.parquet` podrían diferir en el último ulp entre plataformas (libm); `labels.parquet` solo depende del orden. La prueba de reproducibilidad es en la misma plataforma. | INFORMATIVO | Aceptado |
+| T04-H6 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR |
+
+### Revisión y resultado (T04)
+
+- **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas; solo datos sintéticos de ML-03.
+- **Resultado:** **PASS** (T04) — se cumple la aceptación de R04 y todos los controles pasan; M-ML-032 **APROBADO** por César Yael López Trujillo el 2026-11-20 con los valores propuestos y las desviaciones T04-H1, T04-H2 y T04-H3. `labels_params.json` pasó a `metadata.decision = "M-ML-032 (APROBADO)"` sin cambiar ningún valor y `reports/labels_synthetic.md` se regeneró con `prepare` (ver «Cierre tras la aprobación»). T04 completa; ML-04 en 4/7.
+
+### Nota para ML-05
+
+- `data/processed/labels_hidden_utility.parquet` (utilidad oculta por par) y `data/processed/labels_hidden_weights.parquet` (pesos ocultos por estudiante) **NO deben usarse como entrada del modelo ni para entrenarlo**, ni para elegir features o hiperparámetros: son la «respuesta» del simulador y usarlos sería fuga de la etiqueta. ML-05 entrena **solo** con `labels.parquet` (`relevance`, partición `train`) unido a `pairs.parquet` por `student_id` y `room_id`.
+- **Una prueba de ML-05 deberá verificarlo**: por ejemplo, que el código de entrenamiento y evaluación no lea esos dos archivos (sus nombres no aparecen en el módulo de entrenamiento) y que las columnas de entrada del modelo sean exactamente las de `feature_order` del esquema, sin `utility` ni `weight_*`.
+- Las métricas que ML-05 calcule con `labels.parquet` son sobre **etiquetas sintéticas** y se reportan como tales (constitución §8.2); se reemplazan con señales reales en ML-07.
+
+### Cierre tras la aprobación (T04)
+
+| Comando o cambio | Resultado |
+| --- | --- |
+| `labels_params.json`: `metadata.decision` `M-ML-032 (PROPUESTO)` → `M-ML-032 (APROBADO)` | Único cambio; ningún valor ni `basis` cambia |
+| `uv run python -m thehouse_ml prepare` | código 0; `labels: 196605 etiquetas sintéticas de 2000 estudiantes (Spearman con el baseline 0.513)`; el reporte dice «decisión M-ML-032 (APROBADO)» (PASS) |
+| SHA-256 después de la aprobación | `labels.parquet` `b720f056…cdd54`, `labels_hidden_utility.parquet` `ddf71238…6acff` y `labels_hidden_weights.parquet` `086a8fd2…03525`, **iguales** a los de antes (los valores no cambiaron); `reports/labels_synthetic.md` `b1260eb1…511a6`, que solo cambia en el texto de la decisión (PASS) |
+| `uv run ruff format --check .` / `uv run ruff check .` / `uv run mypy src` | `127 files already formatted` / `All checks passed!` / `Success: no issues found in 36 source files` (PASS) |
+| `uv run pytest tests/unit/test_synthetic_labels.py tests/integration/test_labels_stage.py tests/unit/test_stages.py tests/unit/test_cli.py tests/test_repo_hygiene.py` (pruebas afectadas) | **335 passed** (PASS); la suite completa (1346 passed, 95.96 %) corrió antes del cambio de `metadata.decision`, que ninguna prueba lee; el CI la vuelve a correr |
