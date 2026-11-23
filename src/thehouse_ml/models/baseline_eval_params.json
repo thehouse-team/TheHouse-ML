@@ -1,0 +1,55 @@
+{
+  "metadata": {
+    "params_version": "1.0.0",
+    "spec": "ML-04 1.0.0, T06 (ML-04-R06)",
+    "decision": "M-ML-034 (APROBADO)",
+    "synthetic": true,
+    "description": "Parámetros de la evaluación del modelo base (reports/baseline_report.md y reports/baseline_metrics.json). Cada parámetro lleva su base: «calibrado: <fuente>» o «SUPUESTO documentado». Las métricas se calculan con etiquetas SINTÉTICAS (labels.parquet, M-ML-032): no son desempeño real (constitución §8.2 y §20.3)."
+  },
+  "parameters": {
+    "split": {
+      "value": "test",
+      "basis": "calibrado: spec ML-04 §6.6.3 y decisión 5 (M-ML-029): partición test de ML-03 (300 estudiantes, M-ML-027)."
+    },
+    "min_candidates": {
+      "value": 2,
+      "basis": "calibrado: M-ML-027/M-ML-028 (nota para ML-04/ML-05) y spec ML-04 §6.6.3: solo estudiantes con 2 o más candidatos; se reporta cuántos quedan fuera."
+    },
+    "relevance_threshold": {
+      "value": 2,
+      "basis": "SUPUESTO documentado (spec ML-04 §6.6.3, se fija en T06): un cuarto es relevante para Precision@5 y MAP si relevance ≥ 2, es decir, el 20 % superior de la utilidad oculta de cada estudiante con los cortes 10/10/10 % de M-ML-032 (grados 3 y 2). NDCG usa la relevancia graduada 0–3 completa."
+    },
+    "bootstrap.resamples": {
+      "value": 1000,
+      "basis": "SUPUESTO documentado (spec ML-04 §6.6.4): 1,000 remuestreos de estudiantes con reemplazo por segmento."
+    },
+    "bootstrap.confidence": {
+      "value": 0.95,
+      "basis": "SUPUESTO documentado (spec ML-04 §6.6.4): intervalo percentil del 95 % (percentiles 2.5 y 97.5 de las medias remuestreadas, interpolación lineal)."
+    },
+    "bootstrap.seed": {
+      "value": 20261122,
+      "basis": "SUPUESTO documentado: semilla fija (constitución §9), distinta de estudiantes (20261119), cuartos (20261905), pares (20261120) y etiquetas (20261121). Cada segmento usa random.Random(\"bootstrap:<seed>:<segment_id>\") para que agregar o quitar un segmento no cambie los intervalos de los demás; el remuestreo es pareado (mismos estudiantes para baseline, azar y su diferencia)."
+    },
+    "random_order.seed": {
+      "value": 20261123,
+      "basis": "SUPUESTO documentado: piso de referencia. Para cada estudiante, sus candidatos en orden de room_id se barajan con random.Random(\"random_order:<seed>:<student_id>\").shuffle (una permutación por estudiante, independiente del segmento)."
+    },
+    "budget_ranges": {
+      "value": [
+        {"id": "budget_le_2000", "label": "≤ $2,000", "min": null, "max": 2000},
+        {"id": "budget_2001_3500", "label": "$2,001–$3,500", "min": 2001, "max": 3500},
+        {"id": "budget_gt_3500", "label": "> $3,500", "min": 3501, "max": null}
+      ],
+      "basis": "SUPUESTO documentado (spec ML-04 §6.6.5): rangos de budget.max del estudiante (MXN, enteros, límites inclusivos; null = sin límite)."
+    },
+    "example.min_candidates": {
+      "value": 10,
+      "basis": "SUPUESTO documentado: el ejemplo explicado es el primer estudiante de test (por student_id) de un campus verificado con al menos 10 candidatos; regla fija para no elegir el ejemplo a mano."
+    },
+    "example.top_n": {
+      "value": 5,
+      "basis": "calibrado: «EJECUTA» de T06 (un estudiante con su top 5)."
+    }
+  }
+}

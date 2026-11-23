@@ -10,10 +10,11 @@ import pytest
 
 from thehouse_ml import __version__
 from thehouse_ml.cli import build_parser, main
+from thehouse_ml.models.baseline_report import EVALUATE_SKIP_MESSAGE
 from thehouse_ml.stages import STAGE_NAMES, STAGES, Stage
 
-# ML-02 T02 implementa `download` y T03 implementa `prepare`; el resto sigue vacío.
-EMPTY_STAGES = tuple(stage for stage in STAGES if stage.name not in {"download", "prepare"})
+# ML-02 T02 implementa `download`, T03 implementa `prepare` y ML-04 T06 `evaluate`; el resto sigue vacío.
+EMPTY_STAGES = tuple(stage for stage in STAGES if stage.name not in {"download", "prepare", "evaluate"})
 
 
 def test_help_lists_the_five_stages_in_pipeline_order(capsys: pytest.CaptureFixture[str]) -> None:
@@ -42,6 +43,17 @@ def test_empty_stages_do_not_create_files(tmp_path: Path) -> None:
         main(["--root", str(tmp_path), stage.name])
 
     assert list(tmp_path.iterdir()) == []
+
+
+def test_evaluate_without_inputs_is_skipped_and_creates_no_files(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    code = main(["--root", str(tmp_path), "evaluate"])
+
+    assert code == 0
+    assert capsys.readouterr().out.strip() == EVALUATE_SKIP_MESSAGE
+    assert list(tmp_path.iterdir()) == []
+    EVALUATE_SKIP_MESSAGE.encode("cp1252")
 
 
 def test_unknown_stage_exits_with_usage_error(capsys: pytest.CaptureFixture[str]) -> None:

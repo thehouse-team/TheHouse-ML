@@ -1,0 +1,4706 @@
+{
+  "title": "DATOS SINTÉTICOS — ETIQUETAS SINTÉTICAS — métricas del modelo base baseline-1.0.0",
+  "synthetic": true,
+  "warning": "Métricas calculadas con etiquetas SINTÉTICAS (utilidad oculta documentada más ruido, M-ML-032): no son desempeño real ni preferencias reales (constitución §8.2 y §20.3); se reemplazan con señales reales en ML-07.",
+  "model_version": "baseline-1.0.0",
+  "feature_schema_version": "2.0.0",
+  "labels_params_version": "1.0.0",
+  "eval_params_version": "1.0.0",
+  "decision": "M-ML-034 (APROBADO)",
+  "reference_for": "ML-05 (constitución §10.1: sin mejora demostrada sobre el modelo base no se promueve)",
+  "primary_metric": "ndcg@10",
+  "evaluation": {
+    "split": "test",
+    "min_candidates": 2,
+    "students_in_split": 300,
+    "students_evaluated": 300,
+    "excluded_fewer_than_min_candidates": 0,
+    "excluded_no_relevant_room": 0,
+    "ranking": "suma sin redondear descendente, desempate por room_id ascendente (rank, T03)"
+  },
+  "metrics": {
+    "names": [
+      "ndcg@10",
+      "ndcg@5",
+      "precision@5",
+      "map"
+    ],
+    "relevance_threshold": 2,
+    "ndcg": "DCG@k = sum_{i<=k} (2^rel_i - 1) / log2(i + 1); NDCG@k = DCG@k / IDCG@k",
+    "precision@5": "relevantes (relevance >= umbral) en las 5 primeras / 5 (denominador fijo)",
+    "map": "media de AP; AP = (1/R) sum_{i relevante} Precision@i sobre la lista completa",
+    "no_relevant_room": "NDCG o AP no definidos: el estudiante se excluye y se cuenta"
+  },
+  "bootstrap": {
+    "unit": "student",
+    "resamples": 1000,
+    "confidence": 0.95,
+    "interval": "percentil con interpolación lineal",
+    "paired": true,
+    "seed": 20261122,
+    "rng": "random.Random(\"bootstrap:<seed>:<segment_id>\").choices"
+  },
+  "random_reference": {
+    "seed": 20261123,
+    "rng": "random.Random(\"random_order:<seed>:<student_id>\").shuffle sobre room_id ordenados"
+  },
+  "budget_ranges": [
+    {
+      "id": "budget_le_2000",
+      "label": "≤ $2,000",
+      "min": null,
+      "max": 2000
+    },
+    {
+      "id": "budget_2001_3500",
+      "label": "$2,001–$3,500",
+      "min": 2001,
+      "max": 3500
+    },
+    {
+      "id": "budget_gt_3500",
+      "label": "> $3,500",
+      "min": 3501,
+      "max": null
+    }
+  ],
+  "segments": [
+    {
+      "id": "total",
+      "kind": "total",
+      "label": "Total",
+      "students_in_split": 300,
+      "students_evaluated": 300,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.5272521184236858,
+          "ci_low": 0.5031827000348073,
+          "ci_high": 0.5503788715104617
+        },
+        "ndcg@5": {
+          "mean": 0.5350822896345859,
+          "ci_low": 0.5065604029734413,
+          "ci_high": 0.5603829287320267
+        },
+        "precision@5": {
+          "mean": 0.5860000000000001,
+          "ci_low": 0.5573166666666667,
+          "ci_high": 0.6153333333333333
+        },
+        "map": {
+          "mean": 0.5033594130897066,
+          "ci_low": 0.4846694758899098,
+          "ci_high": 0.5218578218996152
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.19738603886639725,
+          "ci_low": 0.18157586666079892,
+          "ci_high": 0.2136322070849502
+        },
+        "ndcg@5": {
+          "mean": 0.16548036544728253,
+          "ci_low": 0.14792367913141288,
+          "ci_high": 0.18231807422672539
+        },
+        "precision@5": {
+          "mean": 0.20400000000000001,
+          "ci_low": 0.18533333333333335,
+          "ci_high": 0.22335
+        },
+        "map": {
+          "mean": 0.2510147158959904,
+          "ci_low": 0.24229717643853807,
+          "ci_high": 0.26023634200338014
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.3298660795572884,
+          "ci_low": 0.30216331235678934,
+          "ci_high": 0.3551759115218656
+        },
+        "ndcg@5": {
+          "mean": 0.3696019241873035,
+          "ci_low": 0.3381136378412037,
+          "ci_high": 0.39940023210528175
+        },
+        "precision@5": {
+          "mean": 0.382,
+          "ci_low": 0.3466666666666667,
+          "ci_high": 0.41601666666666665
+        },
+        "map": {
+          "mean": 0.25234469719371616,
+          "ci_low": 0.2325698490258745,
+          "ci_high": 0.2722979324103238
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9826666666666667
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "campus:UTTT",
+      "kind": "campus",
+      "label": "UTTT",
+      "students_in_split": 30,
+      "students_evaluated": 30,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.5151023559996591,
+          "ci_low": 0.44081321052495087,
+          "ci_high": 0.5808780539715447
+        },
+        "ndcg@5": {
+          "mean": 0.5152108613436457,
+          "ci_low": 0.43268376983879736,
+          "ci_high": 0.5918719391065396
+        },
+        "precision@5": {
+          "mean": 0.5733333333333334,
+          "ci_low": 0.4731666666666668,
+          "ci_high": 0.6666666666666666
+        },
+        "map": {
+          "mean": 0.4966758782493639,
+          "ci_low": 0.4369917815449834,
+          "ci_high": 0.5519934567371607
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.18673065402090278,
+          "ci_low": 0.14256361128362127,
+          "ci_high": 0.23379823547881873
+        },
+        "ndcg@5": {
+          "mean": 0.16027650851933173,
+          "ci_low": 0.11309840871252891,
+          "ci_high": 0.21466416060433233
+        },
+        "precision@5": {
+          "mean": 0.2,
+          "ci_low": 0.14,
+          "ci_high": 0.26666666666666666
+        },
+        "map": {
+          "mean": 0.2512708637365081,
+          "ci_low": 0.21926942843756603,
+          "ci_high": 0.2893887846004934
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.3283717019787563,
+          "ci_low": 0.2361772767163492,
+          "ci_high": 0.4156852280138061
+        },
+        "ndcg@5": {
+          "mean": 0.354934352824314,
+          "ci_low": 0.2574678870715691,
+          "ci_high": 0.45001146473984643
+        },
+        "precision@5": {
+          "mean": 0.3733333333333333,
+          "ci_low": 0.24666666666666667,
+          "ci_high": 0.4934999999999999
+        },
+        "map": {
+          "mean": 0.24540501451285582,
+          "ci_low": 0.17932384830667733,
+          "ci_high": 0.31219255016307806
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9666666666666667
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "campus:UAEH-ESTE",
+      "kind": "campus",
+      "label": "UAEH-ESTE",
+      "students_in_split": 30,
+      "students_evaluated": 30,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.4967750281880841,
+          "ci_low": 0.41523963738058084,
+          "ci_high": 0.5838198934493684
+        },
+        "ndcg@5": {
+          "mean": 0.49980732164354486,
+          "ci_low": 0.4020517158581988,
+          "ci_high": 0.5967225039478541
+        },
+        "precision@5": {
+          "mean": 0.5866666666666667,
+          "ci_low": 0.48666666666666664,
+          "ci_high": 0.6866666666666668
+        },
+        "map": {
+          "mean": 0.4926774630889351,
+          "ci_low": 0.42872249756664854,
+          "ci_high": 0.5583435260809347
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.16221163178369896,
+          "ci_low": 0.12640499207365044,
+          "ci_high": 0.2016303627146144
+        },
+        "ndcg@5": {
+          "mean": 0.13699628312702442,
+          "ci_low": 0.09372398374016785,
+          "ci_high": 0.18836911273430806
+        },
+        "precision@5": {
+          "mean": 0.18000000000000002,
+          "ci_low": 0.12000000000000001,
+          "ci_high": 0.24016666666666653
+        },
+        "map": {
+          "mean": 0.2278799726586569,
+          "ci_low": 0.21217320017442418,
+          "ci_high": 0.2448317524225375
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.33456339640438515,
+          "ci_low": 0.23681881405489888,
+          "ci_high": 0.4289029193129458
+        },
+        "ndcg@5": {
+          "mean": 0.3628110385165204,
+          "ci_low": 0.24768176301679246,
+          "ci_high": 0.4663108973941993
+        },
+        "precision@5": {
+          "mean": 0.4066666666666666,
+          "ci_low": 0.28,
+          "ci_high": 0.5266666666666667
+        },
+        "map": {
+          "mean": 0.2647974904302782,
+          "ci_low": 0.20135709649248879,
+          "ci_high": 0.32666249034703415
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 1.0
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "campus:UAEH-ESTL",
+      "kind": "campus",
+      "label": "UAEH-ESTL",
+      "students_in_split": 30,
+      "students_evaluated": 30,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.5138433065600548,
+          "ci_low": 0.44302795011945895,
+          "ci_high": 0.5797252570267332
+        },
+        "ndcg@5": {
+          "mean": 0.5330829086530621,
+          "ci_low": 0.45604726338031376,
+          "ci_high": 0.6056187461082441
+        },
+        "precision@5": {
+          "mean": 0.6,
+          "ci_low": 0.5,
+          "ci_high": 0.7
+        },
+        "map": {
+          "mean": 0.5015861877052605,
+          "ci_low": 0.4422190164794862,
+          "ci_high": 0.5602800128098737
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.1967359803516642,
+          "ci_low": 0.1388832852918477,
+          "ci_high": 0.2544223148349978
+        },
+        "ndcg@5": {
+          "mean": 0.17816943431373317,
+          "ci_low": 0.1132982718507263,
+          "ci_high": 0.24927392496107542
+        },
+        "precision@5": {
+          "mean": 0.24000000000000002,
+          "ci_low": 0.1598333333333335,
+          "ci_high": 0.3266666666666667
+        },
+        "map": {
+          "mean": 0.27373798738891497,
+          "ci_low": 0.23692632303833194,
+          "ci_high": 0.31310090295331167
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.3171073262083906,
+          "ci_low": 0.2178215043510153,
+          "ci_high": 0.4178109020685306
+        },
+        "ndcg@5": {
+          "mean": 0.3549134743393289,
+          "ci_low": 0.23644744429067271,
+          "ci_high": 0.4668524499769712
+        },
+        "precision@5": {
+          "mean": 0.36000000000000004,
+          "ci_low": 0.22650000000000015,
+          "ci_high": 0.5
+        },
+        "map": {
+          "mean": 0.2278482003163456,
+          "ci_low": 0.15856636015210918,
+          "ci_high": 0.29851835934433923
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9933333333333334
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "campus:UAEH-ESAT",
+      "kind": "campus",
+      "label": "UAEH-ESAT",
+      "students_in_split": 30,
+      "students_evaluated": 30,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.4653977960493494,
+          "ci_low": 0.3849763621750562,
+          "ci_high": 0.5494516806407966
+        },
+        "ndcg@5": {
+          "mean": 0.4433092431529235,
+          "ci_low": 0.3562280618113845,
+          "ci_high": 0.532333954445121
+        },
+        "precision@5": {
+          "mean": 0.5066666666666667,
+          "ci_low": 0.4066666666666667,
+          "ci_high": 0.62
+        },
+        "map": {
+          "mean": 0.48475082212113213,
+          "ci_low": 0.4170790332068516,
+          "ci_high": 0.5522638067495893
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.24869560014282588,
+          "ci_low": 0.19613009736995698,
+          "ci_high": 0.30614879296826136
+        },
+        "ndcg@5": {
+          "mean": 0.2118375915715955,
+          "ci_low": 0.16163534325076256,
+          "ci_high": 0.2674084158379552
+        },
+        "precision@5": {
+          "mean": 0.24000000000000002,
+          "ci_low": 0.18000000000000002,
+          "ci_high": 0.29333333333333333
+        },
+        "map": {
+          "mean": 0.26264669852277905,
+          "ci_low": 0.23502561518623863,
+          "ci_high": 0.2932092438508177
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.21670219590652354,
+          "ci_low": 0.13458242462740055,
+          "ci_high": 0.30628636750863325
+        },
+        "ndcg@5": {
+          "mean": 0.231471651581328,
+          "ci_low": 0.14419917046433303,
+          "ci_high": 0.32352412313216455
+        },
+        "precision@5": {
+          "mean": 0.26666666666666666,
+          "ci_low": 0.15333333333333335,
+          "ci_high": 0.38666666666666666
+        },
+        "map": {
+          "mean": 0.22210412359835308,
+          "ci_low": 0.14837284900819317,
+          "ci_high": 0.2955557623279473
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9866666666666667
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "campus:ITSOEH",
+      "kind": "campus",
+      "label": "ITSOEH",
+      "students_in_split": 30,
+      "students_evaluated": 30,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.4783318205500828,
+          "ci_low": 0.40496894605463873,
+          "ci_high": 0.5585957440254153
+        },
+        "ndcg@5": {
+          "mean": 0.5082753804079072,
+          "ci_low": 0.42093454168563127,
+          "ci_high": 0.5942065037240015
+        },
+        "precision@5": {
+          "mean": 0.5800000000000001,
+          "ci_low": 0.4733333333333334,
+          "ci_high": 0.68
+        },
+        "map": {
+          "mean": 0.4480752742421338,
+          "ci_low": 0.3891150021402861,
+          "ci_high": 0.5158065918635979
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.18059135760541548,
+          "ci_low": 0.14264543706014024,
+          "ci_high": 0.22202239775748062
+        },
+        "ndcg@5": {
+          "mean": 0.15746671201707332,
+          "ci_low": 0.11213189758805936,
+          "ci_high": 0.20818839353660268
+        },
+        "precision@5": {
+          "mean": 0.20666666666666667,
+          "ci_low": 0.15333333333333335,
+          "ci_high": 0.26666666666666666
+        },
+        "map": {
+          "mean": 0.24773524649273193,
+          "ci_low": 0.2294732124390703,
+          "ci_high": 0.2705920886470982
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.29774046294466733,
+          "ci_low": 0.21453091366830976,
+          "ci_high": 0.38426912961380527
+        },
+        "ndcg@5": {
+          "mean": 0.35080866839083386,
+          "ci_low": 0.2414287602204512,
+          "ci_high": 0.4524351083414075
+        },
+        "precision@5": {
+          "mean": 0.37333333333333335,
+          "ci_low": 0.2466666666666667,
+          "ci_high": 0.49333333333333335
+        },
+        "map": {
+          "mean": 0.20034002774940182,
+          "ci_low": 0.13972373975800398,
+          "ci_high": 0.27001225480037605
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 1.0
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "campus:TESJI",
+      "kind": "campus",
+      "label": "TESJI (sin verificar)",
+      "students_in_split": 30,
+      "students_evaluated": 30,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.5805793262688052,
+          "ci_low": 0.5114421358912586,
+          "ci_high": 0.6501993394049026
+        },
+        "ndcg@5": {
+          "mean": 0.5765972902687491,
+          "ci_low": 0.4871238955803485,
+          "ci_high": 0.6584370982550817
+        },
+        "precision@5": {
+          "mean": 0.58,
+          "ci_low": 0.49333333333333335,
+          "ci_high": 0.6733333333333333
+        },
+        "map": {
+          "mean": 0.5343705250369085,
+          "ci_low": 0.47602598656251277,
+          "ci_high": 0.5975431637124258
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.20159611688110463,
+          "ci_low": 0.16069214583627225,
+          "ci_high": 0.24476272972695287
+        },
+        "ndcg@5": {
+          "mean": 0.15835326472020694,
+          "ci_low": 0.10799977670556389,
+          "ci_high": 0.20853930700469558
+        },
+        "precision@5": {
+          "mean": 0.20666666666666667,
+          "ci_low": 0.14666666666666667,
+          "ci_high": 0.2733333333333333
+        },
+        "map": {
+          "mean": 0.23156274399919544,
+          "ci_low": 0.21245246725923053,
+          "ci_high": 0.25050479066377457
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.37898320938770047,
+          "ci_low": 0.30008818598586406,
+          "ci_high": 0.4562677551463144
+        },
+        "ndcg@5": {
+          "mean": 0.4182440255485422,
+          "ci_low": 0.30400265394200965,
+          "ci_high": 0.5237716076486305
+        },
+        "precision@5": {
+          "mean": 0.37333333333333335,
+          "ci_low": 0.28,
+          "ci_high": 0.4668333333333332
+        },
+        "map": {
+          "mean": 0.302807781037713,
+          "ci_low": 0.2381274511046628,
+          "ci_high": 0.3696099571251611
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9533333333333334
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "campus:UMB-JILO",
+      "kind": "campus",
+      "label": "UMB-JILO",
+      "students_in_split": 30,
+      "students_evaluated": 30,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.5361177515982296,
+          "ci_low": 0.4571946912472154,
+          "ci_high": 0.617565854682799
+        },
+        "ndcg@5": {
+          "mean": 0.5441979675038694,
+          "ci_low": 0.4534407648327308,
+          "ci_high": 0.629715785502763
+        },
+        "precision@5": {
+          "mean": 0.56,
+          "ci_low": 0.47333333333333333,
+          "ci_high": 0.6466666666666666
+        },
+        "map": {
+          "mean": 0.4822565704280378,
+          "ci_low": 0.42288406240617654,
+          "ci_high": 0.5463633522261009
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.16846524816230388,
+          "ci_low": 0.1211074694112155,
+          "ci_high": 0.21458416020542734
+        },
+        "ndcg@5": {
+          "mean": 0.13252486324211918,
+          "ci_low": 0.08886117513831053,
+          "ci_high": 0.17851312573717204
+        },
+        "precision@5": {
+          "mean": 0.16000000000000003,
+          "ci_low": 0.10666666666666667,
+          "ci_high": 0.21333333333333335
+        },
+        "map": {
+          "mean": 0.23840893929666632,
+          "ci_low": 0.22225632098328496,
+          "ci_high": 0.25586171019021164
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.36765250343592576,
+          "ci_low": 0.28744678902735543,
+          "ci_high": 0.44931440348314927
+        },
+        "ndcg@5": {
+          "mean": 0.4116731042617502,
+          "ci_low": 0.3160741661684375,
+          "ci_high": 0.5089385743383749
+        },
+        "precision@5": {
+          "mean": 0.4,
+          "ci_low": 0.30666666666666664,
+          "ci_high": 0.5
+        },
+        "map": {
+          "mean": 0.2438476311313715,
+          "ci_low": 0.18645465061673508,
+          "ci_high": 0.3088722616787061
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9866666666666667
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "campus:UMB-VDC",
+      "kind": "campus",
+      "label": "UMB-VDC (sin verificar)",
+      "students_in_split": 30,
+      "students_evaluated": 30,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.5763885606248027,
+          "ci_low": 0.509293325135617,
+          "ci_high": 0.6382939527043257
+        },
+        "ndcg@5": {
+          "mean": 0.5794589494541735,
+          "ci_low": 0.49727397708448134,
+          "ci_high": 0.6623080128543308
+        },
+        "precision@5": {
+          "mean": 0.6066666666666667,
+          "ci_low": 0.5066666666666667,
+          "ci_high": 0.7
+        },
+        "map": {
+          "mean": 0.5075443550620001,
+          "ci_low": 0.45930142843775723,
+          "ci_high": 0.5559126270694356
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.2141643821432708,
+          "ci_low": 0.1641141793387745,
+          "ci_high": 0.26757453596008673
+        },
+        "ndcg@5": {
+          "mean": 0.1898833873854886,
+          "ci_low": 0.13093281341255678,
+          "ci_high": 0.24699761655996147
+        },
+        "precision@5": {
+          "mean": 0.18666666666666668,
+          "ci_low": 0.13333333333333333,
+          "ci_high": 0.24000000000000002
+        },
+        "map": {
+          "mean": 0.2531274908061704,
+          "ci_low": 0.22187525724457427,
+          "ci_high": 0.28689649990801863
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.3622241784815319,
+          "ci_low": 0.28226256001939093,
+          "ci_high": 0.43359988652440073
+        },
+        "ndcg@5": {
+          "mean": 0.389575562068685,
+          "ci_low": 0.2796642285542952,
+          "ci_high": 0.49260865325249
+        },
+        "precision@5": {
+          "mean": 0.42,
+          "ci_low": 0.30666666666666664,
+          "ci_high": 0.5333333333333333
+        },
+        "map": {
+          "mean": 0.2544168642558297,
+          "ci_low": 0.19385801328192695,
+          "ci_high": 0.3080040028712207
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9933333333333334
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "campus:UCAN",
+      "kind": "campus",
+      "label": "UCAN (sin verificar)",
+      "students_in_split": 30,
+      "students_evaluated": 30,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.5402852202248588,
+          "ci_low": 0.4781459331263709,
+          "ci_high": 0.6006305983889696
+        },
+        "ndcg@5": {
+          "mean": 0.5897203596590808,
+          "ci_low": 0.5175572274768103,
+          "ci_high": 0.6568808794495725
+        },
+        "precision@5": {
+          "mean": 0.64,
+          "ci_low": 0.5666666666666667,
+          "ci_high": 0.7066666666666667
+        },
+        "map": {
+          "mean": 0.5322842781908829,
+          "ci_low": 0.4756630159753279,
+          "ci_high": 0.591085213847551
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.19005887621282744,
+          "ci_low": 0.14877922263094365,
+          "ci_high": 0.23313467776011199
+        },
+        "ndcg@5": {
+          "mean": 0.16839519384967847,
+          "ci_low": 0.11775990216941334,
+          "ci_high": 0.2209295694881855
+        },
+        "precision@5": {
+          "mean": 0.24000000000000002,
+          "ci_low": 0.18000000000000002,
+          "ci_high": 0.3
+        },
+        "map": {
+          "mean": 0.24970455250230464,
+          "ci_low": 0.22741368376328155,
+          "ci_high": 0.2792612730950159
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.35022634401203134,
+          "ci_low": 0.2789327878371566,
+          "ci_high": 0.4187138903307445
+        },
+        "ndcg@5": {
+          "mean": 0.42132516580940227,
+          "ci_low": 0.3311604511133777,
+          "ci_high": 0.5113601638623598
+        },
+        "precision@5": {
+          "mean": 0.4,
+          "ci_low": 0.32,
+          "ci_high": 0.48666666666666664
+        },
+        "map": {
+          "mean": 0.2825797256885783,
+          "ci_low": 0.22242349260648928,
+          "ci_high": 0.34339583725287093
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9866666666666667
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "campus:UNE-TULA",
+      "kind": "campus",
+      "label": "UNE-TULA",
+      "students_in_split": 30,
+      "students_evaluated": 30,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.5697000181729307,
+          "ci_low": 0.5024205734605458,
+          "ci_high": 0.6411474925919374
+        },
+        "ndcg@5": {
+          "mean": 0.5611626142589039,
+          "ci_low": 0.4810346314417002,
+          "ci_high": 0.6476533921716131
+        },
+        "precision@5": {
+          "mean": 0.6266666666666667,
+          "ci_low": 0.5399999999999999,
+          "ci_high": 0.7200000000000001
+        },
+        "map": {
+          "mean": 0.553372776772411,
+          "ci_low": 0.4960187334926352,
+          "ci_high": 0.6175025698855298
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.22461054135995856,
+          "ci_low": 0.17611426861697588,
+          "ci_high": 0.2791568081678042
+        },
+        "ndcg@5": {
+          "mean": 0.16090041572657382,
+          "ci_low": 0.11494733407487556,
+          "ci_high": 0.21435165820692592
+        },
+        "precision@5": {
+          "mean": 0.18000000000000002,
+          "ci_low": 0.13333333333333333,
+          "ci_high": 0.23333333333333334
+        },
+        "map": {
+          "mean": 0.2740726635559762,
+          "ci_low": 0.24667463809450968,
+          "ci_high": 0.3114848775959697
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.34508947681297214,
+          "ci_low": 0.2660549707857171,
+          "ci_high": 0.4229843414435317
+        },
+        "ndcg@5": {
+          "mean": 0.40026219853232997,
+          "ci_low": 0.3106381556808158,
+          "ci_high": 0.4943177816014948
+        },
+        "precision@5": {
+          "mean": 0.44666666666666666,
+          "ci_low": 0.3598333333333335,
+          "ci_high": 0.5334999999999999
+        },
+        "map": {
+          "mean": 0.2793001132164348,
+          "ci_low": 0.21037415455660655,
+          "ci_high": 0.34979008554781477
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9600000000000001
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "without_seed_sin_verificar",
+      "kind": "verified",
+      "label": "Sin `seed_sin_verificar`",
+      "students_in_split": 210,
+      "students_evaluated": 210,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.5107525824454844,
+          "ci_low": 0.47993501123711096,
+          "ci_high": 0.5394344331041047
+        },
+        "ndcg@5": {
+          "mean": 0.5150066138519794,
+          "ci_low": 0.48003852264941244,
+          "ci_high": 0.5481495012093835
+        },
+        "precision@5": {
+          "mean": 0.5761904761904761,
+          "ci_low": 0.5361904761904762,
+          "ci_high": 0.6133333333333334
+        },
+        "map": {
+          "mean": 0.49419928180103917,
+          "ci_low": 0.469427277211355,
+          "ci_high": 0.5188241014082077
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.19543443048953854,
+          "ci_low": 0.1777139470360804,
+          "ci_high": 0.2132732273057987
+        },
+        "ndcg@5": {
+          "mean": 0.16259597264535017,
+          "ci_low": 0.14259064427048349,
+          "ci_high": 0.18191101129920664
+        },
+        "precision@5": {
+          "mean": 0.20095238095238097,
+          "ci_low": 0.17711904761904765,
+          "ci_high": 0.22478571428571428
+        },
+        "map": {
+          "mean": 0.25367891023603334,
+          "ci_low": 0.24277534612384277,
+          "ci_high": 0.2652206878565471
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.3153181519559458,
+          "ci_low": 0.27876145553002296,
+          "ci_high": 0.34877286290890946
+        },
+        "ndcg@5": {
+          "mean": 0.3524106412066293,
+          "ci_low": 0.31183534303344557,
+          "ci_high": 0.39023611136265407
+        },
+        "precision@5": {
+          "mean": 0.3752380952380952,
+          "ci_low": 0.32569047619047625,
+          "ci_high": 0.42000000000000004
+        },
+        "map": {
+          "mean": 0.24052037156500583,
+          "ci_low": 0.21482853288666595,
+          "ci_high": 0.2651382058507343
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9847619047619048
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "budget:budget_le_2000",
+      "kind": "budget",
+      "label": "`budget.max` ≤ $2,000",
+      "students_in_split": 73,
+      "students_evaluated": 73,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.5675062562946418,
+          "ci_low": 0.5253847013101121,
+          "ci_high": 0.6084873539822452
+        },
+        "ndcg@5": {
+          "mean": 0.5827701249617946,
+          "ci_low": 0.5355927193778272,
+          "ci_high": 0.6310633854115746
+        },
+        "precision@5": {
+          "mean": 0.6657534246575343,
+          "ci_low": 0.6082191780821917,
+          "ci_high": 0.7232876712328767
+        },
+        "map": {
+          "mean": 0.5609617446844307,
+          "ci_low": 0.522803932132994,
+          "ci_high": 0.601337097854163
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.20559678894395852,
+          "ci_low": 0.17519905612565145,
+          "ci_high": 0.23586819657274963
+        },
+        "ndcg@5": {
+          "mean": 0.16278179236476947,
+          "ci_low": 0.12690946263828456,
+          "ci_high": 0.2005021349793231
+        },
+        "precision@5": {
+          "mean": 0.21095890410958903,
+          "ci_low": 0.16712328767123288,
+          "ci_high": 0.25753424657534246
+        },
+        "map": {
+          "mean": 0.260697790079027,
+          "ci_low": 0.24187281124727744,
+          "ci_high": 0.28280244422056655
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.3619094673506833,
+          "ci_low": 0.3149578930119185,
+          "ci_high": 0.4150616093165836
+        },
+        "ndcg@5": {
+          "mean": 0.4199883325970251,
+          "ci_low": 0.35810308168925253,
+          "ci_high": 0.4831213350790165
+        },
+        "precision@5": {
+          "mean": 0.4547945205479452,
+          "ci_low": 0.3917808219178082,
+          "ci_high": 0.5206164383561643
+        },
+        "map": {
+          "mean": 0.3002639546054037,
+          "ci_low": 0.2602224603905707,
+          "ci_high": 0.3447153157574421
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.978082191780822
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "budget:budget_2001_3500",
+      "kind": "budget",
+      "label": "`budget.max` $2,001–$3,500",
+      "students_in_split": 158,
+      "students_evaluated": 158,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.534409354348823,
+          "ci_low": 0.5029812598037804,
+          "ci_high": 0.5655736050695417
+        },
+        "ndcg@5": {
+          "mean": 0.5350391256671684,
+          "ci_low": 0.49632027127358697,
+          "ci_high": 0.570557571722312
+        },
+        "precision@5": {
+          "mean": 0.569620253164557,
+          "ci_low": 0.5329113924050634,
+          "ci_high": 0.6063924050632911
+        },
+        "map": {
+          "mean": 0.49420495884616883,
+          "ci_low": 0.4694228661809919,
+          "ci_high": 0.5193062286675205
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.20433183996322782,
+          "ci_low": 0.18145901750923912,
+          "ci_high": 0.22880270155038762
+        },
+        "ndcg@5": {
+          "mean": 0.16938574113991384,
+          "ci_low": 0.145129407564781,
+          "ci_high": 0.19456797663050887
+        },
+        "precision@5": {
+          "mean": 0.20126582278481014,
+          "ci_low": 0.1759493670886076,
+          "ci_high": 0.22784810126582278
+        },
+        "map": {
+          "mean": 0.2545302573966959,
+          "ci_low": 0.24165004745077326,
+          "ci_high": 0.2687509713818067
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.33007751438559524,
+          "ci_low": 0.2924648327844484,
+          "ci_high": 0.3672377131206166
+        },
+        "ndcg@5": {
+          "mean": 0.3656533845272546,
+          "ci_low": 0.3186597660856292,
+          "ci_high": 0.4103302548305986
+        },
+        "precision@5": {
+          "mean": 0.36835443037974686,
+          "ci_low": 0.3227848101265823,
+          "ci_high": 0.4126898734177215
+        },
+        "map": {
+          "mean": 0.2396747014494729,
+          "ci_low": 0.213424244373006,
+          "ci_high": 0.26774570023726485
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9784810126582278
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    },
+    {
+      "id": "budget:budget_gt_3500",
+      "kind": "budget",
+      "label": "`budget.max` > $3,500",
+      "students_in_split": 69,
+      "students_evaluated": 69,
+      "excluded_fewer_than_min_candidates": 0,
+      "excluded_no_relevant_room": 0,
+      "baseline": {
+        "ndcg@10": {
+          "mean": 0.4682753743548236,
+          "ci_low": 0.4098436784637285,
+          "ci_high": 0.5181061173570121
+        },
+        "ndcg@5": {
+          "mean": 0.4847287813442345,
+          "ci_low": 0.4188538755094841,
+          "ci_high": 0.5448657947580513
+        },
+        "precision@5": {
+          "mean": 0.5391304347826087,
+          "ci_low": 0.46949275362318843,
+          "ci_high": 0.6057971014492755
+        },
+        "map": {
+          "mean": 0.46338018938049075,
+          "ci_low": 0.42135393447790237,
+          "ci_high": 0.5007514204777337
+        }
+      },
+      "random": {
+        "ndcg@10": {
+          "mean": 0.17279442540319145,
+          "ci_low": 0.14759962397474946,
+          "ci_high": 0.1968522442290245
+        },
+        "ndcg@5": {
+          "mean": 0.15939263320942318,
+          "ci_low": 0.13122769831079692,
+          "ci_high": 0.19098603658790278
+        },
+        "precision@5": {
+          "mean": 0.2028985507246377,
+          "ci_low": 0.16811594202898553,
+          "ci_high": 0.24347826086956523
+        },
+        "map": {
+          "mean": 0.2327202235413072,
+          "ci_low": 0.22202233209052616,
+          "ci_high": 0.2437786379298795
+        }
+      },
+      "lift_baseline_minus_random": {
+        "ndcg@10": {
+          "mean": 0.29548094895163207,
+          "ci_low": 0.23536999207572828,
+          "ci_high": 0.3517982893249556
+        },
+        "ndcg@5": {
+          "mean": 0.3253361481348114,
+          "ci_low": 0.24960665893447342,
+          "ci_high": 0.38942904202554285
+        },
+        "precision@5": {
+          "mean": 0.336231884057971,
+          "ci_low": 0.2521014492753624,
+          "ci_high": 0.41449275362318844
+        },
+        "map": {
+          "mean": 0.23065996583918355,
+          "ci_low": 0.18682209660302299,
+          "ci_high": 0.26974840802207867
+        }
+      },
+      "ideal": {
+        "ndcg@10": {
+          "mean": 1.0
+        },
+        "ndcg@5": {
+          "mean": 1.0
+        },
+        "precision@5": {
+          "mean": 0.9971014492753623
+        },
+        "map": {
+          "mean": 1.0
+        }
+      }
+    }
+  ],
+  "per_student_baseline": [
+    {
+      "student_id": "S0003",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 178,
+      "ndcg@10": 0.32289273038171046,
+      "ndcg@5": 0.49757592734887585,
+      "precision@5": 0.6,
+      "map": 0.3577251977398716
+    },
+    {
+      "student_id": "S0007",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2100,
+      "candidates": 169,
+      "ndcg@10": 0.5118995394438909,
+      "ndcg@5": 0.5091154798932425,
+      "precision@5": 0.8,
+      "map": 0.5316689395286942
+    },
+    {
+      "student_id": "S0008",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 58,
+      "ndcg@10": 0.5890463716238201,
+      "ndcg@5": 0.5962544979603741,
+      "precision@5": 0.6,
+      "map": 0.4983477390859227
+    },
+    {
+      "student_id": "S0020",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 178,
+      "ndcg@10": 0.4159606843625175,
+      "ndcg@5": 0.43376594519194994,
+      "precision@5": 0.8,
+      "map": 0.3294863478104013
+    },
+    {
+      "student_id": "S0031",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 1500,
+      "candidates": 112,
+      "ndcg@10": 0.1067929361734135,
+      "ndcg@5": 0.0,
+      "precision@5": 0.0,
+      "map": 0.26152637077612745
+    },
+    {
+      "student_id": "S0042",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2100,
+      "candidates": 169,
+      "ndcg@10": 0.6021228397801494,
+      "ndcg@5": 0.6937326734044977,
+      "precision@5": 0.8,
+      "map": 0.5812701445932846
+    },
+    {
+      "student_id": "S0044",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 5400,
+      "candidates": 200,
+      "ndcg@10": 0.4849783221702722,
+      "ndcg@5": 0.5780861751102729,
+      "precision@5": 0.6,
+      "map": 0.3801470200487386
+    },
+    {
+      "student_id": "S0059",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 3000,
+      "candidates": 200,
+      "ndcg@10": 0.620879663132967,
+      "ndcg@5": 0.6853781241437774,
+      "precision@5": 0.6,
+      "map": 0.41736669860159525
+    },
+    {
+      "student_id": "S0060",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 45,
+      "ndcg@10": 0.7243446388307251,
+      "ndcg@5": 0.8040708765078748,
+      "precision@5": 0.8,
+      "map": 0.7029241999830235
+    },
+    {
+      "student_id": "S0061",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 178,
+      "ndcg@10": 0.5090061346336523,
+      "ndcg@5": 0.5195045131342853,
+      "precision@5": 0.6,
+      "map": 0.45503146418048107
+    },
+    {
+      "student_id": "S0064",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 4300,
+      "candidates": 70,
+      "ndcg@10": 0.11850884815827627,
+      "ndcg@5": 0.0726771868443463,
+      "precision@5": 0.0,
+      "map": 0.20386966966015288
+    },
+    {
+      "student_id": "S0072",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 1300,
+      "candidates": 19,
+      "ndcg@10": 0.7269533079756982,
+      "ndcg@5": 0.724069931752799,
+      "precision@5": 0.8,
+      "map": 0.6791666666666667
+    },
+    {
+      "student_id": "S0078",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2100,
+      "candidates": 5,
+      "ndcg@10": 0.5897053367440438,
+      "ndcg@5": 0.5897053367440438,
+      "precision@5": 0.2,
+      "map": 0.3333333333333333
+    },
+    {
+      "student_id": "S0086",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 34,
+      "ndcg@10": 0.5497569994422242,
+      "ndcg@5": 0.5830213788486117,
+      "precision@5": 0.8,
+      "map": 0.7109152752009896
+    },
+    {
+      "student_id": "S0088",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 150,
+      "ndcg@10": 0.6046657589116552,
+      "ndcg@5": 0.7808192186449511,
+      "precision@5": 1.0,
+      "map": 0.5712115019567682
+    },
+    {
+      "student_id": "S0090",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 58,
+      "ndcg@10": 0.4603032256476368,
+      "ndcg@5": 0.47455189204944886,
+      "precision@5": 0.6,
+      "map": 0.46659954238976503
+    },
+    {
+      "student_id": "S0094",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 5000,
+      "candidates": 200,
+      "ndcg@10": 0.5236428865085814,
+      "ndcg@5": 0.5632229027799083,
+      "precision@5": 0.8,
+      "map": 0.43206891560347876
+    },
+    {
+      "student_id": "S0101",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 4200,
+      "candidates": 56,
+      "ndcg@10": 0.0,
+      "ndcg@5": 0.0,
+      "precision@5": 0.0,
+      "map": 0.21842281671509278
+    },
+    {
+      "student_id": "S0104",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 40,
+      "ndcg@10": 0.7399571485236103,
+      "ndcg@5": 0.7014941890986883,
+      "precision@5": 0.8,
+      "map": 0.7800595238095237
+    },
+    {
+      "student_id": "S0116",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 3200,
+      "candidates": 49,
+      "ndcg@10": 0.36030416334538046,
+      "ndcg@5": 0.39539095277890546,
+      "precision@5": 0.4,
+      "map": 0.3703601318576212
+    },
+    {
+      "student_id": "S0120",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 64,
+      "ndcg@10": 0.6150902319889254,
+      "ndcg@5": 0.5740133771285303,
+      "precision@5": 0.4,
+      "map": 0.5476291560658807
+    },
+    {
+      "student_id": "S0129",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2600,
+      "candidates": 58,
+      "ndcg@10": 0.4595407844396658,
+      "ndcg@5": 0.17629771358084384,
+      "precision@5": 0.2,
+      "map": 0.4028571781646724
+    },
+    {
+      "student_id": "S0138",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2900,
+      "candidates": 61,
+      "ndcg@10": 0.7100426300491922,
+      "ndcg@5": 0.639972920317419,
+      "precision@5": 0.6,
+      "map": 0.720193090385398
+    },
+    {
+      "student_id": "S0139",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 150,
+      "ndcg@10": 0.6838300741740052,
+      "ndcg@5": 0.6839163028524893,
+      "precision@5": 1.0,
+      "map": 0.7148936878696867
+    },
+    {
+      "student_id": "S0147",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2100,
+      "candidates": 39,
+      "ndcg@10": 0.2722693098368974,
+      "ndcg@5": 0.3050244096807456,
+      "precision@5": 0.4,
+      "map": 0.4290653836295283
+    },
+    {
+      "student_id": "S0166",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 58,
+      "ndcg@10": 0.6186342957416652,
+      "ndcg@5": 0.6399453854227659,
+      "precision@5": 0.6,
+      "map": 0.4470790333742551
+    },
+    {
+      "student_id": "S0187",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 58,
+      "ndcg@10": 0.7448692725794205,
+      "ndcg@5": 0.6735522402548937,
+      "precision@5": 0.6,
+      "map": 0.5764013398881819
+    },
+    {
+      "student_id": "S0189",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2100,
+      "candidates": 39,
+      "ndcg@10": 0.6770609417963614,
+      "ndcg@5": 0.6491157235527771,
+      "precision@5": 0.6,
+      "map": 0.6653395409200362
+    },
+    {
+      "student_id": "S0199",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 46,
+      "ndcg@10": 0.6571680644348501,
+      "ndcg@5": 0.644705955856605,
+      "precision@5": 0.8,
+      "map": 0.6348800084297042
+    },
+    {
+      "student_id": "S0200",
+      "university_code": "UTTT",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 43,
+      "ndcg@10": 0.4528435391585647,
+      "ndcg@5": 0.26734460942544885,
+      "precision@5": 0.4,
+      "map": 0.4804364292120414
+    },
+    {
+      "student_id": "S0216",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 3600,
+      "candidates": 200,
+      "ndcg@10": 0.17515452028310483,
+      "ndcg@5": 0.10324665323499312,
+      "precision@5": 0.2,
+      "map": 0.279835749292331
+    },
+    {
+      "student_id": "S0219",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 200,
+      "ndcg@10": 0.24926053643003948,
+      "ndcg@5": 0.26800611275278424,
+      "precision@5": 0.4,
+      "map": 0.3079527809869473
+    },
+    {
+      "student_id": "S0220",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 1700,
+      "candidates": 135,
+      "ndcg@10": 0.31693347633343355,
+      "ndcg@5": 0.360054614577234,
+      "precision@5": 0.4,
+      "map": 0.307115668086553
+    },
+    {
+      "student_id": "S0230",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 1600,
+      "candidates": 127,
+      "ndcg@10": 0.4725660531910847,
+      "ndcg@5": 0.6011626832363783,
+      "precision@5": 0.6,
+      "map": 0.5557857681664979
+    },
+    {
+      "student_id": "S0238",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 182,
+      "ndcg@10": 0.785905082356298,
+      "ndcg@5": 0.731219838408024,
+      "precision@5": 1.0,
+      "map": 0.7486029902673546
+    },
+    {
+      "student_id": "S0240",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 3400,
+      "candidates": 66,
+      "ndcg@10": 0.6942476721010105,
+      "ndcg@5": 0.8061941684150765,
+      "precision@5": 1.0,
+      "map": 0.5955671669252496
+    },
+    {
+      "student_id": "S0241",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 1700,
+      "candidates": 32,
+      "ndcg@10": 0.5445832682218544,
+      "ndcg@5": 0.6107625698863264,
+      "precision@5": 0.6,
+      "map": 0.551247771836007
+    },
+    {
+      "student_id": "S0243",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 1800,
+      "candidates": 34,
+      "ndcg@10": 0.3953138957251853,
+      "ndcg@5": 0.3412321005988093,
+      "precision@5": 0.4,
+      "map": 0.42739917976760083
+    },
+    {
+      "student_id": "S0254",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 40,
+      "ndcg@10": 0.5948201389160914,
+      "ndcg@5": 0.5830214142113296,
+      "precision@5": 0.4,
+      "map": 0.5913877788877789
+    },
+    {
+      "student_id": "S0257",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 44,
+      "ndcg@10": 0.7485897199158462,
+      "ndcg@5": 0.7469522688816453,
+      "precision@5": 0.8,
+      "map": 0.7634389875769186
+    },
+    {
+      "student_id": "S0262",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 3500,
+      "candidates": 66,
+      "ndcg@10": 0.8979709245946704,
+      "ndcg@5": 0.8415580415114009,
+      "precision@5": 1.0,
+      "map": 0.8654166744228856
+    },
+    {
+      "student_id": "S0289",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 3500,
+      "candidates": 66,
+      "ndcg@10": 0.21268000361215245,
+      "ndcg@5": 0.17735939224586653,
+      "precision@5": 0.4,
+      "map": 0.3462240174916929
+    },
+    {
+      "student_id": "S0290",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 1400,
+      "candidates": 105,
+      "ndcg@10": 0.5873776703183706,
+      "ndcg@5": 0.6223772601563521,
+      "precision@5": 1.0,
+      "map": 0.8249319482004492
+    },
+    {
+      "student_id": "S0298",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 3500,
+      "candidates": 56,
+      "ndcg@10": 0.08911909835130391,
+      "ndcg@5": 0.11593412812005581,
+      "precision@5": 0.2,
+      "map": 0.2557451015176755
+    },
+    {
+      "student_id": "S0300",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 1700,
+      "candidates": 135,
+      "ndcg@10": 0.509410183887122,
+      "ndcg@5": 0.6343169226155623,
+      "precision@5": 1.0,
+      "map": 0.5408134551267848
+    },
+    {
+      "student_id": "S0307",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 1100,
+      "candidates": 69,
+      "ndcg@10": 0.7159109529883105,
+      "ndcg@5": 0.6019104956622309,
+      "precision@5": 0.6,
+      "map": 0.6271543873959841
+    },
+    {
+      "student_id": "S0310",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 200,
+      "ndcg@10": 0.4351163445618252,
+      "ndcg@5": 0.4073568516514549,
+      "precision@5": 0.6,
+      "map": 0.4644894800127807
+    },
+    {
+      "student_id": "S0316",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 3000,
+      "candidates": 200,
+      "ndcg@10": 0.4978641419208492,
+      "ndcg@5": 0.6302441246338196,
+      "precision@5": 0.6,
+      "map": 0.38167384016231976
+    },
+    {
+      "student_id": "S0325",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 3700,
+      "candidates": 57,
+      "ndcg@10": 0.36322024635620775,
+      "ndcg@5": 0.39539095277890546,
+      "precision@5": 0.4,
+      "map": 0.3180700008970358
+    },
+    {
+      "student_id": "S0330",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 45,
+      "ndcg@10": 0.1406197230678558,
+      "ndcg@5": 0.056230747505289336,
+      "precision@5": 0.2,
+      "map": 0.3011312761312761
+    },
+    {
+      "student_id": "S0335",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 2300,
+      "candidates": 191,
+      "ndcg@10": 0.7231188993124434,
+      "ndcg@5": 0.6608397947263838,
+      "precision@5": 0.8,
+      "map": 0.6044437130762362
+    },
+    {
+      "student_id": "S0336",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 1800,
+      "candidates": 43,
+      "ndcg@10": 0.4638059358072125,
+      "ndcg@5": 0.29142272353139903,
+      "precision@5": 0.4,
+      "map": 0.5050119633452966
+    },
+    {
+      "student_id": "S0355",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 200,
+      "ndcg@10": 0.9007619020868619,
+      "ndcg@5": 0.9030970842075382,
+      "precision@5": 1.0,
+      "map": 0.7078915485541163
+    },
+    {
+      "student_id": "S0359",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 1400,
+      "candidates": 105,
+      "ndcg@10": 0.9552009891550426,
+      "ndcg@5": 1.0,
+      "precision@5": 1.0,
+      "map": 0.7290861191888269
+    },
+    {
+      "student_id": "S0369",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 200,
+      "ndcg@10": 0.6055360682524146,
+      "ndcg@5": 0.6302441246338196,
+      "precision@5": 0.6,
+      "map": 0.48459810520429797
+    },
+    {
+      "student_id": "S0378",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 3800,
+      "candidates": 69,
+      "ndcg@10": 0.26284016828180085,
+      "ndcg@5": 0.0,
+      "precision@5": 0.0,
+      "map": 0.2702960481837931
+    },
+    {
+      "student_id": "S0382",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 2900,
+      "candidates": 52,
+      "ndcg@10": 0.2334421492452215,
+      "ndcg@5": 0.20158512119398195,
+      "precision@5": 0.4,
+      "map": 0.41089614089614096
+    },
+    {
+      "student_id": "S0388",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 2400,
+      "candidates": 199,
+      "ndcg@10": 0.6875190932466796,
+      "ndcg@5": 0.8539316501572934,
+      "precision@5": 0.8,
+      "map": 0.4469130053876956
+    },
+    {
+      "student_id": "S0391",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 4000,
+      "candidates": 59,
+      "ndcg@10": 0.4680699584395912,
+      "ndcg@5": 0.5927569596302934,
+      "precision@5": 0.4,
+      "map": 0.315047012066349
+    },
+    {
+      "student_id": "S0400",
+      "university_code": "UAEH-ESTE",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 200,
+      "ndcg@10": 0.17629202868263935,
+      "ndcg@5": 0.2258108501420974,
+      "precision@5": 0.4,
+      "map": 0.25215621361317797
+    },
+    {
+      "student_id": "S0413",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2700,
+      "candidates": 200,
+      "ndcg@10": 0.604107048326566,
+      "ndcg@5": 0.5740133771285303,
+      "precision@5": 0.4,
+      "map": 0.4873951259350071
+    },
+    {
+      "student_id": "S0424",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 62,
+      "ndcg@10": 0.2751453034711725,
+      "ndcg@5": 0.22669867755161566,
+      "precision@5": 0.4,
+      "map": 0.3894211321495422
+    },
+    {
+      "student_id": "S0425",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 3200,
+      "candidates": 200,
+      "ndcg@10": 0.34976084468078183,
+      "ndcg@5": 0.21803156053303893,
+      "precision@5": 0.2,
+      "map": 0.30255404892340165
+    },
+    {
+      "student_id": "S0430",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 160,
+      "ndcg@10": 0.4904021402688526,
+      "ndcg@5": 0.6258236241410682,
+      "precision@5": 1.0,
+      "map": 0.4395209685873037
+    },
+    {
+      "student_id": "S0433",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 54,
+      "ndcg@10": 0.7373817127169491,
+      "ndcg@5": 0.7234405487989655,
+      "precision@5": 0.6,
+      "map": 0.7223480990192219
+    },
+    {
+      "student_id": "S0436",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 1700,
+      "candidates": 41,
+      "ndcg@10": 0.7233867889729905,
+      "ndcg@5": 0.6973515901634045,
+      "precision@5": 1.0,
+      "map": 0.899013024013024
+    },
+    {
+      "student_id": "S0437",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 1700,
+      "candidates": 46,
+      "ndcg@10": 0.31980668723640915,
+      "ndcg@5": 0.3939554006123783,
+      "precision@5": 0.2,
+      "map": 0.28957123652041983
+    },
+    {
+      "student_id": "S0451",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2900,
+      "candidates": 61,
+      "ndcg@10": 0.3968591139448342,
+      "ndcg@5": 0.3868376143306553,
+      "precision@5": 0.6,
+      "map": 0.4211532589590848
+    },
+    {
+      "student_id": "S0456",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2400,
+      "candidates": 54,
+      "ndcg@10": 0.4201964828403931,
+      "ndcg@5": 0.35934063842322017,
+      "precision@5": 0.4,
+      "map": 0.4347161370051017
+    },
+    {
+      "student_id": "S0468",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2700,
+      "candidates": 59,
+      "ndcg@10": 0.4055302108030337,
+      "ndcg@5": 0.4320178252675665,
+      "precision@5": 0.4,
+      "map": 0.3295039437075518
+    },
+    {
+      "student_id": "S0469",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 59,
+      "ndcg@10": 0.37321594091007443,
+      "ndcg@5": 0.237062772860633,
+      "precision@5": 0.4,
+      "map": 0.5025960125144907
+    },
+    {
+      "student_id": "S0479",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 3500,
+      "candidates": 74,
+      "ndcg@10": 0.7587574493628741,
+      "ndcg@5": 0.8281227542004858,
+      "precision@5": 1.0,
+      "map": 0.7515836730573237
+    },
+    {
+      "student_id": "S0502",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 41,
+      "ndcg@10": 0.5817756742742218,
+      "ndcg@5": 0.5720287690122586,
+      "precision@5": 0.6,
+      "map": 0.44766936968023924
+    },
+    {
+      "student_id": "S0511",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 3200,
+      "candidates": 70,
+      "ndcg@10": 0.48279989969883397,
+      "ndcg@5": 0.5431562809120526,
+      "precision@5": 0.6,
+      "map": 0.5325712587854123
+    },
+    {
+      "student_id": "S0516",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2700,
+      "candidates": 200,
+      "ndcg@10": 0.8827904758126036,
+      "ndcg@5": 0.8777221344374128,
+      "precision@5": 1.0,
+      "map": 0.8003062797075413
+    },
+    {
+      "student_id": "S0527",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 1600,
+      "candidates": 132,
+      "ndcg@10": 0.6333431590077414,
+      "ndcg@5": 0.8027478044303603,
+      "precision@5": 1.0,
+      "map": 0.4937803978737233
+    },
+    {
+      "student_id": "S0530",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2700,
+      "candidates": 59,
+      "ndcg@10": 0.4201685525411629,
+      "ndcg@5": 0.38284349287750846,
+      "precision@5": 0.4,
+      "map": 0.3820123756660984
+    },
+    {
+      "student_id": "S0539",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 4700,
+      "candidates": 200,
+      "ndcg@10": 0.5222808698810175,
+      "ndcg@5": 0.5476643235617913,
+      "precision@5": 0.6,
+      "map": 0.49764602896136284
+    },
+    {
+      "student_id": "S0553",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 1800,
+      "candidates": 48,
+      "ndcg@10": 0.46834818308972714,
+      "ndcg@5": 0.576936954288263,
+      "precision@5": 0.6,
+      "map": 0.42091479839763596
+    },
+    {
+      "student_id": "S0554",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 18,
+      "ndcg@10": 0.7917428303034013,
+      "ndcg@5": 0.7293854503605586,
+      "precision@5": 0.4,
+      "map": 0.5416666666666666
+    },
+    {
+      "student_id": "S0560",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 1300,
+      "candidates": 99,
+      "ndcg@10": 0.616622720793811,
+      "ndcg@5": 0.8196294557259916,
+      "precision@5": 1.0,
+      "map": 0.6326489187393062
+    },
+    {
+      "student_id": "S0567",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 3200,
+      "candidates": 70,
+      "ndcg@10": 0.3585755511147302,
+      "ndcg@5": 0.401760926634776,
+      "precision@5": 0.4,
+      "map": 0.4099127920148868
+    },
+    {
+      "student_id": "S0570",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 186,
+      "ndcg@10": 0.41162827985256584,
+      "ndcg@5": 0.6343169226155623,
+      "precision@5": 1.0,
+      "map": 0.3583428370693184
+    },
+    {
+      "student_id": "S0574",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2600,
+      "candidates": 57,
+      "ndcg@10": 0.5538039540981055,
+      "ndcg@5": 0.5414593026216119,
+      "precision@5": 0.6,
+      "map": 0.5366896219045597
+    },
+    {
+      "student_id": "S0578",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 1800,
+      "candidates": 39,
+      "ndcg@10": 0.7755809207429949,
+      "ndcg@5": 0.7225288392693664,
+      "precision@5": 0.8,
+      "map": 0.8293650793650793
+    },
+    {
+      "student_id": "S0581",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 48,
+      "ndcg@10": 0.40869660373564065,
+      "ndcg@5": 0.35934063842322017,
+      "precision@5": 0.4,
+      "map": 0.44378426488720607
+    },
+    {
+      "student_id": "S0584",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2400,
+      "candidates": 61,
+      "ndcg@10": 0.43646572309095283,
+      "ndcg@5": 0.48709935195084586,
+      "precision@5": 0.6,
+      "map": 0.49947173894990116
+    },
+    {
+      "student_id": "S0592",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 3800,
+      "candidates": 69,
+      "ndcg@10": 0.0,
+      "ndcg@5": 0.0,
+      "precision@5": 0.0,
+      "map": 0.19779749296073199
+    },
+    {
+      "student_id": "S0595",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2700,
+      "candidates": 65,
+      "ndcg@10": 0.46549254914505367,
+      "ndcg@5": 0.5718900525099068,
+      "precision@5": 0.4,
+      "map": 0.46309994211439975
+    },
+    {
+      "student_id": "S0597",
+      "university_code": "UAEH-ESTL",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 186,
+      "ndcg@10": 0.7506335260841489,
+      "ndcg@5": 0.7192801759488139,
+      "precision@5": 1.0,
+      "map": 0.5905291070222735
+    },
+    {
+      "student_id": "S0602",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 1700,
+      "candidates": 139,
+      "ndcg@10": 0.64745196057312,
+      "ndcg@5": 0.7446551257189392,
+      "precision@5": 1.0,
+      "map": 0.4920545570451619
+    },
+    {
+      "student_id": "S0605",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 3600,
+      "candidates": 200,
+      "ndcg@10": 0.6325022048034165,
+      "ndcg@5": 0.5508492941340157,
+      "precision@5": 1.0,
+      "map": 0.7110171815575279
+    },
+    {
+      "student_id": "S0615",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 7000,
+      "candidates": 77,
+      "ndcg@10": 0.6512200233456101,
+      "ndcg@5": 0.5714548078419106,
+      "precision@5": 0.8,
+      "map": 0.7384401084428025
+    },
+    {
+      "student_id": "S0619",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2100,
+      "candidates": 175,
+      "ndcg@10": 0.5499530417733949,
+      "ndcg@5": 0.5113250808989613,
+      "precision@5": 0.6,
+      "map": 0.45256059246308666
+    },
+    {
+      "student_id": "S0623",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 62,
+      "ndcg@10": 0.1668513245164854,
+      "ndcg@5": 0.018743582501763112,
+      "precision@5": 0.0,
+      "map": 0.26797619188120825
+    },
+    {
+      "student_id": "S0643",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 3400,
+      "candidates": 200,
+      "ndcg@10": 0.738454002770952,
+      "ndcg@5": 0.6809927256927567,
+      "precision@5": 0.8,
+      "map": 0.6978287350382697
+    },
+    {
+      "student_id": "S0646",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2400,
+      "candidates": 37,
+      "ndcg@10": 0.20884796460678387,
+      "ndcg@5": 0.12138871396655633,
+      "precision@5": 0.2,
+      "map": 0.21630887395130274
+    },
+    {
+      "student_id": "S0649",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2600,
+      "candidates": 39,
+      "ndcg@10": 0.5213248666679161,
+      "ndcg@5": 0.6039993032133143,
+      "precision@5": 0.8,
+      "map": 0.5787482869491882
+    },
+    {
+      "student_id": "S0660",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 34,
+      "ndcg@10": 0.738849729490084,
+      "ndcg@5": 0.6765473404184138,
+      "precision@5": 0.6,
+      "map": 0.6579365079365079
+    },
+    {
+      "student_id": "S0662",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 3100,
+      "candidates": 43,
+      "ndcg@10": 0.31975184759867403,
+      "ndcg@5": 0.21803156053303893,
+      "precision@5": 0.4,
+      "map": 0.4330217893943384
+    },
+    {
+      "student_id": "S0676",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 50,
+      "ndcg@10": 0.6761552232637249,
+      "ndcg@5": 0.6683577236343724,
+      "precision@5": 0.8,
+      "map": 0.749156725627314
+    },
+    {
+      "student_id": "S0679",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 49,
+      "ndcg@10": 0.4099253078494983,
+      "ndcg@5": 0.3048317744289751,
+      "precision@5": 0.6,
+      "map": 0.44650966183574886
+    },
+    {
+      "student_id": "S0680",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 1000,
+      "candidates": 18,
+      "ndcg@10": 0.7038535675278954,
+      "ndcg@5": 0.6318916506621606,
+      "precision@5": 0.6,
+      "map": 0.6678571428571429
+    },
+    {
+      "student_id": "S0722",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2100,
+      "candidates": 51,
+      "ndcg@10": 0.30892293717848823,
+      "ndcg@5": 0.40187470520510254,
+      "precision@5": 0.6,
+      "map": 0.4083945272613661
+    },
+    {
+      "student_id": "S0725",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 34,
+      "ndcg@10": 0.4840752639345216,
+      "ndcg@5": 0.48605374048781536,
+      "precision@5": 0.4,
+      "map": 0.5215500289184499
+    },
+    {
+      "student_id": "S0728",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 39,
+      "ndcg@10": 0.3932097948465966,
+      "ndcg@5": 0.32516414398688315,
+      "precision@5": 0.4,
+      "map": 0.42732551353874887
+    },
+    {
+      "student_id": "S0732",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 3700,
+      "candidates": 48,
+      "ndcg@10": 0.034108595438554566,
+      "ndcg@5": 0.0,
+      "precision@5": 0.0,
+      "map": 0.15786733889987653
+    },
+    {
+      "student_id": "S0734",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2300,
+      "candidates": 192,
+      "ndcg@10": 0.25789791600554995,
+      "ndcg@5": 0.13527790820550623,
+      "precision@5": 0.4,
+      "map": 0.37978208333357405
+    },
+    {
+      "student_id": "S0738",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 1500,
+      "candidates": 119,
+      "ndcg@10": 0.23344628493332223,
+      "ndcg@5": 0.20919059225895778,
+      "precision@5": 0.2,
+      "map": 0.21742201010232
+    },
+    {
+      "student_id": "S0743",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 50,
+      "ndcg@10": 0.7974645490714207,
+      "ndcg@5": 0.9030970842075382,
+      "precision@5": 1.0,
+      "map": 0.7412810873337188
+    },
+    {
+      "student_id": "S0744",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 3100,
+      "candidates": 43,
+      "ndcg@10": 0.3756380454849096,
+      "ndcg@5": 0.388473254166026,
+      "precision@5": 0.2,
+      "map": 0.35903618817941063
+    },
+    {
+      "student_id": "S0746",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 4100,
+      "candidates": 22,
+      "ndcg@10": 0.9753535803948031,
+      "ndcg@5": 0.925613304997084,
+      "precision@5": 0.8,
+      "map": 0.885
+    },
+    {
+      "student_id": "S0751",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 1700,
+      "candidates": 139,
+      "ndcg@10": 0.5563509371551192,
+      "ndcg@5": 0.5870133870600276,
+      "precision@5": 0.8,
+      "map": 0.5363106586837357
+    },
+    {
+      "student_id": "S0764",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 200,
+      "ndcg@10": 0.30579460300823164,
+      "ndcg@5": 0.35790378777537923,
+      "precision@5": 0.2,
+      "map": 0.30391572346142715
+    },
+    {
+      "student_id": "S0772",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 5800,
+      "candidates": 76,
+      "ndcg@10": 0.13255736061050105,
+      "ndcg@5": 0.1453543736886926,
+      "precision@5": 0.2,
+      "map": 0.27903079127671954
+    },
+    {
+      "student_id": "S0773",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 4400,
+      "candidates": 200,
+      "ndcg@10": 0.22309155325009278,
+      "ndcg@5": 0.2807460604645254,
+      "precision@5": 0.4,
+      "map": 0.3462537667252291
+    },
+    {
+      "student_id": "S0776",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 4100,
+      "candidates": 200,
+      "ndcg@10": 0.16721033886004882,
+      "ndcg@5": 0.19130860075337372,
+      "precision@5": 0.2,
+      "map": 0.24601562478714736
+    },
+    {
+      "student_id": "S0781",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 39,
+      "ndcg@10": 0.6151699854136502,
+      "ndcg@5": 0.4461486816006824,
+      "precision@5": 0.2,
+      "map": 0.4927060786435786
+    },
+    {
+      "student_id": "S0792",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 2700,
+      "candidates": 16,
+      "ndcg@10": 0.8785969511036552,
+      "ndcg@5": 0.8785969511036552,
+      "precision@5": 0.6,
+      "map": 0.8214285714285714
+    },
+    {
+      "student_id": "S0800",
+      "university_code": "UAEH-ESAT",
+      "seed_verified": true,
+      "budget_max": 4200,
+      "candidates": 200,
+      "ndcg@10": 0.25790412000346086,
+      "ndcg@5": 0.33439203498127756,
+      "precision@5": 0.4,
+      "map": 0.3097883160804905
+    },
+    {
+      "student_id": "S0802",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 1600,
+      "candidates": 124,
+      "ndcg@10": 0.6580484696131789,
+      "ndcg@5": 0.7652606394268341,
+      "precision@5": 0.8,
+      "map": 0.5473393914834681
+    },
+    {
+      "student_id": "S0824",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 62,
+      "ndcg@10": 0.9720695196994572,
+      "ndcg@5": 0.9165323715184533,
+      "precision@5": 1.0,
+      "map": 0.9342490842490843
+    },
+    {
+      "student_id": "S0826",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 1800,
+      "candidates": 38,
+      "ndcg@10": 0.7016173195364782,
+      "ndcg@5": 0.603124605141955,
+      "precision@5": 0.6,
+      "map": 0.6811823593073594
+    },
+    {
+      "student_id": "S0827",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 44,
+      "ndcg@10": 0.1193035971363142,
+      "ndcg@5": 0.030569466390646793,
+      "precision@5": 0.0,
+      "map": 0.14547556620727353
+    },
+    {
+      "student_id": "S0839",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2100,
+      "candidates": 46,
+      "ndcg@10": 0.49513461740045356,
+      "ndcg@5": 0.38212951672349466,
+      "precision@5": 0.2,
+      "map": 0.36656465174610336
+    },
+    {
+      "student_id": "S0843",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 54,
+      "ndcg@10": 0.03303070765516093,
+      "ndcg@5": 0.04296931144987855,
+      "precision@5": 0.0,
+      "map": 0.16613206616461318
+    },
+    {
+      "student_id": "S0856",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 44,
+      "ndcg@10": 0.480940117700991,
+      "ndcg@5": 0.5649710554157135,
+      "precision@5": 0.6,
+      "map": 0.42545484080571805
+    },
+    {
+      "student_id": "S0867",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 1300,
+      "candidates": 90,
+      "ndcg@10": 0.45812860746447803,
+      "ndcg@5": 0.6630494284435245,
+      "precision@5": 0.8,
+      "map": 0.48035504962997627
+    },
+    {
+      "student_id": "S0869",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 48,
+      "ndcg@10": 0.8772277634888306,
+      "ndcg@5": 0.8415580415114009,
+      "precision@5": 1.0,
+      "map": 0.8281765018607125
+    },
+    {
+      "student_id": "S0870",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 161,
+      "ndcg@10": 0.342758872224729,
+      "ndcg@5": 0.41513614126051335,
+      "precision@5": 0.8,
+      "map": 0.4681308814726959
+    },
+    {
+      "student_id": "S0872",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2100,
+      "candidates": 46,
+      "ndcg@10": 0.6389001110070199,
+      "ndcg@5": 0.5740133771285303,
+      "precision@5": 0.4,
+      "map": 0.4936900362510118
+    },
+    {
+      "student_id": "S0876",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 3500,
+      "candidates": 200,
+      "ndcg@10": 0.610231562701698,
+      "ndcg@5": 0.830419897363192,
+      "precision@5": 0.8,
+      "map": 0.3670169141697305
+    },
+    {
+      "student_id": "S0877",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 59,
+      "ndcg@10": 0.6765130925076259,
+      "ndcg@5": 0.8196294557259916,
+      "precision@5": 1.0,
+      "map": 0.6765873212767498
+    },
+    {
+      "student_id": "S0878",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 4500,
+      "candidates": 71,
+      "ndcg@10": 0.3179536211486381,
+      "ndcg@5": 0.08680021389593613,
+      "precision@5": 0.2,
+      "map": 0.44118756247150953
+    },
+    {
+      "student_id": "S0890",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 179,
+      "ndcg@10": 0.34393634112933047,
+      "ndcg@5": 0.4879871793603641,
+      "precision@5": 0.8,
+      "map": 0.44467402546761353
+    },
+    {
+      "student_id": "S0899",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 161,
+      "ndcg@10": 0.5488275210643495,
+      "ndcg@5": 0.7331155731745727,
+      "precision@5": 0.8,
+      "map": 0.443099109024752
+    },
+    {
+      "student_id": "S0903",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 4000,
+      "candidates": 200,
+      "ndcg@10": 0.08196698598346214,
+      "ndcg@5": 0.11102594284405158,
+      "precision@5": 0.2,
+      "map": 0.18389916694838435
+    },
+    {
+      "student_id": "S0905",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 3100,
+      "candidates": 200,
+      "ndcg@10": 0.18658677953208355,
+      "ndcg@5": 0.1643855860162867,
+      "precision@5": 0.4,
+      "map": 0.23384732869423702
+    },
+    {
+      "student_id": "S0916",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 1800,
+      "candidates": 41,
+      "ndcg@10": 0.32881413567471207,
+      "ndcg@5": 0.27426230803832824,
+      "precision@5": 0.4,
+      "map": 0.29466772868817603
+    },
+    {
+      "student_id": "S0921",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 41,
+      "ndcg@10": 0.3125850005161975,
+      "ndcg@5": 0.3428941990841632,
+      "precision@5": 0.6,
+      "map": 0.36276957323394715
+    },
+    {
+      "student_id": "S0928",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2600,
+      "candidates": 200,
+      "ndcg@10": 0.2638401439386452,
+      "ndcg@5": 0.36002711239400276,
+      "precision@5": 0.2,
+      "map": 0.195613483030255
+    },
+    {
+      "student_id": "S0936",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2300,
+      "candidates": 49,
+      "ndcg@10": 0.6314442358168023,
+      "ndcg@5": 0.6227773700711957,
+      "precision@5": 0.8,
+      "map": 0.6137582417582417
+    },
+    {
+      "student_id": "S0938",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2300,
+      "candidates": 52,
+      "ndcg@10": 0.5769619586080247,
+      "ndcg@5": 0.6227773700711957,
+      "precision@5": 0.8,
+      "map": 0.6492081623390132
+    },
+    {
+      "student_id": "S0939",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 3400,
+      "candidates": 200,
+      "ndcg@10": 0.22335012469754814,
+      "ndcg@5": 0.21803156053303893,
+      "precision@5": 0.2,
+      "map": 0.28250329714255973
+    },
+    {
+      "student_id": "S0941",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 1200,
+      "candidates": 77,
+      "ndcg@10": 0.6532105881584521,
+      "ndcg@5": 0.5806434459155788,
+      "precision@5": 0.8,
+      "map": 0.6213765694575395
+    },
+    {
+      "student_id": "S0943",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 1800,
+      "candidates": 38,
+      "ndcg@10": 0.5528132041874396,
+      "ndcg@5": 0.5415360518378088,
+      "precision@5": 0.4,
+      "map": 0.39736329919373214
+    },
+    {
+      "student_id": "S0952",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2200,
+      "candidates": 179,
+      "ndcg@10": 0.43981459317425536,
+      "ndcg@5": 0.6157471913693036,
+      "precision@5": 0.6,
+      "map": 0.2595657631668916
+    },
+    {
+      "student_id": "S0971",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 3100,
+      "candidates": 200,
+      "ndcg@10": 0.6024126521427795,
+      "ndcg@5": 0.7052184546408721,
+      "precision@5": 0.6,
+      "map": 0.32631783884626714
+    },
+    {
+      "student_id": "S0990",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2600,
+      "candidates": 55,
+      "ndcg@10": 0.6402592869067503,
+      "ndcg@5": 0.7718920066951964,
+      "precision@5": 0.8,
+      "map": 0.5979372157601589
+    },
+    {
+      "student_id": "S0999",
+      "university_code": "ITSOEH",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 161,
+      "ndcg@10": 0.581273085686597,
+      "ndcg@5": 0.5597765387951922,
+      "precision@5": 0.8,
+      "map": 0.5141151974162375
+    },
+    {
+      "student_id": "S1011",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2600,
+      "candidates": 159,
+      "ndcg@10": 0.4179595908386239,
+      "ndcg@5": 0.31564845247951445,
+      "precision@5": 0.4,
+      "map": 0.35778476299275686
+    },
+    {
+      "student_id": "S1015",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2800,
+      "candidates": 169,
+      "ndcg@10": 0.4446570226830813,
+      "ndcg@5": 0.3780842209249833,
+      "precision@5": 0.4,
+      "map": 0.4119205330336378
+    },
+    {
+      "student_id": "S1025",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 3300,
+      "candidates": 196,
+      "ndcg@10": 0.3384172319052668,
+      "ndcg@5": 0.44961218694731964,
+      "precision@5": 0.4,
+      "map": 0.3304842360461405
+    },
+    {
+      "student_id": "S1026",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 4600,
+      "candidates": 200,
+      "ndcg@10": 0.8041862650513432,
+      "ndcg@5": 1.0,
+      "precision@5": 1.0,
+      "map": 0.5345328333423602
+    },
+    {
+      "student_id": "S1040",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 3500,
+      "candidates": 200,
+      "ndcg@10": 0.2168068559261744,
+      "ndcg@5": 0.09170839917194037,
+      "precision@5": 0.2,
+      "map": 0.26137183776392214
+    },
+    {
+      "student_id": "S1045",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2700,
+      "candidates": 8,
+      "ndcg@10": 0.9049495058460971,
+      "ndcg@5": 0.7984848580994974,
+      "precision@5": 0.2,
+      "map": 0.6428571428571428
+    },
+    {
+      "student_id": "S1053",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 4600,
+      "candidates": 73,
+      "ndcg@10": 0.5502314619927716,
+      "ndcg@5": 0.5385619291637966,
+      "precision@5": 0.8,
+      "map": 0.48837674101261064
+    },
+    {
+      "student_id": "S1054",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2700,
+      "candidates": 51,
+      "ndcg@10": 0.287738869745105,
+      "ndcg@5": 0.056230747505289336,
+      "precision@5": 0.2,
+      "map": 0.32472443522863687
+    },
+    {
+      "student_id": "S1061",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2100,
+      "candidates": 118,
+      "ndcg@10": 0.603101617463315,
+      "ndcg@5": 0.5113250808989613,
+      "precision@5": 0.6,
+      "map": 0.5509458426661754
+    },
+    {
+      "student_id": "S1063",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 4100,
+      "candidates": 48,
+      "ndcg@10": 0.5250343186057322,
+      "ndcg@5": 0.5740133771285303,
+      "precision@5": 0.4,
+      "map": 0.3875717058303559
+    },
+    {
+      "student_id": "S1068",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 4100,
+      "candidates": 67,
+      "ndcg@10": 0.48608886669860646,
+      "ndcg@5": 0.41183739211796244,
+      "precision@5": 0.4,
+      "map": 0.5331448918644586
+    },
+    {
+      "student_id": "S1070",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2000,
+      "candidates": 106,
+      "ndcg@10": 0.6673546067342483,
+      "ndcg@5": 0.6004486743709427,
+      "precision@5": 1.0,
+      "map": 0.8509858550944469
+    },
+    {
+      "student_id": "S1074",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2800,
+      "candidates": 169,
+      "ndcg@10": 0.5473279457968884,
+      "ndcg@5": 0.609377217513433,
+      "precision@5": 0.6,
+      "map": 0.39903400973947145
+    },
+    {
+      "student_id": "S1086",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2700,
+      "candidates": 51,
+      "ndcg@10": 0.6482209187979406,
+      "ndcg@5": 0.707167960715413,
+      "precision@5": 0.8,
+      "map": 0.6346070424179396
+    },
+    {
+      "student_id": "S1090",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 4100,
+      "candidates": 51,
+      "ndcg@10": 0.5998346689698173,
+      "ndcg@5": 0.5356383520040641,
+      "precision@5": 0.6,
+      "map": 0.6431581045217409
+    },
+    {
+      "student_id": "S1096",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2900,
+      "candidates": 35,
+      "ndcg@10": 0.8960601838283182,
+      "ndcg@5": 0.8586296918245757,
+      "precision@5": 1.0,
+      "map": 0.936734693877551
+    },
+    {
+      "student_id": "S1099",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 3600,
+      "candidates": 200,
+      "ndcg@10": 0.38221252872601785,
+      "ndcg@5": 0.5258744542787339,
+      "precision@5": 0.8,
+      "map": 0.3854646216972748
+    },
+    {
+      "student_id": "S1100",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 3500,
+      "candidates": 62,
+      "ndcg@10": 0.6362505752777412,
+      "ndcg@5": 0.8687949224876581,
+      "precision@5": 0.8,
+      "map": 0.5131974395408564
+    },
+    {
+      "student_id": "S1107",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 3100,
+      "candidates": 184,
+      "ndcg@10": 0.4672436514107864,
+      "ndcg@5": 0.5087403079104241,
+      "precision@5": 0.4,
+      "map": 0.4453389509581336
+    },
+    {
+      "student_id": "S1116",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 3300,
+      "candidates": 60,
+      "ndcg@10": 0.37764889050001343,
+      "ndcg@5": 0.22291347668428216,
+      "precision@5": 0.4,
+      "map": 0.40756718947508425
+    },
+    {
+      "student_id": "S1120",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 1800,
+      "candidates": 20,
+      "ndcg@10": 0.7032516488340044,
+      "ndcg@5": 0.7204148269797798,
+      "precision@5": 0.4,
+      "map": 0.49935897435897436
+    },
+    {
+      "student_id": "S1138",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 4800,
+      "candidates": 200,
+      "ndcg@10": 0.8232273618633382,
+      "ndcg@5": 0.9030970842075382,
+      "precision@5": 1.0,
+      "map": 0.7773446075330516
+    },
+    {
+      "student_id": "S1163",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2500,
+      "candidates": 33,
+      "ndcg@10": 0.7459177557913748,
+      "ndcg@5": 0.7248608050180108,
+      "precision@5": 0.6,
+      "map": 0.6532578532578531
+    },
+    {
+      "student_id": "S1164",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 4200,
+      "candidates": 50,
+      "ndcg@10": 0.7434585516406473,
+      "ndcg@5": 0.7942545059558663,
+      "precision@5": 1.0,
+      "map": 0.7918560606060606
+    },
+    {
+      "student_id": "S1168",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 4000,
+      "candidates": 66,
+      "ndcg@10": 0.5807489640041903,
+      "ndcg@5": 0.6992148198508501,
+      "precision@5": 0.6,
+      "map": 0.4678418161271138
+    },
+    {
+      "student_id": "S1170",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 3400,
+      "candidates": 200,
+      "ndcg@10": 0.4579516065193901,
+      "ndcg@5": 0.4093401612864127,
+      "precision@5": 0.2,
+      "map": 0.3642639735566654
+    },
+    {
+      "student_id": "S1176",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 1500,
+      "candidates": 10,
+      "ndcg@10": 0.9461356536981058,
+      "ndcg@5": 0.9461356536981058,
+      "precision@5": 0.4,
+      "map": 0.8333333333333333
+    },
+    {
+      "student_id": "S1177",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 5200,
+      "candidates": 200,
+      "ndcg@10": 0.6390270100085711,
+      "ndcg@5": 0.5632229027799083,
+      "precision@5": 0.6,
+      "map": 0.6229542393375922
+    },
+    {
+      "student_id": "S1191",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 2500,
+      "candidates": 152,
+      "ndcg@10": 0.5919948733424787,
+      "ndcg@5": 0.609377217513433,
+      "precision@5": 0.6,
+      "map": 0.4492659707021989
+    },
+    {
+      "student_id": "S1195",
+      "university_code": "TESJI",
+      "seed_verified": false,
+      "budget_max": 5200,
+      "candidates": 76,
+      "ndcg@10": 0.384340785564163,
+      "ndcg@5": 0.364909028545246,
+      "precision@5": 0.6,
+      "map": 0.5318360523337129
+    },
+    {
+      "student_id": "S1203",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 17,
+      "ndcg@10": 0.207817918952643,
+      "ndcg@5": 0.0,
+      "precision@5": 0.0,
+      "map": 0.21146214896214896
+    },
+    {
+      "student_id": "S1209",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3400,
+      "candidates": 200,
+      "ndcg@10": 0.4554156193278834,
+      "ndcg@5": 0.5635354705377646,
+      "precision@5": 0.6,
+      "map": 0.3353743302887717
+    },
+    {
+      "student_id": "S1216",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 197,
+      "ndcg@10": 0.3243182492470978,
+      "ndcg@5": 0.2732006293733056,
+      "precision@5": 0.4,
+      "map": 0.38869922761826337
+    },
+    {
+      "student_id": "S1217",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 5000,
+      "candidates": 70,
+      "ndcg@10": 0.3763068484729964,
+      "ndcg@5": 0.3697296716642629,
+      "precision@5": 0.2,
+      "map": 0.3440670857535184
+    },
+    {
+      "student_id": "S1218",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3600,
+      "candidates": 51,
+      "ndcg@10": 0.7395153031236392,
+      "ndcg@5": 0.6336029464615485,
+      "precision@5": 0.6,
+      "map": 0.6349129593810445
+    },
+    {
+      "student_id": "S1219",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 7500,
+      "candidates": 64,
+      "ndcg@10": 0.0,
+      "ndcg@5": 0.0,
+      "precision@5": 0.0,
+      "map": 0.24699092569858033
+    },
+    {
+      "student_id": "S1230",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3800,
+      "candidates": 52,
+      "ndcg@10": 0.5081052350891517,
+      "ndcg@5": 0.4024486663754506,
+      "precision@5": 0.6,
+      "map": 0.4360282046410573
+    },
+    {
+      "student_id": "S1243",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3700,
+      "candidates": 52,
+      "ndcg@10": 0.7143068132943418,
+      "ndcg@5": 0.8687949224876581,
+      "precision@5": 0.8,
+      "map": 0.6634101405840537
+    },
+    {
+      "student_id": "S1254",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 5000,
+      "candidates": 200,
+      "ndcg@10": 0.5161519122014607,
+      "ndcg@5": 0.5172335736734964,
+      "precision@5": 0.8,
+      "map": 0.6094692567831033
+    },
+    {
+      "student_id": "S1258",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 167,
+      "ndcg@10": 0.698167377631312,
+      "ndcg@5": 0.8546456263113074,
+      "precision@5": 0.8,
+      "map": 0.6294224850583495
+    },
+    {
+      "student_id": "S1264",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 2100,
+      "candidates": 23,
+      "ndcg@10": 0.603070379669048,
+      "ndcg@5": 0.5589219751750013,
+      "precision@5": 0.4,
+      "map": 0.4455555555555556
+    },
+    {
+      "student_id": "S1269",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3500,
+      "candidates": 50,
+      "ndcg@10": 0.4218377405248715,
+      "ndcg@5": 0.48709935195084586,
+      "precision@5": 0.6,
+      "map": 0.3970808261855042
+    },
+    {
+      "student_id": "S1272",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 4700,
+      "candidates": 200,
+      "ndcg@10": 0.5523333075958957,
+      "ndcg@5": 0.576936954288263,
+      "precision@5": 0.6,
+      "map": 0.4384401876861639
+    },
+    {
+      "student_id": "S1285",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3600,
+      "candidates": 200,
+      "ndcg@10": 0.5628402660428427,
+      "ndcg@5": 0.7525206917150931,
+      "precision@5": 0.8,
+      "map": 0.43891798180883096
+    },
+    {
+      "student_id": "S1288",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3500,
+      "candidates": 200,
+      "ndcg@10": 0.4646095864905559,
+      "ndcg@5": 0.44613955383784243,
+      "precision@5": 0.6,
+      "map": 0.37691100478460215
+    },
+    {
+      "student_id": "S1289",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 4100,
+      "candidates": 200,
+      "ndcg@10": 0.6356388423328703,
+      "ndcg@5": 0.6496141411326093,
+      "precision@5": 0.8,
+      "map": 0.5004683311266092
+    },
+    {
+      "student_id": "S1316",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 5300,
+      "candidates": 72,
+      "ndcg@10": 0.12142995246718533,
+      "ndcg@5": 0.024225728948115435,
+      "precision@5": 0.0,
+      "map": 0.22852424606064645
+    },
+    {
+      "student_id": "S1319",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 167,
+      "ndcg@10": 0.90262796779454,
+      "ndcg@5": 1.0,
+      "precision@5": 1.0,
+      "map": 0.5639240070824503
+    },
+    {
+      "student_id": "S1335",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 51,
+      "ndcg@10": 0.806909190043106,
+      "ndcg@5": 0.778957320150241,
+      "precision@5": 0.8,
+      "map": 0.7489734149423145
+    },
+    {
+      "student_id": "S1338",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3000,
+      "candidates": 43,
+      "ndcg@10": 0.8171550027886335,
+      "ndcg@5": 0.6019104956622309,
+      "precision@5": 0.6,
+      "map": 0.7109803776470442
+    },
+    {
+      "student_id": "S1343",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3100,
+      "candidates": 183,
+      "ndcg@10": 0.5098096722427786,
+      "ndcg@5": 0.5862994109060138,
+      "precision@5": 0.6,
+      "map": 0.39000828347925603
+    },
+    {
+      "student_id": "S1352",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 4400,
+      "candidates": 56,
+      "ndcg@10": 0.37237872613192197,
+      "ndcg@5": 0.4424068585086092,
+      "precision@5": 0.4,
+      "map": 0.34590519379422835
+    },
+    {
+      "student_id": "S1358",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 197,
+      "ndcg@10": 0.5990018839360198,
+      "ndcg@5": 0.6164336326286644,
+      "precision@5": 0.6,
+      "map": 0.46658164763983845
+    },
+    {
+      "student_id": "S1371",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 2700,
+      "candidates": 36,
+      "ndcg@10": 0.9622654211935907,
+      "ndcg@5": 0.9457019255307257,
+      "precision@5": 0.8,
+      "map": 0.8701388888888888
+    },
+    {
+      "student_id": "S1379",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 5400,
+      "candidates": 200,
+      "ndcg@10": 0.568567569873359,
+      "ndcg@5": 0.6470030990193111,
+      "precision@5": 0.6,
+      "map": 0.5179376341049664
+    },
+    {
+      "student_id": "S1381",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 197,
+      "ndcg@10": 0.4840104621774407,
+      "ndcg@5": 0.5289207410600282,
+      "precision@5": 0.6,
+      "map": 0.5151281699379314
+    },
+    {
+      "student_id": "S1386",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 47,
+      "ndcg@10": 0.4490242593513339,
+      "ndcg@5": 0.44613955383784243,
+      "precision@5": 0.6,
+      "map": 0.4222720098329854
+    },
+    {
+      "student_id": "S1392",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 4700,
+      "candidates": 200,
+      "ndcg@10": 0.31155768368771286,
+      "ndcg@5": 0.32503844399191834,
+      "precision@5": 0.4,
+      "map": 0.24730541215335017
+    },
+    {
+      "student_id": "S1397",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 1500,
+      "candidates": 63,
+      "ndcg@10": 0.46307308831482946,
+      "ndcg@5": 0.4703652827859579,
+      "precision@5": 0.4,
+      "map": 0.39280717536107773
+    },
+    {
+      "student_id": "S1398",
+      "university_code": "UMB-JILO",
+      "seed_verified": true,
+      "budget_max": 3200,
+      "candidates": 17,
+      "ndcg@10": 0.9352862679478269,
+      "ndcg@5": 0.9581123571019741,
+      "precision@5": 0.8,
+      "map": 0.95
+    },
+    {
+      "student_id": "S1402",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 5400,
+      "candidates": 59,
+      "ndcg@10": 0.6448384924509735,
+      "ndcg@5": 0.778957320150241,
+      "precision@5": 0.8,
+      "map": 0.559664655599485
+    },
+    {
+      "student_id": "S1405",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 3500,
+      "candidates": 57,
+      "ndcg@10": 0.3165813005027975,
+      "ndcg@5": 0.36338593422173154,
+      "precision@5": 0.2,
+      "map": 0.2939746077651893
+    },
+    {
+      "student_id": "S1407",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 2100,
+      "candidates": 34,
+      "ndcg@10": 0.7672464549995185,
+      "ndcg@5": 0.7281443770744535,
+      "precision@5": 0.6,
+      "map": 0.5685504971219256
+    },
+    {
+      "student_id": "S1409",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 3300,
+      "candidates": 200,
+      "ndcg@10": 0.7388040050579644,
+      "ndcg@5": 0.8165832016561192,
+      "precision@5": 0.8,
+      "map": 0.5655698815253831
+    },
+    {
+      "student_id": "S1419",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 3000,
+      "candidates": 40,
+      "ndcg@10": 0.5187088106134885,
+      "ndcg@5": 0.5491374732066682,
+      "precision@5": 0.6,
+      "map": 0.6143044455544455
+    },
+    {
+      "student_id": "S1425",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 4400,
+      "candidates": 63,
+      "ndcg@10": 0.6345581982008022,
+      "ndcg@5": 0.8027478044303603,
+      "precision@5": 1.0,
+      "map": 0.6703318260922997
+    },
+    {
+      "student_id": "S1429",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 3200,
+      "candidates": 198,
+      "ndcg@10": 0.36474082981200096,
+      "ndcg@5": 0.31564845247951445,
+      "precision@5": 0.4,
+      "map": 0.3636832608897302
+    },
+    {
+      "student_id": "S1432",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 3600,
+      "candidates": 200,
+      "ndcg@10": 0.776169445109296,
+      "ndcg@5": 0.7808192186449511,
+      "precision@5": 1.0,
+      "map": 0.7139006623116317
+    },
+    {
+      "student_id": "S1436",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 3600,
+      "candidates": 200,
+      "ndcg@10": 0.6759285885929387,
+      "ndcg@5": 0.7041217066455405,
+      "precision@5": 0.6,
+      "map": 0.5447262522946553
+    },
+    {
+      "student_id": "S1440",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 5400,
+      "candidates": 200,
+      "ndcg@10": 0.35173988898519926,
+      "ndcg@5": 0.4649106712342586,
+      "precision@5": 0.6,
+      "map": 0.3038207163000396
+    },
+    {
+      "student_id": "S1449",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 5500,
+      "candidates": 200,
+      "ndcg@10": 0.3340383211033,
+      "ndcg@5": 0.35598181659549133,
+      "precision@5": 0.4,
+      "map": 0.37111209190060734
+    },
+    {
+      "student_id": "S1451",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 2200,
+      "candidates": 39,
+      "ndcg@10": 0.39654215520248587,
+      "ndcg@5": 0.19300529193160323,
+      "precision@5": 0.4,
+      "map": 0.39480880230880233
+    },
+    {
+      "student_id": "S1452",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 2300,
+      "candidates": 41,
+      "ndcg@10": 0.8262732669451448,
+      "ndcg@5": 0.6712288279674266,
+      "precision@5": 0.6,
+      "map": 0.6251616696061141
+    },
+    {
+      "student_id": "S1487",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 5500,
+      "candidates": 18,
+      "ndcg@10": 0.8368911594781069,
+      "ndcg@5": 0.7293854503605586,
+      "precision@5": 0.4,
+      "map": 0.5821428571428572
+    },
+    {
+      "student_id": "S1491",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 1800,
+      "candidates": 24,
+      "ndcg@10": 0.3608614625912117,
+      "ndcg@5": 0.06112041115863617,
+      "precision@5": 0.0,
+      "map": 0.28272727272727266
+    },
+    {
+      "student_id": "S1496",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 2900,
+      "candidates": 47,
+      "ndcg@10": 0.5128044270876831,
+      "ndcg@5": 0.5851514885653175,
+      "precision@5": 0.8,
+      "map": 0.6466523090436135
+    },
+    {
+      "student_id": "S1497",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 3600,
+      "candidates": 200,
+      "ndcg@10": 0.5377360957639137,
+      "ndcg@5": 0.6496141411326093,
+      "precision@5": 0.8,
+      "map": 0.4471178257791763
+    },
+    {
+      "student_id": "S1499",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 3200,
+      "candidates": 198,
+      "ndcg@10": 0.41448494467423724,
+      "ndcg@5": 0.4308686044455565,
+      "precision@5": 0.4,
+      "map": 0.3306006606233637
+    },
+    {
+      "student_id": "S1503",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 5800,
+      "candidates": 200,
+      "ndcg@10": 0.7759169755812949,
+      "ndcg@5": 0.8777221344374128,
+      "precision@5": 1.0,
+      "map": 0.624543326370347
+    },
+    {
+      "student_id": "S1512",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 4100,
+      "candidates": 61,
+      "ndcg@10": 0.33047210104506797,
+      "ndcg@5": 0.20014956902745487,
+      "precision@5": 0.2,
+      "map": 0.41581524457414454
+    },
+    {
+      "student_id": "S1523",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 2700,
+      "candidates": 171,
+      "ndcg@10": 0.8123406909397135,
+      "ndcg@5": 0.9250256699929476,
+      "precision@5": 1.0,
+      "map": 0.555120384857481
+    },
+    {
+      "student_id": "S1524",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 7200,
+      "candidates": 64,
+      "ndcg@10": 0.4068065120849547,
+      "ndcg@5": 0.3391602052736161,
+      "precision@5": 0.2,
+      "map": 0.4221674006252028
+    },
+    {
+      "student_id": "S1538",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 3800,
+      "candidates": 200,
+      "ndcg@10": 0.7493447759884839,
+      "ndcg@5": 0.8875385049894211,
+      "precision@5": 0.8,
+      "map": 0.5177340848298686
+    },
+    {
+      "student_id": "S1542",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 2600,
+      "candidates": 35,
+      "ndcg@10": 0.8471455251106421,
+      "ndcg@5": 0.9231437330423532,
+      "precision@5": 0.8,
+      "map": 0.7332275132275132
+    },
+    {
+      "student_id": "S1547",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 2400,
+      "candidates": 41,
+      "ndcg@10": 0.3514383494371818,
+      "ndcg@5": 0.4077920636080293,
+      "precision@5": 0.6,
+      "map": 0.35056484578223707
+    },
+    {
+      "student_id": "S1568",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 2600,
+      "candidates": 166,
+      "ndcg@10": 0.6701073612125167,
+      "ndcg@5": 0.7058448886378986,
+      "precision@5": 1.0,
+      "map": 0.5840814647126615
+    },
+    {
+      "student_id": "S1575",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 3200,
+      "candidates": 198,
+      "ndcg@10": 0.4688008806949095,
+      "ndcg@5": 0.5241525707676897,
+      "precision@5": 0.6,
+      "map": 0.36133887811593374
+    },
+    {
+      "student_id": "S1584",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 6900,
+      "candidates": 72,
+      "ndcg@10": 0.47712683288588,
+      "ndcg@5": 0.5851514885653175,
+      "precision@5": 0.8,
+      "map": 0.5656208745664816
+    },
+    {
+      "student_id": "S1588",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 2100,
+      "candidates": 23,
+      "ndcg@10": 0.8441090942100913,
+      "ndcg@5": 0.6820841211351599,
+      "precision@5": 0.4,
+      "map": 0.6655122655122654
+    },
+    {
+      "student_id": "S1597",
+      "university_code": "UMB-VDC",
+      "seed_verified": false,
+      "budget_max": 4000,
+      "candidates": 48,
+      "ndcg@10": 0.5490998723822814,
+      "ndcg@5": 0.3451913422468693,
+      "precision@5": 0.4,
+      "map": 0.5517540740992752
+    },
+    {
+      "student_id": "S1605",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 1800,
+      "candidates": 149,
+      "ndcg@10": 0.6147817573558698,
+      "ndcg@5": 0.6544698535819351,
+      "precision@5": 0.6,
+      "map": 0.4447144377531978
+    },
+    {
+      "student_id": "S1611",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 3700,
+      "candidates": 71,
+      "ndcg@10": 0.12130459886904402,
+      "ndcg@5": 0.11105217925739079,
+      "precision@5": 0.2,
+      "map": 0.230806617866864
+    },
+    {
+      "student_id": "S1621",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2600,
+      "candidates": 55,
+      "ndcg@10": 0.5229259899755538,
+      "ndcg@5": 0.5649710554157135,
+      "precision@5": 0.6,
+      "map": 0.43203819989534265
+    },
+    {
+      "student_id": "S1623",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2100,
+      "candidates": 176,
+      "ndcg@10": 0.6005635861239612,
+      "ndcg@5": 0.6735522402548937,
+      "precision@5": 0.6,
+      "map": 0.433787442129847
+    },
+    {
+      "student_id": "S1630",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 1500,
+      "candidates": 118,
+      "ndcg@10": 0.4952067756965551,
+      "ndcg@5": 0.6213156142027513,
+      "precision@5": 0.6,
+      "map": 0.5050194032016049
+    },
+    {
+      "student_id": "S1632",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2900,
+      "candidates": 200,
+      "ndcg@10": 0.5717849440327939,
+      "ndcg@5": 0.7414701551467148,
+      "precision@5": 0.6,
+      "map": 0.35895965416299364
+    },
+    {
+      "student_id": "S1636",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2500,
+      "candidates": 200,
+      "ndcg@10": 0.30142212412814706,
+      "ndcg@5": 0.38284349287750846,
+      "precision@5": 0.6,
+      "map": 0.32883150587776655
+    },
+    {
+      "student_id": "S1637",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 3000,
+      "candidates": 200,
+      "ndcg@10": 0.6451707806393695,
+      "ndcg@5": 0.7092912526226147,
+      "precision@5": 0.8,
+      "map": 0.62188794571073
+    },
+    {
+      "student_id": "S1646",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2000,
+      "candidates": 47,
+      "ndcg@10": 0.35667936444076337,
+      "ndcg@5": 0.27497628419234205,
+      "precision@5": 0.6,
+      "map": 0.43009870064967515
+    },
+    {
+      "student_id": "S1647",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 1000,
+      "candidates": 13,
+      "ndcg@10": 0.9534686717241728,
+      "ndcg@5": 0.9284946163333048,
+      "precision@5": 0.6,
+      "map": 1.0
+    },
+    {
+      "student_id": "S1652",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 1700,
+      "candidates": 139,
+      "ndcg@10": 0.5223084809206266,
+      "ndcg@5": 0.6275717767768734,
+      "precision@5": 0.8,
+      "map": 0.45928728914966205
+    },
+    {
+      "student_id": "S1654",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2400,
+      "candidates": 200,
+      "ndcg@10": 0.5017183411568181,
+      "ndcg@5": 0.7052184546408721,
+      "precision@5": 0.6,
+      "map": 0.3428637289433799
+    },
+    {
+      "student_id": "S1659",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2300,
+      "candidates": 53,
+      "ndcg@10": 0.40937988283718524,
+      "ndcg@5": 0.4323303930254228,
+      "precision@5": 0.4,
+      "map": 0.45198465371640234
+    },
+    {
+      "student_id": "S1665",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 1700,
+      "candidates": 139,
+      "ndcg@10": 0.57712894901097,
+      "ndcg@5": 0.6343169226155623,
+      "precision@5": 1.0,
+      "map": 0.7640029856911373
+    },
+    {
+      "student_id": "S1666",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 4700,
+      "candidates": 73,
+      "ndcg@10": 0.5568423664443877,
+      "ndcg@5": 0.5597765387951922,
+      "precision@5": 0.8,
+      "map": 0.5696512682177512
+    },
+    {
+      "student_id": "S1672",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 3800,
+      "candidates": 200,
+      "ndcg@10": 0.5279876921298867,
+      "ndcg@5": 0.58776119948588,
+      "precision@5": 0.6,
+      "map": 0.4941313268691346
+    },
+    {
+      "student_id": "S1737",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 1600,
+      "candidates": 34,
+      "ndcg@10": 0.44549116160847413,
+      "ndcg@5": 0.4983676033246967,
+      "precision@5": 0.6,
+      "map": 0.5471861471861471
+    },
+    {
+      "student_id": "S1744",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 7300,
+      "candidates": 79,
+      "ndcg@10": 0.21718932865553103,
+      "ndcg@5": 0.18903766129258498,
+      "precision@5": 0.2,
+      "map": 0.30432964574468707
+    },
+    {
+      "student_id": "S1750",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 5700,
+      "candidates": 200,
+      "ndcg@10": 0.6957581352404494,
+      "ndcg@5": 0.7196802858636574,
+      "precision@5": 0.8,
+      "map": 0.822873678105305
+    },
+    {
+      "student_id": "S1751",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 5100,
+      "candidates": 74,
+      "ndcg@10": 0.699429754860076,
+      "ndcg@5": 0.746517056925071,
+      "precision@5": 0.8,
+      "map": 0.6618784712513761
+    },
+    {
+      "student_id": "S1754",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2600,
+      "candidates": 55,
+      "ndcg@10": 0.6145312374461721,
+      "ndcg@5": 0.5508492941340157,
+      "precision@5": 1.0,
+      "map": 0.7398332638399208
+    },
+    {
+      "student_id": "S1756",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2300,
+      "candidates": 53,
+      "ndcg@10": 0.6603986676407302,
+      "ndcg@5": 0.5982391060766458,
+      "precision@5": 0.4,
+      "map": 0.5448307494343301
+    },
+    {
+      "student_id": "S1758",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 3700,
+      "candidates": 200,
+      "ndcg@10": 0.7691822679704203,
+      "ndcg@5": 0.8875385049894211,
+      "precision@5": 0.8,
+      "map": 0.684239591726071
+    },
+    {
+      "student_id": "S1762",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 1800,
+      "candidates": 149,
+      "ndcg@10": 0.7696388689959203,
+      "ndcg@5": 0.8687949224876581,
+      "precision@5": 0.8,
+      "map": 0.6509550199691517
+    },
+    {
+      "student_id": "S1770",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2600,
+      "candidates": 58,
+      "ndcg@10": 0.6559593477352784,
+      "ndcg@5": 0.6705148518134127,
+      "precision@5": 0.6,
+      "map": 0.5904235292166325
+    },
+    {
+      "student_id": "S1771",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 3000,
+      "candidates": 200,
+      "ndcg@10": 0.3582053221113634,
+      "ndcg@5": 0.28063228189419887,
+      "precision@5": 0.6,
+      "map": 0.45632824524088955
+    },
+    {
+      "student_id": "S1772",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 1700,
+      "candidates": 139,
+      "ndcg@10": 0.5497898748168653,
+      "ndcg@5": 0.7414701551467148,
+      "precision@5": 0.6,
+      "map": 0.491196409353269
+    },
+    {
+      "student_id": "S1777",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2200,
+      "candidates": 49,
+      "ndcg@10": 0.5555770336480054,
+      "ndcg@5": 0.536438637256595,
+      "precision@5": 0.6,
+      "map": 0.6267460317460316
+    },
+    {
+      "student_id": "S1780",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 2000,
+      "candidates": 167,
+      "ndcg@10": 0.5369057071663946,
+      "ndcg@5": 0.7025461067839258,
+      "precision@5": 0.8,
+      "map": 0.4709269553442377
+    },
+    {
+      "student_id": "S1782",
+      "university_code": "UCAN",
+      "seed_verified": false,
+      "budget_max": 4300,
+      "candidates": 200,
+      "ndcg@10": 0.4018255933639772,
+      "ndcg@5": 0.4915722925588539,
+      "precision@5": 0.6,
+      "map": 0.508715447732949
+    },
+    {
+      "student_id": "S1805",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 165,
+      "ndcg@10": 0.6374542700370921,
+      "ndcg@5": 0.7718920066951964,
+      "precision@5": 0.8,
+      "map": 0.5143141249791736
+    },
+    {
+      "student_id": "S1807",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 1500,
+      "candidates": 30,
+      "ndcg@10": 0.7895294554013875,
+      "ndcg@5": 0.6333086701779173,
+      "precision@5": 0.6,
+      "map": 0.6652777777777777
+    },
+    {
+      "student_id": "S1813",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 157,
+      "ndcg@10": 0.6573940840512866,
+      "ndcg@5": 0.8061941684150765,
+      "precision@5": 1.0,
+      "map": 0.5778380786859473
+    },
+    {
+      "student_id": "S1820",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 36,
+      "ndcg@10": 0.4569776674765466,
+      "ndcg@5": 0.43491760599050827,
+      "precision@5": 0.4,
+      "map": 0.4444669913419913
+    },
+    {
+      "student_id": "S1834",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 33,
+      "ndcg@10": 0.7644401311574809,
+      "ndcg@5": 0.6882123236462421,
+      "precision@5": 0.8,
+      "map": 0.8242424242424242
+    },
+    {
+      "student_id": "S1839",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 3100,
+      "candidates": 52,
+      "ndcg@10": 0.2648187320290775,
+      "ndcg@5": 0.0726771868443463,
+      "precision@5": 0.0,
+      "map": 0.2890676166455238
+    },
+    {
+      "student_id": "S1850",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2900,
+      "candidates": 10,
+      "ndcg@10": 0.4930302330749004,
+      "ndcg@5": 0.4930302330749004,
+      "precision@5": 0.4,
+      "map": 0.325
+    },
+    {
+      "student_id": "S1852",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 67,
+      "ndcg@10": 0.8312846477405776,
+      "ndcg@5": 0.7942545059558663,
+      "precision@5": 1.0,
+      "map": 0.7495397115821556
+    },
+    {
+      "student_id": "S1857",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2700,
+      "candidates": 48,
+      "ndcg@10": 0.7309750016018625,
+      "ndcg@5": 0.6775463617080406,
+      "precision@5": 0.8,
+      "map": 0.684265873015873
+    },
+    {
+      "student_id": "S1866",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 3800,
+      "candidates": 54,
+      "ndcg@10": 0.2293792663599714,
+      "ndcg@5": 0.2563803165327442,
+      "precision@5": 0.4,
+      "map": 0.2932575355115924
+    },
+    {
+      "student_id": "S1881",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 1600,
+      "candidates": 129,
+      "ndcg@10": 0.6386686798967444,
+      "ndcg@5": 0.5961157814580222,
+      "precision@5": 0.4,
+      "map": 0.5420916679634692
+    },
+    {
+      "student_id": "S1889",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 1400,
+      "candidates": 108,
+      "ndcg@10": 0.3683004393848598,
+      "ndcg@5": 0.32342774208857294,
+      "precision@5": 0.6,
+      "map": 0.6476436285629987
+    },
+    {
+      "student_id": "S1890",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2000,
+      "candidates": 37,
+      "ndcg@10": 0.9035971929247867,
+      "ndcg@5": 0.7442219178835312,
+      "precision@5": 0.8,
+      "map": 0.9206845238095237
+    },
+    {
+      "student_id": "S1893",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 157,
+      "ndcg@10": 0.3655025903082595,
+      "ndcg@5": 0.39320755547510405,
+      "precision@5": 0.6,
+      "map": 0.39893578951305847
+    },
+    {
+      "student_id": "S1894",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 1800,
+      "candidates": 33,
+      "ndcg@10": 0.3123555731180293,
+      "ndcg@5": 0.1615100424815617,
+      "precision@5": 0.4,
+      "map": 0.3836006850292564
+    },
+    {
+      "student_id": "S1898",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2400,
+      "candidates": 45,
+      "ndcg@10": 0.19262731711162648,
+      "ndcg@5": 0.08134430386292302,
+      "precision@5": 0.2,
+      "map": 0.30850061281750096
+    },
+    {
+      "student_id": "S1899",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2900,
+      "candidates": 200,
+      "ndcg@10": 0.35445135642118064,
+      "ndcg@5": 0.4320178252675665,
+      "precision@5": 0.6,
+      "map": 0.3764700929130025
+    },
+    {
+      "student_id": "S1900",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2500,
+      "candidates": 46,
+      "ndcg@10": 0.3255582132697482,
+      "ndcg@5": 0.34926417294003376,
+      "precision@5": 0.6,
+      "map": 0.5095131257631258
+    },
+    {
+      "student_id": "S1907",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 3300,
+      "candidates": 200,
+      "ndcg@10": 0.6720556411965511,
+      "ndcg@5": 0.7092912526226147,
+      "precision@5": 0.8,
+      "map": 0.6456603449485924
+    },
+    {
+      "student_id": "S1908",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 1900,
+      "candidates": 31,
+      "ndcg@10": 0.5644160205985792,
+      "ndcg@5": 0.4895915292722698,
+      "precision@5": 0.6,
+      "map": 0.7007936507936507
+    },
+    {
+      "student_id": "S1910",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2600,
+      "candidates": 10,
+      "ndcg@10": 0.6831312932610384,
+      "ndcg@5": 0.5766666455144387,
+      "precision@5": 0.2,
+      "map": 0.39285714285714285
+    },
+    {
+      "student_id": "S1913",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2900,
+      "candidates": 49,
+      "ndcg@10": 0.7180356860675515,
+      "ndcg@5": 0.8546456263113074,
+      "precision@5": 0.8,
+      "map": 0.6421578421578421
+    },
+    {
+      "student_id": "S1927",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 1400,
+      "candidates": 108,
+      "ndcg@10": 0.8622105467408699,
+      "ndcg@5": 1.0,
+      "precision@5": 1.0,
+      "map": 0.706300731680759
+    },
+    {
+      "student_id": "S1938",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2300,
+      "candidates": 43,
+      "ndcg@10": 0.6924779012702363,
+      "ndcg@5": 0.8196294557259916,
+      "precision@5": 1.0,
+      "map": 0.7265462506841818
+    },
+    {
+      "student_id": "S1941",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 3900,
+      "candidates": 200,
+      "ndcg@10": 0.6706118883429945,
+      "ndcg@5": 0.9030970842075382,
+      "precision@5": 1.0,
+      "map": 0.5215581489551631
+    },
+    {
+      "student_id": "S1959",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 1800,
+      "candidates": 29,
+      "ndcg@10": 0.6476342493833516,
+      "ndcg@5": 0.5885571326708986,
+      "precision@5": 0.8,
+      "map": 0.7320818070818071
+    },
+    {
+      "student_id": "S1968",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 4600,
+      "candidates": 60,
+      "ndcg@10": 0.4507352312375757,
+      "ndcg@5": 0.3216520872695365,
+      "precision@5": 0.4,
+      "map": 0.36317959742565886
+    },
+    {
+      "student_id": "S1969",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2600,
+      "candidates": 48,
+      "ndcg@10": 0.8007292218743741,
+      "ndcg@5": 0.6654341464746397,
+      "precision@5": 0.6,
+      "map": 0.6902482702482702
+    },
+    {
+      "student_id": "S1972",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2400,
+      "candidates": 45,
+      "ndcg@10": 0.2867935595500072,
+      "ndcg@5": 0.32799582471206784,
+      "precision@5": 0.4,
+      "map": 0.345274040449479
+    },
+    {
+      "student_id": "S1984",
+      "university_code": "UNE-TULA",
+      "seed_verified": true,
+      "budget_max": 2800,
+      "candidates": 62,
+      "ndcg@10": 0.7258244542993747,
+      "ndcg@5": 0.8687949224876581,
+      "precision@5": 0.8,
+      "map": 0.6798152157353882
+    }
+  ]
+}

@@ -8,18 +8,18 @@
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-20 (M-ML-029) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02, T03, T04 y T05 completas (5/7); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02, T03, T04, T05 y T06 completas (6/7); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 5 |
+| Tasks completadas | 6 |
 
 ## Reglas de esta lista
 
-1. T01, T02, T03 y T04 completas (2026-11-20) y T05 completa (2026-11-23), con evidencia en `evidence.md`; T06 y T07 abiertas.
+1. T01, T02, T03 y T04 completas (2026-11-20) y T05 y T06 completas (2026-11-23), con evidencia en `evidence.md`; T07 abierta.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA».
 4. Un control no ejecutado no se reporta como PASS.
-5. Las decisiones 1–5 de la spec §10 están APROBADO (M-ML-029). Los valores SUPUESTO de la spec §6.5 quedaron aprobados con M-ML-032 (T04); T06 no se cierra hasta que se aprueben, con su M-ML, los de la §6.6.
+5. Las decisiones 1–5 de la spec §10 están APROBADO (M-ML-029). Los valores SUPUESTO de la spec §6.5 quedaron aprobados con M-ML-032 (T04); los de la §6.6, con M-ML-034 (T06).
 
 ## F1 — Diseño y contrato
 
@@ -34,7 +34,7 @@
 
 ## F3 — Calidad, seguridad y datos
 
-- [ ] **T06 · Reporte del modelo base** — Requisito: ML-04-R06 · Decisión: 5 · Aceptación: distribución de puntajes, ejemplos explicados con desglose y NDCG@10 (principal), NDCG@5, Precision@5 y MAP en la partición test, con estudiantes de 2 o más candidatos (cuántos quedan fuera); intervalos por bootstrap por estudiante (semilla y número de remuestreos documentados); en total, por campus, sin las 3 `seed_sin_verificar` y por rango de presupuesto; todo marcado como sintético; referencia de ML-05.
+- [x] **T06 · Reporte del modelo base** — Requisito: ML-04-R06 · Decisión: 5 · Aceptación: distribución de puntajes, ejemplos explicados con desglose y NDCG@10 (principal), NDCG@5, Precision@5 y MAP en la partición test, con estudiantes de 2 o más candidatos (cuántos quedan fuera); intervalos por bootstrap por estudiante (semilla y número de remuestreos documentados); en total, por campus, sin las 3 `seed_sin_verificar` y por rango de presupuesto; todo marcado como sintético; referencia de ML-05.
 
 ## F4 — Evidencia
 
@@ -49,5 +49,5 @@
 | T03 | R03 | F2 | T01, T02 | COMPLETA — PASS (M-ML-031) |
 | T04 | R04 | F2 | T02, decisión 4 | COMPLETA — PASS (M-ML-032) |
 | T05 | R05 | F2 | T03 | COMPLETA — PASS (M-ML-033) |
-| T06 | R06 | F3 | T03, T04, decisión 5 | ABIERTA |
+| T06 | R06 | F3 | T03, T04, decisión 5 | COMPLETA — PASS (M-ML-034) |
 | T07 | R07 | F4 | T01–T06 | ABIERTA |
