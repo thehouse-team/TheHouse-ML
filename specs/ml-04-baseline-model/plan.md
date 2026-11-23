@@ -8,7 +8,7 @@
 | Fecha | 2026-11-20 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-20 (M-ML-029) |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 (7/7), 2026-11-20 a 2026-11-23; cierre M-ML-035, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Spec | `spec.md` 1.0.0 |
 

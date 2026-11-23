@@ -29,7 +29,7 @@ def test_get_stage_rejects_unknown_names() -> None:
 
 
 def test_run_stage_returns_the_pending_message(tmp_path: Path) -> None:
-    assert run_stage("train", ProjectPaths(root=tmp_path)) == "train: pendiente de ML-04"
+    assert run_stage("train", ProjectPaths(root=tmp_path)) == "train: pendiente de ML-05"
 
 
 def test_prepare_generates_the_data_card_after_the_other_outputs(

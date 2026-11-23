@@ -39,7 +39,7 @@ class Stage:
 STAGES: tuple[Stage, ...] = (
     Stage("download", "Descarga las fuentes registradas y verifica su SHA-256.", "ML-02"),
     Stage("prepare", "Limpia, pondera, calibra y genera estudiantes, cuartos, pares y etiquetas sintéticos.", "ML-02"),
-    Stage("train", "Entrena el modelo base y los modelos candidatos.", "ML-04"),
+    Stage("train", "Entrena el modelo base y los modelos candidatos.", "ML-05"),
     Stage("evaluate", "Evalúa los modelos contra el modelo base y escribe los reportes.", "ML-04"),
     Stage("export", "Exporta el modelo promovido a ONNX con su paquete de entrega.", "ML-06"),
 )

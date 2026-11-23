@@ -3,8 +3,8 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-04 1.0.0 |
-| Tareas ejecutadas | T02 · Esquema 2.0.0 y features nuevas (R02) y, después, T01 · Configuración versionada (R01); en una segunda ejecución, T03 · Puntaje y desglose (R03); en una tercera, T04 · Simulador de etiquetas sintéticas (R04); en una cuarta, T05 · Casos dorados (R05); en una quinta, T06 · Reporte del modelo base (R06). Cada una con sección propia abajo |
-| Estado | **🟡 EN EJECUCIÓN — 6/7** (T01, T02, T03, T04, T05 y T06 completas; T07 abierta) |
+| Tareas ejecutadas | T02 · Esquema 2.0.0 y features nuevas (R02) y, después, T01 · Configuración versionada (R01); en una segunda ejecución, T03 · Puntaje y desglose (R03); en una tercera, T04 · Simulador de etiquetas sintéticas (R04); en una cuarta, T05 · Casos dorados (R05); en una quinta, T06 · Reporte del modelo base (R06); en una sexta, T07 · Pruebas y evidencia (R07, cierre). Cada una con sección propia abajo |
+| Estado | **✅ ML-04 COMPLETA (7/7)** — cierre M-ML-035, 2026-11-23; ver «T07 · Pruebas y evidencia» y «Resumen final de ML-04» (al final) |
 | Autorización (T02 y T01) | «EJECUTA ML-04 1.0.0, tasks T02 y después T01 (en ese orden, porque T01 valida contra las features de T02), en la rama feat/ml-04-config-schema. Rutas permitidas: src/thehouse_ml/ (features/ y el módulo del modelo base donde indique specs/ARQUITECTURA.md), tests/, reports/ (solo lo que regenere prepare), memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). data/processed/ se regenera pero sigue fuera de git. Sin dependencias nuevas. No modifiques students_params.json, rooms_params.json ni pairs_params.json» — César Yael López Trujillo, 2026-11-20 |
 | Rama (T02 y T01) | `feat/ml-04-config-schema` (commit base `fac23bc`; mezclada en el PR #24, `643f94e`) |
 | Autorización (T03) | «EJECUTA ML-04 1.0.0, task T03 (ML-04-R03), en la rama feat/ml-04-score. Rutas permitidas: src/thehouse_ml/models/, src/thehouse_ml/features/ (solo para reutilizar, no cambiar el esquema), tests/, memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). Sin dependencias nuevas (nada de hypothesis: las pruebas de propiedades usan rejillas o random.Random con semilla). No modifiques feature_schema.json (2.0.0) ni baseline_params.json (baseline-1.0.0)» — César Yael López Trujillo, 2026-11-20 |
@@ -713,3 +713,293 @@ Por campus (30 estudiantes cada uno) en `reports/baseline_report.md` §4. Contra
 - M-ML-034 **APROBADO** por César Yael López Trujillo el 2026-11-23: valores SUPUESTO (relevante si `relevance ≥ 2`; bootstrap 1,000 con intervalo percentil del 95 % y semilla 20261122; rangos ≤ $2,000, $2,001–$3,500 y > $3,500) y las desviaciones T06-H2 (semilla por segmento) y T06-H3 (métricas en `evaluation/`). T06-H5 se resuelve en T07.
 - `baseline_eval_params.json` pasa a `M-ML-034 (APROBADO)` sin cambiar valores; reportes regenerados con `evaluate` (mismas cifras; dos corridas con el mismo SHA-256).
 - **Resultado final (T06): PASS.** T06 completa; ML-04 en 6/7.
+
+## T07 · Pruebas y evidencia (cierre de ML-04)
+
+| Campo | Valor |
+| --- | --- |
+| Autorización | «EJECUTA ML-04 1.0.0, task T07 (ML-04-R07), en la rama feat/ml-04-cierre. Rutas permitidas: src/thehouse_ml/, tests/, reports/, memoria.md, specs/ml-04-baseline-model/, specs/README.md y specs/ARQUITECTURA.md (solo lo de ML-04 y T06-H5). Sin dependencias nuevas» — César Yael López Trujillo, 2026-11-23 |
+| Rama | `feat/ml-04-cierre` |
+| Commit base | `fc69f1d` (merge del PR #28, T06; igual a `origin/main`) |
+| Commit (T07) | Sin commit, por instrucción explícita del responsable |
+| Fecha de ejecución | 2026-11-23 |
+| Decisión | M-ML-035 (APROBADO — César Yael López Trujillo, 2026-11-23) |
+| Esquema y parámetros | `feature_schema.json` 2.0.0, `baseline_params.json` (`baseline-1.0.0`), `labels_params.json` 1.0.0, `baseline_eval_params.json` 1.0.0 y los params de estudiantes, cuartos y pares **sin cambios** |
+
+Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` → `AGENTS.md` → `CONTRIBUTING.md` → `memoria.md` (M-ML-028 a M-ML-034) → `spec.md`, `plan.md`, `task.md` y esta evidencia → `specs/ml-03-feature-schema/evidence.md` (modelo del cierre).
+
+### Qué se hizo
+
+1. **Suite completa con cobertura** (`--cov-report=term-missing`): cobertura total y del código nuevo de ML-04 por encima del 80 % en todos los módulos (el menor, `synthetic/labels.py`, 94 %). No hizo falta agregar pruebas; `src/` y `tests/` **sin cambios**.
+2. **Reproducibilidad:** `prepare` y `evaluate` dos veces seguidas, con SHA-256 de todos los archivos versionados (y nuevos no ignorados) más los 10 Parquet de `data/processed/` antes, entre y después de las corridas (ver «Reproducibilidad comprobada»).
+3. **T06-H5 resuelto en `specs/ARQUITECTURA.md`:** §3 (diagrama y tabla de etapas): `prepare` = ML-02 · ML-03 · ML-04 (10 features y etiquetas sintéticas); `train` = ML-05 (el modelo base por reglas no se entrena: su configuración está versionada); `evaluate` escribe en ML-04 `reports/baseline_report.md` y `reports/baseline_metrics.json` (antes decía `reports/metrics.json` y `reports/model_card.md`, que quedan para ML-05). §4: módulos reales de `models/`, `evaluation/ranking.py` y `synthetic/labels*`. §6: fila de ML-04 con lo que entrega (esquema 2.0.0, `baseline-1.0.0`, etiquetas sintéticas, 81 casos dorados y métricas de referencia).
+4. **Documentos:** `spec.md` (encabezado, §14 y §15), `plan.md` y `task.md` en ✅ COMPLETA (7/7); `specs/README.md` con ML-04 ✅ COMPLETA 7/7; M-ML-035 en `memoria.md` con la herencia para ML-05. `plan.md` decía todavía «⛔ NO EJECUTAR HASTA «EJECUTA»» en el estado de ejecución (T07-H5).
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `137 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 39 source files` (PASS) |
+| `uv run pytest --cov=thehouse_ml --cov-report=term-missing` | **1678 passed in 684.12s (0:11:24)**, código 0; `Required test coverage of 80.0% reached. Total coverage: 96.10%` (PASS) |
+| `uv run coverage report --include="*/thehouse_ml/models/*,*/thehouse_ml/evaluation/*,*/thehouse_ml/synthetic/labels*,*/thehouse_ml/features/*"` | Código nuevo o modificado de ML-04: **98.29 %** (1,984 sentencias, 640 ramas) (PASS) |
+| `uv run python -m thehouse_ml prepare` (1.ª y 2.ª corrida) | Código 0 las dos; ~36 s cada una; misma salida de consola: 2,000 estudiantes, 3,000 cuartos, 196,605 pares, `labels: 196605 etiquetas sintéticas de 2000 estudiantes (Spearman con el baseline 0.513)` (PASS) |
+| `uv run python -m thehouse_ml evaluate` (1.ª y 2.ª corrida, cada una después de su `prepare`) | Código 0 las dos; ~7.5 s; misma salida: `evaluate: baseline-1.0.0 en test con 300 estudiantes; NDCG@10 0.527 [0.503, 0.550] (DATOS SINTÉTICOS)` (PASS) |
+| `git log --first-parent --format="%h %p \| %s" origin/main` y `git rev-list --first-parent --no-merges origin/main` | ML-04 entró solo por los PR #23–#28; el único commit de `main` que no es merge es el inicial `20b2c19` (PASS) |
+
+No se ejecutaron `pip-audit` ni gitleaks en local (corren en el CI: jobs `dependency-audit` y `secrets-gitleaks`); ML-04 no cambió dependencias. No se reportan como PASS local (T07-H2).
+
+### Cobertura por módulo de ML-04
+
+| Módulo | Sentencias | Sin cubrir | Ramas | Ramas parciales | Cobertura | Líneas sin cubrir |
+| --- | ---: | ---: | ---: | ---: | ---: | --- |
+| `evaluation/__init__.py` | 3 | 0 | 0 | 0 | 100 % | — |
+| `evaluation/ranking.py` | 104 | 0 | 36 | 0 | 100 % | — |
+| `models/__init__.py` | 4 | 0 | 0 | 0 | 100 % | — |
+| `models/baseline_config.py` | 256 | 0 | 88 | 0 | 100 % | — |
+| `models/baseline_score.py` | 125 | 0 | 34 | 0 | 100 % | — |
+| `models/baseline_report.py` | 438 | 9 | 146 | 11 | 97 % | 137->143, 228, 442, 473->478, 565, 577-578, 671, 733, 887->896, 968, 977 (validaciones y casos defensivos) |
+| `synthetic/labels.py` | 255 | 11 | 82 | 8 | **94 %** (mínimo) | 163, 171, 187, 193, 210, 236, 242-243, 267, 270-271 (validación defensiva de parámetros) |
+| `synthetic/labels_stage.py` | 171 | 3 | 34 | 3 | 97 % | 199, 209, 380 |
+| `features/pairs.py` (modificado en T02) | 183 | 0 | 66 | 0 | 100 % | — |
+| `features/` restantes (`__init__`, `campuses`, `constraints`, `loader`) | 445 | 0 | 154 | 0 | 100 % | — |
+| `stages.py` y `cli.py` (modificados en T04, T06 y T07-H1) | 86 | 0 | 14 | 0 | 100 % | — |
+| **Total `models/` + `evaluation/` + `synthetic/labels*` + `features/`** | **1,984** | **23** | **640** | **22** | **98.29 %** | — |
+| **Total de `src/thehouse_ml`** | **5,304** | **154** | **1,520** | **110** | **96.10 %** | — |
+
+### Reproducibilidad comprobada
+
+Comando: `sh hashes.sh <salida>` (script en el scratchpad de la sesión, fuera del repo): SHA-256 de `git ls-files -co --exclude-standard` más `data/processed/*.parquet` (**182 archivos**). Se tomó antes de la 1.ª corrida (h0), después de `prepare` + `evaluate` (h1) y después de la 2.ª `prepare` + `evaluate` (h2), con `git status --short` en cada punto.
+
+| Comprobación | Resultado |
+| --- | --- |
+| h1 = h2 (2.ª corrida seguida de `prepare` y `evaluate`) | **idéntico** (`cmp` sin diferencias) |
+| h0 = h2 sin `memoria.md` | **idéntico**: la única diferencia entre h0 y h1 es `memoria.md`, que el agente editó (M-ML-035) mientras corría la 1.ª corrida; ninguna etapa la escribe (T07-H4) |
+| `git status --short` entre h1 y h2 | **idéntico**; las etapas no modifican ningún archivo versionado |
+| Salida de consola de las dos corridas | **idéntica** |
+| SHA-256 de la lista h2 completa | `7ce77c6620a1a105a3487ef9c7a06951f55a7d19202e3c603bd0f319b15a3189` |
+
+| Archivo | SHA-256 (iguales en h0, h1 y h2) |
+| --- | --- |
+| `data/processed/pairs.parquet` | `1f5c4d167c2e45c571681857e6b6b34d2889f9cf5d3578729b6557f0b0431cae` (el mismo `1f5c4d16…1cae` de T02) |
+| `data/processed/labels.parquet` | `b720f05602fb19cd1d68b8ee9a38d3a593b4cca6eb4985ae3a6a99984d9cdd54` (el mismo de T04) |
+| `data/processed/labels_hidden_utility.parquet` | `ddf71238ed994ce8a009b287d3da8cd5cb91fb0abf95ba157d76cd3bb526acff` |
+| `data/processed/labels_hidden_weights.parquet` | `086a8fd2ff3ed8463ec89d7d1e69e518734ad49a316831bdc47e35413b603525` |
+| `data/processed/students.parquet` | `d4ad048ac31392bf98d33437d4bf91ba07839ffeb83d1ebec9842fb49ef373c1` (igual desde ML-03) |
+| `data/processed/rooms.parquet` | `e2ab7e8edaac5cbe55f2ce4971ad50841ce521143d23ce42505e89be3d918dca` (igual desde ML-03) |
+| `reports/baseline_metrics.json` | `df36b2f19c205cb56c3290afe8d15c7ef4e4f48088a7b8a676a98f3149d05561` (el mismo del cierre de T06) |
+| `reports/baseline_report.md` | `3b554e9bafa67c7d1fb8464f1704c60d897472cf2720745752b0befbbe924f30` (el mismo del cierre de T06) |
+| `reports/labels_synthetic.md` | `b1260eb1874fba068bd1a2da188fe366ae8898fb43f676096010cbfc8b2511a6` (el mismo del cierre de T04) |
+| `reports/pairs_summary.md` | `07105fcfcf8b77a402a7167874eb37448a640a4cff8f1c27e45bf5103a3b57de` |
+| `src/thehouse_ml/features/feature_schema.json` | `67af2e487e2b34c6bc5943e0eca4c209e9812a165f30698246c2f2090ffaa8bb` |
+| `src/thehouse_ml/models/baseline_params.json` | `51b663e840eb0b5d12592802093050e28091bf91279db6aece7c237dd5737111` |
+| `src/thehouse_ml/models/baseline_eval_params.json` | `c29ee16499a413d3a3716ffd21d8aaf67ed398b503bc7807d8c5156faf8b844e` |
+| `src/thehouse_ml/synthetic/labels_params.json` | `077e0ea1d79ed3d33f60deb3a474d1b3df16b4932894a3a4837465a09035744f` |
+| `tests/fixtures/baseline_golden_cases.json` | `a92852c7dd289d1040e4f8e5d0b134d23eab8f3a7798c04439b787f9f85ae3f2` (el mismo `a92852c7…85ae3f2` de T05) |
+
+### Trazabilidad R07 → prueba
+
+| Criterio de R07 | Prueba / evidencia |
+| --- | --- |
+| Pruebas unitarias e integración de lo implementado | `tests/unit/test_feature_schema_v2.py`, `test_pair_features.py`, `test_baseline_config.py`, `test_baseline_score.py`, `test_synthetic_labels.py`, `test_baseline_golden_cases.py`, `test_ranking_metrics.py`, `test_baseline_report.py`, `test_stages.py`, `test_cli.py`; `tests/integration/test_pairs_stage.py`, `test_labels_stage.py`, `test_evaluate_stage.py`; trazabilidad por requisito en las secciones T01–T06 |
+| Cobertura ≥ 80 % del código nuevo | «Cobertura por módulo de ML-04»: 98.29 % en el código nuevo o modificado, mínimo por módulo 94 % |
+| ruff y mypy sin errores | «Comandos y resultados» |
+| `evidence.md` con commit, comandos, resultados, hallazgos y coherencia | Esta sección, las tablas de coherencia de abajo y el «Resumen final de ML-04» |
+| Reproducibilidad (constitución §9) | «Reproducibilidad comprobada»; `test_running_twice_does_not_change_any_file` de `pairs`, `labels` y `evaluate` |
+
+### Tabla de coherencia — constitución
+
+| § | Regla | Evidencia en el repo | Resultado |
+| --- | --- | --- | --- |
+| §2.4 / §13.2 | el contrato con el backend es `feature_schema.json` | Esquema 2.0.0 (10 features) en `src/thehouse_ml/features/feature_schema.json`; `baseline_params.json` se valida contra él (`test_the_packaged_config_is_baseline_1_0_0_for_schema_2_0_0`); los casos dorados copian orden y versión (`test_header_versions_match_the_config_and_the_schema`) | PASS |
+| §3 / SDD-001 | spec → plan → task → aprobación → «EJECUTA» → evidencia | `specs/ml-04-baseline-model/{spec,plan,task,evidence}.md`; un «EJECUTA» por task en la cabecera de cada sección; M-ML-029 a M-ML-035 | PASS |
+| §4 / SDD-002 | specs independientes | `specs/README.md`: solo ML-04 cambia de estado; ML-05 a ML-07 siguen en borrador | PASS |
+| §5 | stack de la tabla; dependencias solo con decisión M-ML | `pyproject.toml` y `uv.lock` sin cambios en toda ML-04 (biblioteca estándar, pandas y pyarrow; Spearman y bootstrap sin scipy; sin `hypothesis`) | PASS |
+| §6 / AGENTS | `data/raw`, `data/processed` y `models` fuera de git | `.gitignore` con `/models/` (M-ML-030 H1); `tests/test_repo_hygiene.py` (`test_gitignore_excludes_data_and_models`, `test_artifacts_and_data_are_ignored_by_git`, `test_no_data_or_model_files_are_tracked`); `git status` no lista ningún Parquet | PASS |
+| §7.4 | sin datos personales | Ids sintéticos; `test_outputs_have_no_personal_or_sensitive_fields` (evaluate), `test_simulator_has_no_personal_or_gender_fields` (labels); casos dorados con entradas inventadas | PASS |
+| §8.1 | sintéticos con distribuciones documentadas y semilla fija | `labels_params.json` (cada parámetro con `value` y `basis`), semilla 20261121 distinta de las demás (`test_seed_is_fixed_and_distinct_from_students_rooms_and_pairs`) | PASS |
+| §8.2 | etiquetas de una utilidad: se declara; no es desempeño real | «DATOS SINTÉTICOS — NO SON PREFERENCIAS REALES» en `reports/labels_synthetic.md` (`test_report_is_marked_synthetic_and_the_correlation_is_in_range`); «DATOS SINTÉTICOS — ETIQUETAS SINTÉTICAS», `synthetic: true` y `warning` en `reports/baseline_report.md` y `baseline_metrics.json` (`test_report_and_metrics_are_marked_synthetic_with_versions`); `synthetic = true` en `labels.parquet` | PASS |
+| §8.3 | desempeño real solo con señales reales | Ningún documento de ML-04 afirma desempeño real; ML-07 queda como reemplazo en cada reporte | PASS |
+| §9 | reproducibilidad | Semillas fijas (etiquetas 20261121, bootstrap 20261122, azar 20261123); doble `prepare` + `evaluate` con SHA-256 idénticos (arriba) | PASS |
+| §10.1 | todo modelo entrenado se compara contra el modelo base | ML-04 **es** el modelo base: fija la referencia (`reports/baseline_metrics.json`, `reference_for: ML-05`) y se compara contra azar e ideal; la comparación de un modelo entrenado es de ML-05 | PASS (referencia) · comparación: NO APLICA (ML-05) |
+| §10.2 | NDCG@10, Precision@5 y MAP por estudiante; partición por estudiante sin fuga | `evaluation/ranking.py` (`tests/unit/test_ranking_metrics.py`); partición test de ML-03 (300 estudiantes, sin fuga); `test_only_test_students_with_two_or_more_candidates_are_evaluated`. La validación cruzada es de ML-05 (el modelo base no se entrena) | PASS |
+| §10.3 | intervalos o variación | Bootstrap por estudiante, 1,000, IC 95 %, pareado (`test_packaged_params_hold_the_supuestos_of_m_ml_034`, `test_every_segment_has_intervals_and_the_baseline_beats_random`) | PASS |
+| §11.1 | `livingWith` y presupuesto: restricciones duras | `score_pair` devuelve `ExcludedPair` sin puntaje (`test_an_excluded_pair_has_no_score`); 6 casos dorados excluidos; candidatos de `pairs.parquet` solo entre los que pasan HC01–HC03 | PASS |
+| §11.2 | sin género ni atributos sensibles como señal | `test_no_factor_uses_a_sensitive_attribute`, `test_non_scoring_features_do_not_change_the_result`, `test_simulator_has_no_personal_or_gender_fields`, `test_outputs_have_no_personal_or_sensitive_fields` | PASS |
+| §11.3 | análisis por segmentos (universidad, presupuesto) | 15 segmentos en `reports/baseline_metrics.json`: total, 10 campus, sin `seed_sin_verificar` y 3 rangos de presupuesto (`test_every_segment_has_intervals_and_the_baseline_beats_random`, `test_budget_ranges_are_inclusive_and_cover_every_value`) | PASS |
+| §12 | desglose por factor que suma el total | 6 factores (presupuesto, distancia, servicios, tipo de lugar, modalidad = tipo de inmueble, extras); `raw_total` = Σ puntos sin redondear; tolerancias 0.5/0.3 (`test_the_breakdown_is_coherent_with_the_total`, `test_the_json_output_is_the_format_of_spec_6_4`) | PASS |
+| §13.1 | sin pickle | `tests/test_repo_hygiene.py` prohíbe `.pkl`, `.pickle`, `.joblib` y `.onnx` versionados (`test_onnx_files_are_flagged_wherever_they_are_tracked`); ML-04 solo escribe JSON, Markdown y Parquet | PASS |
+| §13.3 | versión semántica del modelo | `modelVersion` `baseline-1.0.0` en la configuración, la salida, el reporte y los casos dorados | PASS |
+| §13.4 | casos dorados con tolerancia documentada | 81 casos con recuento independiente (`test_fixture_is_exactly_what_the_independent_recount_produces`, `test_recount_does_not_import_the_package`, `test_package_score_matches`); tolerancias y nota .NET en el encabezado (`test_header_documents_generation_decision_and_dotnet_rounding`) | Casos: PASS · paridad ONNX y .NET: NO APLICA (ML-06 / NV-23) |
+| §13.5 | 200 cuartos en < 20 ms | Presupuesto del artefacto ONNX | NO APLICA (ML-06) |
+| §14 | sin secretos; dependencias fijas | Sin secretos ni red; `uv.lock` sin cambios; gitleaks y pip-audit en el CI (no ejecutados en local, T07-H2) | PASS (en el repo) · pip-audit y gitleaks: no ejecutados en local |
+| §15 / COST-001 | costo $0 | CPU local (`prepare` ~36 s, `evaluate` ~7.5 s, suite ~11 min) y GitHub Actions del repositorio público (M-ML-007); sin servicios de pago | PASS |
+| §16 | pruebas unitarias e integración; cobertura ≥ 80 % | 1,678 pruebas sin red; 96.10 % total y 98.29 % en el código de ML-04 | PASS |
+| §17 | CI con ruff, mypy, pytest+cobertura, pip-audit, gitleaks y pipeline | `.github/workflows/ci.yml` sin cambios en ML-04: `quality` (ruff, mypy, pytest con cobertura y las cinco etapas, que ahora incluyen `evaluate`), `tests-windows`, `dependency-audit` y `secrets-gitleaks`; `tests/test_ci_workflow.py` (3) en verde | PASS (local) · CI del PR de T07: pendiente |
+| §18 | versión semántica; cambio de esquema = mayor | `feature_schema.json` 1.1.0 → **2.0.0** (`test_the_schema_loads_as_major_version_2_0_0`, `test_the_new_features_are_appended_at_the_end`); spec 1.0.0 sin bump al cerrar | PASS |
+| §19 | ramas con PR y aprobación ajena; sin commit directo a `main` | `git rev-list --first-parent --no-merges origin/main` → solo `20b2c19`; ML-04 entró por los PR #23–#28. La aprobación en GitHub no es auditable desde el clon local (sin `gh`) | PASS con observación |
+| §20–§21 | leer antes; «EJECUTA»; sin métricas sintéticas como reales; sin scraping, pickle ni costos | «Lecturas previas»; autorizaciones por task; `constitution.md` y `AGENTS.md` sin modificar (`git status`) | PASS |
+
+### Tabla de coherencia — AGENTS.md
+
+| Regla | Evidencia en el repo | Resultado |
+| --- | --- | --- |
+| Leer constitution → AGENTS → memoria → spec/plan/task | «Lecturas previas» de cada sección | PASS |
+| Estado vigente: responsable César (M-ML-011); cada task con su «EJECUTA» | Autorizaciones T01–T07 firmadas por César Yael López Trujillo | PASS |
+| Aprobar spec / implementar tasks con «Apruebo» y «EJECUTA» | M-ML-029 (spec) y M-ML-030 a M-ML-035 (tasks) | PASS |
+| Descargar datos de terceros | ML-04 no descargó nada | NO APLICA |
+| Agregar dependencias solo con decisión M-ML | Sin dependencias nuevas en ML-04 | PASS |
+| Publicar un artefacto (release) | ML-04 no publica artefactos (ML-06) | NO APLICA |
+| Cambios en GitHub con permiso explícito | Ningún cambio de repositorio, ruleset, secretos ni workflow en ML-04 | PASS |
+| Merge solo con aprobación de otra persona | PR #23–#28 mezclados en GitHub; T07 sin commit ni PR; el agente no mezcla | PASS |
+| Un plan aprobado no habilita tareas fuera de él | Solo T07; el texto de `train` (T07-H1) se cambió solo después de la autorización expresa del responsable y solo en las 3 rutas autorizadas | PASS |
+| Flujo: implementar → probar → coherencia → seguridad y licencias | Cada sección T01–T07 tiene comandos, tabla de coherencia y revisión de seguridad | PASS |
+| Un control no ejecutado no se reporta como PASS | pip-audit, gitleaks, CI del PR, paridad .NET/ONNX y §13.5 marcados como no ejecutados o NO APLICA | PASS |
+| Cerrar una task solo con aceptación y evidencia reproducible | Comandos y resultados por sección; doble corrida con SHA-256 | PASS |
+| Datos: nunca subir `raw`/`processed`/`models`; sin datos personales | `.gitignore`, `test_repo_hygiene.py`, pruebas de columnas | PASS |
+| Todo modelo se compara con el modelo base por reglas | ML-04 es el modelo base y deja la referencia | NO APLICA (ML-05) |
+| Métricas sintéticas etiquetadas en todo reporte | `labels_synthetic.md`, `baseline_report.md`, `baseline_metrics.json`, evidencia y M-ML-034/035 | PASS |
+| Sin pickle; solo ONNX; cada artefacto con `feature_schema.json`, `model_card.md`, `metrics.json` y SHA-256 | Sin pickle (higiene); sin artefacto todavía | PASS · artefacto: NO APLICA (ML-06) |
+| Rutas protegidas: `constitution.md` y `AGENTS.md` sin editar; sin secretos, scraping, pago ni commit directo a `main` | `git status`; sin red en las pruebas | PASS |
+| Rutas permitidas de T07 | `git status`: `memoria.md`, `specs/ml-04-baseline-model/` (`spec.md`, `plan.md`, `task.md`, `evidence.md`), `specs/README.md` (fila de ML-04), `specs/ARQUITECTURA.md` (§3, §4, fila de ML-04 y nota en la de ML-03 de §6) y, por T07-H1, `src/thehouse_ml/stages.py`, `tests/unit/test_stages.py` y `tests/integration/test_installed_package.py` (una línea cada uno); `reports/` sin cambios | PASS |
+| Resultado de revisión PASS / PASS WITH WARNINGS / BLOCKED | Resultado por task y global | PASS |
+| Convenciones: documentos en español, código en inglés, decisiones M-ML | Documentos de ML-04 en español; código y pruebas en inglés; M-ML-029 a M-ML-035 | PASS |
+
+### Tabla de coherencia — decisiones M-ML-029 a M-ML-034
+
+| Decisión | Qué exige | Archivo o prueba que lo cumple | Resultado |
+| --- | --- | --- | --- |
+| M-ML-029 · 1 | Esquema 2.0.0 mayor con 3 features al final | `feature_schema.json` 2.0.0; `test_feature_schema_v2.py` (`test_the_new_features_are_appended_at_the_end`, `test_the_seven_previous_definitions_did_not_change`) | PASS |
+| M-ML-029 · 2 | Pesos 30/25/20/10/10/5 y curvas; excluidos sin puntaje; sin atributos sensibles | `baseline_params.json`; `test_factors_weights_and_features_follow_the_spec_table`, `test_an_excluded_pair_has_no_score`, `test_no_factor_uses_a_sensitive_attribute` | PASS |
+| M-ML-029 · 3 | Redondeo mitad hacia arriba, tolerancias, ranking, `matchScore` + `breakdown` | `baseline_score.py`; `test_match_score_rounding_edges`, `test_the_breakdown_is_coherent_with_the_total`, `test_rank_breaks_ties_by_room_id_ascending`, `test_the_json_output_is_the_format_of_spec_6_4` | PASS |
+| M-ML-029 · 4 | Etiquetas sintéticas fuera de git y declaradas no reales | `labels_stage.py`; `test_run_labels_writes_one_synthetic_label_per_candidate_pair`, `test_report_is_marked_synthetic_and_the_correlation_is_in_range` | PASS |
+| M-ML-029 · 5 | Métricas en test, ≥ 2 candidatos, bootstrap, segmentos, referencia de ML-05 | `baseline_report.py`; `test_only_test_students_with_two_or_more_candidates_are_evaluated`, `test_every_segment_has_intervals_and_the_baseline_beats_random` | PASS |
+| M-ML-030 | `training_range` [0, 60]; ubicación y compatibilidad de la configuración; curvas por tramos; `distance_km` no puntúa; `.gitignore` `/models/` (H1); texto de 10 features (H2) | `test_the_training_range_of_distance_ratio_is_the_bound_of_the_synthetic_catalog`, `test_schema_compatibility_is_same_major_and_not_older`, `test_curves_are_the_declared_piecewise_linear_points`, `test_every_schema_feature_scores_or_has_a_reason`, `test_the_models_package_of_the_code_is_not_ignored`; `reports/pairs_summary.md` §2 | PASS |
+| M-ML-031 | API de `baseline_score`, `AwayFromZero`, suma izquierda→derecha, validación, formato JSON, par excluido, round6 por factor | `test_baseline_score.py` (168): `test_factor_points_are_pre_rounded_to_6_decimals`, `test_invalid_vectors_are_rejected`, `test_a_vector_of_zeros_only_keeps_budget_and_distance`, `test_include_raw_adds_the_unrounded_values` | PASS |
+| M-ML-032 | `labels_params.json` 1.0.0: semilla, pesos ocultos distintos, curvas distintas, lognormal 0.3, ruido 5, bandas 10/10/10, Spearman en [0.3, 0.9]; utilidad aparte | `test_hidden_base_weights_differ_from_the_baseline_and_sum_to_100`, `test_utility_shape_differs_from_the_baseline_in_budget_and_distance`, `test_relevance_for_few_candidates`, `test_correlation_out_of_range_is_an_error_and_the_report_says_so`, `test_simulator_does_not_import_the_baseline`; Spearman 0.513 en esta corrida | PASS |
+| M-ML-033 | 81 casos dorados con recuento independiente; margen 1e-9; ejemplo §6.4 con extras 3/8; perfil incompleto | `tests/fixtures/baseline_golden_cases.json`; `test_fixture_is_exactly_what_the_independent_recount_produces`, `test_recount_does_not_import_the_package`, `test_package_score_matches` (81), `test_incomplete_profiles_cover_each_required_field_and_all_three` | PASS |
+| M-ML-034 | Relevante ≥ 2; bootstrap 1,000/95 %/20261122 por segmento; rangos de presupuesto; métricas en `evaluation/`; azar e ideal; `per_student_baseline`; sin archivos ocultos | `baseline_eval_params.json`; `test_packaged_params_hold_the_supuestos_of_m_ml_034`, `test_budget_ranges_are_inclusive_and_cover_every_value`, `test_random_order_is_seeded_per_student_and_independent_of_input_order`, `test_evaluate_never_reads_the_hidden_label_files`; `reports/baseline_metrics.json` con 300 filas en `per_student_baseline` | PASS |
+| T06-H5 (M-ML-034) | ARQUITECTURA coherente con la salida de `evaluate` | `specs/ARQUITECTURA.md` §3, §4 y §6 (arriba) | **RESUELTO** en T07 |
+
+### Hallazgos (T07)
+
+| # | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| T07-H1 | `src/thehouse_ml/stages.py` declaraba `Stage("train", "Entrena el modelo base y los modelos candidatos.", "ML-04")` y la CLI respondía `train: pendiente de ML-04`, aunque ML-04 queda completa y el modelo base no se entrena; `specs/ARQUITECTURA.md` §3 ya dice `train` = ML-05. Las pruebas `tests/unit/test_stages.py` y `tests/integration/test_installed_package.py` fijan ese texto. Propuesta: `spec = "ML-05"` y descripción «Entrena los modelos candidatos (el modelo base por reglas no se entrena)», con las dos pruebas ajustadas. No se cambió porque no está entre los puntos del «EJECUTA» de T07. | ADVERTENCIA (coherencia código ↔ documentos) | **RESUELTO** (autorización del responsable, 2026-11-23): `stages.py` usa `"ML-05"` y la CLI responde `train: pendiente de ML-05`; `tests/unit/test_stages.py` y `tests/integration/test_installed_package.py` ajustadas (ver «Cierre tras T07-H1») |
+| T07-H2 | `pip-audit` y gitleaks no se ejecutaron en local; corren en el CI (`dependency-audit`, `secrets-gitleaks`). ML-04 no cambió dependencias. | INFORMATIVO | Pendiente del CI del PR; no se reporta como PASS |
+| T07-H3 | El menor módulo de ML-04 es `synthetic/labels.py` (94 %): líneas de validación defensiva de parámetros. | INFORMATIVO | Aceptado (≥ 80 %) |
+| T07-H4 | `memoria.md` cambió entre h0 y h1 porque el agente escribió M-ML-035 durante la 1.ª corrida; ninguna etapa la escribe. La reproducibilidad se demuestra con h1 = h2 y con h0 = h2 sin `memoria.md`. | INFORMATIVO | Documentado |
+| T07-H5 | `plan.md` seguía con «⛔ NO EJECUTAR HASTA «EJECUTA»» en el estado de ejecución durante T01–T06. | INFORMATIVO | **RESUELTO** (✅ COMPLETA) |
+| T07-H6 | La fila de ML-03 en `specs/ARQUITECTURA.md` §6 menciona el esquema 1.1.0 (lo que entregó ML-03). | INFORMATIVO | **RESUELTO** (autorización del responsable): la fila conserva su historia y agrega que ML-04 subió el esquema a 2.0.0 (M-ML-029) |
+| T07-H7 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR de T07 |
+
+### Revisión y resultado (T07)
+
+- **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas; `reports/` sin cambios; en `src/` y `tests/` solo el texto de `train` (T07-H1).
+- **Resultado (antes de T07-H1):** PASS WITH WARNINGS — advertencia T07-H1, propuesta al responsable.
+
+### Cierre tras T07-H1
+
+| Comando o cambio | Resultado |
+| --- | --- |
+| `src/thehouse_ml/stages.py`: `Stage("train", …, "ML-04")` → `"ML-05"` | Único cambio en `src/`; coherente con `specs/ARQUITECTURA.md` §3 |
+| `tests/unit/test_stages.py` y `tests/integration/test_installed_package.py`: `train: pendiente de ML-04` → `ML-05` | Una línea cada una |
+| `specs/ARQUITECTURA.md` §6, fila de ML-03 | Conserva lo que entregó ML-03 (1.1.0) y agrega que ML-04 subió el esquema a 2.0.0 (M-ML-029/M-ML-030) |
+| `uv run ruff format --check .` / `uv run ruff check .` / `uv run mypy src` | `137 files already formatted` / `All checks passed!` / `Success: no issues found in 39 source files` (PASS) |
+| `uv run pytest tests/unit/test_stages.py tests/unit/test_cli.py tests/integration/test_installed_package.py tests/test_repo_hygiene.py` (pruebas afectadas) | **37 passed** en 2.91 s (PASS). La suite completa (1,678 passed, 96.10 %) corrió antes de este cambio de una cadena; `stages.py` conserva su cobertura (mismas sentencias y ramas). El CI la vuelve a correr |
+| `uv run python -m thehouse_ml train` | `train: pendiente de ML-05`, código 0 (PASS) |
+
+- **Resultado final (T07): PASS** — se cumple la aceptación de R07 y T07-H1 está resuelto.
+
+## Resumen final de ML-04 (cierre T07, 2026-11-23)
+
+### Pull requests mezclados en `main` y sus commits
+
+Verificado con `git log --first-parent --format="%h %p | %s" origin/main` y `git log <merge>^1..<merge>^2`. El único commit de `main` que no es merge es el inicial `20b2c19` (`git rev-list --first-parent --no-merges origin/main` → 1). ML-04 entró a `main` solo por PR:
+
+| PR | Rama | Contenido | Commit de merge en `main` | Commit de la task |
+| --- | --- | --- | --- | --- |
+| #23 | `docs/ml-04-spec` | Spec 1.0.0 aprobada (M-ML-029) | `fac23bc` | `0040af7` |
+| #24 | `feat/ml-04-config-schema` | T02 · esquema 2.0.0 y T01 · `baseline-1.0.0` (M-ML-030) | `643f94e` | `1136a88` |
+| #25 | `feat/ml-04-score` | T03 · puntaje 0–100 con desglose (M-ML-031) | `85d1e4b` | `004c52d` |
+| #26 | `feat/ml-04-labels` | T04 · etiquetas sintéticas (M-ML-032) | `b0bbdc6` | `c9bde9c` |
+| #27 | `feat/ml-04-golden` | T05 · 81 casos dorados (M-ML-033) | `683d834` | `1f04014` |
+| #28 | `feat/ml-04-report` | T06 · reporte y métricas de ranking (M-ML-034) | `fc69f1d` | `0285328` |
+
+T07 se entrega en `feat/ml-04-cierre` (base `fc69f1d`) **sin commit ni PR**, por instrucción explícita del responsable.
+
+### Comandos ejecutados y resultado
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | 137 files already formatted — PASS |
+| `uv run ruff check .` | All checks passed! — PASS |
+| `uv run mypy src` | Success: no issues found in 39 source files — PASS |
+| `uv run pytest --cov=thehouse_ml --cov-report=term-missing` | 1678 passed in 684.12s; cobertura 96.10 % — PASS |
+| `uv run coverage report --include=<código de ML-04>` | 98.29 % — PASS |
+| `uv run python -m thehouse_ml prepare` y `evaluate` (dos veces seguidas) | Código 0 las cuatro; SHA-256 de 182 archivos idénticos entre corridas (incluidos los 10 Parquet y los dos reportes de `evaluate`) — PASS |
+| `git log --first-parent origin/main` | Solo merges de PR desde `20b2c19` — PASS |
+| `pip-audit`, gitleaks | No ejecutados en local (CI) — no se reportan como PASS |
+
+### Cobertura
+
+| Ámbito | Cobertura |
+| --- | ---: |
+| Total de `src/thehouse_ml` | **96.10 %** (mínimo exigido 80 %) |
+| Código nuevo o modificado de ML-04 (`models/`, `evaluation/`, `synthetic/labels*`, `features/`) | **98.29 %** |
+| Módulo de ML-04 con menor cobertura | `synthetic/labels.py` **94 %** |
+| `stages.py` y `cli.py` (modificados por ML-04) | **100 %** |
+| Pruebas | **1,678** (686 al cerrar ML-03) |
+
+### Resultados de ML-04 (DATOS SINTÉTICOS)
+
+Esquema `feature_schema.json` 2.0.0 · modelo `baseline-1.0.0` · 196,605 pares con etiqueta sintética (Spearman baseline–utilidad 0.513) · 81 casos dorados · en test (300 estudiantes, 0 fuera): **NDCG@10 0.527 [0.503, 0.550]**, NDCG@5 0.535 [0.507, 0.560], Precision@5 0.586 [0.557, 0.615], MAP 0.503 [0.485, 0.522]; azar NDCG@10 0.197; segmento más débil `budget.max` > $3,500 (0.468 [0.410, 0.518]). Son la referencia de ML-05, no desempeño real.
+
+### Estado final de los hallazgos
+
+| Origen | # | Hallazgo | Estado final |
+| --- | --- | --- | --- |
+| T02/T01 | H1 | `.gitignore` ignoraba `src/thehouse_ml/models/` | RESUELTO (M-ML-030) |
+| T02/T01 | H2 | «Las 7 features» en `pairs_summary.md` | RESUELTO (M-ML-030) |
+| T02/T01 | H3, H4 | `training_range` [0, 60]; `distance_km` no puntúa | APROBADOS (M-ML-030) |
+| T02/T01 | H5 | El backend debe actualizar su spec por el esquema 2.0.0 | **ABIERTO — pendiente del backend (NV-23)**, ver abajo |
+| T02/T01 | H6 | Sin commit ni PR | CERRADO — PR #24 mezclado |
+| T03 | H1 | Redondeo por factor sin round6 | RESUELTO (M-ML-031 decisión 10) |
+| T03 | H2 | Vector de ceros = 55 | APROBADO (M-ML-031 decisión 9) |
+| T03 | H3 | `breakdown` y formato del par excluido por coordinar con `TheHouse-GenAI` y el backend | **ABIERTO — acción del responsable** |
+| T03 | H4 | Sin commit ni PR | CERRADO — PR #25 mezclado |
+| T04 | H1, H2, H3 | Curvas, bandas y utilidad aparte distintas del texto de la spec | APROBADOS (M-ML-032) |
+| T04 | H4, H5 | Recorte de `price_to_budget`; ulp entre plataformas en la utilidad oculta | INFORMATIVOS — documentado / aceptado |
+| T04 | H6 | Sin commit ni PR | CERRADO — PR #26 mezclado |
+| T05 | H1 | Recuento y paquete coinciden en 81 casos | CERRADO |
+| T05 | H2, H3, H4 | x.49999955, ejemplo con extras 3/8, borde 2.35 en presupuesto y distancia | APROBADOS (M-ML-033) |
+| T05 | H5 | Haversine a lados opuestos de 87.5; round6 obligatorio en .NET | Documentado — **para NV-23** |
+| T05 | H6 | Coordenadas `seed_sin_verificar` | Aceptado (la prueba avisa si cambian) |
+| T05 | H7 | Perfil incompleto sin formato en la spec | RESUELTO (M-ML-033 decisión 7) |
+| T05 | H8 | Sin commit ni PR | CERRADO — PR #27 mezclado |
+| T06 | H1 | Valores SUPUESTO de la evaluación | RESUELTO (M-ML-034) |
+| T06 | H2, H3 | Semilla por segmento; métricas en `evaluation/` | APROBADOS (M-ML-034) |
+| T06 | H4 | Intervalos anchos por campus (30 estudiantes) | Aceptado |
+| T06 | H5 | ARQUITECTURA nombraba `reports/metrics.json` | **RESUELTO en T07** (`specs/ARQUITECTURA.md` §3, §4 y §6) |
+| T06 | H6 | Sin commit ni PR | CERRADO — PR #28 mezclado |
+| T07 | H1 | Texto de la etapa `train` (`pendiente de ML-04`) | **RESUELTO** — `pendiente de ML-05` (autorización del responsable) |
+| T07 | H2 | pip-audit y gitleaks no ejecutados en local | Pendiente del CI del PR |
+| T07 | H3–H6 | Cobertura mínima 94 %; `memoria.md` entre h0 y h1; `plan.md` desactualizado; fila de ML-03 en ARQUITECTURA | INFORMATIVOS — H3 y H4 aceptados; H5 y H6 resueltos |
+| T07 | H7 | Sin commit ni PR | **Se cierra al mezclar el PR de T07** |
+| Spec | RK02 | Circularidad de las etiquetas sintéticas | Mitigado (pesos y curvas ocultos distintos, ruido, Spearman 0.513); **ABIERTO hasta ML-07** |
+| Spec | RK03 | Paridad Python/backend | Mitigado con 81 casos dorados y nota .NET; **paridad pendiente en NV-23 / ML-06** |
+| Backend | NV-23 | Esquema **2.0.0** (3 features nuevas: `distance_ratio`, `price_below_min`, `extra_services_ratio`) y redondeo **round6** con `MidpointRounding.AwayFromZero` en total y factores | **ABIERTO — pendiente del backend** (aviso a cargo del responsable) |
+| Backend | NV-12 | Contrato del cuarto (RK03 de ML-03: coordenadas, `placeType`, `propertyType`, mascotas, `livingWith`, servicios) y `Property.AreaM2` | **ABIERTO — pendiente del backend** (heredado de M-ML-028) |
+| GenAI | `breakdown` | Campo nuevo propuesto en `ExplainMatchRequest`, y formatos del par excluido y del perfil incompleto | **ABIERTO — coordinación del responsable con `TheHouse-GenAI`** |
+
+### Pendiente y decisiones que esperan aprobación
+
+- **Pendientes del backend:** NV-23 con el esquema 2.0.0 y round6; NV-12 (RK03) y `Property.AreaM2`.
+- **Pendiente con `TheHouse-GenAI`:** `breakdown` y los formatos del par excluido y del perfil incompleto.
+- **Pendiente del CI:** pip-audit, gitleaks y la corrida del pipeline en el PR de T07.
+- **Decisiones:** M-ML-035 registrada como APROBADO según el «EJECUTA» de T07; ML-05 sigue en borrador y requiere su propia aprobación y «EJECUTA».
+
+### Resultado global
+
+**PASS WITH WARNINGS.** ML-04 1.0.0 queda **✅ COMPLETA (7/7)**: los 7 requisitos tienen evidencia (R01–R06 en sus secciones y R07 en «T07»), 1,678 pruebas en verde, cobertura de 96.10 % total y 98.29 % en el código de ML-04, ruff y mypy sin errores, `prepare` y `evaluate` reproducibles byte por byte y coherencia completa con la constitución, `AGENTS.md` y M-ML-029 a M-ML-034. T07 queda en **PASS** (T07-H1 resuelto); el global sigue con advertencias por lo que no depende de este repositorio: **pendientes externos** (NV-23 con esquema 2.0.0 y round6, NV-12/RK03 y `AreaM2` en el backend; `breakdown` con `TheHouse-GenAI`); **RK02** hasta ML-07; y pip-audit/gitleaks a verificar en el CI del PR. Todas las métricas son **sintéticas**. Sin dependencias nuevas, sin descargas, sin secretos y sin commit, según lo autorizado.
