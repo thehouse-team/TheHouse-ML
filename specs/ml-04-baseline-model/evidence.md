@@ -3,15 +3,15 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-04 1.0.0 |
-| Tareas ejecutadas | T02 · Esquema 2.0.0 y features nuevas (R02) y, después, T01 · Configuración versionada (R01); en una segunda ejecución, T03 · Puntaje y desglose (R03); en una tercera, T04 · Simulador de etiquetas sintéticas (R04). Cada una con sección propia abajo |
-| Estado | **🟡 EN EJECUCIÓN — 4/7** (T01, T02, T03 y T04 completas; T05–T07 abiertas) |
+| Tareas ejecutadas | T02 · Esquema 2.0.0 y features nuevas (R02) y, después, T01 · Configuración versionada (R01); en una segunda ejecución, T03 · Puntaje y desglose (R03); en una tercera, T04 · Simulador de etiquetas sintéticas (R04); en una cuarta, T05 · Casos dorados (R05). Cada una con sección propia abajo |
+| Estado | **🟡 EN EJECUCIÓN — 5/7** (T01, T02, T03, T04 y T05 completas; T06 y T07 abiertas) |
 | Autorización (T02 y T01) | «EJECUTA ML-04 1.0.0, tasks T02 y después T01 (en ese orden, porque T01 valida contra las features de T02), en la rama feat/ml-04-config-schema. Rutas permitidas: src/thehouse_ml/ (features/ y el módulo del modelo base donde indique specs/ARQUITECTURA.md), tests/, reports/ (solo lo que regenere prepare), memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). data/processed/ se regenera pero sigue fuera de git. Sin dependencias nuevas. No modifiques students_params.json, rooms_params.json ni pairs_params.json» — César Yael López Trujillo, 2026-11-20 |
 | Rama (T02 y T01) | `feat/ml-04-config-schema` (commit base `fac23bc`; mezclada en el PR #24, `643f94e`) |
 | Autorización (T03) | «EJECUTA ML-04 1.0.0, task T03 (ML-04-R03), en la rama feat/ml-04-score. Rutas permitidas: src/thehouse_ml/models/, src/thehouse_ml/features/ (solo para reutilizar, no cambiar el esquema), tests/, memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). Sin dependencias nuevas (nada de hypothesis: las pruebas de propiedades usan rejillas o random.Random con semilla). No modifiques feature_schema.json (2.0.0) ni baseline_params.json (baseline-1.0.0)» — César Yael López Trujillo, 2026-11-20 |
 | Rama (T03) | `feat/ml-04-score` (commit base `643f94e`, merge del PR #24) |
 | Commit | Sin commit, por instrucción explícita del responsable (las dos ejecuciones) |
 | Fecha de ejecución | 2026-11-20 |
-| Decisiones | M-ML-029 (APROBADO); M-ML-030 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que la spec no fijaba y la resolución de H1 y H2); M-ML-031 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que T03 decidió y la corrección del redondeo por factor de T03-H1); M-ML-032 (**APROBADO**, César Yael López Trujillo, 2026-11-20: parámetros de las etiquetas sintéticas y desviaciones T04-H1 a T04-H3) |
+| Decisiones | M-ML-029 (APROBADO); M-ML-030 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que la spec no fijaba y la resolución de H1 y H2); M-ML-031 (**APROBADO**, César Yael López Trujillo, 2026-11-20: lo que T03 decidió y la corrección del redondeo por factor de T03-H1); M-ML-032 (**APROBADO**, César Yael López Trujillo, 2026-11-20: parámetros de las etiquetas sintéticas y desviaciones T04-H1 a T04-H3); M-ML-033 (**APROBADO**, César Yael López Trujillo, 2026-11-23: formato y casos de T05, con la decisión 7 del perfil incompleto) |
 
 Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§10–§13 y §18) → `AGENTS.md` → `memoria.md` (M-ML-022 a M-ML-029) → `specs/ARQUITECTURA.md` → `spec.md` (sobre todo §6 y §10), `plan.md` y `task.md` de ML-04 → `src/thehouse_ml/features/` y `specs/ml-03-feature-schema/evidence.md` (formato).
 
@@ -453,3 +453,156 @@ SHA-256 tras las dos corridas: `labels.parquet` `b720f056…cdd54`, `labels_hidd
 | SHA-256 después de la aprobación | `labels.parquet` `b720f056…cdd54`, `labels_hidden_utility.parquet` `ddf71238…6acff` y `labels_hidden_weights.parquet` `086a8fd2…03525`, **iguales** a los de antes (los valores no cambiaron); `reports/labels_synthetic.md` `b1260eb1…511a6`, que solo cambia en el texto de la decisión (PASS) |
 | `uv run ruff format --check .` / `uv run ruff check .` / `uv run mypy src` | `127 files already formatted` / `All checks passed!` / `Success: no issues found in 36 source files` (PASS) |
 | `uv run pytest tests/unit/test_synthetic_labels.py tests/integration/test_labels_stage.py tests/unit/test_stages.py tests/unit/test_cli.py tests/test_repo_hygiene.py` (pruebas afectadas) | **335 passed** (PASS); la suite completa (1346 passed, 95.96 %) corrió antes del cambio de `metadata.decision`, que ninguna prueba lee; el CI la vuelve a correr |
+
+## T05 · Casos dorados
+
+| Campo | Valor |
+| --- | --- |
+| Autorización | «EJECUTA ML-04 1.0.0, task T05 (ML-04-R05), en la rama feat/ml-04-golden. Rutas permitidas: tests/ (incluido tests/fixtures/), src/thehouse_ml/models/ (solo si hace falta un exportador; no cambies baseline_params.json ni la lógica de puntaje), memoria.md, specs/ml-04-baseline-model/ y specs/README.md (solo la fila de ML-04). Sin dependencias nuevas. No modifiques feature_schema.json» — César Yael López Trujillo, 2026-11-23 |
+| Rama | `feat/ml-04-golden` (commit base `b0bbdc6`, merge del PR #26) |
+| Commit | Sin commit, por instrucción explícita del responsable |
+| Fecha de ejecución | 2026-11-23 |
+| Decisión | M-ML-033 (**APROBADO**, César Yael López Trujillo, 2026-11-23, con sus 6 decisiones y una séptima: el perfil incompleto como tercer tipo de resultado) |
+
+Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§12 y §13.4) → `AGENTS.md` → `memoria.md` (M-ML-022 a M-ML-024 y M-ML-029 a M-ML-032) → `spec.md` (§6.3, §6.4, R05 y riesgo RK03), `plan.md`, `task.md` y esta evidencia (nota para el backend de T03) → `src/thehouse_ml/models/` y `src/thehouse_ml/features/pairs.py` → `tests/fixtures/pair_feature_cases.json` y `hard_constraint_cases.json` (formato y regla del meridiano).
+
+### Qué se hizo
+
+1. **`tests/golden_recount.py`** (nuevo): recuento independiente. No importa `thehouse_ml` (una prueba lo verifica con `ast`). Escribe aparte las 10 fórmulas de las features, las reglas para faltantes (M-ML-022), los factores de transporte y las tres restricciones duras (M-ML-024); lee como datos los pesos, curvas y decimales de `baseline_params.json` y el orden, el catálogo de servicios y los ids de las restricciones de `feature_schema.json`. Aritmética exacta con `fractions.Fraction`: curvas lineales por tramos con extremos constantes, suma exacta, round6 y mitad hacia arriba sobre el valor exacto. La distancia es la única parte en binary64 (haversine con `atan2`; el paquete usa `asin`) y se convierte a `Fraction`.
+2. **`tests/build_baseline_golden_cases.py`** (nuevo): define las entradas de los 81 casos y escribe `tests/fixtures/baseline_golden_cases.json` solo con el recuento (`uv run python tests/build_baseline_golden_cases.py`). Rechaza un caso si un valor que depende de la distancia queda a menos de 1e-9 de un punto medio de round6 (M-ML-033 decisión 3).
+3. **`tests/fixtures/baseline_golden_cases.json`** (nuevo, 81 casos, 257,076 bytes, SHA-256 `a92852c7…85ae3f2`): encabezado y casos con el formato de abajo.
+4. **`tests/unit/test_baseline_golden_cases.py`** (nuevo, 258 pruebas): archivo idéntico a la salida del recuento, paridad con el paquete por caso, encabezado contra `baseline_params.json` y `feature_schema.json`, campos completos y cobertura de los casos límite.
+5. **`tests/fixtures/README.md`**: entrada de los casos dorados.
+6. `src/thehouse_ml/` **sin cambios** (no hizo falta exportador), igual que `feature_schema.json` y `baseline_params.json`.
+
+### Formato del archivo para el backend (NV-23)
+
+`tests/fixtures/baseline_golden_cases.json` (UTF-8). En **ML-06 se empaquetará como `golden_cases.json` junto al ONNX** (constitución §13.4), con la misma estructura, para la paridad Python ↔ onnxruntime y la prueba .NET del backend.
+
+**Encabezado (`metadata`):**
+
+| Clave | Contenido |
+| --- | --- |
+| `model_version` / `feature_schema_version` | `baseline-1.0.0` / `2.0.0`; la prueba falla si dejan de coincidir con `baseline_params.json` y `feature_schema.json` |
+| `spec`, `decision`, `generated_at`, `generated_by`, `synthetic` | ML-04 1.0.0; M-ML-033 (APROBADO) sobre M-ML-029 a M-ML-031; 2026-11-23; el generador; `true` |
+| `how_computed` | Recuento independiente con `Fraction`, sin el código bajo prueba |
+| `dotnet` | Nota de paridad: sumar en el orden de `breakdown`; **round6 antes de redondear, con `double` o con `decimal`**; `matchScore = Math.Round(Math.Round(sum, 6, MidpointRounding.AwayFromZero), MidpointRounding.AwayFromZero)`; `points = Math.Round(Math.Round(points, 6, MidpointRounding.AwayFromZero), 1, MidpointRounding.AwayFromZero)`; `ToEven` no es compatible |
+| `tolerance` | `features`, `value` y `rawTotal` 1e-6 (absoluta); `points` y `matchScore` 0 (exactos) |
+| `format` | Descripción de cada bloque del caso |
+| `campuses` | `lat`, `lon` y `final_status` de los 10 campus (`data/universities.csv`, `final_lat`/`final_lon`); la prueba los compara con el CSV |
+| `feature_order`, `factors`, `hard_constraints`, `required_fields`, `case_count` | Orden de las 10 features, los 6 factores (`factor`, `feature`, `maxPoints`), los ids HC01–HC03, los campos del quick setup (`budget.max`, `livingWith`, `placeType`) y 81 |
+
+**Cada caso (`cases[]`):**
+
+| Clave | Contenido |
+| --- | --- |
+| `id`, `category`, `description` | Identificador único, grupo de cobertura y explicación con el cálculo a mano |
+| `input.student` | Perfil de NV-11 con los nombres de `feature_schema.json` (`budget.min`, `budget.max`, `maxDistanceKm`, `essentialServices`, `livingWith`, `placeType`, `pets`, `transport`, `propertyTypes`, `university_code`); los 10 siempre presentes y `null` donde el campo es nulo (el backend aplica las reglas para faltantes del esquema) |
+| `input.room` | `price_mxn`, `lat`, `lon`, `services`, `placeType`, `propertyType`, `pets_allowed`, `livingWith`, `bedrooms`, `bathrooms`, `area_m2`, `university_code`, `synthetic` (ninguno nulo) |
+| `tolerance` | `{"features": 1e-6, "value": 1e-6, "points": 0, "matchScore": 0}` |
+| `expected.features` | Las 10 features en el orden de `feature_order` (también en los pares excluidos, como referencia); `null` si el perfil está incompleto |
+| `expected.result` | Si pasa: `modelVersion`, `featureSchemaVersion`, `matchScore` (entero) y `breakdown` (6 entradas en el orden de los factores con `factor`, `points` a 1 decimal, `maxPoints`, `feature` y `value` sin redondear). Si no pasa: `modelVersion`, `featureSchemaVersion`, `excluded: true` y `violatedConstraints` en el orden del esquema, sin `matchScore` ni `breakdown`. Si el perfil está incompleto: ver abajo |
+| `expected.rawTotal` | Suma sin redondear (solo pares que pasan); informativa para depurar el redondeo, no es parte del contrato con `TheHouse-GenAI` |
+
+**Tres tipos de resultado** (el backend los distingue en este orden):
+
+| Orden | Condición | `expected.result` | `expected.features` |
+| --- | --- | --- | --- |
+| 1 | Algún campo del quick setup es nulo (`budget.max`, `livingWith`, `placeType`) | `{"modelVersion", "featureSchemaVersion", "incomplete": true, "missingFields": [...]}`; `missingFields` con **todos** los nulos, con los nombres de NV-11, en el orden `budget.max`, `livingWith`, `placeType` (`metadata.required_fields`). Sin `matchScore`, `breakdown` ni `violatedConstraints`: las restricciones no se evalúan | `null` |
+| 2 | Perfil completo y el par viola HC01–HC03 | `{"modelVersion", "featureSchemaVersion", "excluded": true, "violatedConstraints": [...]}` en el orden del esquema | Las 10 (referencia) |
+| 3 | El par pasa | `{"modelVersion", "featureSchemaVersion", "matchScore", "breakdown"}` (spec §6.4) | Las 10 |
+
+El formato del perfil incompleto no estaba en la spec; lo fija M-ML-033 (decisión 7). En Python equivale a `IncompleteProfileError` con `.missing` (M-ML-023), que lanzan `score_pair` y `compute_pair_features`; el backend puede devolverlo como respuesta o como error de validación, pero con los mismos campos.
+
+### Cobertura de casos
+
+| Categoría | Casos | Qué cubre |
+| --- | ---: | --- |
+| `perfect` | 3 | 100 con todo en 1; con todos los opcionales nulos; renta = `budget.max` y `distance_ratio` 0.5 |
+| `worst` | 2 | 0 con todas las curvas en 0 (`distance_ratio` 1.5 y exactamente 1) |
+| `budget` | 7 | `price_below_min` 0 (renta = `budget.min`), 0.2, 0.5 y 1 (renta 0); `budget.min` nulo; `budget.min` 0; `budget.max` 0 con renta 0 |
+| `distance` | 8 | `distance_ratio` 0.5, 0.6 (`maxDistanceKm` decimal), 2/3 y 0.5 con `maxDistanceKm` nulo, 0.75, 1, 1.2 y 59.8 (`maxDistanceKm` 0.5) |
+| `services` | 6 | Cobertura 0, 1/3, 1/2 y 1; `essentialServices` vacío; los 11 pedidos (5/11, extras sin denominador) |
+| `place_property` | 6 | Tipo de lugar 0, tipo de inmueble 0, los dos en 0, `propertyTypes` nulo, vacío y con varios tipos |
+| `extras` | 4 | `extra_services_ratio` 0, 2/9, 3/8 y 1 (con 10 pedidos) |
+| `factor_rounding` | 7 | 13.35 → 13.4 (presupuesto), 24.35 → 24.4 (distancia), 2.35 → 2.4 (presupuesto y distancia), 28.65 → 28.7, 1.25 → 1.3 y 3.75 → 3.8 (extras) |
+| `total_rounding` | 5 | 86.5 → 87 exacto; 68.5 → 69 con ruido de binary64 (68.49999999999999); 82.49999955 → 83; 82.4999994 → 82; 82.5000004 → 83 |
+| `spec_example` | 1 | Ejemplo de la §6.4 con entradas de la app → 78 |
+| `transport` | 5 | `walk`, `bike`, `public`, `car` y nulo → `public` |
+| `nulls` | 3 | `pets` nulo con cuarto sin mascotas; todos los opcionales nulos con cuarto parcial; `essentialServices` nulo con cuarto sin servicios |
+| `exclusion` | 9 | HC01, HC02 (women/men y men/any), HC03, HC01 + HC03, las tres; y 3 controles que pasan (any/women, mascota permitida, women/women con renta = `budget.max`) |
+| `campus` | 10 | Un caso por campus con el cuarto desplazado en latitud y longitud (haversine general); TESJI, UMB-VDC y UCAN marcados `seed_sin_verificar` |
+| `incomplete` | 5 | Falta `budget.max`; falta `livingWith`; falta `placeType`; faltan los tres; falta `livingWith` con mascota y renta 9000 (gana `incomplete` sobre `excluded`) |
+| **Total** | **81** | 70 con puntaje, 6 excluidos y 5 incompletos; `matchScore` de 0 a 100 |
+
+Además de su categoría, los 10 campus aparecen en los casos y los 6 campos opcionales de NV-11 son nulos en al menos un caso (prueba `test_inputs_cover_transports_nulls_campuses_and_exclusions`).
+
+### Trazabilidad R05 → prueba
+
+| Criterio | Prueba |
+| --- | --- |
+| Al menos 50 casos, ids únicos | `test_file_has_at_least_50_cases_with_unique_ids` |
+| Entradas, features, desglose y total en cada caso | `test_every_case_has_all_fields` (81) |
+| Calculados con un recuento independiente, no con la función de T03 | `test_fixture_is_exactly_what_the_independent_recount_produces`, `test_recount_does_not_import_the_package` (2), `test_recount_rules_written_apart_agree_with_the_schema`, `test_recount_rounding_matches_hand_values` |
+| El paquete devuelve exactamente lo esperado | `test_package_score_matches` (81: `matchScore`, `points`, `maxPoints`, `factor` y `feature` exactos; `value` y `rawTotal` con 1e-6; excluidos con `to_dict()` idéntico; incompletos con `IncompleteProfileError.missing` igual a `missingFields`), `test_package_features_match` (81, 1e-6; los incompletos lanzan el mismo error) |
+| Perfil incompleto: cada campo, los tres y precedencia sobre las restricciones | `test_incomplete_profiles_cover_each_required_field_and_all_three`; `required_fields` = campos `reject` del esquema = `REQUIRED_FIELDS` del recuento (`test_header_versions_match_the_config_and_the_schema`) |
+| Versiones y contrato iguales a `baseline_params.json` y `feature_schema.json` | `test_header_versions_match_the_config_and_the_schema`, `test_header_campuses_match_universities_csv`, `test_header_documents_generation_decision_and_dotnet_rounding` |
+| Casos límite de la §6.2–6.3 y del «EJECUTA» | `test_coverage_by_category`, `test_perfect_and_worst_scores`, `test_factor_borders_are_covered`, `test_rounding_borders_are_covered`, `test_inputs_cover_transports_nulls_campuses_and_exclusions` |
+| La prueba detecta un esperado alterado | Mutación manual: cambiar `points` 13.4 → 13.3 en `budget_13_35` hace fallar 3 pruebas (archivo ≠ recuento, paridad del caso y bordes de redondeo); restaurado, 242 passed |
+
+### Comandos y resultados (T05)
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run python tests/build_baseline_golden_cases.py` | `tests\fixtures\baseline_golden_cases.json: 81 casos` (PASS) |
+| `uv run ruff format --check .` | `130 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 36 source files` (PASS) |
+| `uv run pytest tests/unit/test_baseline_golden_cases.py` | **258 passed** (PASS) |
+| `uv run pytest tests/unit/test_baseline_golden_cases.py tests/unit/test_baseline_score.py tests/unit/test_baseline_config.py tests/unit/test_pair_features.py tests/unit/test_hard_constraints.py tests/test_repo_hygiene.py` (pruebas afectadas) | **717 passed** en 7.6 s (PASS) |
+| Suite completa con cobertura | **No ejecutada aquí** (la corre el CI, por indicación del responsable); no se reporta como PASS. No hay código nuevo en `src/`, así que la cobertura del paquete no cambia |
+
+### Recuento frente al paquete
+
+**Sin discrepancias:** los 81 casos coinciden sin ajustar ningún esperado. Valores sin redondear en los casos más delicados:
+
+| Caso | Recuento | Paquete (binary64) | Sin round6 | Con round6 |
+| --- | --- | --- | ---: | ---: |
+| `total_x5_binary64_noise` | 68.5 (exacto) | 68.49999999999999 | 68 | **69** |
+| `budget_13_35` (factor) | 13.35 (exacto) | 13.349999999999998 | 13.3 | **13.4** |
+| `transport_car` | 87.49999999999967 (distancia binary64 del recuento) | 87.50000000000075 | 87 o 88 | **88** |
+| `total_x4999995_up` | 82.4999995500004 | 82.4999995500012 | 82 | **83** |
+
+En `transport_car` el recuento y el paquete calculan la distancia con haversine distintos y quedan en lados opuestos de 87.5; con round6 los dos dan 88. Es la misma situación que tendrá .NET: sin round6 el resultado dependería de la implementación de haversine.
+
+### Tabla de coherencia (T05)
+
+| Regla | Evidencia | Resultado |
+| --- | --- | --- |
+| Constitución §13.4: casos dorados con tolerancia documentada, entregados al backend | 81 casos (las tres salidas posibles) con tolerancias en el encabezado y por caso; formato y nota de .NET arriba; empaquetado en ML-06 | PASS |
+| Constitución §12: el desglose suma el total antes de redondear | `rawTotal` = Σ de los puntos sin redondear; `matchScore` y `points` con la §6.3 | PASS |
+| Constitución §11.1: un par excluido no recibe puntaje | 6 casos con `excluded`, sin `matchScore` ni `breakdown`; `to_dict()` idéntico | PASS |
+| Spec §6.3 / M-ML-031: round6 y mitad hacia arriba en total y factores | Bordes 13.35, 24.35, 2.35, 28.65, 1.25, 3.75, 86.5, 68.5 (ruido), x.49999955, x.4999994 y x.5000004 | PASS |
+| Spec R05: recuento independiente, no la función de T03 | El recuento y el generador no importan `thehouse_ml` (prueba con `ast`); archivo = salida del recuento | PASS |
+| Constitución §8 / spec §8: solo datos sintéticos, sin datos personales | Entradas inventadas; `synthetic: true` en el encabezado y en cada cuarto | PASS |
+| AGENTS / constitución §5: sin dependencias nuevas | Biblioteca estándar (`fractions`, `json`, `csv`, `math`); `pyproject.toml` y `uv.lock` sin cambios | PASS |
+| AGENTS: rutas permitidas | `git status`: `tests/` (3 archivos `.py` nuevos, `fixtures/baseline_golden_cases.json` y `fixtures/README.md`), `memoria.md`, `specs/ml-04-baseline-model/` y la fila de ML-04 de `specs/README.md`; `src/`, `feature_schema.json` y `baseline_params.json` sin cambios | PASS |
+| AGENTS: un control no ejecutado no se reporta como PASS | Suite completa y paridad en .NET no ejecutadas aquí (CI y NV-23) | No ejecutado (fuera de alcance) |
+
+### Hallazgos (T05)
+
+| # | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| T05-H1 | Recuento y paquete coinciden en los 81 casos; ningún esperado se ajustó. | INFORMATIVO | Cerrado |
+| T05-H2 | Un total con exactamente 7 decimales (x.4999995) no se puede construir con entradas válidas de la app; se usa x.49999955 con margen ≥ 1e-9 a los puntos medios de round6, más x.4999994 y x.5000004. | ADVERTENCIA (desviación del texto del «EJECUTA») | **APROBADO** (M-ML-033 decisión 3) |
+| T05-H3 | El vector del ejemplo de la §6.4 (cobertura 2/3 y extras 3/7) no se puede obtener de entradas de la app; el caso usa extras 3/8 y conserva `matchScore` 78. | ADVERTENCIA (el ejemplo de la spec es solo un vector) | **APROBADO** (M-ML-033 decisión 4) |
+| T05-H4 | Extras no puede valer 2.35 con entradas de la app (denominador ≤ 11); el borde 2.35 → 2.4 se cubre en presupuesto y distancia, y extras cubre 1.25 → 1.3 y 3.75 → 3.8. | INFORMATIVO | **APROBADO** (M-ML-033 decisión 5) |
+| T05-H5 | En `transport_car` el recuento y el paquete quedan en lados opuestos de 87.5 por el haversine; round6 los iguala. Refuerza la nota para .NET: round6 es obligatorio también con `decimal`. | INFORMATIVO (para NV-23) | Documentado en el encabezado y arriba |
+| T05-H6 | Las coordenadas de TESJI, UMB-VDC y UCAN son `seed_sin_verificar`; si cambian en `data/universities.csv`, `test_header_campuses_match_universities_csv` falla y se regeneran los casos con el generador. | INFORMATIVO | Aceptado |
+| T05-H7 | El perfil incompleto (quick setup) no estaba en los casos y su formato no está en la spec. | ADVERTENCIA | **RESUELTO** (M-ML-033 decisión 7, APROBADO): tercer tipo de resultado `incomplete` con `missingFields`, 5 casos y formato documentado arriba para el backend |
+| T05-H8 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR |
+
+### Revisión y resultado (T05)
+
+- **Seguridad y licencias:** sin descargas, sin red, sin secretos, sin datos personales y sin dependencias nuevas; entradas sintéticas y coordenadas de campus de `data/universities.csv` (ya en git).
+- **Resultado:** **PASS** (T05) — se cumple la aceptación de R05: 81 casos (≥ 50) con entradas, 10 features, desglose y total, exclusión o perfil incompleto, calculados con un recuento independiente y con los casos límite de la §6.2–6.3; el paquete coincide en todos; ruff, mypy y las pruebas afectadas pasan. M-ML-033 **APROBADO** por César Yael López Trujillo el 2026-11-23 con las desviaciones T05-H2 a T05-H4 y la decisión 7 (T05-H7 resuelto); el encabezado del archivo dice `M-ML-033 (APROBADO)`. T05 completa; ML-04 en 5/7.

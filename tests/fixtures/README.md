@@ -34,3 +34,13 @@ No contienen datos reales del INEGI.
   Los valores nuevos salen de un recuento independiente (fracciones exactas y la regla del meridiano), sin el código
   bajo prueba.
 - `hard_constraint_cases.json` solo cambia `schema_version` a 2.0.0 (las restricciones y los casos no cambian).
+
+# Casos dorados de ML-04 T05
+
+- `baseline_golden_cases.json`: 81 casos dorados del modelo base `baseline-1.0.0` (esquema 2.0.0) para la paridad
+  Python ↔ backend (.NET, NV-23) y, en ML-06, Python ↔ onnxruntime: entrada (estudiante de NV-11 con nulos explícitos y
+  cuarto, con los nombres del esquema), las 10 features, y `matchScore` con `breakdown`, `excluded` con
+  `violatedConstraints` o `incomplete` con `missingFields` (perfil sin `budget.max`, `livingWith` o `placeType`). Entradas **sintéticas**. Los esperados salen de un recuento independiente
+  (`tests/golden_recount.py`, fracciones exactas, sin importar `thehouse_ml`) y se regeneran con
+  `uv run python tests/build_baseline_golden_cases.py`; la prueba exige que el archivo sea idéntico a esa salida.
+  En ML-06 se empaquetan como `golden_cases.json` junto al ONNX.
