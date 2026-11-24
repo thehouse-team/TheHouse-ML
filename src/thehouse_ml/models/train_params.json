@@ -1,0 +1,100 @@
+{
+  "metadata": {
+    "params_version": "1.0.0",
+    "spec": "ML-05 1.0.0, T02 (ML-05-R02)",
+    "decision": "M-ML-038 (APROBADO)",
+    "synthetic": true,
+    "description": "Parámetros de la etapa train de ML-05: pliegues de validación cruzada, rejilla de hiperparámetros y reproducibilidad. Cada parámetro lleva su base: «calibrado: <fuente>» o «SUPUESTO documentado». Se entrena con etiquetas SINTÉTICAS (labels.parquet, M-ML-032): las métricas no son desempeño real (constitución §8.2 y §20.3). El umbral de relevancia (relevance ≥ 2) y el mínimo de candidatos (2) no se repiten aquí: se leen de baseline_eval_params.json 1.0.0 (M-ML-034) para que el objetivo de la regresión logística y las métricas usen la misma definición. Perfiles (variable de entorno THEHOUSE_ML_TRAIN_PROFILE): «full» (por defecto) es la corrida oficial con la rejilla completa y escribe reports/training_report.md y reports/train_cv_metrics.json; «ci» es una prueba de humo del CI y escribe todo en profiles.ci.output_dir (fuera de git), sin tocar los reportes versionados."
+  },
+  "parameters": {
+    "profiles.ci": {
+      "value": {
+        "n_splits": 2,
+        "logreg": {"transform": "standard", "C": 0.01},
+        "lightgbm": {"num_leaves": 15, "learning_rate": 0.05, "n_estimators": 300},
+        "output_dir": "models/ci"
+      },
+      "basis": "calibrado: M-ML-038 (APROBADO, César Yael López Trujillo, 2026-11-24; T02-H1): el job quality del CI tiene timeout-minutes 15 y la corrida completa tarda 9–13 min. Con THEHOUSE_ML_TRAIN_PROFILE=ci se usa 1 combinación por modelo (las elegidas por la corrida oficial: regresión logística standard C=0.01 y LightGBM 15 hojas, 0.05, 300 árboles) y 2 pliegues, con la misma semilla, datos y reglas; los modelos, el manifiesto y los reportes van a output_dir (fuera de git) y nunca sobrescriben los reportes versionados. Es solo una prueba de humo: la corrida oficial es el perfil full (por defecto)."
+    },
+    "seed": {
+      "value": 20261124,
+      "basis": "SUPUESTO documentado (spec ML-05 §6.3, propuesta aceptada en M-ML-036): semilla única de los pliegues (StratifiedGroupKFold), de la regresión logística y de LightGBM (seed), distinta de estudiantes (20261119), pares (20261120), etiquetas (20261121), bootstrap (20261122) y orden al azar (20261123) de ML-03/ML-04."
+    },
+    "folds.n_splits": {
+      "value": 5,
+      "basis": "calibrado: spec ML-05 §6.2 y decisión 2 (M-ML-036): 5 pliegues."
+    },
+    "folds.splits": {
+      "value": ["train", "validation"],
+      "basis": "calibrado: spec ML-05 §6.2 y decisión 2 (M-ML-036): solo los estudiantes de train + validación de ML-03; la partición test no entra en los pliegues ni en la búsqueda (se mide una vez en T03)."
+    },
+    "folds.stratify_by": {
+      "value": "university_code",
+      "basis": "calibrado: spec ML-05 §6.2: StratifiedGroupKFold(shuffle=True) agrupado por student_id y estratificado por campus (university_code), con una fila por estudiante."
+    },
+    "selection.metric": {
+      "value": "ndcg@10",
+      "basis": "calibrado: spec ML-05 §6.3 y §6.4: se elige la configuración con mayor NDCG@10 medio entre pliegues (media de las medias por pliegue), con las funciones de thehouse_ml.evaluation.ranking (M-ML-034). Desempate: menor desviación estándar muestral entre pliegues y después la primera de la rejilla, que está ordenada de la más simple a la más compleja."
+    },
+    "logreg.C": {
+      "value": [0.01, 0.1, 1.0, 10.0],
+      "basis": "SUPUESTO documentado (spec ML-05 §6.3): inverso de la regularización L2 de LogisticRegression en 4 órdenes de magnitud, de más a menos regularizado."
+    },
+    "logreg.transforms": {
+      "value": ["standard", "quantile_bins"],
+      "basis": "SUPUESTO documentado (spec ML-05 §6.3): «standard» = StandardScaler; «quantile_bins» = KBinsDiscretizer por cuantiles con one-hot denso. Las dos tienen convertidor en skl2onnx (ML-06) y mantienen el modelo aditivo: cada término depende de una sola feature; sin interacciones."
+    },
+    "logreg.quantile_bins.n_bins": {
+      "value": 5,
+      "basis": "SUPUESTO documentado (spec ML-05 §6.3): 5 intervalos por cuantiles (quantile_method averaged_inverted_cdf, subsample=None: todos los pares del ajuste). Las features binarias o constantes quedan con menos intervalos (KBinsDiscretizer quita los de ancho < 1e-8)."
+    },
+    "logreg.solver": {
+      "value": "lbfgs",
+      "basis": "SUPUESTO documentado: solver determinista de scikit-learn para L2 (sin muestreo aleatorio)."
+    },
+    "logreg.max_iter": {
+      "value": 2000,
+      "basis": "SUPUESTO documentado: tope de iteraciones de lbfgs; los avisos de no convergencia se cuentan en el reporte."
+    },
+    "logreg.tol": {
+      "value": 0.0001,
+      "basis": "SUPUESTO documentado: tolerancia por defecto de LogisticRegression."
+    },
+    "logreg.clip": {
+      "value": "training_range",
+      "basis": "calibrado: spec ML-05 §6.3 y §6.6 y decisión 5 (M-ML-036): antes de transformar, cada feature se recorta a su training_range de feature_schema.json 2.0.0 o, si no tiene, a su range (todas las demás están en [0, 1])."
+    },
+    "lightgbm.num_leaves": {
+      "value": [15, 31],
+      "basis": "SUPUESTO documentado (spec ML-05 §6.3)."
+    },
+    "lightgbm.learning_rate": {
+      "value": [0.05, 0.1],
+      "basis": "SUPUESTO documentado (spec ML-05 §6.3)."
+    },
+    "lightgbm.n_estimators": {
+      "value": [100, 300],
+      "basis": "SUPUESTO documentado (spec ML-05 §6.3): número de árboles (num_boost_round), sin parada temprana para no usar los estudiantes retenidos en el ajuste."
+    },
+    "lightgbm.min_data_in_leaf": {
+      "value": 50,
+      "basis": "SUPUESTO documentado (spec ML-05 §6.3, min_child_samples = 50): mínimo de pares por hoja; fijo, no forma parte de la rejilla."
+    },
+    "lightgbm.label_gain": {
+      "value": [0, 1, 3, 7],
+      "basis": "calibrado: spec ML-05 §6.3: ganancia 2^rel − 1 para la relevancia 0–3, la misma de NDCG (M-ML-034)."
+    },
+    "lightgbm.monotone_decreasing": {
+      "value": ["price_to_budget", "distance_km", "effective_distance_km", "distance_ratio"],
+      "basis": "calibrado: spec ML-05 §6.3 y decisión 3 (M-ML-036): restricción −1 (el puntaje no sube al subir la feature); el resto sin restricción (0). Se verifica en el modelo final."
+    },
+    "lightgbm.num_threads": {
+      "value": 1,
+      "basis": "SUPUESTO documentado (spec ML-05 §6.3: un hilo): fijo para que el texto del modelo sea idéntico entre corridas."
+    },
+    "lightgbm.deterministic": {
+      "value": true,
+      "basis": "calibrado: spec ML-05 §6.3: deterministic = true, junto con force_row_wise = true (recomendado por LightGBM para resultados deterministas)."
+    }
+  }
+}

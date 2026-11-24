@@ -46,3 +46,13 @@ def test_quality_caches_data_raw_keyed_by_the_sources_and_manifests_before_the_c
     assert "path: data/raw/" in quality
     assert "hashFiles('data/sources.toml', 'data/manifests/**')" in quality
     assert quality.index("actions/cache@") < quality.index("for stage in download prepare")
+
+
+def test_quality_runs_train_with_the_ci_profile_in_the_cli_step() -> None:
+    """ML-05 T02 (M-ML-038, T02-H1): el paso de la CLI usa el perfil `ci` para caber en el timeout."""
+    quality = _job_blocks(_ci_text())["quality"]
+    step = quality[quality.index("- name: CLI con las cinco etapas") :]
+    step = step[: step.index("- name:", 1)]
+    assert re.search(r"^\s+THEHOUSE_ML_TRAIN_PROFILE:\s*ci\s*$", step, flags=re.MULTILINE)
+    assert "for stage in download prepare train evaluate export" in step
+    assert re.search(r"^\s+timeout-minutes:\s*15\s*$", quality, flags=re.MULTILINE)
