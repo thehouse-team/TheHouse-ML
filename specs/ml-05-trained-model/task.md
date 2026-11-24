@@ -8,14 +8,14 @@
 | Fecha | 2026-11-23 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-23 (M-ML-036) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T05 completas (5/7); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T06 completas (6/7); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 5 |
+| Tasks completadas | 6 |
 
 ## Reglas de esta lista
 
-1. T01 (2026-11-23), T02, T03, T04 y T05 (2026-11-24) completas, con evidencia en `evidence.md`; T06–T07 abiertas.
+1. T01 (2026-11-23), T02, T03, T04, T05 y T06 (2026-11-24) completas, con evidencia en `evidence.md`; T07 abierta.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA».
 4. Un control no ejecutado no se reporta como PASS.
@@ -34,7 +34,7 @@
 
 - [x] **T04 · Ablación y segmentos** — Requisito: ML-05-R04 · Aceptación: ΔNDCG@10 por cada uno de los 6 grupos de features (solo pliegues); métricas y diferencias pareadas por campus, sin `seed_sin_verificar` y por rango de presupuesto en test; hipótesis del segmento > $3,500 confirmada, refutada o no concluyente según la spec §6.7.
 - [x] **T05 · Calibración 0–100 y desglose** — Requisito: ML-05-R05 · Aceptación: cada feature recortada a su `training_range` antes de puntuar (misma regla en Python y en el backend); puntaje 0–100 de la regresión logística y desglose por los 6 factores que suma el total con las tolerancias de M-ML-029/031 en todos los pares de test; ranking idéntico al del logit para entradas dentro del rango; pruebas de propiedades; pipeline solo con transformadores con convertidor en `skl2onnx`.
-- [ ] **T06 · Model card** — Requisito: ML-05-R06 · Aceptación: `reports/model_card.md` con «DATOS SINTÉTICOS», uso previsto, datos, modelos, métricas contra el baseline, ablación, segmentos, desglose de ejemplo, limitaciones, decisión de promoción y trabajo futuro.
+- [x] **T06 · Model card** — Requisito: ML-05-R06 · Aceptación: `reports/model_card.md` con «DATOS SINTÉTICOS», uso previsto, datos, modelos, métricas contra el baseline, ablación, segmentos, desglose de ejemplo, limitaciones, decisión de promoción y trabajo futuro.
 
 ## F4 — Evidencia
 
@@ -49,5 +49,5 @@
 | T03 | R03 | F2 | T02 | COMPLETA — PASS (M-ML-039; T03-H2 traspasado a T04) |
 | T04 | R04 | F3 | T02, T03 | COMPLETA — PASS (M-ML-040; traspaso T03-H2 resuelto; hipótesis > $3,500 confirmada con salvedades T04-H2/H3 para T06) |
 | T05 | R05 | F3 | T02, T03 | COMPLETA — PASS WITH WARNINGS (M-ML-041; `logreg-1.0.0` promovida; T05-H1 desviación aceptada de monotonía del presupuesto, corrección en `logreg-1.1.0`/ML-07; T05-H2 para T06) |
-| T06 | R06 | F3 | T03, T04, T05 | ABIERTA (incluir las salvedades T04-H2 y T04-H3 de la hipótesis > $3,500, la desviación T05-H1 y la explicación de `maxPoints` T05-H2 con aviso a `TheHouse-GenAI`) |
-| T07 | R07 | F4 | T01–T06 | ABIERTA |
+| T06 | R06 | F3 | T03, T04, T05 | COMPLETA — PASS (M-ML-042; `reports/model_card.md` generada desde los JSON de `reports/` con las 10 secciones, T04-H2/H3, T05-H1/H2/H3 y nota para `TheHouse-GenAI`; T06-H1 traspasado a T07, T06-H2 aceptado) |
+| T07 | R07 | F4 | T01–T06 | ABIERTA (traspaso T06-H1: distribución de `matchScore` y ejemplos explicados en `trained_metrics.json`, leídos por la model card; optimizar pruebas lentas, T05-H3) |

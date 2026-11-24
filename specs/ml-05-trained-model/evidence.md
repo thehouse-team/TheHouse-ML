@@ -3,8 +3,8 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-05 1.0.0 |
-| Tareas ejecutadas | T01 · Dependencias y carga de datos (R01); T02 · Validación cruzada y entrenamiento reproducible (R02); T03 · Evaluación contra el baseline y decisión de promoción (R03); T04 · Ablación y segmentos (R04); T05 · Calibración 0-100 y desglose (R05). Cada task con sección propia abajo |
-| Estado | **🟡 EN EJECUCIÓN — T01 a T05 completas (5/7)** |
+| Tareas ejecutadas | T01 · Dependencias y carga de datos (R01); T02 · Validación cruzada y entrenamiento reproducible (R02); T03 · Evaluación contra el baseline y decisión de promoción (R03); T04 · Ablación y segmentos (R04); T05 · Calibración 0-100 y desglose (R05); T06 · Model card (R06). Cada task con sección propia abajo |
+| Estado | **🟡 EN EJECUCIÓN — T01 a T06 completas (6/7)** |
 | Autorización (T01) | «EJECUTA ML-05 1.0.0, task T01 (ML-05-R01), en la rama feat/ml-05-deps-data. Rutas permitidas: pyproject.toml, uv.lock, src/thehouse_ml/ (un módulo de carga de datos de entrenamiento, por ejemplo en models/ o evaluation/ según ARQUITECTURA.md), tests/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). No modifiques feature_schema.json ni ningún params de ML-03/ML-04» — César Yael López Trujillo, 2026-11-23 |
 | Rama (T01) | `feat/ml-05-deps-data` (commit base `2bcb71e`, merge del PR #30); mezclada en `main` con el PR #31 (`386fd1d`) |
 | Autorización (T02) | «EJECUTA ML-05 1.0.0, task T02 (ML-05-R02), en la rama feat/ml-05-train. Rutas permitidas: src/thehouse_ml/ (models/ para el entrenamiento; evaluation/ y features/ solo para reutilizar), tests/, reports/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). Sin dependencias nuevas. No modifiques feature_schema.json, baseline_params.json ni los params de ML-03/ML-04. Los modelos entrenados van a data/processed/ o models/ (fuera de git), nunca con pickle» — César Yael López Trujillo, 2026-11-23 |
@@ -19,9 +19,12 @@
 | Autorización (T05) | «EJECUTA ML-05 1.0.0, task T05 (ML-05-R05), en la rama feat/ml-05-breakdown. Rutas permitidas: src/thehouse_ml/ (models/ y evaluation/; features/ solo para reutilizar; stages.py solo si hace falta), tests/ (incluido tests/fixtures/), reports/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). Sin dependencias nuevas. No modifiques train_params.json, los modelos oficiales, feature_schema.json, baseline_params.json ni los params de ML-03/ML-04» — César Yael López Trujillo, 2026-11-24 |
 | Rama (T05) | `feat/ml-05-breakdown` (commit base `8dd9e6e`, merge del PR #34) |
 | Aprobación (T05) | «Decisión sobre T05-H1: opción 1. La condición (c) de la spec §6.5 aprobada es "desglose aditivo que suma el total" y se cumple; la verificación de monotonía del presupuesto fue una protección adicional que yo agregué en el «EJECUTA», no parte del criterio de la spec. Acepto la no monotonía de price_below_min como desviación conocida […] Promueve logreg-1.0.0 como modelo de ML-05 (baseline-1.0.0 queda como respaldo) y vuelve a correr evaluate […] Apruebo M-ML-041 (César Yael López Trujillo, 2026-11-24) con eso. Marca T05 completa en PASS WITH WARNINGS» |
+| Autorización (T06) | «EJECUTA ML-05 1.0.0, task T06 (ML-05-R06), en la rama docs/ml-05-model-card. Rutas permitidas: reports/model_card.md, src/thehouse_ml/ (solo si la model card se genera automáticamente desde código, como data_card.md), tests/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). Sin dependencias nuevas. No cambies modelos, métricas ni params» — César Yael López Trujillo, 2026-11-24 |
+| Rama (T06) | `docs/ml-05-model-card` (commit base `9c49499`, merge del PR #35) |
+| Aprobación (T06) | «Apruebo M-ML-042 (César Yael López Trujillo, 2026-11-24). T06-H1 se traspasa a T07: agregar a trained_metrics.json la distribución de matchScore y los ejemplos explicados, y que la model card los tome de ahí. T06-H2 aceptado. Marca T06 en PASS» |
 | Commit | Sin commit, por instrucción explícita del responsable |
-| Fecha de ejecución | T01: 2026-11-23 · T02: 2026-11-23 y 2026-11-24 (retomada tras un apagado del equipo) · T03: 2026-11-24 · T04: 2026-11-24 · T05: 2026-11-24 |
-| Decisiones | M-ML-036 (APROBADO, decisiones 1 y 6); M-ML-037 (**APROBADO**, César Yael López Trujillo, 2026-11-23: versiones, override de mypy, ubicación, tercera entrada `students.parquet`, validación del esquema, reutilización de `join_labels`, formato de salida, prueba de humo y protección sin pickle); M-ML-038 (**APROBADO**, César Yael López Trujillo, 2026-11-24: semilla, pliegues, rejilla, selección, `num_threads`, persistencia, salidas y perfil `ci`); M-ML-039 (**APROBADO**, César Yael López Trujillo, 2026-11-24: ubicación y etapa, verificaciones, referencia reproducida, bootstrap pareado, condiciones 1 y 3, tabla por pliegue y salidas; `stages.py` autorizado retroactivamente; T03-H2 traspasado a T04); M-ML-040 (**APROBADO**, César Yael López Trujillo, 2026-11-24: grupos de features, pliegues y modelos de la validación cruzada, 4 métricas por pliegue, ablación, segmentos, regla de la hipótesis > $3,500, integración y perfil `ci`); M-ML-041 (**APROBADO**, César Yael López Trujillo, 2026-11-24: calibración afín, `maxPoints`, `pets_compatible` al término fijo, formato de `breakdown`, `modelVersion` `logreg-1.0.0`, regla de monotonía con la desviación aceptada T05-H1; `logreg-1.0.0` promovida) |
+| Fecha de ejecución | T01: 2026-11-23 · T02: 2026-11-23 y 2026-11-24 (retomada tras un apagado del equipo) · T03: 2026-11-24 · T04: 2026-11-24 · T05: 2026-11-24 · T06: 2026-11-24 |
+| Decisiones | M-ML-036 (APROBADO, decisiones 1 y 6); M-ML-037 (**APROBADO**, César Yael López Trujillo, 2026-11-23: versiones, override de mypy, ubicación, tercera entrada `students.parquet`, validación del esquema, reutilización de `join_labels`, formato de salida, prueba de humo y protección sin pickle); M-ML-038 (**APROBADO**, César Yael López Trujillo, 2026-11-24: semilla, pliegues, rejilla, selección, `num_threads`, persistencia, salidas y perfil `ci`); M-ML-039 (**APROBADO**, César Yael López Trujillo, 2026-11-24: ubicación y etapa, verificaciones, referencia reproducida, bootstrap pareado, condiciones 1 y 3, tabla por pliegue y salidas; `stages.py` autorizado retroactivamente; T03-H2 traspasado a T04); M-ML-040 (**APROBADO**, César Yael López Trujillo, 2026-11-24: grupos de features, pliegues y modelos de la validación cruzada, 4 métricas por pliegue, ablación, segmentos, regla de la hipótesis > $3,500, integración y perfil `ci`); M-ML-041 (**APROBADO**, César Yael López Trujillo, 2026-11-24: calibración afín, `maxPoints`, `pets_compatible` al término fijo, formato de `breakdown`, `modelVersion` `logreg-1.0.0`, regla de monotonía con la desviación aceptada T05-H1; `logreg-1.0.0` promovida); M-ML-042 (**APROBADO**, César Yael López Trujillo, 2026-11-24: generación de la model card desde los JSON de `reports/`, constantes de trazabilidad, distribución y ejemplos enlazados, solo perfil `full`; T06-H1 traspasado a T07, T06-H2 aceptado) |
 
 Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§5 stack y §13 sin pickle) → `AGENTS.md` → `memoria.md` (M-ML-032 a M-ML-036) → `spec.md` (sobre todo R01 y §10 decisiones 1 y 6), `plan.md` y `task.md` de ML-05 → `specs/ARQUITECTURA.md` → `src/thehouse_ml/synthetic/labels_stage.py`, `src/thehouse_ml/evaluation/` y `src/thehouse_ml/models/baseline_report.py` (para reutilizar) → `specs/ml-04-baseline-model/evidence.md` (formato).
 
@@ -830,3 +833,74 @@ Archivos protegidos con el mismo SHA-256 antes y después: `models/logreg.json` 
 - **Coherencia:** tabla anterior.
 
 **Resultado T05: PASS WITH WARNINGS** — aceptación de R05 cumplida y verificada: recorte al `training_range`, calibración afín 0-100 y desglose por los 6 factores que suma el total en los 30,755 pares de test (tolerancias de M-ML-029/031), orden idéntico al del logit, propiedades, formato y pipeline exportable; la regresión logística queda **PROMOVIDA** (`logreg-1.0.0`, `baseline-1.0.0` de respaldo). Advertencias: T05-H1 (no monotonía del presupuesto, desviación aceptada después de ver la verificación; corrección en `logreg-1.1.0`/ML-07) y T05-H2 (`maxPoints` ≠ importancia; para T06 y `TheHouse-GenAI`). M-ML-041 **APROBADO** (César Yael López Trujillo, 2026-11-24). T05 **completa** (ML-05 en 5/7). Sin commit, por instrucción del responsable.
+
+## T06 · Model card
+
+Lecturas previas: `constitution.md` (§8, §10, §11, §12) → `AGENTS.md` → `memoria.md` (M-ML-029 a M-ML-041) → `spec.md` (R06, §6.5–§6.7), `plan.md` y `task.md` de ML-05 → `reports/` (`baseline_metrics.json`, `train_cv_metrics.json`, `trained_metrics.json`, `ablation_metrics.json`, `trained_report.md`, `ablation_report.md`, `trained_breakdown.md`, `data_card.md`) → `src/thehouse_ml/models/` y `src/thehouse_ml/data_card.py` (patrón de generación).
+
+### Qué se hizo
+
+- **Nuevo** `src/thehouse_ml/models/model_card.py`: `collect_inputs` lee los 4 JSON de `reports/`, los pesos del baseline (`default_config()`) y las versiones de `uv.lock`; `check_inputs` exige la corrida oficial sintética (`synthetic`, perfil `full`, `official`, mismo SHA-256 de los modelos en los dos JSON); `render_model_card` (puro) escribe las 10 secciones; `run_model_card` es la única escritura. Ninguna métrica escrita a mano (M-ML-042).
+- **Modificado** `src/thehouse_ml/models/trained_eval.py`: `run_trained_evaluate` regenera la ficha al final de `evaluate` solo con el perfil `full` (5.ª línea del mensaje). El perfil `ci` no la escribe.
+- **Generado** `reports/model_card.md` llamando a `run_model_card` directamente (sin `train` ni `evaluate`; ningún JSON de `reports/` cambió).
+- **Pruebas:** nuevo `tests/unit/test_model_card.py` (28); `tests/integration/test_trained_eval_stage.py` ajustada a la 5.ª línea del mensaje de `evaluate` (omisión en el proyecto temporal, que no tiene `uv.lock`).
+
+### Trazabilidad R06 → prueba (`tests/unit/test_model_card.py`)
+
+| Aceptación | Prueba |
+| --- | --- |
+| 10 secciones en orden | `test_has_the_ten_sections_in_order` |
+| «DATOS SINTÉTICOS» en título, aviso y secciones de datos y métricas | `test_title_and_banner_say_synthetic_data` |
+| Menciona T05-H1, T05-H2, T05-H3, T04-H2, T04-H3 y `TheHouse-GenAI` | `test_mentions_the_required_findings` (6 casos) |
+| Cifras = JSON (resumen, uso, datos, rejilla y SHA-256, pliegues y test, ablación, segmentos, hipótesis, calibración, `maxPoints` y pesos, limitaciones, versiones) | `test_summary_…`, `test_intended_use_…`, `test_data_section_…`, `test_training_section_…`, `test_fold_and_test_metrics_…`, `test_ablation_segments_and_hypothesis_…`, `test_breakdown_…`, `test_limitations_…`, `test_future_work_and_traceability`, `test_library_versions_come_from_uv_lock` |
+| Sin cifras escritas a mano | `test_no_figure_is_hardcoded_a_changed_json_value_changes_the_card` |
+| La ficha versionada es la generada | `test_the_versioned_model_card_is_the_generated_one` |
+| Reproducible (dos generaciones, mismo SHA-256, igual al versionado) | `test_two_generations_have_the_same_sha256` |
+| Solo la corrida oficial sintética; SHA-256 coherentes | `test_only_the_official_synthetic_run_is_accepted` (4), `test_model_hashes_must_agree_between_reports` |
+| Sin rutas absolutas ni datos personales; omisión sin entradas | `test_output_is_deterministic_and_has_no_absolute_paths_or_personal_data`, `test_without_inputs_it_is_skipped_and_writes_nothing` |
+
+### Comandos y resultados (T06)
+
+| Comando | Resultado |
+| --- | --- |
+| `run_model_card(ProjectPaths.resolve(None))` × 2 (vía `uv run python -c`) | Mismo SHA-256 `e4873dc1203cf895276667c766dd68c59017d7d9ce3769b3c84649a459a0ecb7` (PASS); tras la aprobación (M-ML-042 pasa a APROBADO en la sección 10), regenerada dos veces: `5a24b161a9a52ad781d08a1de7a591c48fa2e40da84afbff7b747d299f45dc09` (PASS) |
+| `uv run ruff format --check .` | `167 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy` | `Success: no issues found in 51 source files` (PASS); además `mypy tests/unit/test_model_card.py` sin errores |
+| `uv run pytest tests/unit/test_model_card.py` | **28 passed** (PASS) |
+| `uv run pytest tests/test_repo_hygiene.py tests/unit/test_stages.py tests/unit/test_cli.py tests/unit/test_model_card.py` | **96 passed** (PASS) |
+| `uv run pytest tests/integration/test_trained_eval_stage.py tests/integration/test_ablation_stage.py` | **18 passed** en 90.8 s (PASS) |
+| `git diff` de `reports/*.json` y params de `src/thehouse_ml/models/` | Sin cambios (PASS) |
+| Suite completa, cobertura y `train`/`evaluate`/`prepare` | **No ejecutados** por instrucción del responsable (los corre el CI; cobertura en T07) |
+
+### Tabla de coherencia (T06)
+
+| Referencia | Comprobación | Resultado |
+| --- | --- | --- |
+| Constitución §8 y §20.3 | «DATOS SINTÉTICOS» en el título y advertencia de circularidad (validan el pipeline, no el desempeño real; ML-07) | PASS |
+| Constitución §10 | Comparación contra el baseline por pliegue y en test con IC y diferencia pareada | PASS |
+| Constitución §11 | Sin atributos sensibles (solo `livingWith` declarado); HC01–HC03 sin puntaje; segmentos por campus, presupuesto y sin `seed_sin_verificar` | PASS |
+| Constitución §12 | Desglose explicado y nota para `TheHouse-GenAI` (`maxPoints` no es importancia) | PASS |
+| Spec R06 | Uso previsto, datos y etiquetas, modelos e hiperparámetros, métricas, ablación, segmentos, desglose de ejemplo (coeficientes y puntos por unidad; ejemplos completos enlazados, T06-H1 traspasado a T07), limitaciones, decisión y trabajo futuro | PASS |
+| M-ML-040 / M-ML-041 | Salvedades T04-H2/H3, desviación T05-H1, T05-H2 y T05-H3 incluidas | PASS |
+| AGENTS: rutas | `reports/model_card.md`, `src/thehouse_ml/models/` (1 nuevo, 1 modificado), `tests/` (1 nuevo, 1 modificado), `memoria.md`, `specs/ml-05-trained-model/`, `specs/README.md` (fila de ML-05) | PASS |
+| AGENTS: dependencias, modelos, métricas y params | Sin dependencias nuevas; modelos, JSON de `reports/` y params sin cambios | PASS |
+| AGENTS: un control no ejecutado no es PASS | Suite completa, cobertura y CI no ejecutados; declarados arriba | PASS |
+
+### Hallazgos (T06)
+
+| ID | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| T06-H1 | La distribución de `matchScore`, los puntos por factor en test (mediana 81; distancia al 87 % de su máximo) y los ejemplos explicados solo están en `reports/trained_breakdown.md`, no en un JSON. La ficha los enlaza (§4 y §6) sin copiarlos y da como desglose de ejemplo los coeficientes con «puntos por unidad». Llevarlos a `trained_metrics.json` exigiría volver a correr `evaluate`. | ADVERTENCIA → traspasada | **Traspasado a T07** (responsable, 2026-11-24): agregar a `trained_metrics.json` la distribución de `matchScore` y los ejemplos explicados, y que la model card los tome de ahí |
+| T06-H2 | La fecha de promoción, los PR #30–#35 y la lista de decisiones son constantes del módulo (no están en ningún JSON); la fila de T06 dice «PR pendiente» hasta que exista. | INFORMATIVO | **Aceptado** (responsable, 2026-11-24); actualizar la fila de T06 al abrir el PR |
+| T06-H3 | No se calculó un IC pareado LightGBM − regresión logística (la spec compara cada modelo contra el baseline); la ficha describe el casi empate con las medias y los IC de cada modelo y lo declara. | INFORMATIVO | Documentado en la ficha |
+| T06-H4 | La ficha incluye la nota para `TheHouse-GenAI` y la desviación T05-H1 para NV-23, pero el aviso a esos equipos es del responsable. | INFORMATIVO | Pendiente del responsable |
+| T06-H5 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR |
+
+### Revisión y resultado (T06)
+
+- **Seguridad:** sin secretos, sin red, sin servicios de pago (COST-001); sin pickle (la prueba de higiene pasa).
+- **Datos y licencias:** la ficha solo tiene agregados e ids sintéticos (`S1078`); sin datos personales ni rutas absolutas. Sin dependencias nuevas.
+- **Coherencia:** tabla anterior.
+
+**Resultado T06: PASS** — aceptación de R06 cumplida y verificada: `reports/model_card.md` generada desde los JSON de `reports/` con las 10 secciones, «DATOS SINTÉTICOS», cifras iguales a los JSON y reproducible (mismo SHA-256 en dos generaciones). T06-H1 traspasado a T07 (distribución de `matchScore` y ejemplos en `trained_metrics.json`, leídos por la model card); T06-H2 aceptado. M-ML-042 **APROBADO** (César Yael López Trujillo, 2026-11-24). T06 **completa** (ML-05 en 6/7). Sin commit, por instrucción del responsable.

@@ -64,7 +64,7 @@ from thehouse_ml.models.train import (
     output_dirs,
     sha256_file,
 )
-from thehouse_ml.models.train_config import TrainParams, load_train_params, resolve_profile
+from thehouse_ml.models.train_config import DEFAULT_PROFILE, TrainParams, load_train_params, resolve_profile
 from thehouse_ml.models.trained_breakdown import BreakdownEvaluation, build_breakdown_model, evaluate_breakdown
 from thehouse_ml.models.training_data import TRAINING_INPUTS, TrainingData, load_training_data
 from thehouse_ml.paths import ProjectPaths
@@ -744,6 +744,12 @@ def run_trained_evaluate(paths: ProjectPaths, params: TrainParams | None = None,
     ablation_report_path.write_text(render_ablation_report(ablation), encoding="utf-8", newline="\n")
     breakdown_path = reports_dir / TRAINED_BREAKDOWN
     breakdown_path.write_text(render_breakdown_report(result, config), encoding="utf-8", newline="\n")
+    # ML-05 T06: la model card se genera desde los JSON recién escritos, solo en la corrida oficial (M-ML-042).
+    card_message = ""
+    if profile == DEFAULT_PROFILE:
+        from thehouse_ml.models.model_card import run_model_card
+
+        card_message = f"\n{run_model_card(paths, reports_dir)}"
     lr = result.paired.differences["logreg"][PRIMARY_METRIC]
     gbm = result.paired.differences["lightgbm"][PRIMARY_METRIC]
     return (
@@ -762,6 +768,7 @@ def run_trained_evaluate(paths: ProjectPaths, params: TrainParams | None = None,
         f"logit: {_yes_no(result.breakdown.order.passed)}; monotonia por factor: "
         f"{_yes_no(result.breakdown.monotonicity.passed)}; condicion 3: {_yes_no(result.breakdown.passed)}; "
         f"decision: {result.decision.outcome} (DATOS SINTÉTICOS) -> {breakdown_path.relative_to(paths.root).as_posix()}"
+        f"{card_message}"
     )
 
 
