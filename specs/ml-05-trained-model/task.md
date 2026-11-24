@@ -8,14 +8,14 @@
 | Fecha | 2026-11-23 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-23 (M-ML-036) |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 completa (1/7); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 0 |
+| Tasks completadas | 1 |
 
 ## Reglas de esta lista
 
-1. Todas las tasks están abiertas; escribir este documento no completa ninguna.
+1. T01 completa (2026-11-23), con evidencia en `evidence.md`; T02–T07 abiertas.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA».
 4. Un control no ejecutado no se reporta como PASS.
@@ -23,7 +23,7 @@
 
 ## F1 — Diseño y contrato
 
-- [ ] **T01 · Dependencias y carga de datos** — Requisito: ML-05-R01 · Aceptación: `scikit-learn` y `lightgbm` en `pyproject.toml` y `uv.lock` con `uv lock --check` y pip-audit limpio; cargador de `pairs.parquet` + `labels.parquet` que valida `synthetic = true`, `labels_params_version` 1.0.0 y las 10 columnas de `feature_order`, y excluye y cuenta estudiantes con < 2 candidatos; prueba obligatoria de que no se leen `labels_hidden_utility.parquet` ni `labels_hidden_weights.parquet`; sin generación de etiquetas.
+- [x] **T01 · Dependencias y carga de datos** — Requisito: ML-05-R01 · Aceptación: `scikit-learn` y `lightgbm` en `pyproject.toml` y `uv.lock` con `uv lock --check` y pip-audit limpio; cargador de `pairs.parquet` + `labels.parquet` que valida `synthetic = true`, `labels_params_version` 1.0.0 y las 10 columnas de `feature_order`, y excluye y cuenta estudiantes con < 2 candidatos; prueba obligatoria de que no se leen `labels_hidden_utility.parquet` ni `labels_hidden_weights.parquet`; sin generación de etiquetas.
 
 ## F2 — Implementación
 
@@ -44,7 +44,7 @@
 
 | Task | Requisito | Fase | Depende de | Estado |
 | --- | --- | --- | --- | --- |
-| T01 | R01 | F1 | — | ABIERTA |
+| T01 | R01 | F1 | — | COMPLETA — PASS WITH WARNINGS (M-ML-037; T01-H1 se confirma en el CI) |
 | T02 | R02 | F2 | T01 | ABIERTA |
 | T03 | R03 | F2 | T02 | ABIERTA |
 | T04 | R04 | F3 | T02, T03 | ABIERTA |

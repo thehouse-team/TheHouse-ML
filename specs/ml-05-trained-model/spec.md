@@ -8,7 +8,7 @@
 | Fecha | 2026-11-23 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-23 (M-ML-036) |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 completa (1/7); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0 |
 | Tasks | `task.md` 1.0.0 |
@@ -180,9 +180,9 @@ Registradas en `memoria.md` (M-ML-036, APROBADO). Los valores marcados SUPUESTO 
 | Tasks | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 1 (T01) |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 completa (1/7); ver `evidence.md`** |
 
 ## 15. Aprobación
 
