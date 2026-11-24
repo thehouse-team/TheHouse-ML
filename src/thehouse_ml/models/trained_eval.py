@@ -19,8 +19,13 @@ Pasos (spec ML-05 §6.2, §6.4 y §6.5; decisiones 2, 4 y 5 de M-ML-036):
    `total`), del que salen los intervalos de cada modelo y de la diferencia
    modelo - baseline. Con la misma semilla y el mismo orden de estudiantes, el
    intervalo del baseline coincide con el de `baseline_metrics.json`.
-5. `promotion` evalúa las 3 condiciones de la spec §6.5 por candidato con la
-   tabla por pliegue de `train_cv_metrics.json` (T02) y la diferencia en test.
+5. `evaluate_breakdown` (T05) calibra la regresión logística a 0-100 con su
+   desglose por factor (`trained_breakdown`), lo verifica en todos los pares de
+   test (suma, rangos, orden del logit y métricas sin cambios) y comprueba la
+   monotonía por factor con una rejilla; no reentrena ni vuelve a medir.
+6. `promotion` evalúa las 3 condiciones de la spec §6.5 por candidato con la
+   tabla por pliegue de `train_cv_metrics.json` (T02), la diferencia en test y
+   el desglose de T05.
 
 **Test se evalúa una sola vez** (spec §6.2 y §7 regla 2): esta etapa no elige
 hiperparámetros, features, calibración ni umbrales; solo lee los modelos
@@ -60,6 +65,7 @@ from thehouse_ml.models.train import (
     sha256_file,
 )
 from thehouse_ml.models.train_config import TrainParams, load_train_params, resolve_profile
+from thehouse_ml.models.trained_breakdown import BreakdownEvaluation, build_breakdown_model, evaluate_breakdown
 from thehouse_ml.models.training_data import TRAINING_INPUTS, TrainingData, load_training_data
 from thehouse_ml.paths import ProjectPaths
 
@@ -73,10 +79,10 @@ BASELINE_TOLERANCE = 1e-12
 TRAINED_SKIP_MESSAGE = "evaluate (ML-05): omitido; faltan los modelos de `train` o sus métricas de validación cruzada"
 
 # Resultados de cada candidato y de la decisión (claves estables del JSON).
-OUTCOME_CANDIDATE = "candidate_subject_to_t05"
+OUTCOME_PROMOTED = "promoted"
 OUTCOME_NOT_PROMOTED = "not_promoted"
 OUTCOME_REFERENCE = "reference_not_promoted_in_v1"
-DECISION_CANDIDATE = "logreg_candidate_subject_to_t05"
+DECISION_PROMOTED = "logreg_promoted"
 DECISION_BASELINE = "baseline_stays"
 
 
@@ -402,16 +408,18 @@ def holdout_condition(difference: Interval) -> Condition:
     return Condition(passed=difference.low > 0, detail={"delta_ndcg@10": difference.as_dict()})
 
 
-def breakdown_condition(name: str) -> Condition:
-    """Condición 3: desglose aditivo que suma el total; solo la LR puede cumplirla y se verifica en T05."""
+def breakdown_condition(name: str, breakdown: BreakdownEvaluation | None = None) -> Condition:
+    """Condición 3: desglose aditivo que suma el total y respeta la monotonía por factor (T05).
+
+    Solo la LR puede cumplirla; sin `breakdown` (no verificado) queda `passed = None`.
+    """
     if name == "logreg":
-        return Condition(
-            passed=None,
-            detail={
-                "status": "pending_t05",
-                "note": "modelo aditivo por construcción; el desglose que suma el total se verifica en T05",
-            },
-        )
+        if breakdown is None:
+            return Condition(
+                passed=None,
+                detail={"status": "not_verified", "note": "el desglose no se verificó en esta corrida"},
+            )
+        return Condition(passed=breakdown.passed, detail=breakdown.condition_detail())
     return Condition(
         passed=False,
         detail={"status": "not_additive", "note": "LightGBM no ofrece desglose aditivo exportable (decisión 5)"},
@@ -428,6 +436,10 @@ class CandidateResult:
     def meets_cv_and_test(self) -> bool:
         return self.conditions[0].passed is True and self.conditions[1].passed is True
 
+    @property
+    def meets_all(self) -> bool:
+        return self.meets_cv_and_test and self.conditions[2].passed is True
+
     def as_dict(self) -> dict[str, Any]:
         return {
             "conditions": {
@@ -436,6 +448,7 @@ class CandidateResult:
                 "3_additive_breakdown": self.conditions[2].as_dict(),
             },
             "meets_conditions_1_and_2": self.meets_cv_and_test,
+            "meets_all_conditions": self.meets_all,
             "outcome": self.outcome,
         }
 
@@ -443,7 +456,7 @@ class CandidateResult:
 @dataclass(frozen=True)
 class Decision:
     outcome: str
-    promoted_model: str | None  # None: se queda el baseline; "logreg" sujeto a T05
+    promoted_model: str | None  # None: se queda el baseline; "logreg": promovida
     text: str
 
     def as_dict(self) -> dict[str, Any]:
@@ -454,6 +467,7 @@ def promotion(
     folds: Mapping[str, FoldSeries],
     differences: Mapping[str, Mapping[str, Interval]],
     required_folds: int,
+    breakdown: BreakdownEvaluation | None = None,
 ) -> tuple[dict[str, CandidateResult], Decision]:
     """Condiciones 1-3 por candidato y decisión (spec §6.5 y §6.6, decisiones 4 y 5)."""
     candidates: dict[str, CandidateResult] = {}
@@ -461,18 +475,39 @@ def promotion(
         conditions = (
             cv_condition(folds[name], folds["baseline"], required_folds),
             holdout_condition(differences[name][PRIMARY_METRIC]),
-            breakdown_condition(name),
+            breakdown_condition(name, breakdown),
         )
-        meets = conditions[0].passed is True and conditions[1].passed is True
-        promotable = OUTCOME_CANDIDATE if meets else OUTCOME_NOT_PROMOTED
+        meets = all(condition.passed is True for condition in conditions)
+        promotable = OUTCOME_PROMOTED if meets else OUTCOME_NOT_PROMOTED
         # Solo la LR (aditiva) es promovible; LightGBM es referencia aunque cumpla 1 y 2 (decisión 5).
         candidates[name] = CandidateResult(name, conditions, promotable if name == "logreg" else OUTCOME_REFERENCE)
-    if candidates["logreg"].meets_cv_and_test:
+    logreg = candidates["logreg"]
+    if logreg.meets_all:
+        version = breakdown.model.model_version if breakdown is not None else "logreg"
+        deviations = breakdown.deviations_applied if breakdown is not None else []
+        note = (
+            " Desviación conocida aceptada (M-ML-041): "
+            + ", ".join(f"`{name}`" for name in deviations)
+            + " (ver `reports/trained_breakdown.md`)."
+            if deviations
+            else ""
+        )
         decision = Decision(
-            DECISION_CANDIDATE,
+            DECISION_PROMOTED,
             "logreg",
-            "La regresión logística cumple las condiciones 1 y 2: queda candidata a promoción, sujeta a T05 "
-            "(condición 3, desglose aditivo que suma el total). Hasta entonces `baseline-1.0.0` sigue vigente.",
+            f"La regresión logística cumple las 3 condiciones: queda **PROMOVIDA** como modelo de ML-05 "
+            f"(`{version}`, puntaje 0-100 con desglose por factor); `baseline-1.0.0` queda como respaldo." + note,
+        )
+    elif logreg.meets_cv_and_test:
+        detail = logreg.conditions[2].detail
+        failed = detail.get("failed_checks") or [detail.get("status", "?")]
+        decision = Decision(
+            DECISION_BASELINE,
+            None,
+            "La regresión logística cumple las condiciones 1 y 2, pero **no** la 3 (comprobaciones que fallan: "
+            + ", ".join(f"`{item}`" for item in failed)
+            + "): se queda el baseline `baseline-1.0.0` (constitución §10.1). El detalle y la propuesta están en "
+            "`reports/trained_breakdown.md`.",
         )
     else:
         tail = (
@@ -515,6 +550,8 @@ class TrainedEvaluation:
     decision: Decision
     cv_source: str
     required_folds: int
+    breakdown: BreakdownEvaluation
+    students: pd.DataFrame  # una fila por estudiante incluido (metadatos de segmento, sin datos personales)
 
 
 def evaluate_trained(
@@ -562,7 +599,21 @@ def evaluate_trained(
     total = next(item for item in baseline_reference["segments"] if item["id"] == SEGMENT_ID)
     check_baseline_intervals(total["baseline"], paired.baseline)
     folds = fold_series(cv_metrics, manifest)
-    candidates, decision = promotion(folds, paired.differences, train_params.n_splits)
+    # ML-05 T05: desglose calibrado de la LR en los mismos pares de test (sin volver a puntuar con el modelo).
+    model = build_breakdown_model(logreg, schema, config)
+    raw_total = model.raw_total(model.raw_points(test.features))
+    calibrated = defined(ranked_metrics(raw_total, test.relevance, test.group, test.room_id, threshold), "logreg-0-100")
+    breakdown = evaluate_breakdown(
+        model,
+        test.features,
+        scores["logreg"],
+        test.group,
+        test.room_id,
+        data.features.to_numpy(dtype=np.float64),
+        calibrated == per_student["logreg"],
+        schema,
+    )
+    candidates, decision = promotion(folds, paired.differences, train_params.n_splits, breakdown)
     return TrainedEvaluation(
         profile=profile,
         train_params=train_params,
@@ -581,6 +632,8 @@ def evaluate_trained(
         decision=decision,
         cv_source=cv_source,
         required_folds=train_params.n_splits,
+        breakdown=breakdown,
+        students=data.students,
     )
 
 
@@ -617,6 +670,7 @@ def run_trained_evaluate(paths: ProjectPaths, params: TrainParams | None = None,
     # Importes diferidos: evitan ciclos (los reportes y la ablación importan este módulo).
     from thehouse_ml.models.ablation import ABLATION_METRICS, ABLATION_REPORT, evaluate_ablation
     from thehouse_ml.models.ablation_report import VERDICT_ASCII, ablation_document, fold_table, render_ablation_report
+    from thehouse_ml.models.trained_breakdown_report import TRAINED_BREAKDOWN, render_breakdown_report
     from thehouse_ml.models.trained_report import metrics_document, render_report
 
     profile = profile or resolve_profile()
@@ -688,6 +742,8 @@ def run_trained_evaluate(paths: ProjectPaths, params: TrainParams | None = None,
     _write_json(ablation_path, ablation_document(ablation))
     ablation_report_path = reports_dir / ABLATION_REPORT
     ablation_report_path.write_text(render_ablation_report(ablation), encoding="utf-8", newline="\n")
+    breakdown_path = reports_dir / TRAINED_BREAKDOWN
+    breakdown_path.write_text(render_breakdown_report(result, config), encoding="utf-8", newline="\n")
     lr = result.paired.differences["logreg"][PRIMARY_METRIC]
     gbm = result.paired.differences["lightgbm"][PRIMARY_METRIC]
     return (
@@ -699,16 +755,26 @@ def run_trained_evaluate(paths: ProjectPaths, params: TrainParams | None = None,
         f"evaluate (ML-05 T04, perfil {profile}): {ablation.cv.n_folds} pliegues con 4 métricas, ablación de "
         f"{'+'.join(ablation.cv.ablated_models)}, segmentos en test; hipótesis > $3,500: "
         f"{VERDICT_ASCII[ablation.hypothesis.verdict]} (DATOS SINTÉTICOS) -> "
-        f"{ablation_report_path.relative_to(paths.root).as_posix()}; {ablation_path.relative_to(paths.root).as_posix()}"
+        f"{ablation_report_path.relative_to(paths.root).as_posix()}; "
+        f"{ablation_path.relative_to(paths.root).as_posix()}\n"
+        f"evaluate (ML-05 T05, perfil {profile}): desglose 0-100 de {result.breakdown.model.model_version} en "
+        f"{result.breakdown.sums.pairs} pares; suma el total: {_yes_no(result.breakdown.sums.passed)}; orden del "
+        f"logit: {_yes_no(result.breakdown.order.passed)}; monotonia por factor: "
+        f"{_yes_no(result.breakdown.monotonicity.passed)}; condicion 3: {_yes_no(result.breakdown.passed)}; "
+        f"decision: {result.decision.outcome} (DATOS SINTÉTICOS) -> {breakdown_path.relative_to(paths.root).as_posix()}"
     )
+
+
+def _yes_no(value: bool) -> str:
+    return "si" if value else "no"
 
 
 __all__ = [
     "CANDIDATES",
     "DECISION_BASELINE",
-    "DECISION_CANDIDATE",
-    "OUTCOME_CANDIDATE",
+    "DECISION_PROMOTED",
     "OUTCOME_NOT_PROMOTED",
+    "OUTCOME_PROMOTED",
     "OUTCOME_REFERENCE",
     "TRAINED_METRICS",
     "TRAINED_REPORT",

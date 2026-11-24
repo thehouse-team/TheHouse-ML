@@ -3,8 +3,8 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-05 1.0.0 |
-| Tareas ejecutadas | T01 · Dependencias y carga de datos (R01); T02 · Validación cruzada y entrenamiento reproducible (R02); T03 · Evaluación contra el baseline y decisión de promoción (R03); T04 · Ablación y segmentos (R04). Cada task con sección propia abajo |
-| Estado | **🟡 EN EJECUCIÓN — T01 a T04 completas (4/7)** |
+| Tareas ejecutadas | T01 · Dependencias y carga de datos (R01); T02 · Validación cruzada y entrenamiento reproducible (R02); T03 · Evaluación contra el baseline y decisión de promoción (R03); T04 · Ablación y segmentos (R04); T05 · Calibración 0-100 y desglose (R05). Cada task con sección propia abajo |
+| Estado | **🟡 EN EJECUCIÓN — T01 a T05 completas (5/7)** |
 | Autorización (T01) | «EJECUTA ML-05 1.0.0, task T01 (ML-05-R01), en la rama feat/ml-05-deps-data. Rutas permitidas: pyproject.toml, uv.lock, src/thehouse_ml/ (un módulo de carga de datos de entrenamiento, por ejemplo en models/ o evaluation/ según ARQUITECTURA.md), tests/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). No modifiques feature_schema.json ni ningún params de ML-03/ML-04» — César Yael López Trujillo, 2026-11-23 |
 | Rama (T01) | `feat/ml-05-deps-data` (commit base `2bcb71e`, merge del PR #30); mezclada en `main` con el PR #31 (`386fd1d`) |
 | Autorización (T02) | «EJECUTA ML-05 1.0.0, task T02 (ML-05-R02), en la rama feat/ml-05-train. Rutas permitidas: src/thehouse_ml/ (models/ para el entrenamiento; evaluation/ y features/ solo para reutilizar), tests/, reports/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). Sin dependencias nuevas. No modifiques feature_schema.json, baseline_params.json ni los params de ML-03/ML-04. Los modelos entrenados van a data/processed/ o models/ (fuera de git), nunca con pickle» — César Yael López Trujillo, 2026-11-23 |
@@ -16,9 +16,12 @@
 | Autorización (T04) | «EJECUTA ML-05 1.0.0, task T04 (ML-05-R04), en la rama feat/ml-05-ablation. Rutas permitidas: src/thehouse_ml/ (models/ y evaluation/; features/ solo para reutilizar; stages.py solo si hace falta para integrar la etapa), tests/, reports/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). Sin dependencias nuevas. No modifiques train_params.json, los modelos oficiales, baseline_params.json, baseline_eval_params.json ni los params de ML-03/ML-04» — César Yael López Trujillo, 2026-11-24 |
 | Rama (T04) | `feat/ml-05-ablation` (commit base `03a7b41`, merge del PR #33) |
 | Aprobación (T04) | «Apruebo M-ML-040 (César Yael López Trujillo, 2026-11-24): agrupamiento de features, regla de la hipótesis y perfil ci reducido»; en el mismo mensaje: «Deja la hipótesis > $3,500 como CONFIRMADA con las salvedades T04-H2 y T04-H3 documentadas, para que la model card (T06) las incluya. T04-H1 se cierra cuando el CI del PR confirme el tiempo en ubuntu. Marca T04 en PASS, T03-H2 resuelto» |
+| Autorización (T05) | «EJECUTA ML-05 1.0.0, task T05 (ML-05-R05), en la rama feat/ml-05-breakdown. Rutas permitidas: src/thehouse_ml/ (models/ y evaluation/; features/ solo para reutilizar; stages.py solo si hace falta), tests/ (incluido tests/fixtures/), reports/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). Sin dependencias nuevas. No modifiques train_params.json, los modelos oficiales, feature_schema.json, baseline_params.json ni los params de ML-03/ML-04» — César Yael López Trujillo, 2026-11-24 |
+| Rama (T05) | `feat/ml-05-breakdown` (commit base `8dd9e6e`, merge del PR #34) |
+| Aprobación (T05) | «Decisión sobre T05-H1: opción 1. La condición (c) de la spec §6.5 aprobada es "desglose aditivo que suma el total" y se cumple; la verificación de monotonía del presupuesto fue una protección adicional que yo agregué en el «EJECUTA», no parte del criterio de la spec. Acepto la no monotonía de price_below_min como desviación conocida […] Promueve logreg-1.0.0 como modelo de ML-05 (baseline-1.0.0 queda como respaldo) y vuelve a correr evaluate […] Apruebo M-ML-041 (César Yael López Trujillo, 2026-11-24) con eso. Marca T05 completa en PASS WITH WARNINGS» |
 | Commit | Sin commit, por instrucción explícita del responsable |
-| Fecha de ejecución | T01: 2026-11-23 · T02: 2026-11-23 y 2026-11-24 (retomada tras un apagado del equipo) · T03: 2026-11-24 · T04: 2026-11-24 |
-| Decisiones | M-ML-036 (APROBADO, decisiones 1 y 6); M-ML-037 (**APROBADO**, César Yael López Trujillo, 2026-11-23: versiones, override de mypy, ubicación, tercera entrada `students.parquet`, validación del esquema, reutilización de `join_labels`, formato de salida, prueba de humo y protección sin pickle); M-ML-038 (**APROBADO**, César Yael López Trujillo, 2026-11-24: semilla, pliegues, rejilla, selección, `num_threads`, persistencia, salidas y perfil `ci`); M-ML-039 (**APROBADO**, César Yael López Trujillo, 2026-11-24: ubicación y etapa, verificaciones, referencia reproducida, bootstrap pareado, condiciones 1 y 3, tabla por pliegue y salidas; `stages.py` autorizado retroactivamente; T03-H2 traspasado a T04); M-ML-040 (**APROBADO**, César Yael López Trujillo, 2026-11-24: grupos de features, pliegues y modelos de la validación cruzada, 4 métricas por pliegue, ablación, segmentos, regla de la hipótesis > $3,500, integración y perfil `ci`) |
+| Fecha de ejecución | T01: 2026-11-23 · T02: 2026-11-23 y 2026-11-24 (retomada tras un apagado del equipo) · T03: 2026-11-24 · T04: 2026-11-24 · T05: 2026-11-24 |
+| Decisiones | M-ML-036 (APROBADO, decisiones 1 y 6); M-ML-037 (**APROBADO**, César Yael López Trujillo, 2026-11-23: versiones, override de mypy, ubicación, tercera entrada `students.parquet`, validación del esquema, reutilización de `join_labels`, formato de salida, prueba de humo y protección sin pickle); M-ML-038 (**APROBADO**, César Yael López Trujillo, 2026-11-24: semilla, pliegues, rejilla, selección, `num_threads`, persistencia, salidas y perfil `ci`); M-ML-039 (**APROBADO**, César Yael López Trujillo, 2026-11-24: ubicación y etapa, verificaciones, referencia reproducida, bootstrap pareado, condiciones 1 y 3, tabla por pliegue y salidas; `stages.py` autorizado retroactivamente; T03-H2 traspasado a T04); M-ML-040 (**APROBADO**, César Yael López Trujillo, 2026-11-24: grupos de features, pliegues y modelos de la validación cruzada, 4 métricas por pliegue, ablación, segmentos, regla de la hipótesis > $3,500, integración y perfil `ci`); M-ML-041 (**APROBADO**, César Yael López Trujillo, 2026-11-24: calibración afín, `maxPoints`, `pets_compatible` al término fijo, formato de `breakdown`, `modelVersion` `logreg-1.0.0`, regla de monotonía con la desviación aceptada T05-H1; `logreg-1.0.0` promovida) |
 
 Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§5 stack y §13 sin pickle) → `AGENTS.md` → `memoria.md` (M-ML-032 a M-ML-036) → `spec.md` (sobre todo R01 y §10 decisiones 1 y 6), `plan.md` y `task.md` de ML-05 → `specs/ARQUITECTURA.md` → `src/thehouse_ml/synthetic/labels_stage.py`, `src/thehouse_ml/evaluation/` y `src/thehouse_ml/models/baseline_report.py` (para reutilizar) → `specs/ml-04-baseline-model/evidence.md` (formato).
 
@@ -664,3 +667,165 @@ Domina el tiempo el reajuste de LightGBM: 35 ajustes de ~11 s (5 pliegues × mod
 - **Coherencia:** tabla anterior.
 
 **Resultado T04: PASS** — aceptación de R04 cumplida y verificada, traspaso T03-H2 resuelto; hipótesis > $3,500 **confirmada** con la regla registrada y las salvedades T04-H2 y T04-H3 para la model card (T06); M-ML-040 **APROBADO** (César Yael López Trujillo, 2026-11-24); T04-H1 abierto hasta el CI del PR. T04 **completa** (ML-05 en 4/7). Sin commit, por instrucción del responsable.
+
+## T05 · Calibración 0-100 y desglose
+
+Lecturas previas (T05), en el orden de `AGENTS.md`: `constitution.md` (§11 y §12) → `AGENTS.md` → `memoria.md` (M-ML-029 a M-ML-040; sobre todo M-ML-031 redondeo y M-ML-036 decisión 5) → `spec.md` completo (§6.5, §6.6 y R05), `plan.md`, `task.md` y esta evidencia → `src/thehouse_ml/models/` (`train.py`/`logreg.json`, `baseline_score.py`, `factor_groups.py`, `trained_eval.py`) y `reports/trained_metrics.json`.
+
+### Qué se hizo
+
+- **`src/thehouse_ml/models/trained_breakdown.py`** (nuevo, puro): `build_breakdown_model` (calibración afín por factor sobre el recorte de `logreg.json`, sin reentrenar), `score_features_logreg` y `score_pair_logreg` (salida con formato del baseline, `modelVersion` `logreg-1.0.0`; reutiliza `_check_vector`, `factor_points`, `match_score`, `ExcludedPair`, `check_hard_constraints` y `compute_pair_features`), `rank_logreg`, verificación en lote (`score_pairs`, `check_sums`, `check_order`) y monotonía (`coefficient_table`, `budget_monotonicity`, `distance_monotonicity`, `budget_ratio_threshold`, `observed_budget_ratio`).
+- **`src/thehouse_ml/models/trained_breakdown_report.py`** (nuevo): `reports/trained_breakdown.md` y el bloque `breakdown` de `reports/trained_metrics.json`.
+- **`trained_eval.py`**: dentro de `evaluate_trained`, T05 calibra la LR, verifica el desglose en los mismos pares de test que puntuó T03 (no vuelve a llamar al modelo en test) y evalúa la condición 3 de verdad; resultados `promoted`/`logreg_promoted` en lugar de `candidate_subject_to_t05`/`logreg_candidate_subject_to_t05`; la etapa escribe `reports/trained_breakdown.md` e imprime una cuarta línea. **`trained_report.py`**: condición 3 con su detalle, decisión y bloque `breakdown`. `stages.py`, `evaluation/` y `features/` sin cambios.
+- **Pruebas** (sin red): `tests/unit/test_trained_breakdown.py` (nuevo, 102 casos, 81 de ellos los dorados); `tests/unit/test_trained_eval.py` (3 pruebas de decisión nuevas en lugar de la de «sujeta a T05»); `tests/integration/test_trained_eval_stage.py` (salidas, módulos sin archivos ocultos y 4 líneas de la etapa).
+- **Decisión nueva:** M-ML-041 (**APROBADO**, César Yael López Trujillo, 2026-11-24).
+- **Segunda pasada (tras la decisión del responsable sobre T05-H1):** `trained_breakdown.py` gana `ACCEPTED_DEVIATIONS` (solo `monotonicity_budget`, con su motivo y la referencia a M-ML-041); la condición 3 es el criterio de la spec §6.5 (el desglose suma el total) y una falla de monotonía la bloquea salvo que sea una desviación aceptada. La monotonía se sigue calculando y reportando; el JSON gana `sums_total`, `failed_checks` y `accepted_deviations`, y la decisión de promoción nombra la desviación. 5 pruebas nuevas (4 unitarias de la regla y 1 de la decisión).
+
+### Coeficientes (modelo `models/logreg.json`, SHA-256 `341ea3ec…0b27fa` verificado contra `train_manifest.json`; DATOS SINTÉTICOS)
+
+| Feature | Factor | coef (estandarizado) | Logit por unidad | Signo coherente |
+| --- | --- | ---: | ---: | --- |
+| `distance_km` | distancia | −3.349741 | −0.531370 | sí |
+| `effective_distance_km` | distancia | −1.869938 | −0.505759 | sí |
+| `price_to_budget` | presupuesto | −0.996049 | −4.277202 | sí |
+| `services_coverage` | servicios | +0.565531 | +3.049062 | sí |
+| `place_type_match` | tipo de lugar | +1.006235 | +2.198060 | sí |
+| `property_type_match` | tipo de inmueble | +0.359535 | +0.781024 | sí |
+| `pets_compatible` | término fijo | 0 | 0 | — |
+| `distance_ratio` | distancia | −0.100585 | −0.029395 | sí |
+| `price_below_min` | presupuesto | −0.012314 | −0.056130 | **no** (por debajo del mínimo, más renta suma) |
+| `extra_services_ratio` | extras | +0.439171 | +2.042204 | sí |
+
+Intercepto −4.133224. `pets_compatible` es constante (1) en los candidatos: escala 1, coeficiente 0; va al término fijo con `b0`.
+
+### Calibración y `maxPoints`
+
+| Factor | min_k (logit) | max_k (logit) | maxPoints (sin redondear) | maxPoints | Peso del baseline |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| Presupuesto | −1.9443 | +2.3890 | 9.5698 | **9.6** | 30 |
+| Distancia | −28.7731 | +4.1045 | 72.6075 | **72.6** | 25 |
+| Servicios esenciales | −2.2348 | +0.8142 | 6.7336 | **6.7** | 20 |
+| Tipo de lugar | −0.6570 | +1.5410 | 4.8542 | **4.9** | 10 |
+| Tipo de inmueble | −0.5429 | +0.2381 | 1.7248 | **1.7** | 10 |
+| Extras | −0.9863 | +1.0559 | 4.5100 | **4.5** | 5 |
+| **Total** | | | 100.0000 | **100.0** | 100 |
+
+S = 45.281261 unidades de logit. La distancia domina porque su `training_range` llega a 30 km (y 60 en `distance_ratio`) y los candidatos están cerca (T05-H2).
+
+### Verificación en los 30,755 pares de test (300 estudiantes; misma medición de T03)
+
+| Comprobación | Resultado |
+| --- | --- |
+| máx. \|Σ sin redondear − `matchScore`\| | 0.499973 ≤ 0.5; 0 fuera |
+| máx. \|Σ reportada − Σ sin redondear\| | 0.212896 ≤ 0.3; 0 fuera |
+| Factores fuera de [0, `maxPoints`] / totales fuera de [0, 100] | 0 / 0 |
+| máx. \|logit − afín(raw_total)\| | 2.3 × 10⁻¹⁴ |
+| Orden por `raw_total` = orden del logit | 300/300 estudiantes |
+| Métricas con el puntaje 0-100 | idénticas a las de T03 |
+
+Distribución de `matchScore` en test: mín. 8, p25 74, mediana 81, p75 85, p95 90, máx. 97, media 77.6 (detalle y 3 ejemplos con top 5 en `reports/trained_breakdown.md`).
+
+### Monotonía por factor
+
+| Factor | Rejilla | Pasos en que sube | Resultado |
+| --- | --- | ---: | --- |
+| Distancia (al aumentar la distancia) | 4 transportes × 8 `maxDistanceKm` × 0–36 km cada 0.25 (32 curvas, 4,608 pasos) | 0 | **monótono** |
+| Presupuesto (al subir la renta) | 100 combinaciones `budget.min` ≤ `budget.max` del dominio NV-11, renta 0 → `budget.max` (10,204 pasos) | 46 | **no monótono**: sube si renta < `budget.min` y `budget.max / budget.min` > **76.20**; máx. +0.1238 puntos (`budget.min` 1, `budget.max` 50,000, renta 0 → 1) |
+
+En los datos sintéticos, 73,815 pares tienen renta < `budget.min` y el mayor `budget.max / budget.min` implícito es **2.83**: ningún par observado cae en la zona. Aun así la rejilla sobre los `training_range` falla.
+
+**Desviación aceptada (transparencia).** En la primera pasada, con la regla del «EJECUTA» (paso 6: suma **y** monotonía), la condición 3 no se cumplía y la decisión registrada fue `baseline_stays` (`trained_metrics.json` `8348939d…`). **Después de ver ese resultado**, el responsable eligió la opción 1: la condición 3 aprobada en la spec §6.5 es «desglose aditivo que suma el total» y se cumple; la monotonía del presupuesto fue una protección adicional del «EJECUTA». La no monotonía de `price_below_min` queda como desviación conocida y **no se corrige** en `logreg-1.0.0`. Trabajo futuro: `logreg-1.1.0` sin `price_below_min` o con coeficiente ≥ 0, evaluado con datos nuevos en ML-07 (test ya se usó, spec §6.2).
+
+### Decisión de promoción (condición 3)
+
+| Condición | Regresión logística |
+| --- | --- |
+| 1. NDCG@10 > baseline en 5/5 pliegues (T03) | sí |
+| 2. IC 95 % de Δ NDCG@10 > 0 en test (T03) | sí (+0.335 [+0.312, +0.360]) |
+| 3. Desglose aditivo que suma el total (spec §6.5) | **sí** (suma: sí; monotonía de distancia: sí; monotonía del presupuesto: no, desviación aceptada M-ML-041) |
+
+**Decisión registrada en `reports/trained_metrics.json` y `reports/trained_report.md`: `logreg_promoted`** — la regresión logística queda **PROMOVIDA** como modelo de ML-05 (`logreg-1.0.0`); `baseline-1.0.0` queda como respaldo; LightGBM sigue como referencia (no se promueve en v1).
+
+### Reproducibilidad y perfil `ci`
+
+Primera pasada (regla del «EJECUTA», antes de la decisión sobre T05-H1): dos corridas `full` (900 s, en paralelo con pruebas, y 677 s) con SHA-256 idénticos y decisión `baseline_stays` (`trained_metrics.json` `8348939d…`, `trained_report.md` `fd0584e0…`, `trained_breakdown.md` `54800385…`); `ci` 49 s sin tocar versionados.
+
+Segunda pasada (oficial, con M-ML-041 APROBADO y la desviación aceptada):
+
+| Comando | Duración | Resultado |
+| --- | ---: | --- |
+| `uv run python -m thehouse_ml evaluate` (1.ª, `full`) | 396 s | exit 0; 4 líneas; decisión `logreg_promoted` |
+| `uv run python -m thehouse_ml evaluate` (2.ª, `full`) | 437 s | exit 0; `diff` de los SHA-256 de `reports/*.json` y `reports/*.md` contra la 1.ª: **vacío** |
+| `THEHOUSE_ML_TRAIN_PROFILE=ci uv run python -m thehouse_ml evaluate` | 34 s | exit 0; escribe solo en `models/ci/`; `diff` de los reportes versionados: **vacío** |
+
+| Archivo | SHA-256 (las 2 corridas de la segunda pasada) |
+| --- | --- |
+| `reports/trained_breakdown.md` | `f2f2be0544c33f159d0a128ca9d73f0e198b2ed95d7a95a97dccd44f0aed743e` (nuevo) |
+| `reports/trained_metrics.json` | `44eb1cd038bf07e91f9f0a7c2c2ebdc43bef55c453015f0227488c78412fa25b` (antes de T05 `288258c2…`) |
+| `reports/trained_report.md` | `456a53f9dcb7b01c9bb79f96245ebac74ed2f72a3bd545a86fe3f3e8ff51310f` (antes de T05 `e8ffe126…`) |
+| `reports/ablation_metrics.json`, `reports/ablation_report.md` | sin cambio (`f8c1a80b…`, `732cf41a…`) |
+| `reports/baseline_metrics.json`, `reports/baseline_report.md` | sin cambio (`df36b2f1…`, `3b554e9b…`) |
+
+Archivos protegidos con el mismo SHA-256 antes y después: `models/logreg.json` (`341ea3ec…`), `models/lightgbm_lambdarank.txt` (`5eb8d22d…`), `train_params.json` (`7b836eaa…`), `feature_schema.json` (`67af2e48…`), `baseline_params.json` (`51b663e8…`), `baseline_eval_params.json` (`c29ee164…`).
+
+### Trazabilidad R05 → prueba
+
+| Criterio | Prueba o comando |
+| --- | --- |
+| Recorte al `training_range` antes de puntuar; fuera del rango = entrada recortada | `test_trained_breakdown.py::test_inputs_beyond_the_training_range_score_as_the_clipped_input`, `::test_breakdown_properties_hold_for_random_vectors[beyond-training-range]` |
+| Calibración afín, `maxPoints` proporcionales y Σ = 100; `pets_compatible` al término fijo | `::test_calibration_has_the_six_baseline_factors_with_max_points_summing_100`, `::test_max_points_are_proportional_to_the_contribution_range_of_each_factor`, `::test_pets_compatible_goes_to_the_fixed_term_not_to_a_factor`, `::test_only_the_standard_transform_and_the_schema_order_are_accepted` |
+| Propiedades: total en [0, 100], factor en [0, `maxPoints`], tolerancias y redondeo de M-ML-029/031 | `::test_breakdown_properties_hold_for_random_vectors` (800 vectores), `::test_extremes_give_0_and_100`, `::test_batch_scores_match_the_single_pair_scores`; verificación en los 30,755 pares de test |
+| Orden idéntico al logit; métricas sin cambios | `::test_ranking_by_raw_total_is_the_logit_ranking_inside_the_range`, `::test_check_sums_and_check_order_detect_a_logit_that_is_not_the_calibrated_one`; 300/300 estudiantes en la etapa |
+| Pares excluidos sin puntaje y perfil incompleto como en ML-04 | `::test_excluded_pairs_and_incomplete_profiles_behave_as_in_ml04` (81 casos dorados) |
+| Formato (lista `features`, `maxPoints` variables) | `::test_output_has_the_baseline_format_with_features_lists_and_variable_max_points` |
+| Monotonía por factor | `::test_budget_factor_is_monotone_when_price_below_min_has_the_expected_sign`, `::test_collinear_budget_features_are_reported_with_the_exact_ratio_threshold`, `::test_distance_factor_with_a_wrong_sign_is_detected`, `::test_coefficient_table_flags_signs_against_the_natural_variable`, `::test_observed_budget_ratio_reads_the_implicit_max_over_min_of_the_pairs`, `::test_check_monotonicity_reports_observed_pairs_outside_the_violation_zone` |
+| Decisión con la condición 3 | `test_trained_eval.py::test_logreg_meeting_the_three_conditions_is_promoted`, `::test_logreg_failing_the_breakdown_keeps_the_baseline_and_names_the_failed_checks`, `::test_without_a_verified_breakdown_the_logreg_is_not_promoted` |
+| Pipeline solo con transformadores con convertidor en skl2onnx (lista verificada) | `::test_pipeline_uses_only_estimators_listed_with_a_skl2onnx_converter` (`StandardScaler`→`SklearnScaler`, `KBinsDiscretizer`→`SklearnKBinsDiscretizer`, `LogisticRegression`→`SklearnLinearClassifier`; recorte fuera del pipeline = nodo `Clip` en ML-06) |
+| Reproducible, perfil `ci` sin tocar versionados, sin archivos ocultos | `test_trained_eval_stage.py::test_running_twice_does_not_change_any_file`, `::test_ci_profile_does_not_modify_the_versioned_reports`, `::test_evaluate_never_reads_the_hidden_label_files` (incluye los 2 módulos nuevos); corridas reales |
+
+### Comandos y resultados (T05)
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `163 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy` | `Success: no issues found in 50 source files` (PASS) |
+| `uv run pytest tests/unit/test_trained_breakdown.py tests/unit/test_trained_eval.py` | 1.ª pasada 124 passed; 2.ª pasada **129 passed** (PASS) |
+| `uv run pytest tests/integration/test_trained_eval_stage.py tests/integration/test_ablation_stage.py tests/unit/test_stages.py tests/unit/test_cli.py tests/integration/test_installed_package.py tests/test_repo_hygiene.py` (2.ª pasada) | **88 passed** en 78.2 s (PASS) |
+| Cobertura (1.ª pasada: `test_trained_eval_stage.py` + unitarias de T05) | 136 passed; `trained_breakdown.py` 99 %, `trained_breakdown_report.py` 97 %, `trained_eval.py` 94 %, `trained_report.py` 97 % (96.6 % en conjunto) (PASS; no se repitió con la 2.ª pasada) |
+| `evaluate` × 2 (`full`) y `ci`, en cada pasada | SHA-256 idénticos; versionados intactos con `ci` (PASS) |
+| Suite completa | **No ejecutada** (se pidieron las afectadas); corresponde a T07 |
+
+### Tabla de coherencia (T05)
+
+| Referencia | Comprobación | Resultado |
+| --- | --- | --- |
+| Constitución §12 | Desglose por los 6 factores que suma el total en todos los pares de test | PASS |
+| Constitución §11.1 | Pares excluidos por HC01–HC03 sin puntaje; perfil incompleto como en ML-04 | PASS |
+| Constitución §8 y §20.3 | «DATOS SINTÉTICOS» en el reporte, el JSON y el mensaje | PASS |
+| Constitución §9 / §13.1 | Dos corridas idénticas; sin pickle (JSON) | PASS |
+| Spec §6.2 y §7 regla 2 | Sin reentrenar ni volver a medir en test; sin ajustar nada con sus resultados | PASS |
+| Spec §6.6 | Recorte, calibración afín, `pets_compatible` al término fijo, redondeo de M-ML-029/031, formato con lista `features` | PASS |
+| Spec §6.5 condición 3 | El desglose suma el total en los 30,755 pares de test; monotonía calculada y reportada; la del presupuesto falla y es desviación aceptada (M-ML-041), decidida **después** de ver la verificación (registrado) | PASS WITH WARNINGS |
+| M-ML-031 | `factor_points` y `match_score` reutilizados, suma de izquierda a derecha | PASS |
+| AGENTS: rutas | `src/thehouse_ml/models/` (2 nuevos, 2 modificados), `tests/` (1 nuevo, 2 modificados), `reports/` (1 nuevo, 2 modificados), `memoria.md`, `specs/ml-05-trained-model/`, `specs/README.md` (fila de ML-05) | PASS |
+| AGENTS: protegidos y dependencias | Mismos SHA-256; `pyproject.toml` y `uv.lock` sin cambios | PASS |
+| AGENTS: un control no ejecutado no es PASS | Suite completa y CI del PR no ejecutados | PASS |
+
+### Hallazgos (T05)
+
+| ID | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| T05-H1 | Monotonía del factor presupuesto: el coeficiente de `price_below_min` es negativo; por debajo de `budget.min` el factor sube con la renta cuando `budget.max / budget.min` > 76.20 (máx. +0.124 puntos sobre 100). No ocurre en los datos sintéticos (máx. 2.83), pero sí en el dominio de NV-11. No se corrigió. Con la regla del «EJECUTA» (paso 6) la 1.ª pasada dejó el baseline; **después de ver ese resultado**, el responsable aceptó la desviación (opción 1): la condición 3 de la spec es «suma el total» y la monotonía fue una protección adicional. Codificada en `ACCEPTED_DEVIATIONS`; corrección (sin `price_below_min` o coeficiente ≥ 0) como trabajo futuro en `logreg-1.1.0`, evaluada con datos nuevos en ML-07 porque test ya se usó. | ADVERTENCIA (desviación aceptada) | Aceptado — M-ML-041 APROBADO; la model card (T06) y NV-23 deben mencionarla |
+| T05-H2 | `maxPoints` reflejan el rango de contribución de cada factor en todo el `training_range`, **no su importancia** (la medida de importancia es la ablación de T04): distancia 72.6 contra 25 del baseline; presupuesto 9.6 y servicios 6.7. Los cuartos cercanos tienden a puntajes altos (mediana 81; la distancia da en promedio el 87 % de su máximo). | ADVERTENCIA | Abierto para T06: la model card lo explica y se avisa a `TheHouse-GenAI` (no presentar `maxPoints` como pesos de importancia) |
+| T05-H3 | `min_k`/`max_k` usan la caja de los `training_range`, que incluye combinaciones no alcanzables a la vez (p. ej. `price_to_budget` 1 con `price_below_min` 1): el presupuesto nunca llega exactamente a 0. | INFORMATIVO | Documentado en M-ML-041 |
+| T05-H4 | La prueba de T03 de la decisión «sujeta a T05» se reemplazó por 4 de la decisión final (promovida, con desviación nombrada, condición 3 fallida y sin verificar) y dos de integración se ajustaron (cuarta línea de la etapa, nuevo reporte). Su intención no cambió. | INFORMATIVO | Corregido |
+| T05-H5 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR |
+
+### Revisión y resultado (T05)
+
+- **Seguridad:** sin secretos, sin red en las pruebas, sin servicios de pago (COST-001); sin pickle.
+- **Datos y licencias:** solo datos sintéticos de `data/processed/` (fuera de git); el reporte trae ids sintéticos y agregados, sin datos personales. Sin dependencias nuevas.
+- **Coherencia:** tabla anterior.
+
+**Resultado T05: PASS WITH WARNINGS** — aceptación de R05 cumplida y verificada: recorte al `training_range`, calibración afín 0-100 y desglose por los 6 factores que suma el total en los 30,755 pares de test (tolerancias de M-ML-029/031), orden idéntico al del logit, propiedades, formato y pipeline exportable; la regresión logística queda **PROMOVIDA** (`logreg-1.0.0`, `baseline-1.0.0` de respaldo). Advertencias: T05-H1 (no monotonía del presupuesto, desviación aceptada después de ver la verificación; corrección en `logreg-1.1.0`/ML-07) y T05-H2 (`maxPoints` ≠ importancia; para T06 y `TheHouse-GenAI`). M-ML-041 **APROBADO** (César Yael López Trujillo, 2026-11-24). T05 **completa** (ML-05 en 5/7). Sin commit, por instrucción del responsable.

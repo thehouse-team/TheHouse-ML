@@ -1,10 +1,11 @@
-"""ML-05 T03 (unitarias): verificación de modelos, métricas, comparación pareada y criterio de promoción."""
+"""ML-05 T03 y T05 (unitarias): verificación de modelos, métricas, comparación pareada y criterio de promoción."""
 
 from __future__ import annotations
 
 import hashlib
 import random
 from collections.abc import Sequence
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -16,9 +17,9 @@ from thehouse_ml.evaluation.ranking import METRIC_NAMES, Interval, StudentMetric
 from thehouse_ml.models.train import LIGHTGBM_MODEL, LOGREG_MODEL
 from thehouse_ml.models.trained_eval import (
     DECISION_BASELINE,
-    DECISION_CANDIDATE,
-    OUTCOME_CANDIDATE,
+    DECISION_PROMOTED,
     OUTCOME_NOT_PROMOTED,
+    OUTCOME_PROMOTED,
     OUTCOME_REFERENCE,
     FoldSeries,
     TrainedEvalError,
@@ -279,20 +280,75 @@ def test_holdout_condition_needs_the_lower_bound_above_zero(low: float, expected
     assert holdout_condition(_interval(low)).passed is expected
 
 
-def test_logreg_meeting_cv_and_test_is_a_candidate_subject_to_t05() -> None:
-    folds = {"baseline": BASE, "logreg": _series("logreg", ABOVE), "lightgbm": _series("lightgbm", ABOVE)}
+@dataclass(frozen=True)
+class _Model:
+    model_version: str = "logreg-1.0.0"
 
-    candidates, decision = promotion(folds, _differences(0.02, 0.03), 5)
 
-    assert decision.outcome == DECISION_CANDIDATE
+@dataclass(frozen=True)
+class _Breakdown:
+    """Doble de `BreakdownEvaluation` con lo que usa `promotion` (T05)."""
+
+    passed: bool
+    failed: tuple[str, ...] = ()
+    model: _Model = field(default_factory=_Model)
+    deviations_applied: tuple[str, ...] = ()
+
+    def condition_detail(self) -> dict[str, Any]:
+        return {"status": "verified_t05", "failed_checks": list(self.failed)}
+
+
+FOLDS_BOTH_ABOVE = {"baseline": BASE, "logreg": _series("logreg", ABOVE), "lightgbm": _series("lightgbm", ABOVE)}
+
+
+def test_logreg_meeting_the_three_conditions_is_promoted() -> None:
+    candidates, decision = promotion(FOLDS_BOTH_ABOVE, _differences(0.02, 0.03), 5, _Breakdown(True))  # type: ignore[arg-type]
+
+    assert decision.outcome == DECISION_PROMOTED
     assert decision.promoted_model == "logreg"
-    assert "sujeta a T05" in decision.text
-    assert candidates["logreg"].outcome == OUTCOME_CANDIDATE
-    assert candidates["logreg"].conditions[2].passed is None  # condición 3: se verifica en T05
-    assert candidates["logreg"].as_dict()["conditions"]["3_additive_breakdown"]["status"] == "pending_t05"
+    assert "PROMOVIDA" in decision.text
+    assert "`logreg-1.0.0`" in decision.text
+    assert "respaldo" in decision.text
+    assert candidates["logreg"].outcome == OUTCOME_PROMOTED
+    assert candidates["logreg"].meets_all is True
+    assert candidates["logreg"].as_dict()["conditions"]["3_additive_breakdown"]["status"] == "verified_t05"
     assert candidates["lightgbm"].meets_cv_and_test is True
     assert candidates["lightgbm"].outcome == OUTCOME_REFERENCE  # referencia aunque cumpla 1 y 2 (decisión 5)
     assert candidates["lightgbm"].conditions[2].passed is False
+
+
+def test_a_promotion_with_an_accepted_deviation_names_it_in_the_decision() -> None:
+    breakdown = _Breakdown(True, deviations_applied=("monotonicity_budget",))
+
+    _candidates, decision = promotion(FOLDS_BOTH_ABOVE, _differences(0.02, 0.03), 5, breakdown)  # type: ignore[arg-type]
+
+    assert decision.outcome == DECISION_PROMOTED
+    assert "Desviación conocida aceptada (M-ML-041)" in decision.text
+    assert "`monotonicity_budget`" in decision.text
+
+
+def test_logreg_failing_the_breakdown_keeps_the_baseline_and_names_the_failed_checks() -> None:
+    breakdown = _Breakdown(False, ("monotonicity_budget",))
+
+    candidates, decision = promotion(FOLDS_BOTH_ABOVE, _differences(0.02, 0.03), 5, breakdown)  # type: ignore[arg-type]
+
+    assert decision.outcome == DECISION_BASELINE
+    assert decision.promoted_model is None
+    assert "no** la 3" in decision.text
+    assert "`monotonicity_budget`" in decision.text
+    assert "trained_breakdown.md" in decision.text
+    assert candidates["logreg"].outcome == OUTCOME_NOT_PROMOTED
+    assert candidates["logreg"].meets_cv_and_test is True
+    assert candidates["logreg"].meets_all is False
+
+
+def test_without_a_verified_breakdown_the_logreg_is_not_promoted() -> None:
+    candidates, decision = promotion(FOLDS_BOTH_ABOVE, _differences(0.02, 0.03), 5)
+
+    assert candidates["logreg"].conditions[2].passed is None
+    assert candidates["logreg"].as_dict()["conditions"]["3_additive_breakdown"]["status"] == "not_verified"
+    assert decision.outcome == DECISION_BASELINE
+    assert "`not_verified`" in decision.text
 
 
 def test_only_lightgbm_meeting_the_conditions_keeps_the_baseline() -> None:

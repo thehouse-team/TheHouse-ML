@@ -2,7 +2,8 @@
 
 Determinista (sin fechas, tiempos ni rutas absolutas): dos corridas con los
 mismos modelos, datos y parámetros escriben los mismos bytes. Todo es **sintético**
-(etiquetas de M-ML-032): no es desempeño real (ML-07). Los segmentos son de T04.
+(etiquetas de M-ML-032): no es desempeño real (ML-07). Los segmentos son de T04;
+la condición 3 (desglose 0-100) y la decisión final de promoción, de T05.
 """
 
 from __future__ import annotations
@@ -14,6 +15,7 @@ from thehouse_ml.evaluation.ranking import METRIC_NAMES, Interval
 from thehouse_ml.models.baseline_report import BASELINE_METRICS, METRIC_LABELS, SYNTHETIC_BANNER
 from thehouse_ml.models.train import TRAIN_MANIFEST
 from thehouse_ml.models.train_config import DEFAULT_PROFILE
+from thehouse_ml.models.trained_breakdown_report import TRAINED_BREAKDOWN, breakdown_document
 from thehouse_ml.models.trained_eval import (
     CANDIDATES,
     MODEL_FILES,
@@ -22,12 +24,12 @@ from thehouse_ml.models.trained_eval import (
     TrainedEvaluation,
 )
 
-SPEC = "ML-05 1.0.0, T03 (ML-05-R03)"
+SPEC = "ML-05 1.0.0, T03 (ML-05-R03); condición 3 y decisión: T05 (ML-05-R05)"
 MODEL_LABELS = {"baseline": "Baseline `baseline-1.0.0`", "logreg": "Regresión logística", "lightgbm": "LightGBM"}
 CONDITION_LABELS = (
     "1. Validación cruzada: NDCG@10 > baseline en los 5 pliegues",
     "2. Test: IC 95 % de Δ NDCG@10 pareada con límite inferior > 0",
-    "3. Desglose aditivo que suma el total (constitución §12)",
+    "3. Desglose aditivo que suma el total y monotonía por factor (constitución §12; T05)",
 )
 SINGLE_MEASUREMENT = (
     "La partición test se evaluó una sola vez con los modelos finales de T02 (SHA-256 verificados); "
@@ -113,6 +115,7 @@ def metrics_document(result: TrainedEvaluation) -> dict[str, Any]:
             "candidates": {name: result.candidates[name].as_dict() for name in CANDIDATES},
             "decision": result.decision.as_dict(),
         },
+        "breakdown": breakdown_document(result),
         "per_student_test": [
             {
                 "student_id": student,
@@ -141,7 +144,7 @@ def _signed_ci(interval: Interval) -> str:
 
 def _verdict(passed: bool | None) -> str:
     if passed is None:
-        return "pendiente (T05)"
+        return "sin verificar"
     return "**sí**" if passed else "no"
 
 
@@ -259,8 +262,9 @@ def render_report(result: TrainedEvaluation, fold_metrics: Sequence[str] = ()) -
         "## Criterio de promoción (spec §6.5)",
         "",
         f"Condición 1 con los {result.required_folds} pliegues del perfil completo. Solo la regresión logística "
-        "(aditiva) puede cumplir la condición 3, que se verifica en T05; LightGBM es referencia del potencial y no "
-        "se promueve en v1 aunque cumpla 1 y 2 (decisión 5).",
+        "(aditiva) puede cumplir la condición 3, que T05 verifica en todos los pares de test (el desglose suma el "
+        f"total y respeta la monotonía por factor; detalle en `reports/{TRAINED_BREAKDOWN}`); LightGBM es "
+        "referencia del potencial y no se promueve en v1 aunque cumpla 1 y 2 (decisión 5).",
         "",
         "| Condición | Regresión logística | LightGBM |",
         "| --- | --- | --- |",
@@ -277,10 +281,15 @@ def render_report(result: TrainedEvaluation, fold_metrics: Sequence[str] = ()) -
                 detail = f" ({_signed_ci(diff)})"
             elif name == "lightgbm":
                 detail = " (no aditivo)"
+            else:
+                sums = "sí" if result.breakdown.sums.passed and result.breakdown.order.passed else "no"
+                monotone = "sí" if result.breakdown.monotonicity.passed else "no"
+                accepted = " (desviación aceptada, M-ML-041)" if result.breakdown.deviations_applied else ""
+                detail = f" (suma el total: {sums}; monotonía por factor: {monotone}{accepted})"
             cells.append(_verdict(condition.passed) + detail)
         lines.append(_row(cells))
     outcomes = {
-        "candidate_subject_to_t05": "candidata a promoción, sujeta a T05",
+        "promoted": "PROMOVIDA",
         "not_promoted": "no se promueve",
         "reference_not_promoted_in_v1": "referencia (no se promueve en v1)",
     }
@@ -294,8 +303,8 @@ def render_report(result: TrainedEvaluation, fold_metrics: Sequence[str] = ()) -
         "- **DATOS SINTÉTICOS:** etiquetas generadas por un simulador (M-ML-032), con circularidad (ML-05-RK01): "
         "superar al baseline aquí significa aprender mejor la utilidad oculta del simulador, no recomendar mejor "
         "a estudiantes reales. No es desempeño real; eso es de ML-07.",
-        "- La promoción no es definitiva hasta T05 (condición 3) y la model card (T06); ML-06 exporta el modelo "
-        "que resulte.",
+        "- La condición 3 se verificó en T05 sobre los mismos pares de test (sin volver a medir); la model card "
+        "(T06) documenta la decisión y ML-06 exporta el modelo que resulte.",
         "- Las métricas por segmento (campus, sin `seed_sin_verificar`, rango de presupuesto) y la hipótesis del "
         "segmento > $3,500 son de T04, con esta misma medición (sin volver a medir en test).",
         "",
