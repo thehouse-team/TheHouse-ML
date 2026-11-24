@@ -7,6 +7,7 @@ mismos modelos, datos y parámetros escriben los mismos bytes. Todo es **sintét
 
 from __future__ import annotations
 
+from collections.abc import Sequence
 from typing import Any
 
 from thehouse_ml.evaluation.ranking import METRIC_NAMES, Interval
@@ -148,8 +149,11 @@ def _row(cells: list[str]) -> str:
     return "| " + " | ".join(cells) + " |"
 
 
-def render_report(result: TrainedEvaluation) -> str:
-    """`reports/trained_report.md` (en git con el perfil completo)."""
+def render_report(result: TrainedEvaluation, fold_metrics: Sequence[str] = ()) -> str:
+    """`reports/trained_report.md` (en git con el perfil completo).
+
+    `fold_metrics`: tabla de las 4 métricas por pliegue de T04 (traspaso T03-H2), si se calculó.
+    """
     params = result.eval_params
     paired = result.paired
     folds = result.folds
@@ -163,7 +167,8 @@ def render_report(result: TrainedEvaluation) -> str:
         "reales (constitución §8.2 y §20.3). El desempeño real solo se afirma con señales reales en **ML-07**.",
         "",
         f"Generado por `python -m thehouse_ml evaluate` ({SPEC}). Métricas completas, por estudiante y con las "
-        "condiciones en `reports/trained_metrics.json`; las métricas por segmento son de T04.",
+        "condiciones en `reports/trained_metrics.json`; ablación, segmentos e hipótesis > $3,500 (T04) en "
+        "`reports/ablation_report.md`.",
         "",
         f"Perfil: **`{result.profile}`**"
         + (
@@ -238,9 +243,19 @@ def render_report(result: TrainedEvaluation) -> str:
     summary = ["**Media ± desv.**", f"{_f4(base.mean)} ± {_f4(base.std)}"]
     for name in CANDIDATES:
         summary += [f"{_f4(folds[name].mean)} ± {_f4(folds[name].std)}", f"{folds[name].mean - base.mean:+.4f}"]
+    lines += [_row(summary), ""]
+    if fold_metrics:
+        lines += [
+            "### Las 4 métricas por pliegue (T04, traspaso T03-H2)",
+            "",
+            "Recalculadas en T04 con la misma asignación de pliegues de `train_manifest.json` y los hiperparámetros "
+            "elegidos en T02 (sin búsqueda nueva); el NDCG@10 reproduce exactamente la tabla anterior. Media ± "
+            "desviación estándar muestral entre pliegues.",
+            "",
+            *fold_metrics,
+            "",
+        ]
     lines += [
-        _row(summary),
-        "",
         "## Criterio de promoción (spec §6.5)",
         "",
         f"Condición 1 con los {result.required_folds} pliegues del perfil completo. Solo la regresión logística "
