@@ -24,9 +24,10 @@ from thehouse_ml.features import default_schema
 from thehouse_ml.models.baseline_report import BASELINE_METRICS, run_evaluate
 from thehouse_ml.models.train import LIGHTGBM_MODEL, LOGREG_MODEL, LogRegModel, run_train
 from thehouse_ml.models.train_config import PROFILE_ENV_VAR, TrainParams, load_train_params
+from thehouse_ml.models.trained_breakdown_report import TRAINED_BREAKDOWN
 from thehouse_ml.models.trained_eval import (
     DECISION_BASELINE,
-    DECISION_CANDIDATE,
+    DECISION_PROMOTED,
     TRAINED_METRICS,
     TRAINED_REPORT,
     TRAINED_SKIP_MESSAGE,
@@ -46,9 +47,10 @@ pytestmark = pytest.mark.integration
 REPO = Path(__file__).resolve().parents[2]
 CODES = {"UTTT", "UCAN"}
 ML05_EVAL_MODULES = tuple(
-    REPO / "src" / "thehouse_ml" / "models" / name for name in ("trained_eval.py", "trained_report.py")
+    REPO / "src" / "thehouse_ml" / "models" / name
+    for name in ("trained_eval.py", "trained_report.py", "trained_breakdown.py", "trained_breakdown_report.py")
 )
-OUTPUTS = (f"reports/{TRAINED_METRICS}", f"reports/{TRAINED_REPORT}")
+OUTPUTS = (f"reports/{TRAINED_METRICS}", f"reports/{TRAINED_REPORT}", f"reports/{TRAINED_BREAKDOWN}")
 
 
 def small_params() -> TrainParams:
@@ -196,7 +198,7 @@ def test_outputs_are_synthetic_and_record_the_single_measurement_and_decision(
     assert "una sola vez" in metrics["single_test_measurement"]
     assert "ML-07" in metrics["warning"]
     assert metrics["promotion"]["required_folds"] == small_params().n_splits
-    assert metrics["promotion"]["decision"]["outcome"] in (DECISION_CANDIDATE, DECISION_BASELINE)
+    assert metrics["promotion"]["decision"]["outcome"] in (DECISION_PROMOTED, DECISION_BASELINE)
     assert metrics["promotion"]["candidates"]["lightgbm"]["outcome"] == "reference_not_promoted_in_v1"
     assert len(metrics["cross_validation"]["baseline"]["ndcg@10_by_fold"]) == small_params().n_splits
     for name in ("logreg", "lightgbm"):
@@ -285,10 +287,11 @@ def test_evaluate_stage_runs_the_baseline_and_then_the_trained_models(
 
     message = run_stage("evaluate", copy)  # train_params.json oficial: la condición 1 exige 5 pliegues
 
-    baseline, trained, ablation = message.splitlines()
+    baseline, trained, ablation, breakdown = message.splitlines()
     assert baseline.startswith("evaluate: baseline-1.0.0")
     assert trained.startswith("evaluate (ML-05, perfil full): ")
     assert ablation.startswith("evaluate (ML-05 T04, perfil full): ")
+    assert breakdown.startswith("evaluate (ML-05 T05, perfil full): desglose 0-100 de logreg-1.0.0")
     message.encode("cp1252")  # la CLI lo imprime en una consola de Windows
     metrics = _metrics(copy)
     assert metrics["promotion"]["required_folds"] == 5

@@ -3,7 +3,7 @@
   "synthetic": true,
   "banner": "DATOS SINTÉTICOS — ETIQUETAS SINTÉTICAS",
   "warning": "Métricas con etiquetas SINTÉTICAS (utilidad oculta documentada más ruido, M-ML-032): el modelo aprende la función del simulador; no son desempeño real ni preferencias reales (constitución §8.2 y §20.3) y se reemplazan con señales reales en ML-07.",
-  "spec": "ML-05 1.0.0, T03 (ML-05-R03)",
+  "spec": "ML-05 1.0.0, T03 (ML-05-R03); condición 3 y decisión: T05 (ML-05-R05)",
   "profile": "full",
   "official": true,
   "single_test_measurement": "La partición test se evaluó una sola vez con los modelos finales de T02 (SHA-256 verificados); ningún hiperparámetro, feature, calibración, umbral ni decisión se ajustó con estos resultados (spec ML-05 §6.2 y §7 regla 2). Cambiar algo del modelo después invalida esta medición.",
@@ -249,13 +249,23 @@
             }
           },
           "3_additive_breakdown": {
-            "passed": null,
-            "status": "pending_t05",
-            "note": "modelo aditivo por construcción; el desglose que suma el total se verifica en T05"
+            "passed": true,
+            "status": "verified_t05",
+            "model_version": "logreg-1.0.0",
+            "breakdown_sums_total": true,
+            "order_identical_to_logit": true,
+            "metrics_unchanged_by_calibration": true,
+            "factor_monotonicity": false,
+            "failed_checks": [],
+            "accepted_deviations": {
+              "monotonicity_budget": "M-ML-041 (T05-H1): el coeficiente de price_below_min es negativo; por debajo de budget.min el factor presupuesto sube con la renta solo si budget.max / budget.min > 76.2 (máximo +0.124 puntos sobre 100; ningún par observado en esa zona). Aceptada por el responsable después de ver la verificación; corrección en logreg-1.1.0 (ML-07)"
+            },
+            "pairs_verified": 30755
           }
         },
         "meets_conditions_1_and_2": true,
-        "outcome": "candidate_subject_to_t05"
+        "meets_all_conditions": true,
+        "outcome": "promoted"
       },
       "lightgbm": {
         "conditions": {
@@ -287,14 +297,285 @@
           }
         },
         "meets_conditions_1_and_2": true,
+        "meets_all_conditions": false,
         "outcome": "reference_not_promoted_in_v1"
       }
     },
     "decision": {
-      "outcome": "logreg_candidate_subject_to_t05",
+      "outcome": "logreg_promoted",
       "candidate": "logreg",
-      "text": "La regresión logística cumple las condiciones 1 y 2: queda candidata a promoción, sujeta a T05 (condición 3, desglose aditivo que suma el total). Hasta entonces `baseline-1.0.0` sigue vigente."
+      "text": "La regresión logística cumple las 3 condiciones: queda **PROMOVIDA** como modelo de ML-05 (`logreg-1.0.0`, puntaje 0-100 con desglose por factor); `baseline-1.0.0` queda como respaldo. Desviación conocida aceptada (M-ML-041): `monotonicity_budget` (ver `reports/trained_breakdown.md`)."
     }
+  },
+  "breakdown": {
+    "spec": "ML-05 1.0.0, T05 (ML-05-R05)",
+    "report": "reports/trained_breakdown.md",
+    "calibration": {
+      "model_version": "logreg-1.0.0",
+      "feature_schema_version": "2.0.0",
+      "transform": "standard",
+      "method": "afín por factor sobre el recorte: puntos_k = 100 · (C_k - min_k) / S",
+      "total_span_logit": 45.28126092286596,
+      "intercept": -4.133224493584685,
+      "min_logit_sum": -35.13860335477446,
+      "factors": [
+        {
+          "factor": "budget",
+          "label": "Presupuesto",
+          "features": [
+            "price_to_budget",
+            "price_below_min"
+          ],
+          "min_logit": -1.9443368629596418,
+          "max_logit": 2.388994657935173,
+          "span_logit": 4.333331520894815,
+          "raw_max_points": 9.569811954389692,
+          "maxPoints": 9.6
+        },
+        {
+          "factor": "distance",
+          "label": "Distancia",
+          "features": [
+            "distance_km",
+            "effective_distance_km",
+            "distance_ratio"
+          ],
+          "min_logit": -28.77312772375122,
+          "max_logit": 4.104451550817833,
+          "span_logit": 32.87757927456905,
+          "raw_max_points": 72.60747294686455,
+          "maxPoints": 72.6
+        },
+        {
+          "factor": "essential_services",
+          "label": "Servicios esenciales",
+          "features": [
+            "services_coverage"
+          ],
+          "min_logit": -2.234827014851568,
+          "max_logit": 0.814234737210226,
+          "span_logit": 3.0490617520617938,
+          "raw_max_points": 6.733606109723173,
+          "maxPoints": 6.7
+        },
+        {
+          "factor": "place_type",
+          "label": "Tipo de lugar",
+          "features": [
+            "place_type_match"
+          ],
+          "min_logit": -0.6570364083887372,
+          "max_logit": 1.541023728673566,
+          "span_logit": 2.198060137062303,
+          "raw_max_points": 4.8542379171078585,
+          "maxPoints": 4.9
+        },
+        {
+          "factor": "property_type",
+          "label": "Tipo de inmueble",
+          "features": [
+            "property_type_match"
+          ],
+          "min_logit": -0.542938406885246,
+          "max_logit": 0.23808535750006402,
+          "span_logit": 0.78102376438531,
+          "raw_max_points": 1.7248277730510626,
+          "maxPoints": 1.7
+        },
+        {
+          "factor": "extras",
+          "label": "Extras",
+          "features": [
+            "extra_services_ratio"
+          ],
+          "min_logit": -0.9863369379380452,
+          "max_logit": 1.0558675359546463,
+          "span_logit": 2.0422044738926917,
+          "raw_max_points": 4.510043298863674,
+          "maxPoints": 4.5
+        }
+      ],
+      "fixed_terms": [
+        {
+          "feature": "pets_compatible",
+          "coef": 0.0,
+          "constant_in_candidates": true,
+          "reason": "constante (1) en los candidatos (HC03 excluye los incompatibles): no aporta señal; su término se suma a la constante del modelo (spec §6.6) y se queda en todos los modelos de la ablación"
+        }
+      ],
+      "raw_max_points_sum": 100.0,
+      "max_points_sum": 100.0
+    },
+    "sums": {
+      "passed": true,
+      "pairs": 30755,
+      "max_abs_raw_total_minus_matchScore": 0.49997292757831246,
+      "max_abs_reported_sum_minus_raw_total": 0.2128956776222921,
+      "total_tolerance": 0.5,
+      "breakdown_tolerance": 0.3,
+      "total_tolerance_violations": 0,
+      "breakdown_tolerance_violations": 0,
+      "factors_outside_0_maxPoints": 0,
+      "matchScore_outside_0_100": 0,
+      "max_abs_logit_minus_affine": 2.3092638912203256e-14,
+      "affine_tolerance": 1e-09
+    },
+    "order": {
+      "passed": true,
+      "students": 300,
+      "identical_order": 300,
+      "differing_students": []
+    },
+    "metrics_unchanged_by_calibration": true,
+    "monotonicity": {
+      "passed": false,
+      "coefficients": [
+        {
+          "feature": "distance_km",
+          "factor": "distance",
+          "coef_standardized": -3.3497410057040513,
+          "scale": 6.303972887149905,
+          "logit_per_unit": -0.5313698306875977,
+          "expected_direction": -1,
+          "sign_consistent": true,
+          "note": "distancia real al campus"
+        },
+        {
+          "feature": "effective_distance_km",
+          "factor": "distance",
+          "coef_standardized": -1.8699381812363738,
+          "scale": 3.69729030011551,
+          "logit_per_unit": -0.5057590909693928,
+          "expected_direction": -1,
+          "sign_consistent": true,
+          "note": "distancia x factor de transporte"
+        },
+        {
+          "feature": "price_to_budget",
+          "factor": "budget",
+          "coef_standardized": -0.9960493472836981,
+          "scale": 0.23287406568615762,
+          "logit_per_unit": -4.277201689887036,
+          "expected_direction": -1,
+          "sign_consistent": true,
+          "note": "renta / budget.max: sube con la renta"
+        },
+        {
+          "feature": "services_coverage",
+          "factor": "essential_services",
+          "coef_standardized": 0.5655307735708116,
+          "scale": 0.18547698261224008,
+          "logit_per_unit": 3.0490617520617938,
+          "expected_direction": 1,
+          "sign_consistent": true,
+          "note": "servicios esenciales cubiertos"
+        },
+        {
+          "feature": "place_type_match",
+          "factor": "place_type",
+          "coef_standardized": 1.0062349109077362,
+          "scale": 0.4577831579497021,
+          "logit_per_unit": 2.198060137062303,
+          "expected_direction": 1,
+          "sign_consistent": true,
+          "note": "coincide el tipo de lugar"
+        },
+        {
+          "feature": "property_type_match",
+          "factor": "property_type",
+          "coef_standardized": 0.359535373369282,
+          "scale": 0.4603385834901548,
+          "logit_per_unit": 0.78102376438531,
+          "expected_direction": 1,
+          "sign_consistent": true,
+          "note": "coincide el tipo de inmueble"
+        },
+        {
+          "feature": "pets_compatible",
+          "factor": null,
+          "coef_standardized": 0.0,
+          "scale": 1.0,
+          "logit_per_unit": 0.0,
+          "expected_direction": null,
+          "sign_consistent": null,
+          "note": "constante (1) en los candidatos (HC03 excluye los incompatibles): no aporta señal; su término se suma a la constante del modelo (spec §6.6) y se queda en todos los modelos de la ablación"
+        },
+        {
+          "feature": "distance_ratio",
+          "factor": "distance",
+          "coef_standardized": -0.10058499273363032,
+          "scale": 3.4218176480518103,
+          "logit_per_unit": -0.029395193747655646,
+          "expected_direction": -1,
+          "sign_consistent": true,
+          "note": "distancia / maxDistanceKm"
+        },
+        {
+          "feature": "price_below_min",
+          "factor": "budget",
+          "coef_standardized": -0.012313810365186752,
+          "scale": 0.2193808558497244,
+          "logit_per_unit": -0.056129831007778075,
+          "expected_direction": 1,
+          "sign_consistent": false,
+          "note": "(budget.min - renta) / budget.min: baja al subir la renta"
+        },
+        {
+          "feature": "extra_services_ratio",
+          "factor": "extras",
+          "coef_standardized": 0.43917103493077686,
+          "scale": 0.2150475334595968,
+          "logit_per_unit": 2.0422044738926917,
+          "expected_direction": 1,
+          "sign_consistent": true,
+          "note": "servicios no pedidos que ofrece el cuarto"
+        }
+      ],
+      "sign_inconsistent_features": [
+        "price_below_min"
+      ],
+      "budget": {
+        "passed": false,
+        "factor": "budget",
+        "variable": "rent_mxn",
+        "domain": "NV-11: budget.min ∈ {nulo, 1, 10, 50, 100, 300, 500, 1000, 1500, 2000, 3000, 5000, 10000, 25000, 50000} ≤ budget.max ∈ {500, 1000, 2000, 2700, 3500, 5000, 10000, 25000, 50000}; renta entera de 0 a budget.max (101 pasos más budget.min ± 1): price_to_budget recorre su training_range [0, 1] y price_below_min su range [0, 1]",
+        "curves": 100,
+        "steps": 10204,
+        "violations": 46,
+        "worst_increase_points": 0.12376927194993392,
+        "worst_case": {
+          "budget.min": 1,
+          "budget.max": 50000,
+          "rent_mxn_from": 0.0,
+          "rent_mxn_to": 1.0,
+          "points_from": 9.44585376536445,
+          "points_to": 9.569623037314384
+        },
+        "tolerance_points": 1e-09
+      },
+      "distance": {
+        "passed": true,
+        "factor": "distance",
+        "variable": "distance_km",
+        "domain": "transporte ∈ {walk, bike, public, car} x maxDistanceKm ∈ {nulo→30, 0.5, 1, 2, 5, 10, 20, 30}; distancia de 0 a 36 km cada 0.25 km (incluye > 30 km para comprobar el recorte)",
+        "curves": 32,
+        "steps": 4608,
+        "violations": 0,
+        "worst_increase_points": 0.0,
+        "worst_case": null,
+        "tolerance_points": 1e-09
+      },
+      "budget_ratio_threshold": 76.20193421381104,
+      "observed_max_budget_ratio": 2.8333333333333335,
+      "observed_pairs_below_budget_min": 73815,
+      "observed_pairs_in_violation_zone": false
+    },
+    "sums_total": true,
+    "failed_checks": [],
+    "accepted_deviations": {
+      "monotonicity_budget": "M-ML-041 (T05-H1): el coeficiente de price_below_min es negativo; por debajo de budget.min el factor presupuesto sube con la renta solo si budget.max / budget.min > 76.2 (máximo +0.124 puntos sobre 100; ningún par observado en esa zona). Aceptada por el responsable después de ver la verificación; corrección en logreg-1.1.0 (ML-07)"
+    },
+    "passed": true
   },
   "per_student_test": [
     {

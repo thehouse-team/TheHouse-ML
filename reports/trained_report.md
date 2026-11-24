@@ -2,7 +2,7 @@
 
 > **DATOS SINTÉTICOS — ETIQUETAS SINTÉTICAS.** Las etiquetas son sintéticas (utilidad oculta documentada más ruido, M-ML-032): los modelos aprenden la función del simulador y estas métricas **no** son desempeño real ni preferencias reales (constitución §8.2 y §20.3). El desempeño real solo se afirma con señales reales en **ML-07**.
 
-Generado por `python -m thehouse_ml evaluate` (ML-05 1.0.0, T03 (ML-05-R03)). Métricas completas, por estudiante y con las condiciones en `reports/trained_metrics.json`; ablación, segmentos e hipótesis > $3,500 (T04) en `reports/ablation_report.md`.
+Generado por `python -m thehouse_ml evaluate` (ML-05 1.0.0, T03 (ML-05-R03); condición 3 y decisión: T05 (ML-05-R05)). Métricas completas, por estudiante y con las condiciones en `reports/trained_metrics.json`; ablación, segmentos e hipótesis > $3,500 (T04) en `reports/ablation_report.md`.
 
 Perfil: **`full`** (corrida oficial).
 
@@ -70,19 +70,19 @@ Recalculadas en T04 con la misma asignación de pliegues de `train_manifest.json
 
 ## Criterio de promoción (spec §6.5)
 
-Condición 1 con los 5 pliegues del perfil completo. Solo la regresión logística (aditiva) puede cumplir la condición 3, que se verifica en T05; LightGBM es referencia del potencial y no se promueve en v1 aunque cumpla 1 y 2 (decisión 5).
+Condición 1 con los 5 pliegues del perfil completo. Solo la regresión logística (aditiva) puede cumplir la condición 3, que T05 verifica en todos los pares de test (el desglose suma el total y respeta la monotonía por factor; detalle en `reports/trained_breakdown.md`); LightGBM es referencia del potencial y no se promueve en v1 aunque cumpla 1 y 2 (decisión 5).
 
 | Condición | Regresión logística | LightGBM |
 | --- | --- | --- |
 | 1. Validación cruzada: NDCG@10 > baseline en los 5 pliegues | **sí** (5/5 pliegues) | **sí** (5/5 pliegues) |
 | 2. Test: IC 95 % de Δ NDCG@10 pareada con límite inferior > 0 | **sí** (+0.335 [+0.312, +0.360]) | **sí** (+0.336 [+0.313, +0.360]) |
-| 3. Desglose aditivo que suma el total (constitución §12) | pendiente (T05) | no (no aditivo) |
-| **Resultado** | **candidata a promoción, sujeta a T05** | **referencia (no se promueve en v1)** |
+| 3. Desglose aditivo que suma el total y monotonía por factor (constitución §12; T05) | **sí** (suma el total: sí; monotonía por factor: no (desviación aceptada, M-ML-041)) | no (no aditivo) |
+| **Resultado** | **PROMOVIDA** | **referencia (no se promueve en v1)** |
 
-**Decisión:** La regresión logística cumple las condiciones 1 y 2: queda candidata a promoción, sujeta a T05 (condición 3, desglose aditivo que suma el total). Hasta entonces `baseline-1.0.0` sigue vigente.
+**Decisión:** La regresión logística cumple las 3 condiciones: queda **PROMOVIDA** como modelo de ML-05 (`logreg-1.0.0`, puntaje 0-100 con desglose por factor); `baseline-1.0.0` queda como respaldo. Desviación conocida aceptada (M-ML-041): `monotonicity_budget` (ver `reports/trained_breakdown.md`).
 
 ## Advertencias
 
 - **DATOS SINTÉTICOS:** etiquetas generadas por un simulador (M-ML-032), con circularidad (ML-05-RK01): superar al baseline aquí significa aprender mejor la utilidad oculta del simulador, no recomendar mejor a estudiantes reales. No es desempeño real; eso es de ML-07.
-- La promoción no es definitiva hasta T05 (condición 3) y la model card (T06); ML-06 exporta el modelo que resulte.
+- La condición 3 se verificó en T05 sobre los mismos pares de test (sin volver a medir); la model card (T06) documenta la decisión y ML-06 exporta el modelo que resulte.
 - Las métricas por segmento (campus, sin `seed_sin_verificar`, rango de presupuesto) y la hipótesis del segmento > $3,500 son de T04, con esta misma medición (sin volver a medir en test).
