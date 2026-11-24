@@ -18,14 +18,14 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from conftest import versioned_synthetic_data
+from conftest import copy_project, small_train_params
 from thehouse_ml.evaluation.ranking import METRIC_NAMES, student_metrics
 from thehouse_ml.features import default_schema
-from thehouse_ml.models.baseline_report import BASELINE_METRICS, run_evaluate
+from thehouse_ml.models.baseline_report import BASELINE_METRICS, SCORE_PERCENTILES
 from thehouse_ml.models.model_card import MODEL_CARD_SKIP_MESSAGE
-from thehouse_ml.models.train import LIGHTGBM_MODEL, LOGREG_MODEL, LogRegModel, run_train
+from thehouse_ml.models.train import LIGHTGBM_MODEL, LOGREG_MODEL, LogRegModel
 from thehouse_ml.models.train_config import PROFILE_ENV_VAR, TrainParams, load_train_params
-from thehouse_ml.models.trained_breakdown_report import TRAINED_BREAKDOWN
+from thehouse_ml.models.trained_breakdown_report import HISTOGRAM_BINS, TRAINED_BREAKDOWN
 from thehouse_ml.models.trained_eval import (
     DECISION_BASELINE,
     DECISION_PROMOTED,
@@ -38,10 +38,7 @@ from thehouse_ml.models.trained_eval import (
 from thehouse_ml.models.training_data import TRAINING_INPUTS, load_training_data
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.stages import run_stage
-from thehouse_ml.synthetic.labels_stage import HIDDEN_UTILITY_PARQUET, HIDDEN_WEIGHTS_PARQUET, run_labels
-from thehouse_ml.synthetic.pairs_stage import run_pairs
-from thehouse_ml.synthetic.rooms_stage import ROOMS_PARQUET, rooms_frame
-from thehouse_ml.synthetic.students_stage import STUDENTS_PARQUET, students_frame
+from thehouse_ml.synthetic.labels_stage import HIDDEN_UTILITY_PARQUET, HIDDEN_WEIGHTS_PARQUET
 
 pytestmark = pytest.mark.integration
 
@@ -55,32 +52,14 @@ OUTPUTS = (f"reports/{TRAINED_METRICS}", f"reports/{TRAINED_REPORT}", f"reports/
 
 
 def small_params() -> TrainParams:
-    return load_train_params().with_values(
-        n_splits=3,
-        logreg_c=(0.1, 1.0),
-        num_leaves=(7,),
-        learning_rate=(0.1,),
-        n_estimators=(10, 20),
-        min_data_in_leaf=20,
-    )
+    params: TrainParams = small_train_params()  # la rejilla de la plantilla de sesión (conftest)
+    return params
 
 
 @pytest.fixture(scope="module")
-def project(tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
+def project(two_campus_trained_template: Path, tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
     """Proyecto con pares, etiquetas (con archivos ocultos), modelos de `train` y métricas del baseline."""
-    students, rooms, _campuses = versioned_synthetic_data()
-    schema = default_schema()
-    paths = ProjectPaths(root=tmp_path_factory.mktemp("trained_eval"))
-    paths.data_processed.mkdir(parents=True)
-    shutil.copyfile(REPO / "data" / "universities.csv", paths.universities_csv)
-    chosen_students = [item for item in students if item.profile.university_code in CODES]
-    chosen_rooms = [item for item in rooms if item.room.university_code in CODES]
-    students_frame(chosen_students, schema).to_parquet(paths.data_processed / STUDENTS_PARQUET, index=False)
-    rooms_frame(chosen_rooms, schema).to_parquet(paths.data_processed / ROOMS_PARQUET, index=False)
-    run_pairs(paths)
-    run_labels(paths)
-    run_train(paths, small_params(), "full")
-    run_evaluate(paths)
+    paths: ProjectPaths = copy_project(two_campus_trained_template, tmp_path_factory.mktemp("trained_eval") / "project")
     return paths
 
 
@@ -208,6 +187,49 @@ def test_outputs_are_synthetic_and_record_the_single_measurement_and_decision(
     for text in ("DATOS SINTÉTICOS", "una sola vez", "ML-07", "Criterio de promoción", "**Decisión:**", "T04"):
         assert text in report, text
     assert set(metrics["per_student_test"][0]) == {"student_id", "logreg", "lightgbm"}  # sin datos personales
+
+
+def test_distribution_and_examples_are_in_the_json_and_match_the_markdown(
+    project: ProjectPaths, first_run: dict[str, str]
+) -> None:
+    """ML-05 T07 (T06-H1): `breakdown.distribution` y `breakdown.examples` de `trained_metrics.json`."""
+    del first_run
+    metrics = _metrics(project)
+    markdown = (project.reports / TRAINED_BREAKDOWN).read_text(encoding="utf-8")
+    distribution = metrics["breakdown"]["distribution"]
+    score = distribution["matchScore"]
+
+    assert distribution["pairs"] == metrics["evaluation"]["pairs"] == metrics["breakdown"]["sums"]["pairs"]
+    assert [(item["low"], item["high"]) for item in score["histogram"]] == list(HISTOGRAM_BINS)
+    assert sum(item["count"] for item in score["histogram"]) == distribution["pairs"]
+    assert list(score["percentiles"]) == [f"p{round(q * 100)}" for q in SCORE_PERCENTILES]
+    assert score["min"] <= min(score["percentiles"].values()) <= max(score["percentiles"].values()) <= score["max"]
+    row = " | ".join([str(score["min"]), *(f"{value:g}" for value in score["percentiles"].values()), str(score["max"])])
+    assert f"| {row} | {score['mean']:.1f} |" in markdown  # el Markdown se renderiza desde el JSON
+    for item in score["histogram"]:
+        assert f"{item['count']:>7,} (" in markdown
+    factors = metrics["breakdown"]["calibration"]["factors"]
+    assert [item["factor"] for item in distribution["factor_points"]] == [item["factor"] for item in factors]
+    for item in distribution["factor_points"]:
+        assert 0 <= item["p25"] <= item["p50"] <= item["p75"] <= item["raw_max_points"]
+        assert item["mean_share_of_max"] == pytest.approx(item["mean"] / item["raw_max_points"])
+
+    examples = metrics["breakdown"]["examples"]
+    assert examples, "la regla fija debe encontrar al menos un ejemplo en el proyecto temporal"
+    test_students = {row["student_id"] for row in metrics["per_student_test"]}
+    for example in examples:
+        assert example["student_id"] in test_students
+        assert f"`{example['student_id']}` — {example['university_code']}" in markdown
+        top = example["top"]
+        assert [item["rank"] for item in top] == list(range(1, len(top) + 1))
+        assert [item["matchScore"] for item in top] == sorted((item["matchScore"] for item in top), reverse=True)
+        first = example["first_place"]
+        assert first["room_id"] == top[0]["room_id"]
+        assert first["output"]["matchScore"] == top[0]["matchScore"]
+        assert [item["points"] for item in first["output"]["breakdown"]] == list(top[0]["points"].values())
+        assert abs(first["raw_total"] - first["output"]["matchScore"]) <= 0.5
+        assert set(first["inputs"]) == set(default_schema().feature_order)
+    assert json.dumps(examples[0]["first_place"]["output"], ensure_ascii=False, indent=2) in markdown
 
 
 def test_running_twice_does_not_change_any_file(project: ProjectPaths, first_run: dict[str, str]) -> None:

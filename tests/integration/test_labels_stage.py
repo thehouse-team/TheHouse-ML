@@ -4,13 +4,12 @@ from __future__ import annotations
 
 import hashlib
 import math
-import shutil
 from pathlib import Path
 
 import pandas as pd
 import pytest
 
-from conftest import versioned_synthetic_data
+from conftest import copy_project
 from thehouse_ml.cli import main
 from thehouse_ml.features import default_schema
 from thehouse_ml.paths import ProjectPaths
@@ -28,8 +27,6 @@ from thehouse_ml.synthetic.labels_stage import (
     run_labels,
 )
 from thehouse_ml.synthetic.pairs_stage import PAIRS_PARQUET, run_pairs
-from thehouse_ml.synthetic.rooms_stage import ROOMS_PARQUET, rooms_frame
-from thehouse_ml.synthetic.students_stage import STUDENTS_PARQUET, students_frame
 
 pytestmark = pytest.mark.integration
 
@@ -39,19 +36,16 @@ PERSONAL_OR_SENSITIVE = ("gender", "genero", "living", "name", "nombre", "email"
 
 
 @pytest.fixture(scope="module")
-def project(tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
+def project(two_campus_pairs_template: Path, tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
     """Proyecto con 400 estudiantes y 600 cuartos (2 campus), pares de T06 y etiquetas de T04."""
-    students, rooms, _campuses = versioned_synthetic_data()
-    schema = default_schema()
-    paths = ProjectPaths(root=tmp_path_factory.mktemp("labels"))
-    paths.data_processed.mkdir(parents=True)
-    shutil.copyfile(REPO / "data" / "universities.csv", paths.universities_csv)
-    chosen_students = [item for item in students if item.profile.university_code in CODES]
-    chosen_rooms = [item for item in rooms if item.room.university_code in CODES]
-    students_frame(chosen_students, schema).to_parquet(paths.data_processed / STUDENTS_PARQUET, index=False)
-    rooms_frame(chosen_rooms, schema).to_parquet(paths.data_processed / ROOMS_PARQUET, index=False)
-    run_pairs(paths)
+    paths: ProjectPaths = copy_project(two_campus_pairs_template, tmp_path_factory.mktemp("labels") / "project")
     return paths
+
+
+@pytest.fixture(scope="module")
+def first_labels(project: ProjectPaths) -> str:
+    """Una sola corrida de `labels` por módulo (T07, T05-H3); las pruebas que solo leen sus salidas la reutilizan."""
+    return run_labels(project)
 
 
 def _digests(paths: ProjectPaths) -> dict[str, str]:
@@ -65,8 +59,8 @@ def _digests(paths: ProjectPaths) -> dict[str, str]:
     return {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in files}
 
 
-def test_run_labels_writes_one_synthetic_label_per_candidate_pair(project: ProjectPaths) -> None:
-    message = run_labels(project)
+def test_run_labels_writes_one_synthetic_label_per_candidate_pair(project: ProjectPaths, first_labels: str) -> None:
+    message = first_labels
 
     assert message.startswith("labels: ")
     assert "de 400 estudiantes" in message
@@ -84,8 +78,8 @@ def test_run_labels_writes_one_synthetic_label_per_candidate_pair(project: Proje
     assert (merged["split"] == merged["split_label"]).all()
 
 
-def test_relevance_proportions_per_student_follow_the_cuts(project: ProjectPaths) -> None:
-    run_labels(project)
+def test_relevance_proportions_per_student_follow_the_cuts(project: ProjectPaths, first_labels: str) -> None:
+    del first_labels
     params = load_params(default_schema())
     labels = pd.read_parquet(project.data_processed / LABELS_PARQUET)
     utilities = pd.read_parquet(project.data_processed / HIDDEN_UTILITY_PARQUET)
@@ -97,8 +91,8 @@ def test_relevance_proportions_per_student_follow_the_cuts(project: ProjectPaths
         assert int((group["relevance"] == 3).sum()) >= 1
 
 
-def test_hidden_weights_are_per_student_and_sum_to_100(project: ProjectPaths) -> None:
-    run_labels(project)
+def test_hidden_weights_are_per_student_and_sum_to_100(project: ProjectPaths, first_labels: str) -> None:
+    del first_labels
     weights = pd.read_parquet(project.data_processed / HIDDEN_WEIGHTS_PARQUET)
     labels = pd.read_parquet(project.data_processed / LABELS_PARQUET)
     columns = [column for column in weights.columns if column.startswith("weight_")]
@@ -108,8 +102,8 @@ def test_hidden_weights_are_per_student_and_sum_to_100(project: ProjectPaths) ->
     assert weights.set_index("student_id")["candidates"].to_dict() == labels.groupby("student_id").size().to_dict()
 
 
-def test_report_is_marked_synthetic_and_the_correlation_is_in_range(project: ProjectPaths) -> None:
-    run_labels(project)
+def test_report_is_marked_synthetic_and_the_correlation_is_in_range(project: ProjectPaths, first_labels: str) -> None:
+    del first_labels
     report = (project.reports / LABELS_REPORT).read_text(encoding="utf-8")
     assert report.startswith(LABELS_TITLE + "\n")
     assert LABELS_TITLE == "# DATOS SINTÉTICOS — NO SON PREFERENCIAS REALES"
@@ -132,16 +126,15 @@ def test_report_is_marked_synthetic_and_the_correlation_is_in_range(project: Pro
     assert f"**{pooled:.3f}**" in report
 
 
-def test_outputs_have_no_personal_or_gender_columns(project: ProjectPaths) -> None:
-    run_labels(project)
+def test_outputs_have_no_personal_or_gender_columns(project: ProjectPaths, first_labels: str) -> None:
+    del first_labels
     for name in (LABELS_PARQUET, HIDDEN_UTILITY_PARQUET, HIDDEN_WEIGHTS_PARQUET):
         for column in pd.read_parquet(project.data_processed / name).columns:
             assert not set(column.lower().split("_")) & set(PERSONAL_OR_SENSITIVE), (name, column)
 
 
-def test_running_twice_does_not_change_any_file(project: ProjectPaths) -> None:
-    run_pairs(project)
-    run_labels(project)
+def test_running_twice_does_not_change_any_file(project: ProjectPaths, first_labels: str) -> None:
+    del first_labels  # 1.ª corrida de `pairs` (plantilla) y de `labels` (fixture); aquí va la 2.ª
     first = _digests(project)
     run_pairs(project)
     run_labels(project)

@@ -11,6 +11,8 @@ from functools import cache
 from pathlib import Path
 from typing import Any
 
+import pytest
+
 from thehouse_ml.manifests import Manifest, ManifestFile, write_manifest
 from thehouse_ml.sources import FileSpec, SourceSpec
 from thehouse_ml.universities import UniversitySeed, build_query_url
@@ -220,3 +222,82 @@ def versioned_synthetic_data() -> tuple[tuple[Any, ...], tuple[Any, ...], dict[s
     }
     rooms = generate_rooms(room_params, inputs, campuses, schema)
     return tuple(students), tuple(rooms), campuses
+
+
+# ---------------------------------------------------------------------------
+# ML-05 T07 (T05-H3): proyectos de 2 campus compartidos por la sesión.
+#
+# Varias pruebas de integración construían el mismo proyecto temporal (estudiantes y cuartos de
+# UTTT y UCAN → `pairs` → `labels` → `train` pequeño → `evaluate` del baseline) en cada módulo.
+# Ahora se construye una sola vez por sesión como plantilla de solo lectura y cada módulo trabaja
+# sobre su propia copia (`copy_project`), así que el aislamiento entre módulos no cambia.
+# ---------------------------------------------------------------------------
+
+TWO_CAMPUS_CODES = frozenset({"UTTT", "UCAN"})  # Un campus verificado y uno sin verificar.
+SMALL_TRAIN_VALUES: dict[str, Any] = {
+    "n_splits": 3,
+    "logreg_c": (0.1, 1.0),
+    "num_leaves": (7,),
+    "learning_rate": (0.1,),
+    "n_estimators": (10, 20),
+    "min_data_in_leaf": 20,
+}
+
+
+def small_train_params() -> Any:
+    """Rejilla pequeña de `train` para los proyectos temporales (la misma en todos los módulos)."""
+    from thehouse_ml.models.train_config import load_train_params
+
+    return load_train_params().with_values(**SMALL_TRAIN_VALUES)
+
+
+def copy_project(template: Path, target: Path) -> Any:
+    """Copia una plantilla de proyecto a `target` (que no debe existir) y devuelve sus rutas."""
+    from thehouse_ml.paths import ProjectPaths
+
+    shutil.copytree(template, target)
+    return ProjectPaths(root=target)
+
+
+@pytest.fixture(scope="session")
+def two_campus_pairs_template(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Plantilla: estudiantes y cuartos de 2 campus (400 y 600) y sus pares (ML-03 T06). No modificar."""
+    from thehouse_ml.features import default_schema
+    from thehouse_ml.paths import ProjectPaths
+    from thehouse_ml.synthetic.pairs_stage import run_pairs
+    from thehouse_ml.synthetic.rooms_stage import ROOMS_PARQUET, rooms_frame
+    from thehouse_ml.synthetic.students_stage import STUDENTS_PARQUET, students_frame
+
+    students, rooms, _campuses = versioned_synthetic_data()
+    schema = default_schema()
+    paths = ProjectPaths(root=tmp_path_factory.mktemp("template") / "pairs")
+    paths.data_processed.mkdir(parents=True)
+    shutil.copyfile(REPO_ROOT / "data" / "universities.csv", paths.universities_csv)
+    chosen_students = [item for item in students if item.profile.university_code in TWO_CAMPUS_CODES]
+    chosen_rooms = [item for item in rooms if item.room.university_code in TWO_CAMPUS_CODES]
+    students_frame(chosen_students, schema).to_parquet(paths.data_processed / STUDENTS_PARQUET, index=False)
+    rooms_frame(chosen_rooms, schema).to_parquet(paths.data_processed / ROOMS_PARQUET, index=False)
+    run_pairs(paths)
+    return paths.root
+
+
+@pytest.fixture(scope="session")
+def two_campus_labels_template(two_campus_pairs_template: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Plantilla: la de pares más las etiquetas sintéticas con sus archivos ocultos (ML-04 T04). No modificar."""
+    from thehouse_ml.synthetic.labels_stage import run_labels
+
+    paths = copy_project(two_campus_pairs_template, tmp_path_factory.mktemp("template") / "labels")
+    run_labels(paths)
+    return Path(paths.root)
+
+
+@pytest.fixture(scope="session")
+def two_campus_trained_template(two_campus_labels_template: Path, tmp_path_factory: pytest.TempPathFactory) -> Path:
+    """Plantilla: la de etiquetas más `train` con la rejilla pequeña y `evaluate` del baseline. No modificar."""
+    from thehouse_ml.models.baseline_report import run_evaluate
+    from thehouse_ml.models.train import run_train
+
+    paths = copy_project(two_campus_labels_template, tmp_path_factory.mktemp("template") / "trained")
+    run_train(paths, small_train_params(), "full")
+    run_evaluate(paths)
+    return Path(paths.root)

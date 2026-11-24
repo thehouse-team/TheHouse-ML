@@ -8,14 +8,14 @@
 | Fecha | 2026-11-23 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-23 (M-ML-036) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T06 completas (6/7); ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 (7/7), 2026-11-23 a 2026-11-24; cierre M-ML-043, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 6 |
+| Tasks completadas | 7 |
 
 ## Reglas de esta lista
 
-1. T01 (2026-11-23), T02, T03, T04, T05 y T06 (2026-11-24) completas, con evidencia en `evidence.md`; T07 abierta.
+1. T01 (2026-11-23), T02, T03, T04, T05, T06 y T07 (2026-11-24) completas, con evidencia en `evidence.md`; ML-05 cerrada con M-ML-043.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA».
 4. Un control no ejecutado no se reporta como PASS.
@@ -38,7 +38,7 @@
 
 ## F4 — Evidencia
 
-- [ ] **T07 · Pruebas y evidencia** — Requisito: ML-05-R07 · Aceptación: pruebas unitarias e integración de lo implementado con cobertura ≥ 80 % del código nuevo; ruff, mypy y pip-audit sin errores; `evidence.md` con commit, comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`.
+- [x] **T07 · Pruebas y evidencia** — Requisito: ML-05-R07 · Aceptación: pruebas unitarias e integración de lo implementado con cobertura ≥ 80 % del código nuevo; ruff, mypy y pip-audit sin errores; `evidence.md` con commit, comandos, resultados, hallazgos y revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`.
 
 ## Matriz task → requisito
 
@@ -50,4 +50,4 @@
 | T04 | R04 | F3 | T02, T03 | COMPLETA — PASS (M-ML-040; traspaso T03-H2 resuelto; hipótesis > $3,500 confirmada con salvedades T04-H2/H3 para T06) |
 | T05 | R05 | F3 | T02, T03 | COMPLETA — PASS WITH WARNINGS (M-ML-041; `logreg-1.0.0` promovida; T05-H1 desviación aceptada de monotonía del presupuesto, corrección en `logreg-1.1.0`/ML-07; T05-H2 para T06) |
 | T06 | R06 | F3 | T03, T04, T05 | COMPLETA — PASS (M-ML-042; `reports/model_card.md` generada desde los JSON de `reports/` con las 10 secciones, T04-H2/H3, T05-H1/H2/H3 y nota para `TheHouse-GenAI`; T06-H1 traspasado a T07, T06-H2 aceptado) |
-| T07 | R07 | F4 | T01–T06 | ABIERTA (traspaso T06-H1: distribución de `matchScore` y ejemplos explicados en `trained_metrics.json`, leídos por la model card; optimizar pruebas lentas, T05-H3) |
+| T07 | R07 | F4 | T01–T06 | COMPLETA — PASS (M-ML-043; T06-H1 resuelto: distribución de `matchScore` y ejemplos en `trained_metrics.json`, leídos por la model card; T05-H3: pruebas lentas optimizadas; cobertura total y del código de ML-05 ≥ 80 %; tabla de coherencia y resumen final en `evidence.md`) |

@@ -2,7 +2,7 @@
 
 > **DATOS SINTÉTICOS — ETIQUETAS SINTÉTICAS.** Métricas con etiquetas SINTÉTICAS (utilidad oculta documentada más ruido, M-ML-032): el modelo aprende la función del simulador; no son desempeño real ni preferencias reales (constitución §8.2 y §20.3) y se reemplazan con señales reales en ML-07.
 
-Generada automáticamente (`thehouse_ml.models.model_card.render_model_card`, ML-05 1.0.0, T06 (ML-05-R06)) desde los JSON de `reports/`, `baseline_params.json` y `uv.lock`; ninguna cifra está escrita a mano. La regenera `python -m thehouse_ml evaluate` (perfil `full`).
+Generada automáticamente (`thehouse_ml.models.model_card.render_model_card`, ML-05 1.0.0, T06 (ML-05-R06) y T07) desde los JSON de `reports/`, `baseline_params.json` y `uv.lock`; ninguna cifra está escrita a mano. La regenera `python -m thehouse_ml evaluate` (perfil `full`).
 
 ## 1. Resumen
 
@@ -221,7 +221,141 @@ Salvedades (aceptadas al aprobar M-ML-040):
 
 Verificación en 30,755 pares de test: máx. |Σ sin redondear - `matchScore`| 0.49997 (≤ 0.5); máx. |Σ reportada - Σ| 0.2129 (≤ 0.3); 0 factores fuera de [0, `maxPoints`]; 0 totales fuera de [0, 100]; orden idéntico al del logit en 300/300 estudiantes.
 
-**T05-H2 — `maxPoints` no es importancia.** `maxPoints` mide cuánto puede mover el logit cada factor dentro de **todo** su `training_range`, no cuánto importa en los candidatos típicos; la medida de importancia es la ablación (sección 6). La distancia recibe el mayor `maxPoints` porque su rango llega hasta los límites del esquema mientras la mayoría de los candidatos están cerca: casi todos obtienen una parte grande de sus puntos de distancia y **los cuartos cercanos tienden a puntajes altos**. La distribución de `matchScore` y de los puntos por factor en test, y los ejemplos explicados con su JSON, están en [`trained_breakdown.md`](trained_breakdown.md) §4 y §6 (no se copian aquí porque no forman parte de un JSON).
+**Distribución de `matchScore` en test** (DATOS SINTÉTICOS; 30,755 pares candidatos de la medición única de T03):
+
+| Mín. | p5 | p10 | p25 | p50 | p75 | p90 | p95 | Máx. | Media |
+| ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 8 | 50 | 61 | 74 | 81 | 85 | 88 | 90 | 97 | 77.6 |
+
+| `matchScore` | 0-9 | 10-19 | 20-29 | 30-39 | 40-49 | 50-59 | 60-69 | 70-79 | 80-89 | 90-100 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| Pares | 1 | 45 | 108 | 319 | 963 | 1,444 | 2,491 | 7,407 | 16,140 | 1,837 |
+| % | 0.0 % | 0.1 % | 0.4 % | 1.0 % | 3.1 % | 4.7 % | 8.1 % | 24.1 % | 52.5 % | 6.0 % |
+
+Puntos por factor (sin redondear) en los mismos pares:
+
+| Factor | maxPoints | Media | p25 | Mediana | p75 | Media / maxPoints |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| Presupuesto (`budget`) | 9.6 | 4.27 | 2.49 | 4.40 | 6.04 | 45 % |
+| Distancia (`distance`) | 72.6 | 63.42 | 60.55 | 68.04 | 70.90 | 87 % |
+| Servicios esenciales (`essential_services`) | 6.7 | 4.94 | 4.04 | 4.81 | 5.77 | 73 % |
+| Tipo de lugar (`place_type`) | 4.9 | 1.52 | 0.00 | 0.00 | 4.85 | 31 % |
+| Tipo de inmueble (`property_type`) | 1.7 | 1.25 | 0.00 | 1.72 | 1.72 | 73 % |
+| Extras (`extras`) | 4.5 | 2.17 | 1.50 | 2.26 | 2.87 | 48 % |
+
+**T05-H2 — `maxPoints` no es importancia.** `maxPoints` mide cuánto puede mover el logit cada factor dentro de **todo** su `training_range`, no cuánto importa en los candidatos típicos; la medida de importancia es la ablación (sección 6). El factor `distance` recibe el mayor `maxPoints` porque su rango llega hasta los límites del esquema mientras la mayoría de los candidatos están cerca: casi todos obtienen una parte grande de esos puntos y **los cuartos cercanos tienden a puntajes altos** (en test, mediana de `matchScore` 81; `distance` da en promedio el 87 % de su máximo). Las tablas de arriba y los ejemplos de abajo salen de `trained_metrics.json` (`breakdown.distribution` y `breakdown.examples`); [`trained_breakdown.md`](trained_breakdown.md) §4 y §6 los muestra con el histograma de barras.
+
+**Ejemplos explicados** (DATOS SINTÉTICOS; regla fija de M-ML-041, decisión 8: por rango de `budget.max`, el primer estudiante de test por `student_id` de un campus verificado con suficientes candidatos, y su top por `matchScore`; ids sintéticos, sin datos personales; «Baseline» es el `matchScore` de `baseline-1.0.0` para el mismo par):
+
+1. `S0031` — UTTT, `budget.max` $1,500 (≤ $2,000), 112 candidatos.
+
+| # | Cuarto | matchScore | `budget` (/9.6) | `distance` (/72.6) | `essential_services` (/6.7) | `place_type` (/4.9) | `property_type` (/1.7) | `extras` (/4.5) | Relevancia sintética | Baseline |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | `R00261` | **94** | 7.3 | 70.6 | 6.7 | 4.9 | 1.7 | 2.6 | 3 | 81 |
+| 2 | `R00101` | **93** | 6.4 | 72.2 | 5.1 | 4.9 | 1.7 | 3.2 | 3 | 82 |
+| 3 | `R00069` | **93** | 7.0 | 72.2 | 5.1 | 4.9 | 1.7 | 2.6 | 3 | 78 |
+| 4 | `R00282` | **91** | 6.1 | 70.7 | 5.1 | 4.9 | 1.7 | 2.6 | 3 | 83 |
+| 5 | `R00193` | **90** | 5.5 | 71.1 | 5.1 | 4.9 | 0.0 | 3.2 | 2 | 78 |
+
+Primer lugar `R00261`: `budget` 7.3/9.6, `distance` 70.6/72.6, `essential_services` 6.7/6.7, `place_type` 4.9/4.9, `property_type` 1.7/1.7, `extras` 2.6/4.5 → `matchScore` **94** (suma sin redondear 93.747352). Renta = 23% de `budget.max`, 0.89 km (efectiva 0.89 km), cobertura de servicios 100%, extras 0.57.
+
+2. `S0003` — UTTT, `budget.max` $2,200 ($2,001–$3,500), 178 candidatos.
+
+| # | Cuarto | matchScore | `budget` (/9.6) | `distance` (/72.6) | `essential_services` (/6.7) | `place_type` (/4.9) | `property_type` (/1.7) | `extras` (/4.5) | Relevancia sintética | Baseline |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | `R00244` | **89** | 6.3 | 70.7 | 3.8 | 4.9 | 0.0 | 3.4 | 3 | 44 |
+| 2 | `R00088` | **88** | 6.5 | 66.6 | 5.8 | 4.9 | 0.0 | 4.5 | 3 | 50 |
+| 3 | `R00101` | **88** | 7.4 | 72.2 | 3.8 | 0.0 | 0.0 | 4.5 | 3 | 54 |
+| 4 | `R00193` | **88** | 6.7 | 71.0 | 4.8 | 0.0 | 1.7 | 3.4 | 3 | 44 |
+| 5 | `R00075` | **88** | 5.0 | 70.6 | 4.8 | 4.9 | 0.0 | 2.3 | 3 | 53 |
+
+Primer lugar `R00244`: `budget` 6.3/9.6, `distance` 70.7/72.6, `essential_services` 3.8/6.7, `place_type` 4.9/4.9, `property_type` 0/1.7, `extras` 3.4/4.5 → `matchScore` **89** (suma sin redondear 89.101906). Renta = 34% de `budget.max`, 0.78 km (efectiva 0.78 km), cobertura de servicios 57%, extras 0.75.
+
+3. `S0044` — UTTT, `budget.max` $5,400 (> $3,500), 200 candidatos.
+
+| # | Cuarto | matchScore | `budget` (/9.6) | `distance` (/72.6) | `essential_services` (/6.7) | `place_type` (/4.9) | `property_type` (/1.7) | `extras` (/4.5) | Relevancia sintética | Baseline |
+| ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| 1 | `R00088` | **94** | 8.2 | 69.0 | 6.7 | 4.9 | 1.7 | 3.4 | 3 | 74 |
+| 2 | `R00175` | **92** | 6.0 | 72.5 | 4.8 | 4.9 | 1.7 | 2.3 | 3 | 78 |
+| 3 | `R00235` | **92** | 6.9 | 70.6 | 6.7 | 4.9 | 1.7 | 1.1 | 3 | 78 |
+| 4 | `R00156` | **91** | 7.0 | 72.0 | 5.8 | 4.9 | 1.7 | 0.0 | 3 | 74 |
+| 5 | `R00269` | **91** | 6.4 | 70.9 | 4.8 | 4.9 | 1.7 | 2.3 | 3 | 76 |
+
+Primer lugar `R00088`: `budget` 8.2/9.6, `distance` 69/72.6, `essential_services` 6.7/6.7, `place_type` 4.9/4.9, `property_type` 1.7/1.7, `extras` 3.4/4.5 → `matchScore` **94** (suma sin redondear 93.931952). Renta = 13% de `budget.max`, 2.48 km (efectiva 0.62 km), cobertura de servicios 100%, extras 0.75.
+
+**Desglose de ejemplo** (salida JSON del primer lugar del ejemplo 1, `R00261`; formato del contrato: `maxPoints` de la calibración y lista `features` en los factores de varias features):
+
+```json
+{
+  "modelVersion": "logreg-1.0.0",
+  "featureSchemaVersion": "2.0.0",
+  "matchScore": 94,
+  "breakdown": [
+    {
+      "factor": "budget",
+      "points": 7.3,
+      "maxPoints": 9.6,
+      "features": [
+        {
+          "feature": "price_to_budget",
+          "value": 0.23333333333333334
+        },
+        {
+          "feature": "price_below_min",
+          "value": 0.5625
+        }
+      ]
+    },
+    {
+      "factor": "distance",
+      "points": 70.6,
+      "maxPoints": 72.6,
+      "features": [
+        {
+          "feature": "distance_km",
+          "value": 0.8924504599656791
+        },
+        {
+          "feature": "effective_distance_km",
+          "value": 0.8924504599656791
+        },
+        {
+          "feature": "distance_ratio",
+          "value": 0.029748348665522634
+        }
+      ]
+    },
+    {
+      "factor": "essential_services",
+      "points": 6.7,
+      "maxPoints": 6.7,
+      "feature": "services_coverage",
+      "value": 1
+    },
+    {
+      "factor": "place_type",
+      "points": 4.9,
+      "maxPoints": 4.9,
+      "feature": "place_type_match",
+      "value": 1
+    },
+    {
+      "factor": "property_type",
+      "points": 1.7,
+      "maxPoints": 1.7,
+      "feature": "property_type_match",
+      "value": 1
+    },
+    {
+      "factor": "extras",
+      "points": 2.6,
+      "maxPoints": 4.5,
+      "feature": "extra_services_ratio",
+      "value": 0.5714285714285714
+    }
+  ]
+}
+```
 
 **Nota para `TheHouse-GenAI` (cómo interpretar y explicar el `breakdown`):**
 
@@ -242,7 +376,7 @@ Verificación en 30,755 pares de test: máx. |Σ sin redondear - `matchScore`| 0
 - **Circularidad y etiquetas sintéticas** (ML-05-RK01): sección 3.
 - **Paridad pendiente:** la exportación a ONNX, la paridad Python ↔ onnxruntime y la de .NET se verifican en ML-06 y NV-23 (ML-05-RK03); el recorte al `training_range` debe ser la misma regla en el backend.
 - **Campos de Property pendientes (NV-12, RK03 de ML-03):** el cuarto del backend aún no tiene coordenadas, `placeType`, `propertyType`, mascotas, `livingWith` ni servicios como catálogo; sin ellos el modelo no se puede usar en producción.
-- **Timeout del CI (T05-H3):** el job `quality` necesitó un tiempo límite mayor porque las pruebas casi lo agotaban (`.github/workflows/ci.yml`); queda pendiente optimizar las pruebas lentas.
+- **Timeout del CI (T05-H3):** el job `quality` necesitó un tiempo límite mayor porque las pruebas casi lo agotaban (`.github/workflows/ci.yml`, 30 min); en T07 se optimizaron las pruebas más lentas (fixtures de sesión y datos pequeños) sin cambiar ese límite.
 
 ## 9. Decisión de promoción y trabajo futuro
 
@@ -254,7 +388,7 @@ Verificación en 30,755 pares de test: máx. |Σ sin redondear - `matchScore`| 0
 
 1. `logreg-1.1.0` sin `price_below_min` o con su coeficiente ≥ 0 (corrige T05-H1), evaluado con datos nuevos de ML-07: la partición test ya se usó y no puede medir un modelo reentrenado (spec §6.2).
 2. Revisar la calibración de `maxPoints` (T05-H2) para que refleje mejor el rango observado en los candidatos y no todo el `training_range`; requiere una versión nueva del modelo y coordinarlo con `TheHouse-GenAI` y NV-23.
-3. Optimizar las pruebas lentas (fixtures de sesión, sin regenerar los datos completos) para volver a un margen holgado en el CI (T05-H3, T07).
+3. Vigilar el tiempo de la suite en el CI: las pruebas lentas se optimizaron en T07 (T05-H3); si vuelve a acercarse al límite, separar las pruebas de integración pesadas en un job propio.
 4. LightGBM como candidato si se resuelve un desglose aditivo explicable y exportable (p. ej., contribuciones por factor); hoy queda como referencia del potencial.
 5. Medir el desempeño real con señales reales de TheHouse (ML-07).
 
@@ -293,7 +427,8 @@ Pull requests de ML-05 (`thehouse-team/TheHouse-ML`):
 | T03 medición única en test (M-ML-039) | #33 | `feat/ml-05-eval` |
 | T04 ablación y segmentos (M-ML-040) | #34 | `feat/ml-05-ablation` |
 | T05 puntaje 0-100 y desglose (M-ML-041) | #35 | `feat/ml-05-breakdown` |
-| T06 model card (M-ML-042) | pendiente | `docs/ml-05-model-card` |
+| T06 model card (M-ML-042) | #36 | `docs/ml-05-model-card` |
+| T07 pruebas, evidencia y cierre (M-ML-043) | pendiente | `feat/ml-05-cierre` |
 
 Decisiones:
 
@@ -309,5 +444,6 @@ Decisiones:
 - **M-ML-040** — T04: ablación, segmentos e hipótesis > $3,500
 - **M-ML-041** — T05: calibración, desglose, desviación T05-H1 y promoción
 - **M-ML-042** — T06: generación de esta model card (APROBADO)
+- **M-ML-043** — T07: cierre de ML-05 y herencia para ML-06
 
 Reportes de origen: `reports/trained_metrics.json`, `reports/train_cv_metrics.json`, `reports/ablation_metrics.json` y `reports/baseline_metrics.json`; detalle en [`trained_report.md`](trained_report.md), [`ablation_report.md`](ablation_report.md), [`trained_breakdown.md`](trained_breakdown.md), [`training_report.md`](training_report.md) y [`baseline_report.md`](baseline_report.md).

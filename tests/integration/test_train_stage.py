@@ -10,7 +10,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import shutil
 from pathlib import Path
 from typing import Any
 
@@ -19,7 +18,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from conftest import versioned_synthetic_data
+from conftest import copy_project, small_train_params
 from thehouse_ml.features import default_schema
 from thehouse_ml.models.train import (
     LIGHTGBM_MODEL,
@@ -35,10 +34,7 @@ from thehouse_ml.models.train_config import PROFILE_ENV_VAR, TrainParams, load_t
 from thehouse_ml.models.training_data import TRAINING_INPUTS, load_training_data
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.stages import run_stage
-from thehouse_ml.synthetic.labels_stage import HIDDEN_UTILITY_PARQUET, HIDDEN_WEIGHTS_PARQUET, run_labels
-from thehouse_ml.synthetic.pairs_stage import run_pairs
-from thehouse_ml.synthetic.rooms_stage import ROOMS_PARQUET, rooms_frame
-from thehouse_ml.synthetic.students_stage import STUDENTS_PARQUET, students_frame
+from thehouse_ml.synthetic.labels_stage import HIDDEN_UTILITY_PARQUET, HIDDEN_WEIGHTS_PARQUET
 
 pytestmark = pytest.mark.integration
 
@@ -52,30 +48,14 @@ REPORTS = (f"reports/{TRAINING_REPORT}", f"reports/{TRAIN_CV_METRICS}")
 
 
 def small_params() -> TrainParams:
-    return load_train_params().with_values(
-        n_splits=3,
-        logreg_c=(0.1, 1.0),
-        num_leaves=(7,),
-        learning_rate=(0.1,),
-        n_estimators=(10, 20),
-        min_data_in_leaf=20,
-    )
+    params: TrainParams = small_train_params()  # la rejilla de la plantilla de sesión (conftest)
+    return params
 
 
 @pytest.fixture(scope="module")
-def project(tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
+def project(two_campus_labels_template: Path, tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
     """Proyecto con 2 campus: estudiantes, cuartos, pares (ML-03 T06) y etiquetas con archivos ocultos (ML-04 T04)."""
-    students, rooms, _campuses = versioned_synthetic_data()
-    schema = default_schema()
-    paths = ProjectPaths(root=tmp_path_factory.mktemp("train_stage"))
-    paths.data_processed.mkdir(parents=True)
-    shutil.copyfile(REPO / "data" / "universities.csv", paths.universities_csv)
-    chosen_students = [item for item in students if item.profile.university_code in CODES]
-    chosen_rooms = [item for item in rooms if item.room.university_code in CODES]
-    students_frame(chosen_students, schema).to_parquet(paths.data_processed / STUDENTS_PARQUET, index=False)
-    rooms_frame(chosen_rooms, schema).to_parquet(paths.data_processed / ROOMS_PARQUET, index=False)
-    run_pairs(paths)
-    run_labels(paths)
+    paths: ProjectPaths = copy_project(two_campus_labels_template, tmp_path_factory.mktemp("train_stage") / "project")
     assert (paths.data_processed / HIDDEN_UTILITY_PARQUET).is_file()
     return paths
 
