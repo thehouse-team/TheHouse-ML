@@ -7,7 +7,8 @@ y universidades verificadas); ML-03 T04 agrega los estudiantes sintéticos y
 T05 el catálogo sintético de cuartos y T06 el conjunto de pares; ML-04 T04 agrega
 las etiquetas sintéticas de relevancia y T06 implementa ``evaluate`` (métricas y
 reporte del modelo base). ML-05 T02 implementa ``train`` (validación cruzada y
-modelos candidatos).
+modelos candidatos) y T03 agrega a ``evaluate`` la medición única en test de los
+modelos entrenados y la decisión de promoción.
 """
 
 from __future__ import annotations
@@ -17,7 +18,7 @@ from dataclasses import dataclass
 from thehouse_ml.data_card import run_data_card
 from thehouse_ml.denue import run_denue
 from thehouse_ml.download import Fetcher, run_download
-from thehouse_ml.models.baseline_report import run_evaluate
+from thehouse_ml.models.baseline_report import EVALUATE_SKIP_MESSAGE, run_evaluate
 from thehouse_ml.national import run_prepare
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.regional import run_regional
@@ -79,6 +80,12 @@ def run_stage(name: str, paths: ProjectPaths, source: str | None = None, fetcher
         return run_train(paths)
     if name == "evaluate":
         del source, fetcher  # La etapa evaluate no usa red ni filtro de fuente.
-        return run_evaluate(paths)
+        baseline = run_evaluate(paths)
+        if baseline == EVALUATE_SKIP_MESSAGE:
+            return baseline
+        # ML-05 T03: medición única en test de los modelos de `train` (diferido: LightGBM solo al evaluarlos).
+        from thehouse_ml.models.trained_eval import run_trained_evaluate
+
+        return f"{baseline}\n{run_trained_evaluate(paths)}"
     del source, fetcher  # Las etapas vacías no leen ni escriben archivos.
     return f"{stage.name}: pendiente de {stage.spec}"

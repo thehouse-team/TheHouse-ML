@@ -3,16 +3,19 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-05 1.0.0 |
-| Tareas ejecutadas | T01 · Dependencias y carga de datos (R01); T02 · Validación cruzada y entrenamiento reproducible (R02). Cada task con sección propia abajo |
-| Estado | **🟡 EN EJECUCIÓN — T01 y T02 completas (2/7)** |
+| Tareas ejecutadas | T01 · Dependencias y carga de datos (R01); T02 · Validación cruzada y entrenamiento reproducible (R02); T03 · Evaluación contra el baseline y decisión de promoción (R03). Cada task con sección propia abajo |
+| Estado | **🟡 EN EJECUCIÓN — T01, T02 y T03 completas (3/7)** |
 | Autorización (T01) | «EJECUTA ML-05 1.0.0, task T01 (ML-05-R01), en la rama feat/ml-05-deps-data. Rutas permitidas: pyproject.toml, uv.lock, src/thehouse_ml/ (un módulo de carga de datos de entrenamiento, por ejemplo en models/ o evaluation/ según ARQUITECTURA.md), tests/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). No modifiques feature_schema.json ni ningún params de ML-03/ML-04» — César Yael López Trujillo, 2026-11-23 |
 | Rama (T01) | `feat/ml-05-deps-data` (commit base `2bcb71e`, merge del PR #30); mezclada en `main` con el PR #31 (`386fd1d`) |
 | Autorización (T02) | «EJECUTA ML-05 1.0.0, task T02 (ML-05-R02), en la rama feat/ml-05-train. Rutas permitidas: src/thehouse_ml/ (models/ para el entrenamiento; evaluation/ y features/ solo para reutilizar), tests/, reports/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). Sin dependencias nuevas. No modifiques feature_schema.json, baseline_params.json ni los params de ML-03/ML-04. Los modelos entrenados van a data/processed/ o models/ (fuera de git), nunca con pickle» — César Yael López Trujillo, 2026-11-23 |
 | Rama (T02) | `feat/ml-05-train` (commit base `386fd1d`, merge del PR #31) |
 | Aprobación (T02) | «Apruebo M-ML-038 (César Yael López Trujillo, 2026-11-24) con sus 9 decisiones y la elección de C=0.01 por la regla registrada (T02-H3)»; en el mismo mensaje, por T02-H1: «Autorizo .github/workflows/ci.yml solo para esto: agrega un perfil de entrenamiento "ci" […] que use 1 combinación por modelo (las elegidas) y 2 pliegues, escriba sus salidas en una ubicación que no sobrescriba reports/training_report.md ni reports/train_cv_metrics.json versionados, y deje la corrida completa como la oficial. No cambies nombres de jobs ni timeouts» |
+| Autorización (T03) | «EJECUTA ML-05 1.0.0, task T03 (ML-05-R03), en la rama feat/ml-05-eval. Rutas permitidas: src/thehouse_ml/ (models/ y evaluation/; features/ solo para reutilizar), tests/, reports/, memoria.md, specs/ml-05-trained-model/ y specs/README.md (solo la fila de ML-05). Sin dependencias nuevas. No modifiques train_params.json, los modelos entrenados, baseline_params.json, baseline_eval_params.json ni los params de ML-03/ML-04» — César Yael López Trujillo, 2026-11-24 |
+| Rama (T03) | `feat/ml-05-eval` (commit base `971beaf`, merge del PR #32) |
+| Aprobación (T03) | «Apruebo M-ML-039 (César Yael López Trujillo, 2026-11-24)»; en el mismo mensaje: «Autorizo retroactivamente el cambio en src/thehouse_ml/stages.py (T03-H6). T03-H2: que T04 registre las 4 métricas (NDCG@10, NDCG@5, Precision@5 y MAP) por pliegue al reentrenar para la ablación, y que T04 complete la tabla por pliegue de trained_report.md; anótalo en evidence.md como traspaso a T04. Con eso, T03 queda en PASS» |
 | Commit | Sin commit, por instrucción explícita del responsable |
-| Fecha de ejecución | T01: 2026-11-23 · T02: 2026-11-23 y 2026-11-24 (retomada tras un apagado del equipo) |
-| Decisiones | M-ML-036 (APROBADO, decisiones 1 y 6); M-ML-037 (**APROBADO**, César Yael López Trujillo, 2026-11-23: versiones, override de mypy, ubicación, tercera entrada `students.parquet`, validación del esquema, reutilización de `join_labels`, formato de salida, prueba de humo y protección sin pickle); M-ML-038 (**APROBADO**, César Yael López Trujillo, 2026-11-24: semilla, pliegues, rejilla, selección, `num_threads`, persistencia, salidas y perfil `ci`) |
+| Fecha de ejecución | T01: 2026-11-23 · T02: 2026-11-23 y 2026-11-24 (retomada tras un apagado del equipo) · T03: 2026-11-24 |
+| Decisiones | M-ML-036 (APROBADO, decisiones 1 y 6); M-ML-037 (**APROBADO**, César Yael López Trujillo, 2026-11-23: versiones, override de mypy, ubicación, tercera entrada `students.parquet`, validación del esquema, reutilización de `join_labels`, formato de salida, prueba de humo y protección sin pickle); M-ML-038 (**APROBADO**, César Yael López Trujillo, 2026-11-24: semilla, pliegues, rejilla, selección, `num_threads`, persistencia, salidas y perfil `ci`); M-ML-039 (**APROBADO**, César Yael López Trujillo, 2026-11-24: ubicación y etapa, verificaciones, referencia reproducida, bootstrap pareado, condiciones 1 y 3, tabla por pliegue y salidas; `stages.py` autorizado retroactivamente; T03-H2 traspasado a T04) |
 
 Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§5 stack y §13 sin pickle) → `AGENTS.md` → `memoria.md` (M-ML-032 a M-ML-036) → `spec.md` (sobre todo R01 y §10 decisiones 1 y 6), `plan.md` y `task.md` de ML-05 → `specs/ARQUITECTURA.md` → `src/thehouse_ml/synthetic/labels_stage.py`, `src/thehouse_ml/evaluation/` y `src/thehouse_ml/models/baseline_report.py` (para reutilizar) → `specs/ml-04-baseline-model/evidence.md` (formato).
 
@@ -371,3 +374,141 @@ Las métricas no cambian (mismos NDCG@10 por pliegue y configuración; LR 0.8623
 - **Coherencia:** tabla anterior.
 
 **Resultado T02: PASS** — aceptación de R02 cumplida y verificada; M-ML-038 **APROBADO** (César Yael López Trujillo, 2026-11-24) con el perfil `ci` que resuelve T02-H1; T02-H2 queda como informativo para T05/ML-06, que lo verifican por spec. T02 **completa** (ML-05 en 2/7). Sin commit, por instrucción del responsable.
+
+## T03 · Evaluación contra el baseline y decisión de promoción
+
+Lecturas previas (T03), en el orden de `AGENTS.md`: `constitution.md` (§10 evaluación y §12 explicabilidad) → `AGENTS.md` → `memoria.md` (M-ML-034 a M-ML-038) → `spec.md` (R03, §6.2, §6.4, §6.5 y §10 decisiones 4 y 5), `plan.md` y `task.md` → `specs/ARQUITECTURA.md` (§3: `evaluate` = ML-04 · ML-05) → `reports/baseline_metrics.json`, `reports/train_cv_metrics.json` → `src/thehouse_ml/models/train.py`, `train_config.py`, `train_report.py`, `training_data.py`, `baseline_report.py` y `src/thehouse_ml/evaluation/ranking.py`.
+
+### Qué se hizo
+
+- **`src/thehouse_ml/models/trained_eval.py`** (nuevo): verificación de los modelos finales de T02 por SHA-256 contra `models/train_manifest.json` (y de las entradas, del perfil y de que `train_cv_metrics.json` es de la misma corrida); carga sin pickle (`LogRegModel.from_dict` y `lightgbm.Booster(model_file=…)`), **sin reentrenar**; selección de **solo** la partición test (`select_split`); puntaje de cada modelo, ranking por puntaje descendente con desempate por `room_id` y métricas con `thehouse_ml.evaluation.ranking.student_metrics` (`ranked_metrics`); recálculo del baseline con `score_features` y `rank` y verificación contra `per_student_baseline` (`check_baseline_reference`) y contra el intervalo del total (`check_baseline_intervals`); bootstrap pareado (`paired_intervals`); tabla por pliegue (`fold_series`); condiciones de la spec §6.5 y decisión (`promotion`); etapa `run_trained_evaluate` con perfiles `full` y `ci`.
+- **`src/thehouse_ml/models/trained_report.py`** (nuevo): `reports/trained_metrics.json` y `reports/trained_report.md`, deterministas y marcados «DATOS SINTÉTICOS».
+- **`src/thehouse_ml/stages.py`**: `evaluate` corre el baseline (ML-04) y después la medición de ML-05 (importación diferida de LightGBM); si el baseline se omite por falta de datos, ML-05 también (T03-H6).
+- **Pruebas** (sin red): `tests/unit/test_trained_eval.py` (20) y `tests/integration/test_trained_eval_stage.py` (12).
+- **Salidas en git:** `reports/trained_metrics.json` y `reports/trained_report.md`.
+- **Decisiones nuevas:** M-ML-039 (**APROBADO**, César Yael López Trujillo, 2026-11-24).
+
+### Medición única en test
+
+**Test se evaluó una sola vez:** los modelos finales de T02 (`logreg:standard:C=0.01` y `lightgbm:leaves=15:lr=0.05:trees=300`) se cargaron con su SHA-256 verificado y se midieron en test sin cambiar nada. Ningún hiperparámetro, feature, calibración, umbral ni decisión se ajustó con estos resultados (spec §6.2 y §7 regla 2); `train_params.json`, los modelos y los params de ML-03/ML-04 tienen los mismos SHA-256 antes y después. La etapa se corrió 3 veces con el perfil oficial (la primera escribió los archivos pero el mensaje de consola falló, T03-H1) y las 3 dieron los mismos bytes: repetir es reproducibilidad, no una nueva medición con ajustes (T03-H5). T04–T06 reutilizan esta medición.
+
+| Modelo (fuera de git) | SHA-256 verificado contra `train_manifest.json` |
+| --- | --- |
+| `models/logreg.json` | `341ea3ec705c2f877b36d1b931eafe2dea4630523560fe8764ce59e0a70b27fa` |
+| `models/lightgbm_lambdarank.txt` | `5eb8d22dd771e04444383c092413c02501726d6ea1362111673b87ecd9e6086d` |
+
+### Resultado en test (DATOS SINTÉTICOS)
+
+Partición test: **300 estudiantes** (los mismos de `per_student_baseline`) y **30,755 pares**; el baseline recalculado reproduce `per_student_baseline` y su intervalo del total. Bootstrap pareado por estudiante: 1,000 remuestreos, percentil 95 %, `bootstrap:20261122:total`.
+
+| Modelo | NDCG@10 [IC 95 %] | NDCG@5 [IC 95 %] | Precision@5 [IC 95 %] | MAP [IC 95 %] |
+| --- | ---: | ---: | ---: | ---: |
+| Baseline `baseline-1.0.0` | 0.527 [0.503, 0.550] | 0.535 [0.507, 0.560] | 0.586 [0.557, 0.615] | 0.503 [0.485, 0.522] |
+| Regresión logística | 0.862 [0.852, 0.873] | 0.874 [0.861, 0.886] | 0.916 [0.900, 0.931] | 0.831 [0.821, 0.839] |
+| LightGBM | 0.863 [0.853, 0.872] | 0.877 [0.864, 0.890] | 0.911 [0.894, 0.927] | 0.835 [0.825, 0.844] |
+
+| Diferencia pareada contra el baseline | Δ NDCG@10 [IC 95 %] | Δ NDCG@5 | Δ Precision@5 | Δ MAP |
+| --- | ---: | ---: | ---: | ---: |
+| Regresión logística | **+0.335 [+0.312, +0.360]** | +0.339 [+0.313, +0.367] | +0.330 [+0.299, +0.361] | +0.327 [+0.307, +0.347] |
+| LightGBM | +0.336 [+0.313, +0.360] | +0.342 [+0.315, +0.370] | +0.325 [+0.295, +0.358] | +0.331 [+0.312, +0.350] |
+
+Validación cruzada (NDCG@10, de `reports/train_cv_metrics.json`, media ± desviación muestral): baseline 0.5381 ± 0.0093; regresión logística 0.8623 ± 0.0035 (5/5 pliegues por encima, Δ mínima +0.3100); LightGBM 0.8665 ± 0.0049 (5/5, Δ mínima +0.3128). Tabla completa por pliegue en `reports/trained_report.md`.
+
+### Decisión de promoción (spec §6.5)
+
+| Condición | Regresión logística | LightGBM |
+| --- | --- | --- |
+| 1. NDCG@10 > baseline en los 5 pliegues | sí (5/5) | sí (5/5) |
+| 2. IC 95 % de Δ NDCG@10 pareada > 0 en test | sí (límite inferior +0.312) | sí (+0.313) |
+| 3. Desglose aditivo que suma el total | pendiente (T05) | no (no aditivo) |
+| Resultado | **candidata a promoción, sujeta a T05** | referencia (no se promueve en v1, decisión 5) |
+
+**Decisión:** la regresión logística cumple 1 y 2 y queda **candidata a promoción, sujeta a T05** (condición 3). `baseline-1.0.0` sigue vigente hasta que T05 verifique el desglose; la decisión final va en la model card (T06).
+
+### Reproducibilidad y perfil `ci`
+
+| Comando | Duración | Resultado |
+| --- | ---: | --- |
+| `uv run python -m thehouse_ml evaluate` (1.ª, perfil `full`) | 14 s | Escribió `reports/trained_metrics.json` y `reports/trained_report.md`; **exit 1** al imprimir el mensaje en la consola cp1252 («Δ», T03-H1) |
+| `uv run python -m thehouse_ml evaluate` (2.ª y 3.ª, tras corregir el mensaje) | 15 s y 14 s | exit 0; `diff` de los SHA-256 de `models/*`, `src/thehouse_ml/models/*.json`, `reports/*.json` y `reports/*.md` entre las 3 corridas: **vacío** |
+| `THEHOUSE_ML_TRAIN_PROFILE=ci uv run python -m thehouse_ml evaluate` (con `models/ci/` de T02) | — | exit 0; escribe `models/ci/trained_metrics.json` y `models/ci/trained_report.md` (`profile: ci`, `official: false`, 2 pliegues, decisión `baseline_stays` porque la condición 1 exige 5; T03-H3); `diff` de los SHA-256 de los archivos versionados: **vacío** |
+
+| Archivo | SHA-256 (las 3 corridas) |
+| --- | --- |
+| `reports/trained_metrics.json` | `288258c212d7550fab127008b098d365156a13db28b57199e60001c53ce2ce68` |
+| `reports/trained_report.md` | `32e0b90f02bafe3436c4a0581205a2a786c2eb1411ccebdb8584c7fcc59c766b` |
+
+Respecto del estado previo a T03, el único cambio en esos archivos es la aparición de los 2 reportes nuevos: `reports/baseline_*`, `reports/train*`, `models/*` y los params (`train_params.json`, `baseline_params.json`, `baseline_eval_params.json`, params de ML-03/ML-04) tienen los mismos SHA-256.
+
+### Trazabilidad R03 → prueba
+
+| Criterio | Prueba o comando |
+| --- | --- |
+| SHA-256 de los modelos verificado (falla si no coincide) | `test_trained_eval.py::test_verify_models_accepts_the_files_of_the_manifest`, `::test_verify_models_fails_if_a_model_changed[logreg.json]`, `[lightgbm_lambdarank.txt]`, `::test_verify_models_fails_if_a_model_or_its_digest_is_missing`; `test_trained_eval_stage.py::test_a_model_that_does_not_match_its_sha256_is_an_error` (2), `::test_inputs_different_from_the_training_ones_are_an_error` |
+| Solo se puntúa test | `test_trained_eval.py::test_select_split_keeps_only_the_test_pairs`; `test_trained_eval_stage.py::test_only_test_pairs_are_scored` (espía de los dos modelos), `::test_only_the_test_students_of_per_student_baseline_are_evaluated` |
+| Métricas iguales a `ranking.py` (orden puntaje desc, `room_id` asc) | `test_trained_eval.py::test_ranked_metrics_order_by_score_then_room_id_and_use_ranking_py`; `test_trained_eval_stage.py::test_metrics_match_an_independent_recomputation_with_ranking_py` |
+| Mismos 300 estudiantes que `per_student_baseline` y baseline reproducido | `test_trained_eval.py::test_baseline_reference_must_have_the_same_students_and_metrics`; `test_trained_eval_stage.py::test_only_the_test_students_of_per_student_baseline_are_evaluated` (incluye el intervalo del total); verificación en la etapa con los datos reales |
+| Comparación pareada correcta (ejemplo a mano) | `test_trained_eval.py::test_paired_difference_matches_a_hand_computed_example`, `::test_paired_intervals_use_the_same_resamples_as_the_baseline_bootstrap` |
+| Las 3 condiciones, «sujeta a T05» y «se queda el baseline» | `test_trained_eval.py::test_cv_condition_needs_every_required_fold_strictly_above`, `::test_holdout_condition_needs_the_lower_bound_above_zero` (3), `::test_logreg_meeting_cv_and_test_is_a_candidate_subject_to_t05`, `::test_only_lightgbm_meeting_the_conditions_keeps_the_baseline`, `::test_without_a_candidate_meeting_cv_and_test_the_baseline_stays` (3) |
+| Tabla por pliegue de la misma corrida | `test_trained_eval.py::test_fold_series_reads_the_selected_models_of_the_same_run` |
+| Reportes sintéticos, medición única, decisión | `test_trained_eval_stage.py::test_outputs_are_synthetic_and_record_the_single_measurement_and_decision` |
+| Reproducibilidad (SHA-256 iguales) | `test_trained_eval_stage.py::test_running_twice_does_not_change_any_file`; 3 corridas reales (tabla anterior) |
+| Nunca lee los archivos ocultos (decisión 1) | `test_trained_eval_stage.py::test_evaluate_never_reads_the_hidden_label_files` |
+| Etapa `evaluate` y perfil `ci` sin tocar los reportes versionados | `test_trained_eval_stage.py::test_evaluate_stage_runs_the_baseline_and_then_the_trained_models`, `::test_ci_profile_does_not_modify_the_versioned_reports`, `::test_without_models_the_stage_is_skipped`; corrida real con `THEHOUSE_ML_TRAIN_PROFILE=ci` |
+
+### Comandos y resultados (T03)
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff format --check .` | `154 files already formatted` (PASS) |
+| `uv run ruff check .` | `All checks passed!` (PASS) |
+| `uv run mypy src` | `Success: no issues found in 45 source files` (PASS) |
+| `uv run pytest` de las afectadas (`test_trained_eval.py`, `test_trained_eval_stage.py`, `test_stages.py`, `test_cli.py`, `test_installed_package.py`, `test_evaluate_stage.py`, `test_train_stage.py`, `test_repo_hygiene.py`, `test_ci_workflow.py`, `test_baseline_report.py`) con cobertura de los módulos nuevos | **164 passed** en 113.9 s; cobertura: `trained_eval.py` 93 %, `trained_report.py` 100 %, `stages.py` 97 % (94.9 % en conjunto) (PASS) |
+| `uv run python -m thehouse_ml evaluate` × 3 y con `THEHOUSE_ML_TRAIN_PROFILE=ci` | SHA-256 idénticos; versionados intactos con `ci` (tabla anterior) (PASS) |
+| Suite completa (`uv run pytest --cov=thehouse_ml`) | **No ejecutada** en T03 (se pidieron las afectadas); corresponde a T07 |
+
+### Tabla de coherencia (T03)
+
+| Referencia | Comprobación | Resultado |
+| --- | --- | --- |
+| Constitución §10.1 | Los dos modelos se comparan contra `baseline-1.0.0`; sin la condición 3 (T05) no hay promoción definitiva | PASS |
+| Constitución §10.2–§10.3 | NDCG@10, NDCG@5, Precision@5 y MAP por estudiante; partición por estudiante sin fuga; intervalos por bootstrap en test y media ± desviación entre pliegues | PASS |
+| Constitución §12 | La condición 3 queda pendiente de T05 para la LR y no se cumple para LightGBM; ningún modelo sin desglose se promueve | PASS |
+| Constitución §8 y §20.3 | «DATOS SINTÉTICOS» y advertencia de ML-07 en el JSON, el reporte y el mensaje de la etapa | PASS |
+| Constitución §9 | Un comando (`evaluate`), mismas salidas byte a byte; versiones y SHA-256 de entradas y modelos en el JSON | PASS |
+| Constitución §13.1 | Modelos cargados de JSON y texto nativo; sin pickle (`test_repo_hygiene.py` en verde) | PASS |
+| Spec §6.2 y §7 regla 2 | Test medido una vez con los modelos finales, sin ajustar nada; constancia en la evidencia, el JSON y el reporte | PASS |
+| Spec §6.4 | Funciones de `ranking.py`, umbral 2, desempate `room_id`; bootstrap con `baseline_eval_params.json` 1.0.0; prueba de los 300 estudiantes y del baseline reproducido | PASS |
+| Spec §6.5, §6.6 y decisiones 4 y 5 | 3 condiciones por candidato; LR «sujeta a T05»; LightGBM referencia | PASS |
+| Spec R03 | Tabla por pliegue solo con NDCG@10 (la de `train_cv_metrics.json`, como pidió el «EJECUTA»); R03 nombra también NDCG@5, Precision@5 y MAP por pliegue: traspasado a T04 por el responsable (T03-H2) | PASS |
+| Spec §6.1 y decisión 1 | Solo `TRAINING_INPUTS`; prueba obligatoria para la etapa de T03 | PASS |
+| `specs/ARQUITECTURA.md` §3–§4 | Integrado en `evaluate`; módulos en `models/`; reportes en `reports/` | PASS |
+| AGENTS: rutas permitidas | `src/thehouse_ml/models/` (2 nuevos), `src/thehouse_ml/stages.py` (T03-H6), `tests/` (2 nuevos), `reports/` (2 nuevos), `memoria.md`, `specs/ml-05-trained-model/`, `specs/README.md` (fila de ML-05); `evaluation/` y `features/` solo reutilizados | PASS |
+| AGENTS: archivos protegidos por el «EJECUTA» | `train_params.json`, modelos, `baseline_params.json`, `baseline_eval_params.json` y params de ML-03/ML-04 con los mismos SHA-256 | PASS |
+| AGENTS: sin dependencias nuevas | `pyproject.toml` y `uv.lock` sin cambios | PASS |
+| AGENTS: un control no ejecutado no se reporta como PASS | La suite completa y el CI del PR no se ejecutaron (T07 / PR); la condición 3 queda «pendiente», no «sí» | PASS |
+
+### Hallazgos (T03)
+
+| ID | Hallazgo | Clasificación | Estado |
+| --- | --- | --- | --- |
+| T03-H1 | La primera corrida oficial escribió los dos reportes y después falló al imprimir el mensaje en la consola de Windows (cp1252 no tiene «Δ»). Se cambió solo el texto del mensaje («dif.») y se agregó la comprobación `encode("cp1252")` en la prueba de integración; los reportes de las 3 corridas son idénticos. | ADVERTENCIA → corregida | Corregido |
+| T03-H2 | La spec R03 pide la tabla por pliegue de NDCG@10, NDCG@5, Precision@5 y MAP; `train_cv_metrics.json` (T02) solo guarda NDCG@10 y el «EJECUTA» pidió usar esa tabla sin reentrenar. Las condiciones de promoción solo usan NDCG@10, así que la decisión no cambia. **Propuesta:** que T04, que ya reentrena por pliegue para la ablación, registre también las 4 métricas por pliegue de los modelos completos y del baseline; o aceptar NDCG@10 como suficiente para R03. | ADVERTENCIA → traspasada | **Traspaso a T04** (M-ML-039 decisión 7, APROBADO 2026-11-24): T04 registra las 4 métricas por pliegue al reentrenar para la ablación y completa la tabla por pliegue de `reports/trained_report.md` |
+| T03-H3 | Con el perfil `ci` (2 pliegues) la condición 1 nunca se cumple y la salida dice `baseline_stays`; es intencional (la condición exige los 5 pliegues oficiales) y la salida va a `models/ci/` marcada «no oficial». | INFORMATIVO | Cerrado |
+| T03-H4 | En test la LR y LightGBM quedan prácticamente empatados (Δ NDCG@10 +0.335 contra +0.336, intervalos casi iguales); LightGBM es algo mejor en validación cruzada (0.8665 contra 0.8623). No cambia la decisión (LightGBM no se promueve en v1). | INFORMATIVO | Para la model card (T06) |
+| T03-H5 | «Test una sola vez»: la etapa se corrió 3 veces con el perfil oficial y 1 con `ci`, sin cambiar modelos, parámetros ni código de cálculo entre corridas (solo el texto del mensaje, T03-H1); las salidas son idénticas. Las pruebas usan un proyecto temporal, no la partición test real. | INFORMATIVO | Cerrado |
+| T03-H6 | Integrar la medición en `evaluate` exigió cambiar `src/thehouse_ml/stages.py` (fuera de `models/`), como en T02; el «EJECUTA» lo pide en el punto 6. `cli.py` no cambió: `TrainedEvalError` hereda de `EvaluationError`. | INFORMATIVO | **Autorizado retroactivamente** por el responsable (2026-11-24) |
+| T03-H7 | Sin commit ni PR, por instrucción del responsable. | INFORMATIVO | Se cierra al mezclar el PR |
+
+### Revisión y resultado (T03)
+
+- **Seguridad:** sin secretos, sin red en las pruebas, sin servicios de pago (COST-001: CPU local); sin pickle; los modelos solo se cargan si su SHA-256 coincide con el manifiesto (constitución §14.3).
+- **Datos y licencias:** solo datos sintéticos de `data/processed/` (fuera de git); los reportes en git traen agregados y métricas por estudiante con solo el `student_id` sintético (como `per_student_baseline`), sin datos personales. Sin dependencias nuevas.
+- **Coherencia:** tabla anterior.
+
+### Traspaso a T04
+
+- **T03-H2:** Traspaso a T04 (aprobado por el responsable el 2026-11-24): al reentrenar por pliegue para la ablación, T04 registra las 4 métricas (NDCG@10, NDCG@5, Precision@5 y MAP) por pliegue del baseline, la regresión logística y LightGBM y completa la tabla por pliegue de `reports/trained_report.md`. Las condiciones de promoción de T03 solo usan NDCG@10 y no cambian. T04 no vuelve a medir en test.
+- **T03-H4:** el empate práctico entre la LR y LightGBM en test va a la model card (T06).
+
+**Resultado T03: PASS** — aceptación de R03 cumplida y verificada; M-ML-039 **APROBADO** (César Yael López Trujillo, 2026-11-24), con `stages.py` autorizado retroactivamente (T03-H6) y la tabla por pliegue de 4 métricas traspasada a T04 (T03-H2). T03 **completa** (ML-05 en 3/7). Sin commit, por instrucción del responsable.
