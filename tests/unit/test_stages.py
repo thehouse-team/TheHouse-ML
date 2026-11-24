@@ -29,7 +29,13 @@ def test_get_stage_rejects_unknown_names() -> None:
 
 
 def test_run_stage_returns_the_pending_message(tmp_path: Path) -> None:
-    assert run_stage("train", ProjectPaths(root=tmp_path)) == "train: pendiente de ML-05"
+    assert run_stage("export", ProjectPaths(root=tmp_path)) == "export: pendiente de ML-06"
+
+
+def test_train_stage_skips_without_inputs(tmp_path: Path) -> None:
+    from thehouse_ml.models.train import TRAIN_SKIP_MESSAGE
+
+    assert run_stage("train", ProjectPaths(root=tmp_path)) == TRAIN_SKIP_MESSAGE
 
 
 def test_prepare_generates_the_data_card_after_the_other_outputs(

@@ -6,7 +6,8 @@ error. ML-02 T02 implementa ``download``; T03, T04, T05 y T07 implementan
 y universidades verificadas); ML-03 T04 agrega los estudiantes sintéticos y
 T05 el catálogo sintético de cuartos y T06 el conjunto de pares; ML-04 T04 agrega
 las etiquetas sintéticas de relevancia y T06 implementa ``evaluate`` (métricas y
-reporte del modelo base).
+reporte del modelo base). ML-05 T02 implementa ``train`` (validación cruzada y
+modelos candidatos).
 """
 
 from __future__ import annotations
@@ -39,7 +40,7 @@ class Stage:
 STAGES: tuple[Stage, ...] = (
     Stage("download", "Descarga las fuentes registradas y verifica su SHA-256.", "ML-02"),
     Stage("prepare", "Limpia, pondera, calibra y genera estudiantes, cuartos, pares y etiquetas sintéticos.", "ML-02"),
-    Stage("train", "Entrena el modelo base y los modelos candidatos.", "ML-05"),
+    Stage("train", "Entrena los modelos candidatos con validación cruzada (el modelo base no se entrena).", "ML-05"),
     Stage("evaluate", "Evalúa los modelos contra el modelo base y escribe los reportes.", "ML-04"),
     Stage("export", "Exporta el modelo promovido a ONNX con su paquete de entrega.", "ML-06"),
 )
@@ -71,6 +72,11 @@ def run_stage(name: str, paths: ProjectPaths, source: str | None = None, fetcher
             f"{run_denue(paths)}\n{run_students(paths)}\n{run_rooms(paths)}\n"
             f"{run_pairs(paths)}\n{run_labels(paths)}\n{run_data_card(paths)}"
         )
+    if name == "train":
+        del source, fetcher  # La etapa train no usa red ni filtro de fuente.
+        from thehouse_ml.models.train import run_train  # Diferido: scikit-learn y LightGBM solo al entrenar.
+
+        return run_train(paths)
     if name == "evaluate":
         del source, fetcher  # La etapa evaluate no usa red ni filtro de fuente.
         return run_evaluate(paths)

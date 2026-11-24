@@ -64,7 +64,13 @@ jobs:
           path: data/raw/
           key: data-raw-${{ runner.os }}-${{ hashFiles('data/sources.toml', 'data/manifests/**') }}
 
+      # ML-05 T02 (M-ML-038, T02-H1): `train` corre con el perfil "ci" (1
+      # combinación por modelo y 2 pliegues; salidas en models/ci/, fuera de
+      # git) para caber en el timeout del job. La corrida oficial es el perfil
+      # completo por defecto, que escribe los reportes versionados.
       - name: CLI con las cinco etapas
+        env:
+          THEHOUSE_ML_TRAIN_PROFILE: ci
         run: |
           uv run python -m thehouse_ml --help
           for stage in download prepare train evaluate export; do
