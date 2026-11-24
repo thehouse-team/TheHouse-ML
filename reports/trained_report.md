@@ -2,7 +2,7 @@
 
 > **DATOS SINTÉTICOS — ETIQUETAS SINTÉTICAS.** Las etiquetas son sintéticas (utilidad oculta documentada más ruido, M-ML-032): los modelos aprenden la función del simulador y estas métricas **no** son desempeño real ni preferencias reales (constitución §8.2 y §20.3). El desempeño real solo se afirma con señales reales en **ML-07**.
 
-Generado por `python -m thehouse_ml evaluate` (ML-05 1.0.0, T03 (ML-05-R03)). Métricas completas, por estudiante y con las condiciones en `reports/trained_metrics.json`; las métricas por segmento son de T04.
+Generado por `python -m thehouse_ml evaluate` (ML-05 1.0.0, T03 (ML-05-R03)). Métricas completas, por estudiante y con las condiciones en `reports/trained_metrics.json`; ablación, segmentos e hipótesis > $3,500 (T04) en `reports/ablation_report.md`.
 
 Perfil: **`full`** (corrida oficial).
 
@@ -48,6 +48,25 @@ De `reports/train_cv_metrics.json` (T02, train + validación; test no participa)
 | P3 | 0.5241 | 0.8626 | +0.3386 | 0.8661 | +0.3420 |
 | P4 | 0.5345 | 0.8640 | +0.3295 | 0.8684 | +0.3339 |
 | **Media ± desv.** | 0.5381 ± 0.0093 | 0.8623 ± 0.0035 | +0.3242 | 0.8665 ± 0.0049 | +0.3284 |
+
+### Las 4 métricas por pliegue (T04, traspaso T03-H2)
+
+Recalculadas en T04 con la misma asignación de pliegues de `train_manifest.json` y los hiperparámetros elegidos en T02 (sin búsqueda nueva); el NDCG@10 reproduce exactamente la tabla anterior. Media ± desviación estándar muestral entre pliegues.
+
+| Métrica | Modelo | P0 | P1 | P2 | P3 | P4 | Media ± desv. |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |
+| NDCG@10 | Baseline | 0.5396 | 0.5470 | 0.5453 | 0.5241 | 0.5345 | 0.5381 ± 0.0093 |
+| NDCG@10 | Regresión logística | 0.8664 | 0.8570 | 0.8616 | 0.8626 | 0.8640 | 0.8623 ± 0.0035 |
+| NDCG@10 | LightGBM | 0.8733 | 0.8597 | 0.8651 | 0.8661 | 0.8684 | 0.8665 ± 0.0049 |
+| NDCG@5 | Baseline | 0.5399 | 0.5512 | 0.5583 | 0.5185 | 0.5282 | 0.5392 ± 0.0163 |
+| NDCG@5 | Regresión logística | 0.8683 | 0.8659 | 0.8747 | 0.8674 | 0.8648 | 0.8682 ± 0.0039 |
+| NDCG@5 | LightGBM | 0.8773 | 0.8675 | 0.8775 | 0.8735 | 0.8708 | 0.8733 ± 0.0043 |
+| Precision@5 | Baseline | 0.5765 | 0.5935 | 0.5882 | 0.5617 | 0.5576 | 0.5755 ± 0.0158 |
+| Precision@5 | Regresión logística | 0.8906 | 0.8888 | 0.8900 | 0.8897 | 0.8800 | 0.8878 ± 0.0044 |
+| Precision@5 | LightGBM | 0.8959 | 0.8871 | 0.8994 | 0.8973 | 0.8865 | 0.8932 ± 0.0060 |
+| MAP | Baseline | 0.5114 | 0.5161 | 0.5095 | 0.5012 | 0.5103 | 0.5097 ± 0.0054 |
+| MAP | Regresión logística | 0.8342 | 0.8244 | 0.8275 | 0.8230 | 0.8278 | 0.8274 ± 0.0043 |
+| MAP | LightGBM | 0.8408 | 0.8275 | 0.8309 | 0.8318 | 0.8333 | 0.8329 ± 0.0049 |
 
 ## Criterio de promoción (spec §6.5)
 

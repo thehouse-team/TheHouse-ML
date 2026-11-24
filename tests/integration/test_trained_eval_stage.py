@@ -141,7 +141,13 @@ def test_only_test_pairs_are_scored(
 
     run_trained_evaluate(project, small_params(), "full")
 
-    assert scored == [("logreg", test_pairs), ("lightgbm", test_pairs)]
+    # Los modelos oficiales (T03) puntúan solo test, una vez cada uno.
+    assert scored[:2] == [("logreg", test_pairs), ("lightgbm", test_pairs)]
+    # T04: los modelos de cada pliegue puntúan solo a sus retenidos de train + validación, una vez por pasada
+    # (modelo completo + 6 grupos de la ablación); ningún par de test.
+    cv_pairs = int((load_training_data(project).split != "test").sum())
+    for name in ("logreg", "lightgbm"):
+        assert sum(rows for model, rows in scored[2:] if model == name) == cv_pairs * 7
 
 
 def test_metrics_match_an_independent_recomputation_with_ranking_py(
@@ -279,9 +285,11 @@ def test_evaluate_stage_runs_the_baseline_and_then_the_trained_models(
 
     message = run_stage("evaluate", copy)  # train_params.json oficial: la condición 1 exige 5 pliegues
 
-    baseline, trained = message.splitlines()
+    baseline, trained, ablation = message.splitlines()
     assert baseline.startswith("evaluate: baseline-1.0.0")
     assert trained.startswith("evaluate (ML-05, perfil full): ")
+    assert ablation.startswith("evaluate (ML-05 T04, perfil full): ")
+    message.encode("cp1252")  # la CLI lo imprime en una consola de Windows
     metrics = _metrics(copy)
     assert metrics["promotion"]["required_folds"] == 5
     assert metrics["promotion"]["decision"]["outcome"] == DECISION_BASELINE  # 3 pliegues no cumplen la condición 1

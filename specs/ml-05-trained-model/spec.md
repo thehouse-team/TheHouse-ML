@@ -8,7 +8,7 @@
 | Fecha | 2026-11-23 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-23 (M-ML-036) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02 y T03 completas (3/7); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T04 completas (4/7); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0 |
 | Tasks | `task.md` 1.0.0 |
@@ -180,9 +180,9 @@ Registradas en `memoria.md` (M-ML-036, APROBADO). Los valores marcados SUPUESTO 
 | Tasks | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 3 (T01, T02, T03; rejilla y semilla fijadas en M-ML-038; T03 con M-ML-039: regresión logística candidata a promoción, sujeta a T05; T04 completa la tabla por pliegue con las 4 métricas) |
+| Tasks completadas | 4 (T01, T02, T03, T04; rejilla y semilla fijadas en M-ML-038; T03 con M-ML-039: regresión logística candidata a promoción, sujeta a T05; T04 con M-ML-040: 4 métricas por pliegue, ablación de los 6 grupos, segmentos e hipótesis > $3,500 confirmada con salvedades T04-H2/H3) |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02 y T03 completas (3/7); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T04 completas (4/7); ver `evidence.md`** |
 
 ## 15. Aprobación
 

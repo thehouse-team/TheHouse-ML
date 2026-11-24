@@ -614,7 +614,10 @@ def run_trained_evaluate(paths: ProjectPaths, params: TrainParams | None = None,
     `profiles.ci.output_dir` (fuera de git) y nunca toca los reportes versionados. La condición 1 exige
     siempre los pliegues del perfil completo (5): el perfil `ci` (2 pliegues) no puede cumplirla.
     """
-    from thehouse_ml.models.trained_report import metrics_document, render_report  # evita un ciclo de importes
+    # Importes diferidos: evitan ciclos (los reportes y la ablación importan este módulo).
+    from thehouse_ml.models.ablation import ABLATION_METRICS, ABLATION_REPORT, evaluate_ablation
+    from thehouse_ml.models.ablation_report import VERDICT_ASCII, ablation_document, fold_table, render_ablation_report
+    from thehouse_ml.models.trained_report import metrics_document, render_report
 
     profile = profile or resolve_profile()
     base = params or load_train_params()
@@ -662,11 +665,29 @@ def run_trained_evaluate(paths: ProjectPaths, params: TrainParams | None = None,
         inputs=inputs,
         cv_source=cv_source,
     )
+    # ML-05 T04: pliegues con 4 métricas y ablación (solo train + validación) y segmentos de esta misma medición.
+    ablation = evaluate_ablation(
+        result.per_student,
+        data,
+        manifest,
+        cv_metrics,
+        reference,
+        params=base.for_profile(profile),
+        schema=schema,
+        baseline_config=config,
+        eval_params=eval_params,
+        profile=profile,
+        cv_source=cv_source,
+    )
     reports_dir.mkdir(parents=True, exist_ok=True)
     metrics_path = reports_dir / TRAINED_METRICS
     _write_json(metrics_path, metrics_document(result))
     report_path = reports_dir / TRAINED_REPORT
-    report_path.write_text(render_report(result), encoding="utf-8", newline="\n")
+    report_path.write_text(render_report(result, fold_table(ablation.cv)), encoding="utf-8", newline="\n")
+    ablation_path = reports_dir / ABLATION_METRICS
+    _write_json(ablation_path, ablation_document(ablation))
+    ablation_report_path = reports_dir / ABLATION_REPORT
+    ablation_report_path.write_text(render_ablation_report(ablation), encoding="utf-8", newline="\n")
     lr = result.paired.differences["logreg"][PRIMARY_METRIC]
     gbm = result.paired.differences["lightgbm"][PRIMARY_METRIC]
     return (
@@ -674,7 +695,11 @@ def run_trained_evaluate(paths: ProjectPaths, params: TrainParams | None = None,
         f"dif. NDCG@10 vs baseline: logreg {lr.mean:+.3f} [{lr.low:+.3f}, {lr.high:+.3f}], "
         f"lightgbm {gbm.mean:+.3f} [{gbm.low:+.3f}, {gbm.high:+.3f}]; decisión: {result.decision.outcome} "
         f"(DATOS SINTÉTICOS) -> {report_path.relative_to(paths.root).as_posix()}; "
-        f"{metrics_path.relative_to(paths.root).as_posix()}"
+        f"{metrics_path.relative_to(paths.root).as_posix()}\n"
+        f"evaluate (ML-05 T04, perfil {profile}): {ablation.cv.n_folds} pliegues con 4 métricas, ablación de "
+        f"{'+'.join(ablation.cv.ablated_models)}, segmentos en test; hipótesis > $3,500: "
+        f"{VERDICT_ASCII[ablation.hypothesis.verdict]} (DATOS SINTÉTICOS) -> "
+        f"{ablation_report_path.relative_to(paths.root).as_posix()}; {ablation_path.relative_to(paths.root).as_posix()}"
     )
 
 
