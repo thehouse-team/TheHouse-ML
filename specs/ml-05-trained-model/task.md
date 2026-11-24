@@ -8,14 +8,14 @@
 | Fecha | 2026-11-23 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-23 (M-ML-036) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 y T02 completas (2/7); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02 y T03 completas (3/7); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 2 |
+| Tasks completadas | 3 |
 
 ## Reglas de esta lista
 
-1. T01 (2026-11-23) y T02 (2026-11-24) completas, con evidencia en `evidence.md`; T03–T07 abiertas.
+1. T01 (2026-11-23), T02 (2026-11-24) y T03 (2026-11-24) completas, con evidencia en `evidence.md`; T04–T07 abiertas.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA».
 4. Un control no ejecutado no se reporta como PASS.
@@ -28,7 +28,7 @@
 ## F2 — Implementación
 
 - [x] **T02 · Validación cruzada y entrenamiento reproducible** — Requisito: ML-05-R02 · Aceptación: 5 pliegues agrupados por estudiante y estratificados por campus sobre train + validación, sin estudiantes compartidos; rejilla de `train_params.json` solo con los pliegues; modelos finales en train + validación; LightGBM con las 4 restricciones monotónicas; dos corridas de `train` con SHA-256 iguales; sin pickle.
-- [ ] **T03 · Evaluación contra el baseline y decisión de promoción** — Requisito: ML-05-R03 · Aceptación: métricas por pliegue y media ± desviación de baseline, regresión logística y LightGBM; medición única en test con intervalos y diferencia pareada contra `per_student_baseline`; condiciones de la §6.5 por candidato y decisión en `reports/trained_metrics.json` y `reports/trained_report.md`, marcados como sintéticos.
+- [x] **T03 · Evaluación contra el baseline y decisión de promoción** — Requisito: ML-05-R03 · Aceptación: métricas por pliegue y media ± desviación de baseline, regresión logística y LightGBM; medición única en test con intervalos y diferencia pareada contra `per_student_baseline`; condiciones de la §6.5 por candidato y decisión en `reports/trained_metrics.json` y `reports/trained_report.md`, marcados como sintéticos.
 
 ## F3 — Calidad, seguridad y datos
 
@@ -46,8 +46,8 @@
 | --- | --- | --- | --- | --- |
 | T01 | R01 | F1 | — | COMPLETA — PASS (M-ML-037; T01-H1 resuelto en el CI del PR #31) |
 | T02 | R02 | F2 | T01 | COMPLETA — PASS (M-ML-038; perfil `ci` para el CI) |
-| T03 | R03 | F2 | T02 | ABIERTA |
-| T04 | R04 | F3 | T02, T03 | ABIERTA |
+| T03 | R03 | F2 | T02 | COMPLETA — PASS (M-ML-039; T03-H2 traspasado a T04) |
+| T04 | R04 | F3 | T02, T03 | ABIERTA (incluye el traspaso T03-H2: 4 métricas por pliegue y tabla por pliegue completa en `reports/trained_report.md`) |
 | T05 | R05 | F3 | T02, T03 | ABIERTA |
 | T06 | R06 | F3 | T03, T04, T05 | ABIERTA |
 | T07 | R07 | F4 | T01–T06 | ABIERTA |
