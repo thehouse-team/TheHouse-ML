@@ -22,6 +22,7 @@ from conftest import versioned_synthetic_data
 from thehouse_ml.evaluation.ranking import METRIC_NAMES, student_metrics
 from thehouse_ml.features import default_schema
 from thehouse_ml.models.baseline_report import BASELINE_METRICS, run_evaluate
+from thehouse_ml.models.model_card import MODEL_CARD_SKIP_MESSAGE
 from thehouse_ml.models.train import LIGHTGBM_MODEL, LOGREG_MODEL, LogRegModel, run_train
 from thehouse_ml.models.train_config import PROFILE_ENV_VAR, TrainParams, load_train_params
 from thehouse_ml.models.trained_breakdown_report import TRAINED_BREAKDOWN
@@ -287,7 +288,8 @@ def test_evaluate_stage_runs_the_baseline_and_then_the_trained_models(
 
     message = run_stage("evaluate", copy)  # train_params.json oficial: la condición 1 exige 5 pliegues
 
-    baseline, trained, ablation, breakdown = message.splitlines()
+    baseline, trained, ablation, breakdown, card = message.splitlines()
+    assert card == MODEL_CARD_SKIP_MESSAGE  # ML-05 T06: el proyecto temporal no tiene uv.lock
     assert baseline.startswith("evaluate: baseline-1.0.0")
     assert trained.startswith("evaluate (ML-05, perfil full): ")
     assert ablation.startswith("evaluate (ML-05 T04, perfil full): ")

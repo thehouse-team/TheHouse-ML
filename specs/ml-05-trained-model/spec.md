@@ -8,7 +8,7 @@
 | Fecha | 2026-11-23 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-23 (M-ML-036) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T05 completas (5/7); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T06 completas (6/7); ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0 |
 | Tasks | `task.md` 1.0.0 |
@@ -180,9 +180,9 @@ Registradas en `memoria.md` (M-ML-036, APROBADO). Los valores marcados SUPUESTO 
 | Tasks | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 5 (T01, T02, T03, T04, T05; rejilla y semilla fijadas en M-ML-038; T03 con M-ML-039: regresión logística candidata a promoción, sujeta a T05; T04 con M-ML-040: 4 métricas por pliegue, ablación de los 6 grupos, segmentos e hipótesis > $3,500 confirmada con salvedades T04-H2/H3). T05 con M-ML-041: calibración afín 0-100 y desglose de `logreg-1.0.0` que suma el total en los 30,755 pares de test; **regresión logística PROMOVIDA** (baseline de respaldo), con la no monotonía del presupuesto (`budget.max/budget.min` > 76.2) como desviación aceptada T05-H1 y T05-H2 para la model card) |
+| Tasks completadas | 6 (T01, T02, T03, T04, T05, T06; rejilla y semilla fijadas en M-ML-038; T03 con M-ML-039: regresión logística candidata a promoción, sujeta a T05; T04 con M-ML-040: 4 métricas por pliegue, ablación de los 6 grupos, segmentos e hipótesis > $3,500 confirmada con salvedades T04-H2/H3). T05 con M-ML-041: calibración afín 0-100 y desglose de `logreg-1.0.0` que suma el total en los 30,755 pares de test; **regresión logística PROMOVIDA** (baseline de respaldo), con la no monotonía del presupuesto (`budget.max/budget.min` > 76.2) como desviación aceptada T05-H1 y T05-H2 para la model card). T06 con M-ML-042 (PASS): `reports/model_card.md` generada automáticamente desde los JSON de `reports/` («DATOS SINTÉTICOS», 10 secciones, salvedades T04-H2/H3, desviación T05-H1, explicación de `maxPoints` T05-H2 y nota para `TheHouse-GenAI`; T06-H1 traspasado a T07) |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T05 completas (5/7); ver `evidence.md`** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T06 completas (6/7); ver `evidence.md`** |
 
 ## 15. Aprobación
 
