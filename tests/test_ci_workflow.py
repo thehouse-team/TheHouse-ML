@@ -55,4 +55,9 @@ def test_quality_runs_train_with_the_ci_profile_in_the_cli_step() -> None:
     step = step[: step.index("- name:", 1)]
     assert re.search(r"^\s+THEHOUSE_ML_TRAIN_PROFILE:\s*ci\s*$", step, flags=re.MULTILINE)
     assert "for stage in download prepare train evaluate export" in step
-    assert re.search(r"^\s+timeout-minutes:\s*15\s*$", quality, flags=re.MULTILINE)
+
+
+def test_quality_timeout_is_30_minutes() -> None:
+    """ML-05 T05-H3: «Pruebas y cobertura» tardaba 14m50s con límite de 15; autorizado 30 (COST-001: $0)."""
+    quality = _job_blocks(_ci_text())["quality"]
+    assert re.findall(r"^\s+timeout-minutes:\s*(\d+)\s*$", quality, flags=re.MULTILINE) == ["30"]
