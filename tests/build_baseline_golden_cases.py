@@ -130,7 +130,8 @@ def services(*names: str) -> list[str]:
 
 def meridian_lat(code: str, distance_km: Fraction | float, direction: int = 1) -> float:
     """Latitud a `distance_km` sobre el meridiano del campus (haversine = 6371 km x Δφ)."""
-    return CAMPUSES[code]["lat"] + direction * math.degrees(float(distance_km) / 6371)
+    lat: float = CAMPUSES[code]["lat"]
+    return lat + direction * math.degrees(float(distance_km) / 6371)
 
 
 CASES: list[dict[str, Any]] = []

@@ -3,8 +3,8 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-06 1.0.0 (M-ML-044) |
-| Tareas ejecutadas | T01 · Dependencias y exportación verificada (ML-06-R01); T02 · Paridad Python ↔ ONNX (ML-06-R02); T03 · Casos dorados de `logreg-1.0.0` (ML-06-R03); T04 · Rendimiento (ML-06-R04); T05 · Paquete de entrega (ML-06-R05); T06 · Guía de integración (ML-06-R06) |
-| Estado | **T01 completa — PASS WITH WARNINGS** (M-ML-045, APROBADO 2026-11-24); **T02 completa — PASS WITH WARNINGS** (M-ML-046, APROBADO 2026-11-24); **T03 completa — PASS WITH WARNINGS** (M-ML-047, APROBADO 2026-11-25); **T04 completa — PASS WITH WARNINGS** (M-ML-048, APROBADO 2026-11-25); **T05 completa — PASS WITH WARNINGS** (M-ML-049, APROBADO 2026-11-25); **T06 completa — PASS WITH WARNINGS** (M-ML-050, APROBADO 2026-11-25) |
+| Tareas ejecutadas | T01 · Dependencias y exportación verificada (ML-06-R01); T02 · Paridad Python ↔ ONNX (ML-06-R02); T03 · Casos dorados de `logreg-1.0.0` (ML-06-R03); T04 · Rendimiento (ML-06-R04); T05 · Paquete de entrega (ML-06-R05); T06 · Guía de integración (ML-06-R06); T07 · Pruebas y evidencia (ML-06-R07) |
+| Estado | **T01 completa — PASS WITH WARNINGS** (M-ML-045, APROBADO 2026-11-24); **T02 completa — PASS WITH WARNINGS** (M-ML-046, APROBADO 2026-11-24); **T03 completa — PASS WITH WARNINGS** (M-ML-047, APROBADO 2026-11-25); **T04 completa — PASS WITH WARNINGS** (M-ML-048, APROBADO 2026-11-25); **T05 completa — PASS WITH WARNINGS** (M-ML-049, APROBADO 2026-11-25); **T06 completa — PASS WITH WARNINGS** (M-ML-050, APROBADO 2026-11-25); **T07 completa — PASS WITH WARNINGS** (M-ML-051, APROBADO 2026-11-25); **ML-06 ✅ COMPLETA (7/7)** |
 | Autorización (T01) | «EJECUTA ML-06 1.0.0, task T01. Rama: feat/ml-06-export (ya creada desde main actualizado, con la spec ML-06 1.0.0 aprobada en M-ML-044). Se autoriza modificar pyproject.toml y uv.lock SOLO para agregar las dependencias onnx y onnxruntime que pide la spec (respetando exclude-newer 2026-10-27 de uv). Se autoriza crear/modificar los archivos de código y pruebas que la task T01 indique en el plan de ML-06. Ninguna otra ruta fuera de las listadas en el plan» — César Yael López Trujillo, 2026-11-24 |
 | Rama | `feat/ml-06-export` (commit base `a046abf`, merge del PR #38) |
 | Commit | Sin commit ni push, por instrucción del responsable |
@@ -872,3 +872,161 @@ Sin cambios: `src/`, otras pruebas, `pyproject.toml`, `uv.lock`, `.gitignore`, `
 | M-ML-041 / M-ML-046 / M-ML-047 / M-ML-048 / M-ML-049 | Formato y `maxPoints`; `-0` → `0`; 109 casos y tolerancias; latencia; paquete de 7 archivos y SHA-256 del release |
 
 **Resultado T06: PASS WITH WARNINGS** — aceptación de R06 cumplida (guía y prueba de coherencia en verde). Advertencias: T06-H3 (incidencia del release, aceptada), T06-H6 (`baseline_params.json` fuera del release, fijado por commit y SHA-256), T06-H7 (C# de referencia; latencia .NET sin medir) y T06-H8 (controles no ejecutados: suite completa, gitleaks). T06 completa con M-ML-050 (APROBADO, César Yael López Trujillo, 2026-11-25).
+
+## T07 · Pruebas y evidencia (cierre de ML-06)
+
+| Campo | Valor |
+| --- | --- |
+| Autorización | «EJECUTA ML-06 1.0.0, task T07» — César Yael López Trujillo, 2026-11-25. Rama `docs/ml-06-t07` (desde `main` con T01–T06 mezcladas, PR #39–#44). Rutas: las de T07 en el plan, `spec.md` (errata §6.4 y tabla §14, sin cambiar la versión 1.0.0), `task.md`, `evidence.md`, `specs/README.md`, `specs/ARQUITECTURA.md`, `memoria.md` y `tests/golden_recount.py` / `tests/build_baseline_golden_cases.py` **solo** para los 2 errores de mypy, sin cambiar resultados ni fixtures; `README.md` solo si el plan lo pide (no lo pide). **No** `src/`, el resto de `tests/`, fixtures, `pyproject.toml`, `uv.lock`, `.gitignore`, `.github/workflows/` ni el release |
+| Commit base | `7310d91` (merge del PR #44) |
+| Commit | Sin commit ni push, por instrucción del responsable |
+| Fecha de ejecución | 2026-11-25 |
+| Estado | **PASS WITH WARNINGS** — T07 completa; ML-06 cerrada (7/7) |
+| Aprobación (T07) | «Apruebo ML-06 T07 y el cierre de la spec ML-06 1.0.0 (César Yael López Trujillo, 2026-11-25)», con las decisiones: aplicar el cierre (T07 marcada, ✅ COMPLETA en `spec.md`, `plan.md`, `task.md` y §14, `specs/README.md` 7/7, `ARQUITECTURA.md` ✅ COMPLETA); autoriza `README.md` solo para el estado del proyecto y «Modelo publicado»; `reports/model_card.md` no se modifica (la sección 11 del release reemplaza «Paridad pendiente»; se corrige en la próxima versión del modelo); los 35 errores de `mypy --strict` en `tests/` quedan como mejora futura |
+| Decisión | **M-ML-051 (APROBADO, 2026-11-25)**, registrada en `memoria.md` |
+
+Lecturas previas: `constitution.md` → `AGENTS.md` → `memoria.md` (M-ML-043 a M-ML-050) → `spec.md`, `plan.md` (F4, T07), `task.md` y esta evidencia (T01–T06); `specs/README.md`, `specs/ARQUITECTURA.md` y `README.md`.
+
+**Prompt ↔ spec:**
+
+1. El prompt pide «actualizar la tabla §14, `specs/README.md` y `specs/ARQUITECTURA.md` con ML-06 completa (7/7)» y, a la vez, «no marcar T07 ni cambiar el estado de la spec a cerrada hasta el «Apruebo»». Como `AGENTS.md` cierra una task solo con aceptación y revisión, los tres documentos quedan en **«🟡 CIERRE PROPUESTO» con 6/7** y M-ML-051 lista el cambio a **7/7 / ✅ COMPLETA** que se aplica con el «Apruebo» (T07-H1).
+2. El prompt pide registrar el release «en la spec»; la autorización limita `spec.md` a la errata de la §6.4 y la tabla §14, así que el release se registra en la **tabla §14** (URL, commit y SHA-256). El encabezado de la spec (estado de ejecución «⛔ NO EJECUTAR HASTA «EJECUTA»», sin actualizar desde T01) no se toca: pasa a **✅ COMPLETA** con el «Apruebo» (T07-H2).
+
+### Qué se hizo
+
+1. **Errata de la §6.4** (M-ML-046 / T02-H3): «incluidos los 9 excluidos y los 5 incompletos» → «70 puntuados, 6 excluidos y 5 incompletos», con una nota de fe de erratas en la misma sección y en la tabla §14. La versión sigue en 1.0.0; ningún requisito ni criterio cambia.
+2. **Los 2 errores `no-any-return` de mypy preexistentes** (M-ML-047), corregidos **solo con anotaciones de tipo**, sin cambiar ninguna operación:
+   - `tests/golden_recount.py:140` (`round6_margin`): `10**decimals` con `int` devuelve `Any` en typeshed; se anota `scaled: Fraction = value * 10**decimals`.
+   - `tests/build_baseline_golden_cases.py:133` (`meridian_lat`): `CAMPUSES` es `dict[str, dict[str, Any]]`; se anota `lat: float = CAMPUSES[code]["lat"]` y se devuelve `lat + …`.
+   - Regenerados los dos fixtures con sus generadores: **mismo SHA-256** que antes (tabla de comandos).
+3. **Release `model-v1.0.0` registrado** en esta evidencia y en la tabla §14 de la spec (URL, commit, SHA-256 de `model.onnx`, verificación del responsable e incidencia aceptada en M-ML-050).
+4. **Índices:** fila de ML-06 en `specs/README.md` y en `specs/ARQUITECTURA.md` §6 (lo que entrega ML-06, el release y «cierre propuesto», 6/7) y fila de `export` en §3. Se corrigen dos menciones obsoletas de ML-06 en `ARQUITECTURA.md`: «nodo `Clip` en ML-06» → `Max`/`Min` (M-ML-044) y «los 81 casos del baseline se empaquetan como `golden_cases.json`» → `baseline_golden_cases.json` (`golden_cases.json` es el de logreg, M-ML-049).
+5. **Búsqueda de menciones obsoletas** (`export: pendiente de ML-06`, `PROPUESTO` de ML-06, «sin ejecutar»): ver tabla de comandos y T07-H3/T07-H4.
+6. **Suite completa, ruff, mypy, pip-audit** una vez, con el modelo oficial y el paquete del release presentes.
+7. **M-ML-051** redactada como PROPUESTO y APROBADA tras el «Apruebo» (2026-11-25): cierre de ML-06, `baseline_params.json` fuera de `model-v1.0.0` y avisos a otros equipos a cargo del responsable.
+
+### Release `model-v1.0.0` (verificación, ML-06-R07)
+
+| Campo | Valor |
+| --- | --- |
+| URL | https://github.com/thehouse-team/TheHouse-ML/releases/tag/model-v1.0.0 |
+| Tag / commit | `model-v1.0.0` / `59f07bcfe1fa6cf4a0f183b568c56913980175ee` (merge del PR #43) |
+| SHA-256 de `model.onnx` | `36c867188232a6cfedd949171121f3273f606ba5057dc5d3eb24cafd672bdcc5` — el valor que NV-23 fija |
+| Assets | 7: `model.onnx`, `feature_schema.json`, `golden_cases.json`, `baseline_golden_cases.json`, `model_card.md`, `metrics.json`, `SHA256SUMS` |
+| Verificación por descarga (responsable, 2026-11-25) | **6/6 OK** en `SHA256SUMS` (archivos descargados de GitHub) |
+| Comprobación local del agente (sin red, 2026-11-25) | `dist/model-v1.0.0/`: `sha256sum -c SHA256SUMS` 6 × OK; `model.onnx` = `36c86718…bdcc5`; con ese paquete corren las pruebas del paquete del release en la suite completa |
+| Incidencia | 5 de 7 assets fallaron al subir; completados el mismo día sin reemplazar archivos. **Aceptada como parte de la publicación inicial** (M-ML-050 / T06-H3) |
+| `baseline_params.json` | Fuera del release; fijado por commit `59f07bc…` y SHA-256 `51b663e840eb0b5d12592802093050e28091bf91279db6aece7c237dd5737111` (M-ML-050 decisión 7). M-ML-051 (APROBADO): se queda así en v1.0.0; su inclusión es mejora opcional de `model-v1.0.1` |
+
+El agente no descargó el release (sin red): la verificación por descarga es la del responsable; la del agente es sobre el paquete local, idéntico por SHA-256.
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `sha256sum tests/fixtures/*.json` antes y después de `uv run python tests/build_baseline_golden_cases.py` y `uv run python tests/build_logreg_golden_cases.py` | 81 y 109 casos; **los 4 SHA-256 idénticos**: `baseline_golden_cases.json` `a92852c7…5ae3f2`, `logreg_golden_cases.json` `38a58920…49da48a`, `hard_constraint_cases.json` `d8174d19…7ac`, `pair_feature_cases.json` `9cbee0a5…b83`; `git status` sin cambios en `tests/fixtures/` |
+| `uv run mypy --strict tests/golden_recount.py tests/build_baseline_golden_cases.py tests/build_logreg_golden_cases.py` | Antes: 2 errores (`no-any-return`, líneas 140 y 133). Después: **Success: no issues found in 3 source files** |
+| `uv run mypy src` (mypy estricto del `pyproject.toml`, el que corre el CI) | **Success: no issues found in 56 source files** |
+| `uv run mypy --strict tests` (informativo) | 35 errores en 13 archivos, todos preexistentes y fuera de las rutas autorizadas (T07-H5) |
+| `uv run ruff format --check .` | 184 files already formatted |
+| `uv run ruff check .` | All checks passed! |
+| `uv lock --check` | Resolved 60 packages (sin cambios) |
+| `uv run pip-audit --skip-editable` | No known vulnerabilities found |
+| `cd dist/model-v1.0.0 && sha256sum -c SHA256SUMS` | 6 × OK |
+| `uv run pytest --cov=thehouse_ml --cov-report=term -q -rs` (suite completa, una vez) | **2,579 passed, 0 failed, 0 skipped** en 714.58 s (11 min 57 s de reloj), con `models/logreg.json` oficial y `dist/model-v1.0.0/` del release presentes (las pruebas oficiales corrieron, ninguna omitida); cobertura **TOTAL 96 %** (8,524 sentencias, 229 sin cubrir; 2,276 ramas, 172 parciales; ≈ 96.29 %); `thehouse_ml.export`: `__init__` 100 %, `onnx_graph` 99 %, `parity` 99 %, `package` 96 %, `benchmark` 88 % (≈ 96.2 % en conjunto) |
+| `grep -rn "pendiente de ML-06\|export: pendiente\|PROPUESTO"` en `*.md`, `*.py`, `*.toml`, `*.yml` | `export: pendiente de ML-06` solo en la tabla histórica de T01 de esta evidencia (lo que esperaban las pruebas antes de T01). Ningún `PROPUESTO` de ML-06 (M-ML-051 pasó a APROBADO). Los `PROPUESTO` restantes son de otras specs (M-ML-005, ML-07 §10, la plantilla) o históricos |
+
+**No ejecutados** (no se reportan como PASS): gitleaks local (no instalado en esta máquina; corre en el CI del PR; los cambios no agregan cadenas asignadas a nombres como `key`, `token`, `secret` o `password`); descarga del release por el agente (sin red; consta la del responsable); compilación de los ejemplos de C# de la guía (referencia, M-ML-050).
+
+### Archivos
+
+| Archivo | Cambio |
+| --- | --- |
+| `specs/ml-06-onnx-export/spec.md` | Errata §6.4 y tabla §14 (tasks, release, SHA-256, errata, estado «cierre propuesto»); versión 1.0.0 sin cambios |
+| `specs/ml-06-onnx-export/evidence.md` | Encabezado y esta sección |
+| `specs/README.md` | Fila de ML-06 (6/7, cierre propuesto, release) |
+| `specs/ARQUITECTURA.md` | Fila de ML-06 en §6, fila de `export` en §3 y dos menciones obsoletas de ML-06 en las filas de ML-04 y ML-05 |
+| `tests/golden_recount.py` | Una anotación de tipo (mypy) |
+| `tests/build_baseline_golden_cases.py` | Una variable anotada (mypy) |
+| `memoria.md` | M-ML-051 (PROPUESTO; APROBADO tras el «Apruebo») |
+
+Tras el «Apruebo» (M-ML-051): `task.md` (T07 marcada y ✅ COMPLETA), `plan.md` y `spec.md` (encabezado ✅ COMPLETA), `specs/README.md` (7/7), `specs/ARQUITECTURA.md` (✅ COMPLETA) y `README.md` (estado del proyecto y «Modelo publicado»).
+
+Sin cambios: `src/`, el resto de `tests/`, fixtures, `pyproject.toml`, `uv.lock`, `.gitignore`, `.github/workflows/`, `reports/`, `docs/`, modelos, params y el release.
+
+### Aceptación de T07 (ML-06-R07)
+
+| Criterio (spec §9 R07 y `task.md`) | Resultado |
+| --- | --- |
+| Pruebas unitarias e integración con cobertura ≥ 80 % del código nuevo | ✅ suite completa 2,579 passed (0 omitidas); cobertura total 96 % y ≈ 96.2 % en el código nuevo de ML-06 (`thehouse_ml.export`), ≥ 80 % (constitución §16) |
+| ruff, mypy y pip-audit sin errores | ✅ ruff (formato y lint), `mypy src` estricto, los 3 generadores de casos dorados con `--strict`, pip-audit sin vulnerabilidades |
+| `evidence.md` con commit, comandos, resultados, hallazgos y revisión de coherencia | ✅ T01–T07 en este archivo (commit base de cada task; coherencia abajo) |
+| Verificación del release publicado (SHA-256 descargados = `SHA256SUMS`) o pendiente registrado | ✅ responsable: 6/6 OK por descarga; agente: paquete local idéntico (6 × OK, `model.onnx` = `36c86718…bdcc5`) |
+
+### Estado de los requisitos de ML-06
+
+| Requisito | Task | Estado | Decisión |
+| --- | --- | --- | --- |
+| R01 Dependencias y exportación verificada | T01 | ✅ PASS WITH WARNINGS | M-ML-045 |
+| R02 Paridad Python ↔ ONNX | T02 | ✅ PASS WITH WARNINGS | M-ML-046 |
+| R03 Casos dorados de `logreg-1.0.0` | T03 | ✅ PASS WITH WARNINGS | M-ML-047 |
+| R04 Rendimiento | T04 | ✅ PASS WITH WARNINGS | M-ML-048 |
+| R05 Paquete de entrega | T05 | ✅ PASS WITH WARNINGS | M-ML-049 |
+| R06 Guía de integración | T06 | ✅ PASS WITH WARNINGS | M-ML-050 |
+| R07 Pruebas y evidencia | T07 | ✅ PASS WITH WARNINGS | M-ML-051 |
+
+### Estado final de los pendientes heredados
+
+| Origen | Pendiente | Estado |
+| --- | --- | --- |
+| M-ML-045 / T01 | `/dist/` en `.gitignore` y prueba de higiene | RESUELTO en T05 (M-ML-049) |
+| M-ML-045 a M-ML-050 | Suite completa | RESUELTO en T07 (esta sección) |
+| M-ML-045 a M-ML-050 | gitleaks | CI del PR de T07 (no instalado en local) |
+| M-ML-046 / T02-H3 | Errata 9 → 6 excluidos de la §6.4 | RESUELTO en T07 |
+| M-ML-046 / T02-H5 | Paquete no publicable si la paridad falla | RESUELTO en T05 (M-ML-049) |
+| M-ML-046 | Regla `-0` → `0` en la guía | RESUELTO en T06 (M-ML-050) |
+| M-ML-047 | 2 errores de mypy preexistentes en `tests/` | RESUELTO en T07 (solo anotaciones; fixtures idénticos) |
+| M-ML-048 / T04-H5 | Rendimiento en `export` y en la model card | RESUELTO en T05 (M-ML-049) |
+| M-ML-049 / T05-H6 | Release publicado y verificado; SHA-256 de `model.onnx` registrado | RESUELTO (responsable, 2026-11-25; registrado en T06 y T07) |
+| M-ML-050 / T06-H6 | `baseline_params.json` en el paquete | APROBADO en M-ML-051: fuera de `model-v1.0.0`; inclusión opcional en `model-v1.0.1` |
+| M-ML-050 | `specs/README.md` y `specs/ARQUITECTURA.md` | RESUELTO en T07 (6/7 «cierre propuesto»; 7/7 con el «Apruebo») |
+
+### Avisos pendientes a otros equipos (responsable, no del repositorio)
+
+No bloquean el cierre de ML-06 ni dependen de este repositorio; los envía o coordina el responsable.
+
+| Equipo | Aviso | Referencia |
+| --- | --- | --- |
+| Backend — NV-23 | Integrar `model-v1.0.0` según `docs/backend-integration.md`: descarga por tag, `SHA256SUMS` y SHA-256 de `model.onnx` fijado (`36c86718…bdcc5`); faltantes → perfil incompleto → HC01–HC03 → features (esquema 2.0.0) → ONNX → redondeo (round6, `AwayFromZero`, `-0` → `0`, `maxPoints` de `maxPointsRaw`) → JSON → ranking; correr los 109 + 81 casos dorados en .NET; desviación ML-05 T05-H1; respaldo `baseline-1.0.0` en C# con `baseline_params.json` fijado por commit y SHA-256; modo de redondeo de `Property.Price` en su spec | M-ML-044, M-ML-046, M-ML-050 |
+| Backend — NV-12 | Campos del cuarto que faltan en `Property` (`lat`, `lon`, `services` como catálogo, `placeType`, `propertyType`, `pets_allowed`, `livingWith`; `backend_status = missing_in_property`): necesarios para usar el modelo en producción | ML-03 RK03, M-ML-028, M-ML-043 |
+| `TheHouse-GenAI` | `breakdown` como campo nuevo de `ExplainMatchRequest` (hoy solo `matchScore`); `maxPoints` variables por versión y que no son importancia (§7 de la model card, §15 de la guía); formatos del par excluido y del perfil incompleto | M-ML-029, M-ML-043, M-ML-050 |
+| Backend — NV-11 (coordenadas de universidades) | `TESJI`, `UMB-VDC` y `UCAN` siguen como `seed_sin_verificar` (distancias orientativas); confirmar nombre y ubicación (en especial UCAN) y corregir NV-11; si cambian, se regeneran los casos dorados en una versión nueva | M-ML-016, M-ML-017 |
+
+### Hallazgos
+
+| ID | Clasificación | Hallazgo | Acción |
+| --- | --- | --- | --- |
+| T07-H1 | Desviación prompt ↔ reglas | El prompt pide «ML-06 completa (7/7)» en §14, `specs/README.md` y `ARQUITECTURA.md`, pero también no cerrar la spec ni marcar T07 sin «Apruebo» | Se dejó «🟡 CIERRE PROPUESTO, 6/7» hasta el «Apruebo»; aplicado después: 7/7 / ✅ COMPLETA (RESUELTO) |
+| T07-H2 | Advertencia | El encabezado de `spec.md` (y de `plan.md`) sigue con «⛔ NO EJECUTAR HASTA «EJECUTA»» desde T01; la autorización de T07 limita `spec.md` a §6.4 y §14 | RESUELTO tras el «Apruebo»: encabezados de `spec.md`, `plan.md` y `task.md` en ✅ COMPLETA |
+| T07-H3 | Advertencia (fuera de las rutas) | `README.md` del repositorio dice «Constitution y AGENTS 1.0.0 … Las specs ML-01 a ML-07 están en borrador» (obsoleto: AGENTS 1.1.0 y ML-01 a ML-06 aprobadas); el plan de T07 no pide cambiarlo | RESUELTO tras el «Apruebo» (decisión 2): solo el estado del proyecto y la sección «Modelo publicado» |
+| T07-H4 | Informativo | `reports/model_card.md` (ML-05, base del `model_card.md` del release) dice «Paridad pendiente … se verifican en ML-06» y la fila de ML-05 T07 «pendiente»; la sección 11 del paquete sí trae la paridad. El release es inmutable | Aceptado (M-ML-051): `reports/model_card.md` no se modifica (reproducibilidad del paquete v1.0.0); la sección 11 del release reemplaza «Paridad pendiente»; se corrige en la próxima versión del modelo |
+| T07-H5 | Informativo | `mypy --strict tests` da 35 errores en 13 archivos (preexistentes); el CI solo exige `mypy src` | Mejora futura (M-ML-051); el CI exige solo `mypy src` |
+| T07-H6 | Control no ejecutado | gitleaks local (no instalado) | CI del PR de T07 |
+| T07-H7 | Informativo | `baseline_params.json` fuera de `model-v1.0.0` | M-ML-051: fijado por commit y SHA-256; inclusión opcional en `model-v1.0.1` |
+
+### Seguridad, datos y licencias
+
+- Sin datos personales: los cambios son documentación, dos anotaciones de tipo y referencias a hashes públicos. Todas las métricas citadas son **sintéticas**.
+- Sin secretos ni cadenas asignadas a nombres como `key`, `token`, `secret` o `password` (nota de gitleaks); los SHA-256 son hashes de archivos públicos.
+- Sin red, sin `gh` ni API de GitHub; sin dependencias nuevas; `uv lock --check` y pip-audit limpios; COST-001 $0.
+
+### Coherencia
+
+| Documento | Comprobación |
+| --- | --- |
+| `constitution.md` §8, §9, §13, §14, §16, §17 | Métricas sintéticas etiquetadas; fixtures reproducibles (mismo SHA-256); release inmutable no modificado, SHA-256 publicado y fijado en el backend; pip-audit limpio; cobertura ≥ 80 % en `src/thehouse_ml`; checks del CI (ruff, mypy, pytest, pip-audit) en verde en local, gitleaks en el CI |
+| `AGENTS.md` | Lecturas en orden; sin commit ni push; un control no ejecutado no se reporta como PASS (gitleaks, descarga del agente); T07 y el cierre quedan para el «Apruebo»; rutas protegidas sin cambios |
+| `memoria.md` M-ML-044 a M-ML-050 | Pendientes de cada decisión cerrados o asignados (tabla de pendientes); incidencia del release y `baseline_params.json` según M-ML-050 |
+| Spec §6.4, §9 R07, §14 | Errata aplicada sin cambiar la versión; R07 cumplido; tabla §14 con release, SHA-256 y estado |
+
+**Resultado T07: PASS WITH WARNINGS** — aceptación de R07 cumplida. Advertencias: T07-H4 (model card de ML-05 sin cambios, aceptado), T07-H5 (mypy en `tests/`, mejora futura) y T07-H6 (gitleaks en el CI). T07 completa y ML-06 cerrada con M-ML-051 (APROBADO, César Yael López Trujillo, 2026-11-25).

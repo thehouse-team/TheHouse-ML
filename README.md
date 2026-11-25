@@ -6,7 +6,13 @@ Es un proyecto separado del backend. No se despliega: entrega un artefacto ONNX 
 
 ## Estado
 
-Constitution y AGENTS 1.0.0 aprobados (2026-11-09). Las specs ML-01 a ML-07 están en borrador: antes de escribir código se requiere aprobar cada spec y dar «EJECUTA».
+Constitution 1.0.0 (2026-11-09) y AGENTS 1.1.0 (2026-11-11) aprobados. Las specs **ML-01 a ML-06 están completas**; ML-07 (señales reales) sigue en borrador. Cada spec requiere su aprobación y «EJECUTA» antes de escribir código; el estado de cada una está en [`specs/README.md`](specs/README.md).
+
+## Modelo publicado
+
+- **Release:** [`model-v1.0.0`](https://github.com/thehouse-team/TheHouse-ML/releases/tag/model-v1.0.0) (`logreg-1.0.0`; métricas sobre datos **sintéticos**).
+- **SHA-256 de `model.onnx`:** `36c867188232a6cfedd949171121f3273f606ba5057dc5d3eb24cafd672bdcc5`.
+- **Integración con el backend (NV-23):** [`docs/backend-integration.md`](docs/backend-integration.md).
 
 Las explicaciones en lenguaje natural del puntaje son de [`TheHouse-GenAI`](https://github.com/thehouse-team/TheHouse-GenAI); este repositorio solo calcula el puntaje.
 

@@ -8,7 +8,7 @@
 | Fecha | 2026-11-24 |
 | Estado documental | **✅ APROBADA — 1.0.0** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-24 (M-ML-044) |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 (7/7), 2026-11-24 a 2026-11-25; cierre M-ML-051, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0 |
 | Tasks | `task.md` 1.0.0 |
@@ -114,10 +114,11 @@ El ONNX **solo puntúa pares que ya pasaron** todas las reglas previas; no valid
 ### 6.4 Casos dorados de `logreg-1.0.0`
 
 - **Archivo** `tests/fixtures/logreg_golden_cases.json` (en git), escrito por un generador de pruebas con **recuento independiente** (como M-ML-033): no importa `thehouse_ml`; reutiliza el recuento de features de `tests/golden_recount.py`; lee como datos `logreg.json` (recorte, media, escala, coeficientes) y `feature_schema.json`; calcula recorte, escalado, contribuciones, `min_k`/`max_k`, calibración y redondeo con aritmética exacta (`fractions.Fraction` sobre los binary64 del JSON). La prueba exige que el archivo versionado sea **idéntico** a la salida del generador. Se empaqueta como `golden_cases.json`.
-- **Casos:** (1) las **mismas entradas que los 81 casos del baseline** (incluidos los 9 excluidos y los 5 incompletos, ahora con `modelVersion` `logreg-1.0.0`); (2) **recorte**: entradas crudas con `distance_km`/`effective_distance_km` > 30 y `distance_ratio` > 60, y vectores con features por debajo de 0 o por encima de su límite (≥ 4); (3) **extremos**: entradas que dan 100 y vectores en las esquinas de la caja (0 no es alcanzable con entradas de la app, T05-H4) (≥ 2); (4) **bordes de redondeo**: factores que terminan en .x5 tras round6 y totales x.49999955, x.4999994 y x.5000004 construidos con la distancia (≥ 6); (5) **zona T05-H1**: `budget.max / budget.min` > 76.2 con renta < `budget.min`, mostrando que el factor sube con la renta (≥ 3); (6) `pets_compatible` en el término fijo (≥ 1). Los casos solo vector (`input.features` sin entradas crudas) se marcan con su categoría y solo prueban la inferencia.
+- **Casos:** (1) las **mismas entradas que los 81 casos del baseline** (70 puntuados, 6 excluidos y 5 incompletos, ahora con `modelVersion` `logreg-1.0.0`); (2) **recorte**: entradas crudas con `distance_km`/`effective_distance_km` > 30 y `distance_ratio` > 60, y vectores con features por debajo de 0 o por encima de su límite (≥ 4); (3) **extremos**: entradas que dan 100 y vectores en las esquinas de la caja (0 no es alcanzable con entradas de la app, T05-H4) (≥ 2); (4) **bordes de redondeo**: factores que terminan en .x5 tras round6 y totales x.49999955, x.4999994 y x.5000004 construidos con la distancia (≥ 6); (5) **zona T05-H1**: `budget.max / budget.min` > 76.2 con renta < `budget.min`, mostrando que el factor sube con la renta (≥ 3); (6) `pets_compatible` en el término fijo (≥ 1). Los casos solo vector (`input.features` sin entradas crudas) se marcan con su categoría y solo prueban la inferencia.
 - **Formato por caso:** `id`, `category`, `description`, `input.student`/`input.room` (o `input.features`), `tolerance`, `expected.features` (10, sin recortar), `expected.clippedFeatures` (informativo), `expected.onnx` (`factor_points` [6] y `raw_total`), `expected.result` (JSON de §6.1 paso 7: `breakdown` redondeado y `matchScore`, o `excluded`/`incomplete`). Encabezado con `modelVersion`, SHA-256 de `logreg.json`, `maxPointsRaw`, regla de redondeo, nota de .NET y tolerancias.
 - **Tolerancias:** features y `value` 1e-6; `expected.onnx` 1e-4; `points` redondeados y `matchScore` exactos (0).
 - **Regla de margen** (M-ML-033 decisión 3): todo valor no exacto queda a ≥ 1e-9 de un punto medio de round6; el generador falla si un caso la incumple (se reemplaza la entrada, no se ajusta el esperado).
+- **Fe de erratas (M-ML-046 / T02-H3, aplicada en T07 sin cambiar la versión 1.0.0):** el texto aprobado decía «incluidos los 9 excluidos y los 5 incompletos»; `tests/fixtures/baseline_golden_cases.json` tiene **70 puntuados, 6 excluidos y 5 incompletos** (81). No cambia ningún requisito ni criterio de aceptación.
 - **Sin el modelo oficial** (p. ej. en CI, donde `models/` no existe): la prueba de identidad del archivo y la paridad oficial se omiten con un motivo explícito; en CI la misma exportación y paridad corren con el modelo del perfil `ci` (`models/ci/`). La evidencia registra la corrida con el modelo oficial (un control no ejecutado no se reporta como PASS).
 
 ### 6.5 Rendimiento
@@ -221,9 +222,12 @@ Registradas en `memoria.md` (M-ML-044, APROBADO). Las versiones, licencias y el 
 | Tasks | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 0 |
+| Tasks completadas | 7 (T01–T07): T01–T06 M-ML-045 a M-ML-050 (PR #39–#44) y T07 M-ML-051 (suite completa, errata §6.4, release registrado y cierre) |
+| Release | [`model-v1.0.0`](https://github.com/thehouse-team/TheHouse-ML/releases/tag/model-v1.0.0), publicado a mano por el responsable sobre el commit `59f07bcfe1fa6cf4a0f183b568c56913980175ee` (merge del PR #43) |
+| SHA-256 de `model.onnx` | `36c867188232a6cfedd949171121f3273f606ba5057dc5d3eb24cafd672bdcc5` (el que fija NV-23; verificación por descarga del responsable 6/6 OK en `SHA256SUMS`; incidencia de publicación aceptada en M-ML-050) |
+| Fe de erratas | §6.4: 70 puntuados, 6 excluidos y 5 incompletos (no «9 excluidos»), sin cambio de versión (M-ML-046) |
 | Estado documental | **✅ APROBADA — 1.0.0** |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 (7/7), 2026-11-24 a 2026-11-25; cierre M-ML-051, ver `evidence.md`** |
 
 ## 15. Aprobación
 

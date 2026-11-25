@@ -8,14 +8,14 @@
 | Fecha | 2026-11-24 |
 | Estado documental | **✅ APROBADA — 1.0.0** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-24 (M-ML-044) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02, T03, T04, T05 y T06 completas (6/7), 2026-11-24 y 2026-11-25 (M-ML-045, M-ML-046, M-ML-047, M-ML-048, M-ML-049, M-ML-050); T07 ⛔ NO EJECUTAR HASTA «EJECUTA»; ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 (7/7), 2026-11-24 a 2026-11-25; cierre M-ML-051, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 6 |
+| Tasks completadas | 7 |
 
 ## Reglas de esta lista
 
-1. T01 (M-ML-045) y T02 (M-ML-046) completas (2026-11-24) y T03 (M-ML-047), T04 (M-ML-048), T05 (M-ML-049) y T06 (M-ML-050) completas (2026-11-25) con evidencia en `evidence.md`; T07 abierta. Escribir este documento no completa ninguna.
+1. T01 (M-ML-045) y T02 (M-ML-046) completas (2026-11-24) y T03 (M-ML-047), T04 (M-ML-048), T05 (M-ML-049) y T06 (M-ML-050) completas (2026-11-25) con evidencia en `evidence.md`; T07 (M-ML-051) completa (2026-11-25): ML-06 cerrada. Escribir este documento no completa ninguna.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA». Las decisiones 1–5 de la spec §10 están APROBADAS (M-ML-044).
 4. Un control no ejecutado no se reporta como PASS (en particular, las pruebas que necesitan el modelo oficial y se omiten en CI).
@@ -38,7 +38,7 @@
 
 ## F4 — Evidencia
 
-- [ ] **T07 · Pruebas y evidencia** — Requisito: ML-06-R07 · Aceptación: cobertura ≥ 80 % del código nuevo; ruff, mypy y pip-audit sin errores; `evidence.md` con commit, comandos, resultados, hallazgos, revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`, y verificación del release publicado (o pendiente registrado).
+- [x] **T07 · Pruebas y evidencia** — Requisito: ML-06-R07 · Aceptación: cobertura ≥ 80 % del código nuevo; ruff, mypy y pip-audit sin errores; `evidence.md` con commit, comandos, resultados, hallazgos, revisión de coherencia con `constitution.md`, `AGENTS.md` y `memoria.md`, y verificación del release publicado (o pendiente registrado).
 
 ## Matriz task → requisito
 
@@ -50,4 +50,4 @@
 | T04 | R04 | — | F3 | COMPLETA — PASS WITH WARNINGS (M-ML-048; mediana 0.0477 ms con `logreg-1.0.0`; `export` debe medir y reportar el rendimiento y la sección «Artefacto ONNX» de la model card incluirlo en T05; gitleaks y suite completa en el CI del PR) |
 | T05 | R05 | 4 | F3 | COMPLETA — PASS WITH WARNINGS (M-ML-049; paquete de 7 archivos, reproducible, no publicable con árbol sucio, paridad o casos dorados en falla; el rendimiento se reporta y no bloquea; la publicación del release `model-v1.0.0` la hace el responsable a mano después del merge, desde `main` limpio, y se registra en T07) |
 | T06 | R06 | 2, 3, 4 | F3 | COMPLETA — PASS WITH WARNINGS (M-ML-050; `docs/backend-integration.md` y `tests/unit/test_backend_integration_doc.py` en verde; incidencia del release aceptada como publicación inicial; `baseline_params.json` fijado por commit y SHA-256, en el paquete solo en `model-v1.0.1`; `Property.Price` en la spec de NV-23; suite completa y gitleaks en el CI del PR) |
-| T07 | R07 | — | F4 | ABIERTA |
+| T07 | R07 | — | F4 | COMPLETA — PASS WITH WARNINGS (M-ML-051; suite completa 2,579 passed, cobertura 96 %; errata §6.4; mypy de `tests/` corregido sin cambiar fixtures; release `model-v1.0.0` registrado; gitleaks en el CI del PR) |
