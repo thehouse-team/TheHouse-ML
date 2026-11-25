@@ -3,8 +3,8 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-06 1.0.0 (M-ML-044) |
-| Tareas ejecutadas | T01 · Dependencias y exportación verificada (ML-06-R01) |
-| Estado | **T01 completa — PASS WITH WARNINGS** (M-ML-045, APROBADO 2026-11-24) |
+| Tareas ejecutadas | T01 · Dependencias y exportación verificada (ML-06-R01); T02 · Paridad Python ↔ ONNX (ML-06-R02) |
+| Estado | **T01 completa — PASS WITH WARNINGS** (M-ML-045, APROBADO 2026-11-24); **T02 completa — PASS WITH WARNINGS** (M-ML-046, APROBADO 2026-11-24) |
 | Autorización (T01) | «EJECUTA ML-06 1.0.0, task T01. Rama: feat/ml-06-export (ya creada desde main actualizado, con la spec ML-06 1.0.0 aprobada en M-ML-044). Se autoriza modificar pyproject.toml y uv.lock SOLO para agregar las dependencias onnx y onnxruntime que pide la spec (respetando exclude-newer 2026-10-27 de uv). Se autoriza crear/modificar los archivos de código y pruebas que la task T01 indique en el plan de ML-06. Ninguna otra ruta fuera de las listadas en el plan» — César Yael López Trujillo, 2026-11-24 |
 | Rama | `feat/ml-06-export` (commit base `a046abf`, merge del PR #38) |
 | Commit | Sin commit ni push, por instrucción del responsable |
@@ -128,3 +128,128 @@ Lecturas previas, en el orden obligatorio de `AGENTS.md`: `constitution.md` (§5
 | M-ML-041 / M-ML-044 | Recorte con `Max`/`Min`, calibración afín por factor, `maxPointsRaw` en metadatos, `Add` encadenado en el orden de Python; desviación T05-H1 conservada (no se tocó el coeficiente) |
 
 **Resultado T01: PASS WITH WARNINGS** — T01-H1, T01-H2 y T01-H8 (advertencias). T01 completa con M-ML-045 (APROBADO, César Yael López Trujillo, 2026-11-24).
+
+---
+
+## T02 · Paridad Python ↔ ONNX
+
+| Campo | Valor |
+| --- | --- |
+| Autorización | «EJECUTA ML-06 1.0.0, task T02» — César Yael López Trujillo, 2026-11-24. Rama `feat/ml-06-t02` (desde `main` con T01 mezclada, PR #39). Solo archivos de código, pruebas y fixtures que indique T02 en el plan, más `evidence.md` y `task.md`; **no** `pyproject.toml`, `uv.lock`, `.gitignore` ni `memoria.md` |
+| Commit base | `0cf2e9a` (merge del PR #39) |
+| Commit | Sin commit ni push, por instrucción del responsable |
+| Fecha de ejecución | 2026-11-24 |
+| Estado | **PASS WITH WARNINGS** — T02 completa |
+| Aprobación (T02) | «Apruebo ML-06 T02 (César Yael López Trujillo, 2026-11-24)», con decisiones: correcto seguir la spec (casos dorados de logreg en T03); grafo sin cambios y regla `-0` → `0` para NV-23 documentada en T06; errata de la §6.4 al cerrar la spec en T07; `score_matrix` aceptado para la rejilla; `export` solo reporta y T05 debe marcar no publicable si la paridad falla; autoriza `memoria.md` y `task.md` |
+| Decisión | **M-ML-046 (APROBADO, 2026-11-24)**, registrada en `memoria.md` |
+
+Lecturas previas: `spec.md` (§6.1, §6.3, §6.4, §9 R02/R03), `plan.md`, `task.md`, esta evidencia (T01) y M-ML-045 en `memoria.md`; código de T01 (`onnx_graph.py`, `package.py`), `trained_breakdown.py` (`score_features_logreg`, `score_matrix`), `baseline_score.py` (`round_half_up`, `factor_points`, `match_score`), `tests/golden_recount.py` y `tests/fixtures/baseline_golden_cases.json`.
+
+### Aclaración del alcance (prompt ↔ spec)
+
+El «EJECUTA» describe T02 como «paridad ONNX vs Python **y casos dorados de logreg con recuento independiente**». En la spec, el generador con recuento independiente y `tests/fixtures/logreg_golden_cases.json` son **T03** (§6.4, ML-06-R03, plan F2); T02 (ML-06-R02) es la paridad en los pares de test, la rejilla fuera del `training_range` y los casos dorados como conjunto de entrada, más la prueba de que todo es double. **Se siguió la spec** (instrucción 1 del «EJECUTA»): no se creó el generador ni `logreg_golden_cases.json`. Como conjunto de casos dorados se usaron los **70 vectores `expected.features` de los casos puntuados de `baseline_golden_cases.json`**, que ya vienen del recuento independiente de ML-04 (`tests/golden_recount.py`, fracciones exactas, sin importar `thehouse_ml`). Cuando exista el archivo de T03, su paridad contra el ONNX es parte de la aceptación de T03 (T02-H2).
+
+### Qué se hizo
+
+1. **`src/thehouse_ml/export/parity.py`** (nuevo):
+   - `check_parity(name, model_bytes, model, features)` → `ParityResult`: ejecuta el ONNX en onnxruntime CPU y lo compara con la referencia de Python; reporta máx. \|dif\| en `factor_points` y `raw_total`, filas con algún punto redondeado distinto, filas con `matchScore` distinto, celdas negativas del ONNX y hasta 10 filas con diferencias (vector, puntos y `matchScore` de ambos lados). `passed` exige ≥ 1 fila, \|dif\| ≤ 1e-4 y 0 diferencias redondeadas. **La tolerancia no se ajustó.**
+   - **Referencia de Python:** `score_features_logreg` fila por fila (puntos sin redondear, `rawTotal`, puntos redondeados y `matchScore` del paquete). Solo para vectores fuera del `range` del esquema (los rechaza `score_features_logreg`, que valida como el baseline) se usa `score_matrix`, el mismo cálculo interno, con `factor_points`/`match_score` del paquete (T02-H4). El reporte dice cuántas filas fueron por cada camino.
+   - **Redondeo de las salidas del ONNX** con la regla del backend (spec §6.1 paso 6): `backend_round` = .NET `Math.Round(x, d, MidpointRounding.AwayFromZero)` (`round_half_up` del paquete sobre la magnitud, con el signo, y `-0.0` normalizado a `0.0`); puntos = round(round6(x), 1); `matchScore` = round(round6(raw_total), 0) recortado a [0, 100] (T02-H1).
+   - `out_of_range_grid(lower, upper)`: rejilla determinista de **380 vectores** con los límites del recorte de `logreg.json`: sobre 3 bases (esquina inferior, centro, esquina superior), cada feature sola en cada límite y por debajo/encima con desplazamientos de 1e-9, 1e-6, 0.1, 1 y 10 veces el ancho (360); y todas a la vez por debajo, por encima y alternadas (20).
+   - `run_onnx_clipped` / `clip_matches_np_clip`: exponen el tensor intermedio `clipped` del grafo en una copia del modelo y lo comparan **bit a bit** con `np.clip` con los límites leídos de `logreg.json`.
+2. **Etapa `export`** (`package.py`): el resumen informativo de T01 (`OnnxRunSummary`) se reemplaza por la paridad formal en los pares de test (si existe `data/processed/`) y en la rejilla, con veredicto PASS/FALLA por conjunto. La etapa no cambia el `model.onnx` ni falla si la paridad falla: la condición de «publicable» es de T05 (T02-H5). Mensaje de consola sin «§» (cp1252).
+3. **Pruebas** nuevas: `tests/unit/test_onnx_parity.py` (25, modelo sintético, sin `models/`) y `tests/integration/test_onnx_parity_official.py` (6, modelo oficial; se omiten con motivo explícito sin `models/logreg.json` oficial o sin `data/processed/`).
+
+### Archivos
+
+| Área | Archivo | Cambio |
+| --- | --- | --- |
+| Código | `src/thehouse_ml/export/parity.py` | Nuevo: comparación, redondeo del backend, rejilla, recorte vs `np.clip` |
+| Código | `src/thehouse_ml/export/package.py` | La etapa `export` reporta la paridad formal (pares de test y rejilla); `load_test_pair_features`, `run_on_grid`; se quita `OnnxRunSummary` |
+| Pruebas | `tests/unit/test_onnx_parity.py` | Nuevo (25 pruebas) |
+| Pruebas | `tests/integration/test_onnx_parity_official.py` | Nuevo (6 pruebas con el modelo oficial) |
+| Evidencia | `specs/ml-06-onnx-export/evidence.md` | Esta sección y el encabezado |
+
+No se modificaron `pyproject.toml`, `uv.lock`, `.gitignore`, `memoria.md`, `task.md`, `onnx_graph.py`, `logreg.json`, `feature_schema.json` ni ningún params.
+
+### Resultados de la paridad (modelo oficial `logreg-1.0.0`, SHA-256 `341ea3ec…0b27fa`)
+
+| Conjunto | Vectores | Referencia | máx. \|dif\| `factor_points` | máx. \|dif\| `raw_total` | Dif. puntos redondeados | Dif. `matchScore` | Celdas < 0 del ONNX (mín.) | Recorte = `np.clip` | Resultado |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Pares de test de ML-05 | 30,755 | 30,755 `score_features_logreg` | 2.842e-14 | 4.263e-14 | **0** | **0** | 21,102, todas en `place_type` (−2.45e-16) | ✅ bit a bit | **PASS** |
+| Rejilla fuera del `training_range` | 380 | 80 `score_features_logreg` + 300 `score_matrix` | 1.421e-14 | 1.421e-14 | **0** | **0** | 243: 107 `distance`, 136 `place_type` (−7.85e-15) | ✅ bit a bit | **PASS** |
+| Casos dorados (vectores del recuento independiente del baseline) | 70 | 70 `score_features_logreg` | 1.421e-14 | 1.421e-14 | **0** | **0** | 5 en `place_type` (−2.45e-16) | ✅ bit a bit | **PASS** |
+
+Tolerancias de la spec §6.3: \|dif\| ≤ 1e-4 sin redondear y 0 en redondeados y `matchScore`; cumplidas con margen (máx. observado 4.3e-14, del orden esperado con double). **Ningún caso dio diferencia en `matchScore`.** Tipos: entrada, salidas, las 8 constantes y los 17 tensores intermedios inferidos son `tensor(double)`; solo los 6 índices escalares de `Gather` son int64; ningún float32.
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run python -m thehouse_ml export` (perfil `full`, 2 ejecuciones) | `logreg.json` SHA-256 `341ea3ec…0b27fa` verificado = spec §1; paridad: pares de test 30,755 → PASS; rejilla 380 → PASS; `model.onnx` SHA-256 `8a407e7a4192d056c95862ce6b7eda2cc22b44c1b2c6b72a91cb56a4d2866eca` las 2 veces (reproducible); `gitCommit` = `0cf2e9a…-dirty` |
+| `uv run ruff check src tests` | `All checks passed!` ✅ |
+| `uv run ruff format --check src tests` | `121 files already formatted` ✅ |
+| `uv run mypy` (estricto) | `Success: no issues found in 55 source files` ✅ |
+| `uv run pytest tests/unit/test_onnx_parity.py tests/integration/test_onnx_parity_official.py tests/unit/test_onnx_graph.py tests/integration/test_export_stage.py tests/unit/test_cli.py tests/unit/test_stages.py tests/integration/test_installed_package.py tests/test_repo_hygiene.py --cov=thehouse_ml.export --cov-report=term-missing -rs` | **129 passed** en 13.1 s, **0 omitidas** (corrieron las pruebas con el modelo oficial y con `data/processed/`); cobertura de `thehouse_ml.export` **98 %** (`parity.py` 99 %, `package.py` 96 %, `onnx_graph.py` 99 %) |
+| Búsqueda de asignaciones `key/token/secret/password = "<literal>"` en los archivos nuevos o cambiados | Ninguna |
+| Búsqueda de `pickle`/`joblib`/`dill` en `src/thehouse_ml/export/` y en las pruebas nuevas | Solo menciones en docstrings («sin pickle») |
+| gitleaks | **No ejecutado localmente** (no instalado); lo corre el CI. No se reporta como PASS |
+| Suite completa | **No ejecutada** por instrucción del responsable; la corre el CI |
+| pip-audit | No aplica: T02 no cambia dependencias |
+
+Plataforma: Windows 11 (10.0.26200), Python 3.12.16, onnxruntime 1.31.1 (`CPUExecutionProvider`).
+
+### Aceptación de T02 (ML-06-R02)
+
+| Criterio | Resultado |
+| --- | --- |
+| Pares de test: \|dif\| ≤ 1e-4, 0 en redondeados y `matchScore` | ✅ 30,755 pares (`test_parity_on_the_test_pairs`) |
+| Rejilla fuera del `training_range` | ✅ 380 vectores (`test_parity_on_the_out_of_range_grid`) |
+| Casos dorados | ✅ con los 70 vectores del recuento independiente del baseline (`test_parity_on_the_golden_case_vectors`); **pendiente** la paridad contra `logreg_golden_cases.json` de T03 (T02-H2) |
+| Máximo \|dif\| reportado | ✅ tabla de resultados y mensaje de `export` |
+| Entradas, constantes y salidas double | ✅ `test_all_inputs_constants_intermediates_and_outputs_are_double` (incluye los tensores intermedios) y las pruebas de T01 |
+| Recorte = `np.clip` con los límites de `logreg.json` | ✅ bit a bit en los tres conjuntos |
+
+### Hallazgos
+
+| ID | Clasificación | Hallazgo | Acción |
+| --- | --- | --- | --- |
+| T02-H1 | Advertencia | El ONNX devuelve **negativos del orden de 1e-16 a 1e-15** en un factor que está en su mínimo, donde Python da 0 exacto (21,102 celdas de `place_type` en test; también `distance` en la rejilla). Está dentro de 1e-4 y no cambia ningún redondeo, pero: (a) `round_half_up` del paquete **rechaza** negativos (por eso las salidas del ONNX se redondean con `backend_round`); (b) en .NET, `Math.Round(-2.45e-16, 6, AwayFromZero)` da **`-0.0`**, que `System.Text.Json` escribe como `-0`. Causa: el ONNX calcula `(C_k − min_k) · (100/S)` con `MatMul`, y Python suma la ganancia término a término | Propuesta en M-ML-046: el backend normaliza `-0` a `0` (o aplica `max(0, x)`) después del redondeo; T06 lo documenta en la guía y T03 incluye un caso dorado con un factor en su mínimo. **No** se cambió el grafo ni la tolerancia |
+| T02-H2 | Aclaración del «EJECUTA» | El prompt incluía en T02 los casos dorados con recuento independiente; en la spec son T03 (§6.4, R03). Se siguió la spec | El generador, `logreg_golden_cases.json` y su paridad contra el ONNX quedan para el «EJECUTA» de T03 |
+| T02-H3 | Discrepancia documental | La spec §6.4 dice «incluidos los 9 excluidos y los 5 incompletos»; `baseline_golden_cases.json` tiene **70 puntuados, 6 excluidos y 5 incompletos** (81) | Corregir el texto en la próxima versión de la spec o tomar nota en T03; no afecta a T02 |
+| T02-H4 | Decisión técnica | 300 de los 380 vectores de la rejilla están fuera del `range` del esquema (p. ej. negativos o > 1 en features acotadas) y `score_features_logreg` los rechaza; para ellos la referencia es `score_matrix` (el mismo cálculo interno) con el redondeo del paquete. El reporte separa ambos conteos | Registrado en M-ML-046 |
+| T02-H5 | Informativo | La etapa `export` reporta la paridad (PASS/FALLA) pero no falla ni borra el `model.onnx` si la paridad falla: la condición de «publicable» es de T05 | T05 usa `ParityResult.passed` para marcar el paquete |
+| T02-H6 | Advertencia | El `model.onnx` regenerado (`8a407e7a…`, `gitCommit` `0cf2e9a…-dirty`) no es publicable; `dist/` sigue sin estar en `.gitignore` (T01-H1) | No hacer `git add dist/`; paquete publicable en T05 desde un commit limpio |
+| T02-H7 | Control no ejecutado | gitleaks local y suite completa | Revisar el CI del PR |
+
+### Decisión registrada (APROBADO, `memoria.md`)
+
+**M-ML-046 — ML-06 T02: paridad Python ↔ ONNX y normalización de `-0` en el backend** — APROBADO (resumen; el texto completo está en `memoria.md`)
+
+- **Decisión:** completar **ML-06 T02** (ML-06-R02) con estas elecciones:
+  1. **Módulo** `src/thehouse_ml/export/parity.py` (`check_parity`, `ParityResult`, `out_of_range_grid`, `clip_matches_np_clip`); la etapa `export` reporta la paridad formal en los pares de test y en la rejilla.
+  2. **Referencia de Python:** `score_features_logreg`; para vectores fuera del `range` del esquema (solo en la rejilla), `score_matrix` con el redondeo del paquete (T02-H4).
+  3. **Redondeo de las salidas del ONNX** como el backend: `Math.Round(x, d, MidpointRounding.AwayFromZero)` sobre round6, con `-0.0` normalizado a `0.0` (T02-H1). **Regla para NV-23** (a documentar en T06): después de redondear cada factor y el total, normalizar `-0` a `0` (o recortar a `max(0, x)`), porque el ONNX puede devolver negativos de ~1e-16 en un factor en su mínimo; el grafo **no** se cambia.
+  4. **Rejilla** determinista de 380 vectores (3 bases × 10 features × 12 valores + 20 con todas las features fuera a la vez).
+  5. **Casos dorados en T02:** los 70 vectores del recuento independiente de `baseline_golden_cases.json`; la paridad contra `logreg_golden_cases.json` se agrega en T03 (T02-H2).
+- **Evidencia:** `specs/ml-06-onnx-export/evidence.md` (T02): 30,755 pares de test, 380 vectores de rejilla y 70 casos dorados con máx. \|dif\| 4.3e-14 y **0** diferencias en puntos redondeados y `matchScore`; recorte idéntico a `np.clip`; todo double; 129 pruebas nuevas o afectadas en verde (0 omitidas), cobertura de `thehouse_ml.export` 98 %; ruff y mypy estricto sin errores.
+- **Pendientes:** paridad contra `logreg_golden_cases.json` (T03); corrección del «9 excluidos» de la spec §6.4 (T02-H3); nota de `-0` en la guía (T06); gitleaks y suite completa en el CI del PR.
+- **Estado:** APROBADO — César Yael López Trujillo — 2026-11-24. Además: regla para NV-23 «después del redondeo AwayFromZero, normalizar `-0` a `0` en factor_points y matchScore antes de escribir el JSON» (T06); T05 **debe** marcar el paquete no publicable si la paridad falla; errata de la §6.4 al cerrar la spec en T07 sin cambiar la versión 1.0.0.
+- **Impacto:** T02 de ML-06 lista para cerrarse (2/7) con la aprobación; sin cambios en el grafo, modelos, `feature_schema.json`, params ni dependencias.
+
+### Seguridad, datos y licencias
+
+- Sin pickle, joblib ni dill; sin dependencias nuevas; sin red ni secretos en las pruebas; sin servicios de pago (COST-001 $0, `CPUExecutionProvider`).
+- `models/`, `data/` y `dist/` sin versionar (`git status`: `?? dist/`, ver T02-H6). La paridad solo compara puntajes de los pares de test; no recalcula métricas ni ajusta nada (spec §6.3).
+- Sin datos personales: vectores de features sintéticas y entradas inventadas de los casos dorados.
+
+### Coherencia
+
+| Documento | Comprobación |
+| --- | --- |
+| `constitution.md` §8, §13.1, §13.4, §15 | Métricas: ninguna nueva; sin pickle; paridad Python ↔ runtime demostrada; $0 |
+| `AGENTS.md` | Sin commit ni push; controles no ejecutados declarados; spec seguida sobre el prompt y desviación avisada; T02 marcada completa solo tras el «Apruebo» |
+| M-ML-029/031/033 | Redondeo round6 → 1 decimal mitad lejos de cero; total `floor(round6(Σ) + 0.5)`; bordes 68.49999999999999 → 69 y 13.349999999999998 → 13.4 probados |
+| M-ML-041 / M-ML-044 / M-ML-045 | Grafo de T01 sin cambios (`onnx_graph.py` intacto); `raw_total` con `Add` encadenado; desviación T05-H1 conservada |
+
+**Resultado T02: PASS WITH WARNINGS** — T02-H1 y T02-H6 (advertencias), T02-H2 y T02-H3 (alcance/documental), T02-H7 (controles no ejecutados). T02 completa con M-ML-046 (APROBADO, César Yael López Trujillo, 2026-11-24).
