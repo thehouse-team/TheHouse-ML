@@ -3,8 +3,8 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-06 1.0.0 (M-ML-044) |
-| Tareas ejecutadas | T01 · Dependencias y exportación verificada (ML-06-R01); T02 · Paridad Python ↔ ONNX (ML-06-R02); T03 · Casos dorados de `logreg-1.0.0` (ML-06-R03) |
-| Estado | **T01 completa — PASS WITH WARNINGS** (M-ML-045, APROBADO 2026-11-24); **T02 completa — PASS WITH WARNINGS** (M-ML-046, APROBADO 2026-11-24); **T03 completa — PASS WITH WARNINGS** (M-ML-047, APROBADO 2026-11-25) |
+| Tareas ejecutadas | T01 · Dependencias y exportación verificada (ML-06-R01); T02 · Paridad Python ↔ ONNX (ML-06-R02); T03 · Casos dorados de `logreg-1.0.0` (ML-06-R03); T04 · Rendimiento (ML-06-R04) |
+| Estado | **T01 completa — PASS WITH WARNINGS** (M-ML-045, APROBADO 2026-11-24); **T02 completa — PASS WITH WARNINGS** (M-ML-046, APROBADO 2026-11-24); **T03 completa — PASS WITH WARNINGS** (M-ML-047, APROBADO 2026-11-25); **T04 completa — PASS WITH WARNINGS** (M-ML-048, APROBADO 2026-11-25) |
 | Autorización (T01) | «EJECUTA ML-06 1.0.0, task T01. Rama: feat/ml-06-export (ya creada desde main actualizado, con la spec ML-06 1.0.0 aprobada en M-ML-044). Se autoriza modificar pyproject.toml y uv.lock SOLO para agregar las dependencias onnx y onnxruntime que pide la spec (respetando exclude-newer 2026-10-27 de uv). Se autoriza crear/modificar los archivos de código y pruebas que la task T01 indique en el plan de ML-06. Ninguna otra ruta fuera de las listadas en el plan» — César Yael López Trujillo, 2026-11-24 |
 | Rama | `feat/ml-06-export` (commit base `a046abf`, merge del PR #38) |
 | Commit | Sin commit ni push, por instrucción del responsable |
@@ -412,3 +412,150 @@ No se modificaron `pyproject.toml`, `uv.lock`, `.gitignore`, `memoria.md`, `task
 | M-ML-044 / M-ML-045 / M-ML-046 | `onnx_graph.py` y `parity.py` intactos; `-0` → `0` en el redondeo del backend; T02-H2 resuelto |
 
 **Resultado T03: PASS WITH WARNINGS** — T03-H1 (desviación aprobada), T03-H4 (advertencia conocida), T03-H6 y T03-H10 (pendientes fuera de las rutas autorizadas o de otras tasks), T03-H9 (controles no ejecutados). T03 completa con M-ML-047 (APROBADO, César Yael López Trujillo, 2026-11-25).
+
+## T04 · Rendimiento
+
+| Campo | Valor |
+| --- | --- |
+| Autorización | «EJECUTA ML-06 1.0.0, task T04» — César Yael López Trujillo, 2026-11-25. Rama `feat/ml-06-t04` (desde `main` con T01, T02 y T03 mezcladas, PR #39, #40 y #41). Solo lo que T04 indica en el plan, más `evidence.md` y `task.md`; **no** `pyproject.toml`, `uv.lock`, `.gitignore`, `memoria.md`, `onnx_graph.py` ni `.github/workflows/` |
+| Commit base | `52e3949` (merge del PR #41) |
+| Commit | Sin commit ni push, por instrucción del responsable |
+| Fecha de ejecución | 2026-11-25 |
+| Estado | **PASS WITH WARNINGS** — T04 completa |
+| Aprobación (T04) | «Apruebo ML-06 T04 (César Yael López Trujillo, 2026-11-25)», con decisiones: T04-H1 a T04-H4 aprobados tal como se describieron; T04-H5 pendiente para T05 (`export` debe medir y reportar el rendimiento y la sección «Artefacto ONNX» de la model card debe incluirlo); autoriza `memoria.md` y `task.md` |
+| Decisión | **M-ML-048 (APROBADO, 2026-11-25)**, registrada en `memoria.md` |
+
+Lecturas previas: `spec.md` (§4.5, §6.5, §6.6, §9 R04, §12 RK05), `plan.md` (F3 y ubicación de `benchmark.py`), `task.md`, esta evidencia (T01–T03) y M-ML-045, M-ML-046 y M-ML-047 en `memoria.md`; `src/thehouse_ml/export/` (`onnx_graph.py`, `parity.py`, `package.py`), `tests/integration/test_onnx_parity_official.py`, `tests/unit/test_onnx_parity.py` y `.github/workflows/ci.yml`.
+
+**Prompt ↔ spec:** sin contradicciones. La spec §6.5 fija la métrica (mediana), el lote (200 cuartos de pares de test), el calentamiento (10), las corridas (100), el reloj (`time.perf_counter_ns`), la sesión creada una vez y que en CI la prueba es humo informativo sin umbral estricto; se siguió tal cual. El timeout del CI no se tocó.
+
+### Qué se hizo
+
+1. **Módulo `src/thehouse_ml/export/benchmark.py`** (nuevo; ubicación del plan):
+   - `benchmark_batch`: las **primeras 200 filas** de los pares de test (orden de `data/processed/`, determinista) como tensor `[200, 10]` contiguo en double; falla si hay menos de 200 o la forma no es `[N, 10]`.
+   - `run_benchmark`: crea la `InferenceSession` **una sola vez** con `CPUExecutionProvider` y `SessionOptions` (`intra_op_num_threads`, `inter_op_num_threads`; 0 = valor por omisión de onnxruntime) y prepara el tensor de entrada **antes** de medir; comprueba una vez la forma de las salidas (`factor_points` [200, 6], `raw_total` [200]); **10 corridas de calentamiento** descartadas; **100 corridas medidas**, cada una con `time.perf_counter_ns` alrededor de **una sola** llamada a `session.run` con las dos salidas del contrato. La creación de la sesión no cuenta.
+   - `BenchmarkResult`: mediana (`statistics.median`), **p95** (`numpy.percentile`, método lineal), máximo, mínimo y media en ms; criterio `passed` = **mediana < 20 ms** (estricto); `as_dict()` y `summary()` con hilos y entorno (CPU, CPUs lógicas, SO, Python, onnxruntime, proveedores).
+   - `cpu_name()`: nombre comercial del CPU (registro de Windows o `/proc/cpuinfo`; si no, `platform.processor()`), solo lectura.
+   - `main` (`python -m thehouse_ml.export.benchmark [hilos_intra_op]`): mide el **`model.onnx` que escribe `export`** (`dist/model-v1.0.0/` o `dist/ci/` según el perfil) con los pares de test e imprime el resumen y el JSON; código 0 si pasa y 1 si falla o faltan el modelo o los datos.
+2. **Pruebas:**
+   - `tests/unit/test_onnx_benchmark.py` (nuevo, 20 pruebas; sin `models/` ni `data/`): parámetros de la §6.5, lote, estadísticos (mediana y p95 lineal), criterio estricto (20 ms no pasa; un pico aislado no cambia la mediana), medición vacía no pasa, campos del reporte, configuración de hilos, argumentos inválidos, `main` (sin modelo, sin pares de test y camino exitoso con pares sustituidos) y **humo** con un modelo sintético: corre la medición completa (10 + 100) y solo exige una **cota de cordura de 1,000 ms** (50 × el presupuesto) para no volver inestable el CI.
+   - `tests/integration/test_onnx_benchmark_official.py` (nuevo, 1 prueba): con el modelo oficial (SHA-256 `341ea3ec…0b27fa`, exportado a un directorio temporal con `export_model`) y los primeros 200 pares de test, exige **mediana < 20 ms**. Sin `models/` o sin `data/processed/` se omite con motivo explícito (ML-06-RK05).
+
+### Mediciones (modelo oficial `logreg-1.0.0`)
+
+Artefacto medido: `dist/model-v1.0.0/model.onnx` de `uv run python -m thehouse_ml export` (perfil `full`, opset 17; SHA-256 `e7b1cf75e164e07b956af0c67f7decf55416bd39a6f64f46cc4abbc99a1e0a70`; `gitCommit` `52e3949…`; no publicable, el paquete publicable es de T05). `logreg.json` verificado (`341ea3ec…0b27fa`); en la misma exportación, paridad en los 30,755 pares de test y en los 380 vectores de la rejilla con máx. \|dif\| 4.3e-14 y 0 diferencias en puntos redondeados y `matchScore`.
+
+| Corrida | Hilos (`intra_op` / `inter_op`) | Mediana | p95 | Máximo | Mínimo | Media | Criterio (mediana < 20 ms) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Oficial (1.ª) | 0 / 0 (por omisión) | **0.0477 ms** | 0.0779 ms | 0.3342 ms | 0.0472 ms | 0.0550 ms | **PASS** |
+| Repetición 2 | 0 / 0 | 0.0466 ms | 0.0490 ms | 0.1153 ms | — | — | PASS |
+| Repetición 3 | 0 / 0 | 0.0490 ms | 0.0765 ms | 0.1705 ms | — | — | PASS |
+| Repetición 4 | 0 / 0 | 0.0554 ms | 0.0599 ms | 0.1445 ms | — | — | PASS |
+| Informativa | 1 / 0 | 0.0470 ms | 0.0556 ms | 0.2195 ms | — | — | PASS |
+
+La mediana queda unas **400 veces** por debajo del presupuesto de 20 ms (constitución §13.5); incluso el máximo de cada corrida está por debajo de 0.34 ms. Con 1 hilo intra-op el resultado es prácticamente igual: el grafo (pocos nodos elementales sobre 200 × 10 doubles) es demasiado pequeño para que el paralelismo importe.
+
+**Máquina (oficial):**
+
+| Campo | Valor |
+| --- | --- |
+| CPU | 13th Gen Intel(R) Core(TM) i7-13620H — 10 núcleos físicos, 16 lógicos (2.4 GHz base) |
+| Memoria | 15.7 GiB |
+| SO | Windows 11 Home Single Language (`Windows-11-10.0.26200-SP0`), AMD64 |
+| Python | 3.12.16 (CPython, MSC v.1944 64 bit) |
+| onnxruntime | 1.31.1 (`uv.lock`), `CPUExecutionProvider` |
+| Hilos | `intra_op_num_threads` = 0 y `inter_op_num_threads` = 0 (onnxruntime decide; ejecución secuencial por omisión); corrida informativa con `intra_op_num_threads` = 1 |
+| Sesión | Creada **una vez** antes del calentamiento; su creación no se cuenta |
+| Lote | Primeros 200 pares de test de ML-05, `[200, 10]` double contiguo, preparado antes de medir |
+| Reloj | `time.perf_counter_ns`, una llamada a `session.run` por medida |
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `sha256sum models/logreg.json` | `341ea3ec705c2f877b36d1b931eafe2dea4630523560fe8764ce59e0a70b27fa` = spec §1 ✅ |
+| `uv run python -m thehouse_ml export` | `dist/model-v1.0.0/model.onnx` (SHA-256 `e7b1cf75…1e0a70`); paridad PASS en pares de test y rejilla |
+| `uv run python -m thehouse_ml.export.benchmark` (4 veces) | Mediana 0.0477 / 0.0466 / 0.0490 / 0.0554 ms; **PASS**; código de salida 0 |
+| `uv run python -m thehouse_ml.export.benchmark 1` | Mediana 0.0470 ms; PASS (informativo, 1 hilo intra-op) |
+| `uv run pytest tests/unit/test_onnx_benchmark.py tests/integration/test_onnx_benchmark_official.py tests/test_repo_hygiene.py -rs` (nuevas + afectadas) | **71 passed**, **0 omitidas** (la prueba oficial corrió con el modelo y los datos) |
+| Cobertura de `thehouse_ml.export.benchmark` en esas pruebas | **88 %** (sin cubrir en Windows: la lectura de `/proc/cpuinfo` de Linux, el respaldo `platform.processor()` y la guarda `if __name__ == "__main__"`) |
+| Simulación sin el modelo oficial (copia de la prueba oficial con `OFFICIAL_MODELS` en un directorio inexistente, en el scratchpad) | **1 skipped** con el motivo «models/logreg.json oficial ausente (fuera de git; en CI corre solo el humo, ML-06-RK05)» |
+| `uv run ruff check src tests` | `All checks passed!` ✅ |
+| `uv run ruff format --check src tests` | `126 files already formatted` ✅ |
+| `uv run mypy` (estricto; la configuración cubre `src`) | `Success: no issues found in 56 source files` ✅ |
+| `uv run mypy --strict tests/unit/test_onnx_benchmark.py tests/integration/test_onnx_benchmark_official.py` (informativo) | `Success: no issues found in 2 source files` ✅ |
+| Búsqueda de asignaciones `key/token/secret/password = "<literal>"` en los archivos nuevos | Ninguna |
+| Búsqueda de `pickle`/`joblib`/`dill` en los archivos nuevos | Ninguna (además `test_no_module_of_the_package_uses_pickle` en verde) |
+| `git status --short --ignored models dist data` | `!! models/`, `!! data/processed/`, `!! data/raw/` (ignorados); `?? dist/` (sin versionar; `/dist/` llega en T05) |
+| gitleaks | **No ejecutado localmente** (no instalado); lo corre el CI. No se reporta como PASS |
+| Suite completa | **No ejecutada** por instrucción del responsable; la corre el CI |
+| pip-audit | No aplica: T04 no cambia dependencias |
+
+### Archivos
+
+| Área | Archivo | Cambio |
+| --- | --- | --- |
+| Código | `src/thehouse_ml/export/benchmark.py` | Nuevo: medición de la spec §6.5 y `python -m thehouse_ml.export.benchmark` |
+| Pruebas | `tests/unit/test_onnx_benchmark.py` | Nuevo: 20 pruebas (humo de CI incluido) |
+| Pruebas | `tests/integration/test_onnx_benchmark_official.py` | Nuevo: criterio de 20 ms con el modelo oficial (se omite en CI) |
+| Evidencia | `specs/ml-06-onnx-export/evidence.md` | Encabezado y esta sección |
+
+No se modificaron `pyproject.toml`, `uv.lock`, `.gitignore`, `memoria.md`, `task.md`, `.github/workflows/`, `onnx_graph.py`, `parity.py`, `package.py`, `stages.py`, `logreg.json`, `feature_schema.json` ni ningún params. El grafo y el objetivo de 20 ms no cambiaron.
+
+### Aceptación de T04 (ML-06-R04)
+
+| Criterio | Resultado |
+| --- | --- |
+| 200 cuartos en onnxruntime CPU (`CPUExecutionProvider`) | ✅ `[200, 10]` de los pares de test |
+| 10 corridas de calentamiento y 100 medidas con `time.perf_counter_ns` | ✅ |
+| Sesión ya cargada (la carga no cuenta) | ✅ creada una vez antes del calentamiento |
+| Mediana < 20 ms | ✅ **0.0477 ms** (y 0.047–0.055 ms en las repeticiones) |
+| p95, máximo, hilos y CPU/SO reportados | ✅ tablas de arriba y `as_dict()` |
+| Oficial en la máquina local documentada; humo informativo en CI sin umbral estricto | ✅ prueba oficial local (omitida en CI con motivo); humo en `tests/unit/` con cota de cordura de 1,000 ms |
+
+### Hallazgos
+
+| ID | Clasificación | Hallazgo | Acción |
+| --- | --- | --- | --- |
+| T04-H1 | Decisión técnica | La spec dice «200 cuartos tomados de pares de test» sin fijar cuáles. Se toman los **primeros 200** en el orden de `data/processed/` (determinista, sin semilla). El costo del grafo no depende de los valores | Aprobado en M-ML-048 |
+| T04-H2 | Decisión técnica | Hilos: la medición oficial usa los **valores por omisión de onnxruntime** (`intra_op` = `inter_op` = 0), los que tendría un consumidor que no configura nada; 1 hilo intra-op da el mismo resultado (informativo) | Aprobado en M-ML-048 |
+| T04-H3 | Decisión técnica | p95 con `numpy.percentile` (método lineal) y mediana con `statistics.median`; el criterio es estricto (20.0 ms no pasa) | Aprobado en M-ML-048 |
+| T04-H4 | Decisión técnica | Humo en CI: la prueba de `tests/unit/` corre la medición completa con un modelo sintético y solo exige una **cota de cordura de 1,000 ms** (50 × el presupuesto), no los 20 ms; el criterio de la spec solo se exige en la prueba oficial local (omitida en CI, RK05). No se tocó el CI ni su timeout | Aprobado en M-ML-048 |
+| T04-H5 | Pendiente para T05 (aprobado) | La etapa `export` **no** ejecuta la medición (no se tocaron `package.py` ni `stages.py`): la medición es `python -m thehouse_ml.export.benchmark` sobre el `model.onnx` exportado. La sección «Artefacto ONNX» de `model_card.md` (spec §6.6) debe incluir el rendimiento: T05 puede llamar a `run_benchmark` o citar esta evidencia | T05: `export` debe medir y reportar el rendimiento y la model card incluirlo (M-ML-048) |
+| T04-H6 | Informativo | La cifra mide solo la inferencia de onnxruntime desde Python. La latencia por solicitud del backend (features, reglas, redondeo y JSON en .NET con `Microsoft.ML.OnnxRuntime`) no se mide aquí; es de NV-23 | Ninguna; mencionar en la guía (T06) que el presupuesto del ONNX es holgado |
+| T04-H7 | Informativo | El `model.onnx` medido (`e7b1cf75…`) lleva `gitCommit` `52e3949…` sin `-dirty` porque los archivos nuevos de T04 están sin versionar (regla de M-ML-045 decisión 7); no es publicable y `benchmark.py` no cambia sus bytes | Ninguna; el paquete publicable sale en T05 desde un commit limpio |
+| T04-H8 | Control no ejecutado | gitleaks local y suite completa | Revisar el CI del PR |
+
+### Decisión registrada (APROBADO, `memoria.md`)
+
+**M-ML-048 — ML-06 T04: rendimiento de `logreg-1.0.0` en onnxruntime CPU**
+
+- **Decisión:** completar **ML-06 T04** (ML-06-R04) con estas elecciones:
+  1. **Módulo** `src/thehouse_ml/export/benchmark.py` (`benchmark_batch`, `run_benchmark`, `BenchmarkResult`, `cpu_name`, `main`) con la medición de la spec §6.5 sin cambios: `CPUExecutionProvider`, sesión creada una vez (la carga no cuenta), lote `[200, 10]` double, 10 corridas de calentamiento descartadas y 100 medidas con `time.perf_counter_ns` alrededor de una sola llamada a `session.run`; criterio **mediana < 20 ms** (estricto). Se ejecuta con `uv run python -m thehouse_ml.export.benchmark` sobre el `model.onnx` que escribe `export`.
+  2. **Lote (T04-H1):** los primeros 200 pares de test en el orden de `data/processed/`.
+  3. **Hilos (T04-H2):** oficial con los valores por omisión de onnxruntime (`intra_op_num_threads` = `inter_op_num_threads` = 0); configurable (`main [hilos_intra_op]`) y reportado en el resultado.
+  4. **Estadísticos (T04-H3):** mediana (`statistics.median`), p95 lineal (`numpy.percentile`), máximo, mínimo y media; CPU, CPUs lógicas, SO, Python, onnxruntime y proveedores en el reporte.
+  5. **CI (T04-H4):** humo informativo con modelo sintético y cota de cordura de 1,000 ms (no el criterio); la prueba con el criterio de 20 ms (`tests/integration/test_onnx_benchmark_official.py`) se omite sin el modelo oficial o sin los pares de test, con motivo explícito (RK05). Sin cambios en el CI ni en su timeout.
+  6. **Integración con `export` (T04-H5):** requisito para T05: la etapa `export` debe medir y reportar el rendimiento, y la sección «Artefacto ONNX» de `model_card.md` debe incluirlo.
+- **Evidencia:** `specs/ml-06-onnx-export/evidence.md` (T04): i7-13620H (10 núcleos / 16 lógicos), Windows 11, Python 3.12.16, onnxruntime 1.31.1; mediana **0.0477 ms**, p95 0.0779 ms, máx. 0.3342 ms (PASS, ≈ 400 veces bajo el presupuesto); 3 repeticiones entre 0.047 y 0.055 ms; 1 hilo intra-op 0.0470 ms; 71 pruebas nuevas o afectadas en verde (0 omitidas) y 1 omitida con motivo en la simulación sin modelo; cobertura de `benchmark.py` 88 %; ruff y mypy estricto sin errores.
+- **Pendientes:** rendimiento en la model card del paquete (T05); nota de latencia en la guía (T06); gitleaks y suite completa en el CI del PR.
+- **Estado:** APROBADO — César Yael López Trujillo — 2026-11-25 (texto completo en `memoria.md`).
+- **Fecha:** 2026-11-25.
+- **Impacto:** T04 de ML-06 completa (4/7) — PASS WITH WARNINGS; T05–T07 siguen sin ejecutar hasta su «EJECUTA». Sin cambios en el grafo, el objetivo de 20 ms, modelos, `feature_schema.json`, params, dependencias, `.gitignore` ni CI; sin commit ni push, por instrucción del responsable.
+
+### Seguridad, datos y licencias
+
+- Sin pickle, joblib ni dill; sin dependencias nuevas; sin red ni secretos (la única lectura del sistema es el nombre del CPU, del registro de Windows o `/proc/cpuinfo`); sin servicios de pago (COST-001 $0, CPU local).
+- `models/`, `data/` y `dist/` sin versionar. Las pruebas y el reporte no muestran filas de los pares de test: solo tiempos y la forma del lote.
+- Sin datos personales: los pares de test son sintéticos (ML-02/ML-05) y no se imprimen.
+
+### Coherencia
+
+| Documento | Comprobación |
+| --- | --- |
+| `constitution.md` §13.5, §8, §13.1, §15 | 200 cuartos con mediana < 20 ms; las cifras de este reporte son de **rendimiento**, no métricas del modelo (los pares de test son sintéticos); sin pickle; $0 |
+| `AGENTS.md` | Sin commit ni push; controles no ejecutados declarados (gitleaks, suite completa); decisión M-ML-048 registrada y T04 marcada en `task.md` solo tras el «Apruebo» |
+| Spec §6.5 / R04 | Métrica, lote, calentamiento, corridas, reloj, sesión única, p95/máx/hilos/CPU/SO; oficial local y humo en CI sin umbral estricto |
+| M-ML-045 / M-ML-046 / M-ML-047 | `onnx_graph.py`, `parity.py` y `package.py` intactos; mide el `model.onnx` de `export` con el SHA-256 de `logreg.json` verificado; RK05 (omisión con motivo) como en T02/T03 |
+
+**Resultado T04: PASS WITH WARNINGS** — criterio cumplido con margen amplio; advertencias: T04-H5 (rendimiento en la model card pendiente para T05), T04-H8 (gitleaks y suite completa no ejecutados localmente) y las decisiones técnicas T04-H1–H4 (aprobadas). T04 completa con M-ML-048 (APROBADO, César Yael López Trujillo, 2026-11-25).
