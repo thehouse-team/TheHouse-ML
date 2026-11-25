@@ -8,14 +8,14 @@
 | Fecha | 2026-11-24 |
 | Estado documental | **✅ APROBADA — 1.0.0** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-24 (M-ML-044) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 completa (1/7), 2026-11-24 (M-ML-045); T02–T07 ⛔ NO EJECUTAR HASTA «EJECUTA»; ver `evidence.md`** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 y T02 completas (2/7), 2026-11-24 (M-ML-045, M-ML-046); T03–T07 ⛔ NO EJECUTAR HASTA «EJECUTA»; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 1 |
+| Tasks completadas | 2 |
 
 ## Reglas de esta lista
 
-1. T01 completa (2026-11-24, M-ML-045) con evidencia en `evidence.md`; T02–T07 abiertas. Escribir este documento no completa ninguna.
+1. T01 (M-ML-045) y T02 (M-ML-046) completas (2026-11-24) con evidencia en `evidence.md`; T03–T07 abiertas. Escribir este documento no completa ninguna.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA». Las decisiones 1–5 de la spec §10 están APROBADAS (M-ML-044).
 4. Un control no ejecutado no se reporta como PASS (en particular, las pruebas que necesitan el modelo oficial y se omiten en CI).
@@ -27,7 +27,7 @@
 
 ## F2 — Implementación
 
-- [ ] **T02 · Paridad Python ↔ ONNX** — Requisito: ML-06-R02 · Decisión: 2 · Aceptación: en los pares de test, la rejilla fuera del `training_range` y los casos dorados, \|Δ\| ≤ 1e-4 en `factor_points` y `raw_total`, 0 diferencias en puntos redondeados y `matchScore`, máximo \|Δ\| reportado; prueba de que entradas, constantes y salidas son double.
+- [x] **T02 · Paridad Python ↔ ONNX** — Requisito: ML-06-R02 · Decisión: 2 · Aceptación: en los pares de test, la rejilla fuera del `training_range` y los casos dorados, \|Δ\| ≤ 1e-4 en `factor_points` y `raw_total`, 0 diferencias en puntos redondeados y `matchScore`, máximo \|Δ\| reportado; prueba de que entradas, constantes y salidas son double.
 - [ ] **T03 · Casos dorados de `logreg-1.0.0`** — Requisito: ML-06-R03 · Decisiones: 1, 3 · Aceptación: `tests/fixtures/logreg_golden_cases.json` generado con recuento independiente (entradas de los 81 casos del baseline + recorte ≥ 4, extremos ≥ 2, bordes de redondeo ≥ 6, zona T05-H1 ≥ 3, término fijo ≥ 1), idéntico a la salida del generador, con la regla de margen; paquete y ONNX coinciden con todos dentro de las tolerancias.
 
 ## F3 — Calidad, seguridad y datos
@@ -45,7 +45,7 @@
 | Task | Requisito | Decisiones | Fase | Estado |
 | --- | --- | --- | --- | --- |
 | T01 | R01 | 1, 2, 5 | F1 | COMPLETA — PASS WITH WARNINGS (M-ML-045; `/dist/` en `.gitignore` y paquete publicable en T05; gitleaks y suite completa en el CI del PR) |
-| T02 | R02 | 2 | F2 | ABIERTA |
+| T02 | R02 | 2 | F2 | COMPLETA — PASS WITH WARNINGS (M-ML-046; casos dorados de logreg en T03; `export` solo reporta y T05 debe marcar no publicable si la paridad falla; regla `-0` → `0` en la guía de T06; errata de la §6.4 en T07) |
 | T03 | R03 | 1, 3 | F2 | ABIERTA |
 | T04 | R04 | — | F3 | ABIERTA |
 | T05 | R05 | 4 | F3 | ABIERTA |

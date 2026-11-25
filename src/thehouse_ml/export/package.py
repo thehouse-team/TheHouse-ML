@@ -4,7 +4,9 @@ ML-06 T01 (ML-06-R01) implementa la parte del modelo de la etapa: verificación 
 `logreg.json` (contra `train_manifest.json` y, en el perfil `full`, contra el valor fijado en la
 spec §1), grafo de la spec §6.2 con sus metadatos, `onnx.checker`, escritura determinista de
 `model.onnx` y ejecución en onnxruntime CPU sobre los pares de test (si `data/processed/` existe).
-El resto del paquete de entrega (casos dorados, model card, métricas y `SHA256SUMS`) es de T05.
+ML-06 T02 (ML-06-R02) agrega la paridad formal Python ↔ onnxruntime (`parity.py`) en los pares de
+test y en la rejilla fuera del `training_range`. El resto del paquete de entrega (casos dorados,
+model card, métricas y `SHA256SUMS`) es de T05.
 
 Perfiles (`THEHOUSE_ML_TRAIN_PROFILE`, como `train` y `evaluate`): `full` lee `models/` y escribe
 en `dist/model-v1.0.0/`; `ci` lee `profiles.ci.output_dir` y escribe en `dist/ci/` (no publicable).
@@ -21,21 +23,20 @@ from pathlib import Path
 
 import numpy as np
 
-from thehouse_ml.export import ExportError
 from thehouse_ml.export.onnx_graph import (
     EXPECTED_LOGREG_SHA256,
     OPSET,
     build_onnx_model,
     graph_constants,
     model_metadata,
-    run_onnx,
     serialize_model,
     verify_logreg,
 )
+from thehouse_ml.export.parity import ParityResult, check_parity, out_of_range_grid
 from thehouse_ml.features import default_schema
 from thehouse_ml.models.train import LOGREG_MODEL, LogRegModel, output_dirs
 from thehouse_ml.models.train_config import DEFAULT_PROFILE, load_train_params, resolve_profile
-from thehouse_ml.models.trained_breakdown import BreakdownModel, build_breakdown_model, score_matrix
+from thehouse_ml.models.trained_breakdown import BreakdownModel, build_breakdown_model
 from thehouse_ml.models.training_data import TRAINING_INPUTS, load_training_data
 from thehouse_ml.paths import ProjectPaths
 
@@ -72,42 +73,38 @@ def git_commit(root: Path) -> str:
 
 
 @dataclass(frozen=True)
-class OnnxRunSummary:
-    """Ejecución de `model.onnx` en onnxruntime CPU sobre los pares de test (T01; la paridad formal es T02)."""
-
-    pairs: int
-    finite: bool
-    max_abs_diff_factor_points: float
-    max_abs_diff_raw_total: float
-
-
-@dataclass(frozen=True)
 class ExportResult:
     profile: str
     model_path: Path
     model_sha256: str
     logreg_sha256: str
     commit: str
-    test_pairs: OnnxRunSummary | None
+    test_pairs: ParityResult | None
+    grid: ParityResult
 
 
-def run_on_test_pairs(model_bytes: bytes, model: BreakdownModel, paths: ProjectPaths) -> OnnxRunSummary | None:
-    """Ejecuta el ONNX sobre los pares de test; `None` si faltan los datos de `data/processed/`."""
+def load_test_pair_features(paths: ProjectPaths) -> np.ndarray | None:
+    """Vectores [N, 10] de los pares de test de ML-05; `None` si faltan los datos de `data/processed/`."""
     if not all((paths.data_processed / name).is_file() for name in TRAINING_INPUTS):
         return None
     data = load_training_data(paths, default_schema())
     mask = (data.split == TEST_SPLIT).to_numpy()
-    features = data.features[mask].to_numpy(dtype=np.float64, copy=True)
-    points, total = run_onnx(model_bytes, features)
-    expected_points, expected_total, _ = score_matrix(model, features)
-    if points.shape != expected_points.shape or total.shape != expected_total.shape:
-        raise ExportError(f"formas del ONNX {points.shape}/{total.shape} distintas de las de Python")
-    return OnnxRunSummary(
-        pairs=len(features),
-        finite=bool(np.isfinite(points).all() and np.isfinite(total).all()),
-        max_abs_diff_factor_points=float(np.abs(points - expected_points).max(initial=0.0)),
-        max_abs_diff_raw_total=float(np.abs(total - expected_total).max(initial=0.0)),
-    )
+    features: np.ndarray = data.features[mask].to_numpy(dtype=np.float64, copy=True)
+    return features
+
+
+def run_on_test_pairs(model_bytes: bytes, model: BreakdownModel, paths: ProjectPaths) -> ParityResult | None:
+    """Paridad Python ↔ ONNX en los pares de test (spec §6.3); `None` si faltan los datos."""
+    features = load_test_pair_features(paths)
+    if features is None:
+        return None
+    return check_parity("pares de test", model_bytes, model, features)
+
+
+def run_on_grid(model_bytes: bytes, model: BreakdownModel) -> ParityResult:
+    """Paridad en la rejilla fuera del `training_range` (límites del recorte de `logreg.json`)."""
+    grid = out_of_range_grid(model.logreg.clip_lower, model.logreg.clip_upper)
+    return check_parity("rejilla fuera del training_range", model_bytes, model, grid)
 
 
 def export_model(
@@ -142,11 +139,12 @@ def export_model(
         logreg_sha256=logreg_sha256,
         commit=commit,
         test_pairs=run_on_test_pairs(model_bytes, breakdown, paths),
+        grid=run_on_grid(model_bytes, breakdown),
     )
 
 
 def run_export(paths: ProjectPaths, profile: str | None = None, commit: str | None = None) -> str:
-    """Etapa `export` (T01): `model.onnx` verificado; mensaje para la consola."""
+    """Etapa `export` (T01-T02): `model.onnx` verificado y su paridad; mensaje para la consola."""
     profile = profile or resolve_profile()
     result = export_model(paths, profile=profile, commit=commit)
     if result is None:
@@ -159,16 +157,12 @@ def run_export(paths: ProjectPaths, profile: str | None = None, commit: str | No
         f"  model.onnx  SHA-256 {result.model_sha256}",
         f"  commit {result.commit}",
     ]
-    run = result.test_pairs
-    if run is None:
-        lines.append("  pares de test: omitido; faltan los datos de data/processed/ (ejecute `prepare`)")
+    lines.append("  paridad Python <-> onnxruntime CPU (spec ML-06, seccion 6.3):")
+    if result.test_pairs is None:
+        lines.append("    pares de test: omitido; faltan los datos de data/processed/ (ejecute `prepare`)")
     else:
-        lines.append(
-            f"  onnxruntime CPU sobre {run.pairs:,} pares de test: salidas finitas {run.finite}; "
-            f"max |dif| vs Python: factor_points {run.max_abs_diff_factor_points:.3e}, "
-            f"raw_total {run.max_abs_diff_raw_total:.3e} "
-            "(informativo; la paridad formal es T02)"
-        )
+        lines.append(f"    {result.test_pairs.summary()}")
+    lines.append(f"    {result.grid.summary()}")
     return "\n".join(lines)
 
 
@@ -176,10 +170,11 @@ __all__ = [
     "MODEL_ONNX",
     "PACKAGE_DIRS",
     "ExportResult",
-    "OnnxRunSummary",
     "export_model",
     "export_skip_message",
     "git_commit",
+    "load_test_pair_features",
     "run_export",
+    "run_on_grid",
     "run_on_test_pairs",
 ]
