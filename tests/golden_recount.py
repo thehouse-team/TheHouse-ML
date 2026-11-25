@@ -135,7 +135,7 @@ def round_half_up(value: Fraction, decimals: int) -> Fraction:
 
 def round6_margin(value: Fraction, decimals: int = 6) -> Fraction:
     """Distancia de `value · 10^decimals` al punto medio más cercano (0 = punto medio exacto)."""
-    scaled = value * 10**decimals
+    scaled: Fraction = value * 10**decimals
     frac = scaled - math.floor(scaled)
     return abs(frac - HALF)
 
