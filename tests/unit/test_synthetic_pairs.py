@@ -61,6 +61,7 @@ from thehouse_ml.synthetic.rooms_stage import rooms_frame
 from thehouse_ml.synthetic.students import BASIS_PREFIXES, PARAMS_PACKAGE, SyntheticStudent
 from thehouse_ml.synthetic.students_stage import students_frame
 
+FEW_CODES = {"UTTT", "UCAN"}
 LABEL_WORDS = re.compile(r"label|relevan|score|puntaje|target|etiqueta|rank", re.IGNORECASE)
 
 
@@ -118,6 +119,41 @@ def _subset(
         [item for item in students if item.profile.university_code in codes],
         [item for item in rooms if item.room.university_code in codes],
     )
+
+
+@pytest.fixture(scope="module")
+def allowed_by_student(
+    students: tuple[SyntheticStudent, ...], rooms: tuple[SyntheticRoom, ...], schema: FeatureSchema
+) -> dict[str, list[str]]:
+    """Recuento independiente de `build_pairs`, una vez por módulo (T07, T05-H3).
+
+    `filter_rooms` (T03) con los cuartos del campus de cada estudiante; devuelve los `room_id`
+    permitidos en el orden del catálogo.
+    """
+    by_campus: dict[str, list[SyntheticRoom]] = defaultdict(list)
+    for item in rooms:
+        by_campus[item.room.university_code].append(item)
+    result: dict[str, list[str]] = {}
+    for student in students:
+        campus_rooms = by_campus[student.profile.university_code]
+        allowed = filter_rooms(student.profile, [item.room for item in campus_rooms], schema).allowed
+        result[student.student_id] = [
+            item.room_id for item in campus_rooms if any(item.room is room for room in allowed)
+        ]
+    return result
+
+
+@pytest.fixture(scope="module")
+def few_pair_set(
+    students: tuple[SyntheticStudent, ...],
+    rooms: tuple[SyntheticRoom, ...],
+    campuses: dict[str, Campus],
+    params: PairParams,
+    schema: FeatureSchema,
+) -> PairSet:
+    """Pares de 2 campus (UTTT verificado, UCAN sin verificar): datos pequeños para las pruebas que reconstruyen."""
+    few_students, few_rooms = _subset(students, rooms, FEW_CODES)
+    return build_pairs(few_students, few_rooms, campuses, params, schema)
 
 
 def _room(base: SyntheticRoom, room_id: str, **changes: Any) -> SyntheticRoom:
@@ -266,19 +302,16 @@ def test_split_does_not_depend_on_rooms_and_changes_with_the_seed(
 
 def test_at_least_ninety_percent_of_students_have_a_room_that_passes_the_hard_constraints(
     students: tuple[SyntheticStudent, ...],
-    rooms: tuple[SyntheticRoom, ...],
+    allowed_by_student: dict[str, list[str]],
     pair_set: PairSet,
     params: PairParams,
     schema: FeatureSchema,
 ) -> None:
     # Recuento independiente de build_pairs: filter_rooms (T03) con los cuartos del campus del estudiante.
-    rooms_by_campus: dict[str, list[Any]] = defaultdict(list)
-    for item in rooms:
-        rooms_by_campus[item.room.university_code].append(item.room)
     hits: dict[str, list[bool]] = defaultdict(list)
     for student in students:
         code = student.profile.university_code
-        allowed = filter_rooms(student.profile, rooms_by_campus[code], schema).allowed
+        allowed = allowed_by_student[student.student_id]
         hits[code].append(bool(allowed))
         hits["__total__"].append(bool(allowed))
         if student.seed_verified:
@@ -309,21 +342,18 @@ def test_coverage_below_the_threshold_does_not_meet(params: PairParams, schema: 
 
 
 def test_candidates_are_the_compatible_rooms_of_the_campus_up_to_the_maximum(
-    students: tuple[SyntheticStudent, ...],
     rooms: tuple[SyntheticRoom, ...],
+    allowed_by_student: dict[str, list[str]],
     pair_set: PairSet,
     params: PairParams,
-    schema: FeatureSchema,
 ) -> None:
     by_campus: dict[str, list[SyntheticRoom]] = defaultdict(list)
     for item in rooms:
         by_campus[item.room.university_code].append(item)
-    profiles = {student.student_id: student.profile for student in students}
     sampled = 0
     for summary in pair_set.students:
         campus_rooms = by_campus[summary.university_code]
-        allowed = filter_rooms(profiles[summary.student_id], [item.room for item in campus_rooms], schema).allowed
-        allowed_ids = [item.room_id for item in campus_rooms if any(item.room is room for room in allowed)]
+        allowed_ids = allowed_by_student[summary.student_id]
         assert summary.compatible == len(allowed_ids)
         assert summary.campus_rooms == len(campus_rooms)
         assert list(summary.room_ids) == sorted(summary.room_ids)
@@ -434,19 +464,26 @@ def test_schema_2_0_0_keeps_the_same_pairs_splits_and_first_seven_features(
     campuses: dict[str, Campus],
     params: PairParams,
     pair_set: PairSet,
+    few_pair_set: PairSet,
     schema: FeatureSchema,
 ) -> None:
     # ML-04 T02 (M-ML-029): las 3 features nuevas solo agregan columnas; pares y particiones no cambian.
+    # T07 (T05-H3): se compara en los 2 campus de `few_pair_set` en lugar de reconstruir los 10. Particiones
+    # y candidatos se sortean por campus: el subconjunto es el conjunto completo restringido a esos campus.
+    assert [(p.student_id, p.room_id, p.split, p.features) for p in few_pair_set.pairs] == [
+        (p.student_id, p.room_id, p.split, p.features) for p in pair_set.pairs if p.university_code in FEW_CODES
+    ]
+    few_students, few_rooms = _subset(students, rooms, FEW_CODES)
     first_seven = schema.feature_order[:7]
     legacy = replace(schema, pair_features=schema.pair_features[:7], feature_order=first_seven)
-    legacy_set = build_pairs(students, rooms, campuses, params, legacy)
+    legacy_set = build_pairs(few_students, few_rooms, campuses, params, legacy)
     assert [(p.student_id, p.room_id, p.split) for p in legacy_set.pairs] == [
-        (p.student_id, p.room_id, p.split) for p in pair_set.pairs
+        (p.student_id, p.room_id, p.split) for p in few_pair_set.pairs
     ]
-    for old, new in zip(legacy_set.pairs, pair_set.pairs, strict=True):
+    for old, new in zip(legacy_set.pairs, few_pair_set.pairs, strict=True):
         assert old.features == {name: new.features[name] for name in first_seven}
     old_frame = pairs_frame(legacy_set, legacy)
-    new_frame = pairs_frame(pair_set, schema)
+    new_frame = pairs_frame(few_pair_set, schema)
     assert old_frame.equals(new_frame[list(old_frame.columns)])
 
 
@@ -478,16 +515,17 @@ def test_same_inputs_give_the_same_pairs_byte_for_byte(
     rooms: tuple[SyntheticRoom, ...],
     campuses: dict[str, Campus],
     params: PairParams,
+    few_pair_set: PairSet,
     schema: FeatureSchema,
 ) -> None:
-    few_students, few_rooms = _subset(students, rooms, {"UTTT", "UCAN"})
+    few_students, few_rooms = _subset(students, rooms, FEW_CODES)
 
     def parquet(pair_set: PairSet) -> bytes:
         buffer = io.BytesIO()
         pairs_frame(pair_set, schema).to_parquet(buffer, index=False)
         return buffer.getvalue()
 
-    first = build_pairs(few_students, few_rooms, campuses, params, schema)
+    first = few_pair_set  # 1.ª construcción (fixture compartido); aquí, orden inverso y otra semilla
     again = build_pairs(list(reversed(few_students)), list(reversed(few_rooms)), campuses, params, schema)
     assert parquet(first) == parquet(again)
     other = build_pairs(few_students, few_rooms, campuses, params.with_seed(params.seed + 1), schema)

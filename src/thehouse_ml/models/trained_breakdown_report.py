@@ -5,6 +5,11 @@ datos y parámetros escriben los mismos bytes. Todo es **sintético** (etiquetas
 Los ejemplos se eligen con una regla fija (no por sus resultados): para cada rango de
 `budget.max` de `baseline_eval_params.json`, el primer estudiante de test por `student_id`
 de un campus verificado con al menos `example_min_candidates` candidatos.
+
+ML-05 T07 (T06-H1): la distribución de `matchScore` y los ejemplos explicados se calculan una
+sola vez (`distribution_document` y `examples_document`), se guardan en el bloque `breakdown`
+de `reports/trained_metrics.json` y el Markdown se renderiza desde esos mismos diccionarios, así
+que la model card los lee del JSON sin volver a puntuar test.
 """
 
 from __future__ import annotations
@@ -17,7 +22,7 @@ from typing import Any
 import numpy as np
 import pandas as pd
 
-from thehouse_ml.models.baseline_config import BaselineConfig
+from thehouse_ml.models.baseline_config import BaselineConfig, default_config
 from thehouse_ml.models.baseline_report import SCORE_PERCENTILES, SYNTHETIC_BANNER, BudgetRange, _histogram
 from thehouse_ml.models.baseline_score import score_features
 from thehouse_ml.models.train import LOGREG_MODEL, TRAIN_MANIFEST
@@ -42,6 +47,8 @@ FACTOR_SHORT = {
     "extras": "Extras",
 }
 DIRECTION_LABELS = {1: "↑ suma", -1: "↑ no suma", None: "—"}
+# Mismas decenas que el histograma de `baseline_report._histogram` (la última incluye 100).
+HISTOGRAM_BINS: tuple[tuple[int, int], ...] = (*((low, low + 9) for low in range(0, 90, 10)), (90, 100))
 
 
 @dataclass(frozen=True)
@@ -278,24 +285,64 @@ def _verification_section(evaluation: BreakdownEvaluation, result: TrainedEvalua
     ]
 
 
-def _distribution_section(evaluation: BreakdownEvaluation) -> list[str]:
+def distribution_document(evaluation: BreakdownEvaluation) -> dict[str, Any]:
+    """Distribución de `matchScore` y de los puntos por factor en los pares de test (para `trained_metrics.json`)."""
     scores = pd.Series(evaluation.scored.match_score, dtype="int64")
     quantiles = scores.quantile(list(SCORE_PERCENTILES), interpolation="linear")
+    factor_points: list[dict[str, Any]] = []
+    for index, factor in enumerate(evaluation.model.factors):
+        points = pd.Series(evaluation.scored.raw_points[:, index], dtype="float64")
+        mean = float(points.mean())
+        factor_points.append(
+            {
+                "factor": factor.id,
+                "label": factor.label,
+                "maxPoints": factor.max_points,
+                "raw_max_points": factor.raw_max_points,
+                "mean": mean,
+                "p25": float(points.quantile(0.25, interpolation="linear")),
+                "p50": float(points.quantile(0.5, interpolation="linear")),
+                "p75": float(points.quantile(0.75, interpolation="linear")),
+                "mean_share_of_max": mean / factor.raw_max_points,
+            }
+        )
+    return {
+        "scope": "pares candidatos de test de la medición única de T03 (DATOS SINTÉTICOS)",
+        "pairs": len(scores),
+        "matchScore": {
+            "min": int(scores.min()),
+            "max": int(scores.max()),
+            "mean": float(scores.mean()),
+            "interpolation": "linear",
+            "percentiles": {f"p{round(q * 100)}": float(quantiles[q]) for q in SCORE_PERCENTILES},
+            "histogram": [
+                {"low": low, "high": high, "count": int(((scores >= low) & (scores <= high)).sum())}
+                for low, high in HISTOGRAM_BINS
+            ],
+        },
+        "factor_points_basis": "puntos sin redondear por par",
+        "factor_points": factor_points,
+    }
+
+
+def _distribution_section(evaluation: BreakdownEvaluation, document: dict[str, Any]) -> list[str]:
+    scores = pd.Series(evaluation.scored.match_score, dtype="int64")
+    summary = document["matchScore"]
     lines = [
         "## 4. Distribución de `matchScore` en test",
         "",
-        f"**{len(scores):,}** pares candidatos de test. Histograma por decenas (la última barra incluye 100):",
+        f"**{document['pairs']:,}** pares candidatos de test. Histograma por decenas (la última barra incluye 100):",
         "",
         *_histogram(scores),
         "",
-        _row(["Mín.", *(f"p{round(q * 100)}" for q in SCORE_PERCENTILES), "Máx.", "Media"]),
-        _row(["---:"] * (len(SCORE_PERCENTILES) + 3)),
+        _row(["Mín.", *summary["percentiles"], "Máx.", "Media"]),
+        _row(["---:"] * (len(summary["percentiles"]) + 3)),
         _row(
             [
-                f"{int(scores.min())}",
-                *(f"{float(quantiles[q]):g}" for q in SCORE_PERCENTILES),
-                f"{int(scores.max())}",
-                f"{float(scores.mean()):.1f}",
+                f"{summary['min']}",
+                *(f"{value:g}" for value in summary["percentiles"].values()),
+                f"{summary['max']}",
+                f"{summary['mean']:.1f}",
             ]
         ),
         "",
@@ -304,19 +351,17 @@ def _distribution_section(evaluation: BreakdownEvaluation) -> list[str]:
         _row(["Factor", "maxPoints", "Media", "p25", "Mediana", "p75", "Media / maxPoints"]),
         _row(["---", "---:", "---:", "---:", "---:", "---:", "---:"]),
     ]
-    for index, factor in enumerate(evaluation.model.factors):
-        points = pd.Series(evaluation.scored.raw_points[:, index], dtype="float64")
-        p25, p50, p75 = (float(points.quantile(q, interpolation="linear")) for q in (0.25, 0.5, 0.75))
+    for item in document["factor_points"]:
         lines.append(
             _row(
                 [
-                    f"{factor.label} (`{factor.id}`)",
-                    f"{factor.max_points:g}",
-                    f"{float(points.mean()):.2f}",
-                    f"{p25:.2f}",
-                    f"{p50:.2f}",
-                    f"{p75:.2f}",
-                    f"{100 * float(points.mean()) / factor.raw_max_points:.0f} %",
+                    f"{item['label']} (`{item['factor']}`)",
+                    f"{item['maxPoints']:g}",
+                    f"{item['mean']:.2f}",
+                    f"{item['p25']:.2f}",
+                    f"{item['p50']:.2f}",
+                    f"{item['p75']:.2f}",
+                    f"{100 * item['mean'] / item['raw_max_points']:.0f} %",
                 ]
             )
         )
@@ -408,8 +453,53 @@ def _monotonicity_section(evaluation: BreakdownEvaluation) -> list[str]:
     return lines
 
 
-def _example_rows(result: TrainedEvaluation, config: BaselineConfig, example: Example) -> list[str]:
+def examples_document(result: TrainedEvaluation, config: BaselineConfig) -> list[dict[str, Any]]:
+    """Ejemplos explicados (regla fija de `pick_examples`): top N y salida JSON del primer lugar."""
     evaluation = result.breakdown
+    model = evaluation.model
+    documents: list[dict[str, Any]] = []
+    for example in pick_examples(result):
+        top: list[dict[str, Any]] = []
+        for rank_index, position in enumerate(example.positions, start=1):
+            baseline = score_features([float(value) for value in result.test.features[position]], config)
+            top.append(
+                {
+                    "rank": rank_index,
+                    "room_id": str(result.test.room_id[position]),
+                    "matchScore": int(evaluation.scored.match_score[position]),
+                    "points": {
+                        factor.id: float(evaluation.scored.points[position, k])
+                        for k, factor in enumerate(model.factors)
+                    },
+                    "relevance": int(result.test.relevance[position]),
+                    "baseline_matchScore": int(baseline.match_score),
+                }
+            )
+        first = example.positions[0]
+        values = {name: float(result.test.features[first][i]) for i, name in enumerate(result.test.feature_order)}
+        scored = score_features_logreg(list(values.values()), model)
+        documents.append(
+            {
+                "budget_range": example.budget_range.id,
+                "budget_range_label": example.budget_range.label,
+                "student_id": example.student_id,
+                "university_code": example.university_code,
+                "budget_max": example.budget_max,
+                "candidates": example.candidates,
+                "top": top,
+                "first_place": {
+                    "room_id": str(result.test.room_id[first]),
+                    "inputs": values,
+                    "raw_total": scored.raw_total,
+                    "probability": scored.probability,
+                    "output": scored.to_dict(),
+                },
+            }
+        )
+    return documents
+
+
+def _example_rows(evaluation: BreakdownEvaluation, example: dict[str, Any]) -> list[str]:
     model = evaluation.model
     header = [
         "#",
@@ -420,26 +510,23 @@ def _example_rows(result: TrainedEvaluation, config: BaselineConfig, example: Ex
         "Baseline",
     ]
     lines = [_row(header), _row(["---:", "---", "---:", *(["---:"] * len(model.factors)), "---:", "---:"])]
-    for rank_index, position in enumerate(example.positions, start=1):
-        row = result.test.features[position]
-        baseline = score_features([float(value) for value in row], config)
+    for item in example["top"]:
         lines.append(
             _row(
                 [
-                    str(rank_index),
-                    f"`{result.test.room_id[position]}`",
-                    f"**{int(evaluation.scored.match_score[position])}**",
-                    *(f"{float(evaluation.scored.points[position, k]):.1f}" for k in range(len(model.factors))),
-                    str(int(result.test.relevance[position])),
-                    str(baseline.match_score),
+                    str(item["rank"]),
+                    f"`{item['room_id']}`",
+                    f"**{item['matchScore']}**",
+                    *(f"{item['points'][factor.id]:.1f}" for factor in model.factors),
+                    str(item["relevance"]),
+                    str(item["baseline_matchScore"]),
                 ]
             )
         )
     return lines
 
 
-def _examples_section(result: TrainedEvaluation, config: BaselineConfig) -> list[str]:
-    examples = pick_examples(result)
+def _examples_section(result: TrainedEvaluation, examples: list[dict[str, Any]]) -> list[str]:
     params = result.eval_params
     lines = [
         "## 6. Ejemplos explicados",
@@ -456,20 +543,22 @@ def _examples_section(result: TrainedEvaluation, config: BaselineConfig) -> list
         return [*lines, "Ningún estudiante cumple la regla.", ""]
     for number, example in enumerate(examples, start=1):
         lines += [
-            f"### 6.{number} `{example.student_id}` — {example.university_code}, `budget.max` "
-            f"{_money(example.budget_max)} ({example.budget_range.label}), {example.candidates} candidatos",
+            f"### 6.{number} `{example['student_id']}` — {example['university_code']}, `budget.max` "
+            f"{_money(example['budget_max'])} ({example['budget_range_label']}), {example['candidates']} candidatos",
             "",
-            *_example_rows(result, config, example),
+            *_example_rows(result.breakdown, example),
             "",
         ]
-        first = example.positions[0]
-        values = {name: float(result.test.features[first][i]) for i, name in enumerate(result.test.feature_order)}
-        top = score_features_logreg(list(values.values()), result.breakdown.model)
-        explained = [f"{FACTOR_SHORT[item.factor]} {item.points:g}/{item.max_points:g}" for item in top.breakdown]
+        first = example["first_place"]
+        output = first["output"]
+        values = first["inputs"]
+        explained = [
+            f"{FACTOR_SHORT[item['factor']]} {item['points']:g}/{item['maxPoints']:g}" for item in output["breakdown"]
+        ]
         lines += [
-            f"Primer lugar `{result.test.room_id[first]}`: {', '.join(explained)} → `matchScore` "
-            f"**{top.match_score}** (suma sin redondear {top.raw_total:.6f}; probabilidad {top.probability:.3f}, "
-            f"dato informativo). Renta = {values['price_to_budget']:.0%} de `budget.max`, "
+            f"Primer lugar `{first['room_id']}`: {', '.join(explained)} → `matchScore` "
+            f"**{output['matchScore']}** (suma sin redondear {first['raw_total']:.6f}; probabilidad "
+            f"{first['probability']:.3f}, dato informativo). Renta = {values['price_to_budget']:.0%} de `budget.max`, "
             f"{values['distance_km']:.2f} km (efectiva {values['effective_distance_km']:.2f} km, "
             f"{values['distance_ratio']:.2f} de su máximo), cobertura de servicios {values['services_coverage']:.0%}, "
             f"extras {values['extra_services_ratio']:.2f}.",
@@ -481,7 +570,7 @@ def _examples_section(result: TrainedEvaluation, config: BaselineConfig) -> list
                 "`features` en los factores de varias features; `value` = valor de entrada):",
                 "",
                 "```json",
-                json.dumps(top.to_dict(), ensure_ascii=False, indent=2),
+                json.dumps(output, ensure_ascii=False, indent=2),
                 "```",
                 "",
             ]
@@ -536,9 +625,9 @@ def render_breakdown_report(result: TrainedEvaluation, config: BaselineConfig) -
         *_coefficients_section(evaluation),
         *_calibration_section(evaluation, config),
         *_verification_section(evaluation, result),
-        *_distribution_section(evaluation),
+        *_distribution_section(evaluation, distribution_document(evaluation)),
         *_monotonicity_section(evaluation),
-        *_examples_section(result, config),
+        *_examples_section(result, examples_document(result, config)),
         *_decision_section(result),
         "## Advertencias",
         "",
@@ -551,8 +640,8 @@ def render_breakdown_report(result: TrainedEvaluation, config: BaselineConfig) -
     return "\n".join(lines)
 
 
-def breakdown_document(result: TrainedEvaluation) -> dict[str, Any]:
-    """Bloque `breakdown` de `reports/trained_metrics.json`."""
+def breakdown_document(result: TrainedEvaluation, config: BaselineConfig | None = None) -> dict[str, Any]:
+    """Bloque `breakdown` de `reports/trained_metrics.json`, con la distribución y los ejemplos (T07, T06-H1)."""
     evaluation = result.breakdown
     return {
         "spec": SPEC,
@@ -566,7 +655,18 @@ def breakdown_document(result: TrainedEvaluation) -> dict[str, Any]:
         "failed_checks": evaluation.failed_checks,
         "accepted_deviations": {name: evaluation.accepted_deviations[name] for name in evaluation.deviations_applied},
         "passed": evaluation.passed,
+        "distribution": distribution_document(evaluation),
+        "examples": examples_document(result, config or default_config()),
     }
 
 
-__all__ = ["TRAINED_BREAKDOWN", "Example", "breakdown_document", "pick_examples", "render_breakdown_report"]
+__all__ = [
+    "HISTOGRAM_BINS",
+    "TRAINED_BREAKDOWN",
+    "Example",
+    "breakdown_document",
+    "distribution_document",
+    "examples_document",
+    "pick_examples",
+    "render_breakdown_report",
+]

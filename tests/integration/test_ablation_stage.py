@@ -15,23 +15,19 @@ from typing import Any
 import numpy as np
 import pytest
 
-from conftest import versioned_synthetic_data
+from conftest import copy_project, small_train_params
 from thehouse_ml.evaluation.ranking import METRIC_NAMES
 from thehouse_ml.features import default_schema
 from thehouse_ml.models import ablation as ablation_module
 from thehouse_ml.models.ablation import ABLATION_METRICS, ABLATION_REPORT
-from thehouse_ml.models.baseline_report import run_evaluate
 from thehouse_ml.models.factor_groups import FACTOR_GROUPS
-from thehouse_ml.models.train import TRAIN_CV_METRICS, run_train
+from thehouse_ml.models.train import TRAIN_CV_METRICS
 from thehouse_ml.models.train_config import PROFILE_ENV_VAR, TrainParams, load_train_params
 from thehouse_ml.models.trained_eval import TRAINED_METRICS, TRAINED_REPORT, run_trained_evaluate
 from thehouse_ml.models.training_data import load_training_data
 from thehouse_ml.paths import ProjectPaths
 from thehouse_ml.stages import run_stage
-from thehouse_ml.synthetic.labels_stage import HIDDEN_UTILITY_PARQUET, HIDDEN_WEIGHTS_PARQUET, run_labels
-from thehouse_ml.synthetic.pairs_stage import run_pairs
-from thehouse_ml.synthetic.rooms_stage import ROOMS_PARQUET, rooms_frame
-from thehouse_ml.synthetic.students_stage import STUDENTS_PARQUET, students_frame
+from thehouse_ml.synthetic.labels_stage import HIDDEN_UTILITY_PARQUET, HIDDEN_WEIGHTS_PARQUET
 
 pytestmark = pytest.mark.integration
 
@@ -44,31 +40,13 @@ OUTPUTS = tuple(f"reports/{name}" for name in (TRAINED_METRICS, TRAINED_REPORT, 
 
 
 def small_params() -> TrainParams:
-    return load_train_params().with_values(
-        n_splits=3,
-        logreg_c=(0.1, 1.0),
-        num_leaves=(7,),
-        learning_rate=(0.1,),
-        n_estimators=(10, 20),
-        min_data_in_leaf=20,
-    )
+    params: TrainParams = small_train_params()  # la rejilla de la plantilla de sesión (conftest)
+    return params
 
 
 @pytest.fixture(scope="module")
-def project(tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
-    students, rooms, _campuses = versioned_synthetic_data()
-    schema = default_schema()
-    paths = ProjectPaths(root=tmp_path_factory.mktemp("ablation"))
-    paths.data_processed.mkdir(parents=True)
-    shutil.copyfile(REPO / "data" / "universities.csv", paths.universities_csv)
-    chosen_students = [item for item in students if item.profile.university_code in CODES]
-    chosen_rooms = [item for item in rooms if item.room.university_code in CODES]
-    students_frame(chosen_students, schema).to_parquet(paths.data_processed / STUDENTS_PARQUET, index=False)
-    rooms_frame(chosen_rooms, schema).to_parquet(paths.data_processed / ROOMS_PARQUET, index=False)
-    run_pairs(paths)
-    run_labels(paths)
-    run_train(paths, small_params(), "full")
-    run_evaluate(paths)
+def project(two_campus_trained_template: Path, tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
+    paths: ProjectPaths = copy_project(two_campus_trained_template, tmp_path_factory.mktemp("ablation") / "project")
     return paths
 
 

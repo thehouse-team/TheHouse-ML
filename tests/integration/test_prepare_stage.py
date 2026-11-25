@@ -2,15 +2,20 @@
 
 from __future__ import annotations
 
+import contextlib
 import csv
 import io
+import shutil
 import zipfile
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Any
 
 import pandas as pd
 import pytest
 
 from conftest import write_osm_project
+from thehouse_ml import cli
 from thehouse_ml.cli import main
 from thehouse_ml.data_card import run_data_card
 from thehouse_ml.national import BASELINE_COLUMNS, ENIGH_SOURCE, ENVI_SOURCE, run_prepare
@@ -263,13 +268,46 @@ def test_prepare_report_has_reference_month_note_and_summary_rows(tmp_path: Path
     assert report.count("| ENIGH 2022 |") == 3
 
 
-def test_cli_prepare_returns_zero(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
-    _write_project(tmp_path)
+@dataclass(frozen=True)
+class PreparedByCli:
+    """Una corrida real de `python -m thehouse_ml prepare` sobre el proyecto inventado (T07, T05-H3)."""
 
-    code = main(["--root", str(tmp_path), "prepare"])
+    root: Path
+    code: int
+    stdout: str
+    stage_calls: tuple[str, ...]
+    stage_output: str
 
-    assert code == 0
-    assert "national_baselines.parquet" in capsys.readouterr().out
+
+@pytest.fixture(scope="module")
+def prepared_by_cli(tmp_path_factory: pytest.TempPathFactory) -> PreparedByCli:
+    """La etapa `prepare` completa (todas sus subetapas) es la prueba más lenta: se corre una vez por módulo.
+
+    La CLI llama al `run_stage` real; el espía solo registra la etapa pedida y lo que devolvió, para que
+    `test_run_stage_dispatches_prepare` verifique el despacho sin volver a correr la etapa.
+    """
+    root = tmp_path_factory.mktemp("prepare_cli")
+    _write_project(root)
+    calls: list[str] = []
+    outputs: list[str] = []
+
+    def spy(name: str, paths: ProjectPaths, **kwargs: Any) -> str:
+        calls.append(name)
+        outputs.append(run_stage(name, paths, **kwargs))
+        return outputs[-1]
+
+    stdout = io.StringIO()
+    with pytest.MonkeyPatch.context() as patch:
+        patch.setattr(cli, "run_stage", spy)
+        with contextlib.redirect_stdout(stdout):
+            code = main(["--root", str(root), "prepare"])
+    return PreparedByCli(root, code, stdout.getvalue(), tuple(calls), outputs[-1] if outputs else "")
+
+
+def test_cli_prepare_returns_zero(prepared_by_cli: PreparedByCli) -> None:
+    assert prepared_by_cli.code == 0
+    assert "national_baselines.parquet" in prepared_by_cli.stdout
+    assert prepared_by_cli.stdout.strip() == prepared_by_cli.stage_output.strip()  # la CLI imprime lo de la etapa
 
 
 def test_cli_prepare_fails_clearly_when_a_file_is_missing(tmp_path: Path, capsys: pytest.CaptureFixture[str]) -> None:
@@ -282,10 +320,9 @@ def test_cli_prepare_fails_clearly_when_a_file_is_missing(tmp_path: Path, capsys
     assert "ejecute primero `download`" in capsys.readouterr().err
 
 
-def test_run_stage_dispatches_prepare(tmp_path: Path) -> None:
-    _write_project(tmp_path)
-
-    output = run_stage("prepare", ProjectPaths(root=tmp_path))
+def test_run_stage_dispatches_prepare(prepared_by_cli: PreparedByCli) -> None:
+    assert prepared_by_cli.stage_calls == ("prepare",)
+    output = prepared_by_cli.stage_output
 
     assert output.startswith("prepare: ")
     assert "universities: " in output
@@ -293,11 +330,11 @@ def test_run_stage_dispatches_prepare(tmp_path: Path) -> None:
     assert "data card: " in output
 
 
-def test_prepare_generates_the_data_card_with_all_sections(tmp_path: Path) -> None:
-    _write_project(tmp_path)
+def test_prepare_generates_the_data_card_with_all_sections(prepared_by_cli: PreparedByCli, tmp_path: Path) -> None:
+    # Copia del proyecto ya preparado por `prepare` (la prueba agrega un archivo y vuelve a escribir la data card).
+    shutil.copytree(prepared_by_cli.root, tmp_path / "project")
+    tmp_path = tmp_path / "project"
     paths = ProjectPaths(root=tmp_path)
-
-    run_stage("prepare", paths)
     # El proyecto inventado no trae ZIP del DENUE: se agrega solo el agregado.
     pd.DataFrame(
         [{"code": "UTTT", "radius_m": 2000, "category": "total", "count": 42, "final_status": "ok_osm"}]

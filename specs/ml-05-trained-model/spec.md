@@ -8,7 +8,7 @@
 | Fecha | 2026-11-23 |
 | Estado documental | **✅ APROBADA** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-23 (M-ML-036) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T06 completas (6/7); ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 (7/7), 2026-11-23 a 2026-11-24; cierre M-ML-043, ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Plan | `plan.md` 1.0.0 |
 | Tasks | `task.md` 1.0.0 |
@@ -180,10 +180,12 @@ Registradas en `memoria.md` (M-ML-036, APROBADO). Los valores marcados SUPUESTO 
 | Tasks | 7 |
 | Requisitos sin task | 0 |
 | Tasks sin requisito | 0 |
-| Tasks completadas | 6 (T01, T02, T03, T04, T05, T06; rejilla y semilla fijadas en M-ML-038; T03 con M-ML-039: regresión logística candidata a promoción, sujeta a T05; T04 con M-ML-040: 4 métricas por pliegue, ablación de los 6 grupos, segmentos e hipótesis > $3,500 confirmada con salvedades T04-H2/H3). T05 con M-ML-041: calibración afín 0-100 y desglose de `logreg-1.0.0` que suma el total en los 30,755 pares de test; **regresión logística PROMOVIDA** (baseline de respaldo), con la no monotonía del presupuesto (`budget.max/budget.min` > 76.2) como desviación aceptada T05-H1 y T05-H2 para la model card). T06 con M-ML-042 (PASS): `reports/model_card.md` generada automáticamente desde los JSON de `reports/` («DATOS SINTÉTICOS», 10 secciones, salvedades T04-H2/H3, desviación T05-H1, explicación de `maxPoints` T05-H2 y nota para `TheHouse-GenAI`; T06-H1 traspasado a T07) |
+| Tasks completadas | 7 (T01–T07): T01 M-ML-037, T02 M-ML-038 (rejilla y semilla), T03 M-ML-039, T04 M-ML-040 (hipótesis > $3,500 confirmada con salvedades T04-H2/H3), T05 M-ML-041 (calibración afín 0-100, `logreg-1.0.0` **PROMOVIDA**, desviación aceptada T05-H1), T06 M-ML-042 (model card) y T07 M-ML-043 (distribución de `matchScore` y ejemplos en `trained_metrics.json` por T06-H1, pruebas lentas optimizadas por T05-H3, cobertura, coherencia y cierre) |
 | Estado documental | **✅ APROBADA** |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 a T06 completas (6/7); ver `evidence.md`** |
+| Estado de ejecución | **✅ COMPLETA — T01–T07 (7/7), 2026-11-23 a 2026-11-24; cierre M-ML-043, ver `evidence.md`** |
 
 ## 15. Aprobación
 
 Aprobada por César Yael López Trujillo el 2026-11-23 («Apruebo ML-05 1.0.0», M-ML-036), con las decisiones 1–6 de la §10 en APROBADO y las aclaraciones de la revisión (recorte al `training_range`, propuestas de calibración, formato de `breakdown`, regla de la hipótesis > $3,500, bootstrap, semilla, persistencia y nombres de salida). Para ejecutar se requiere «EJECUTA» con versión, tasks y rutas permitidas; T01 agrega dependencias, así que su «EJECUTA» debe autorizar `pyproject.toml` y `uv.lock`.
+
+Ejecutada con un «EJECUTA» por task: T01 (M-ML-037) el 2026-11-23; T02 (M-ML-038), T03 (M-ML-039), T04 (M-ML-040), T05 (M-ML-041) y T06 (M-ML-042) el 2026-11-24; y cerrada con T07 (ML-05-R07: pruebas, evidencia, revisión de coherencia y cierre) el 2026-11-24 en la rama `feat/ml-05-cierre` (M-ML-043). ML-05 queda **COMPLETA**: 7 de 7 tasks, con `logreg-1.0.0` promovido como modelo para ML-06 y `baseline-1.0.0` de respaldo. No se sube la versión 1.0.0: la constitución y `AGENTS.md` no exigen un bump al cerrar.

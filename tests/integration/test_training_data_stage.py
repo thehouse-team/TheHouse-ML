@@ -7,14 +7,13 @@ si esos archivos se borran.
 
 from __future__ import annotations
 
-import shutil
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 import pytest
 
-from conftest import versioned_synthetic_data
+from conftest import copy_project
 from thehouse_ml.features import default_schema
 from thehouse_ml.models.training_data import TrainingData, load_training_data
 from thehouse_ml.paths import ProjectPaths
@@ -22,11 +21,9 @@ from thehouse_ml.synthetic.labels_stage import (
     HIDDEN_UTILITY_PARQUET,
     HIDDEN_WEIGHTS_PARQUET,
     LABELS_PARQUET,
-    run_labels,
 )
-from thehouse_ml.synthetic.pairs_stage import PAIRS_PARQUET, run_pairs
-from thehouse_ml.synthetic.rooms_stage import ROOMS_PARQUET, rooms_frame
-from thehouse_ml.synthetic.students_stage import STUDENTS_PARQUET, students_frame
+from thehouse_ml.synthetic.pairs_stage import PAIRS_PARQUET
+from thehouse_ml.synthetic.students_stage import STUDENTS_PARQUET
 
 pytestmark = pytest.mark.integration
 
@@ -36,19 +33,9 @@ ML05_MODULES = (REPO / "src" / "thehouse_ml" / "models" / "training_data.py",)
 
 
 @pytest.fixture(scope="module")
-def project(tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
+def project(two_campus_labels_template: Path, tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
     """Proyecto con 2 campus: estudiantes, cuartos, pares (ML-03 T06) y etiquetas con archivos ocultos (ML-04 T04)."""
-    students, rooms, _campuses = versioned_synthetic_data()
-    schema = default_schema()
-    paths = ProjectPaths(root=tmp_path_factory.mktemp("training_data"))
-    paths.data_processed.mkdir(parents=True)
-    shutil.copyfile(REPO / "data" / "universities.csv", paths.universities_csv)
-    chosen_students = [item for item in students if item.profile.university_code in CODES]
-    chosen_rooms = [item for item in rooms if item.room.university_code in CODES]
-    students_frame(chosen_students, schema).to_parquet(paths.data_processed / STUDENTS_PARQUET, index=False)
-    rooms_frame(chosen_rooms, schema).to_parquet(paths.data_processed / ROOMS_PARQUET, index=False)
-    run_pairs(paths)
-    run_labels(paths)
+    paths: ProjectPaths = copy_project(two_campus_labels_template, tmp_path_factory.mktemp("training_data") / "project")
     assert (paths.data_processed / HIDDEN_UTILITY_PARQUET).is_file()
     assert (paths.data_processed / HIDDEN_WEIGHTS_PARQUET).is_file()
     return paths

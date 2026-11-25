@@ -12,7 +12,7 @@ from typing import Any
 import pandas as pd
 import pytest
 
-from conftest import versioned_synthetic_data
+from conftest import copy_project
 from thehouse_ml.cli import main
 from thehouse_ml.evaluation import METRIC_NAMES, student_metrics
 from thehouse_ml.features import default_schema
@@ -31,11 +31,10 @@ from thehouse_ml.synthetic.labels_stage import (
     HIDDEN_UTILITY_PARQUET,
     HIDDEN_WEIGHTS_PARQUET,
     LABELS_PARQUET,
-    run_labels,
 )
-from thehouse_ml.synthetic.pairs_stage import PAIRS_PARQUET, run_pairs
-from thehouse_ml.synthetic.rooms_stage import ROOMS_PARQUET, rooms_frame
-from thehouse_ml.synthetic.students_stage import STUDENTS_PARQUET, students_frame
+from thehouse_ml.synthetic.pairs_stage import PAIRS_PARQUET
+from thehouse_ml.synthetic.rooms_stage import ROOMS_PARQUET
+from thehouse_ml.synthetic.students_stage import STUDENTS_PARQUET
 
 pytestmark = pytest.mark.integration
 
@@ -45,19 +44,9 @@ PERSONAL_OR_SENSITIVE = ("gender", "email", "phone", "teléfono", "correo")  # e
 
 
 @pytest.fixture(scope="module")
-def project(tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
+def project(two_campus_labels_template: Path, tmp_path_factory: pytest.TempPathFactory) -> ProjectPaths:
     """Proyecto con 400 estudiantes y 600 cuartos (2 campus), pares (ML-03 T06) y etiquetas (T04)."""
-    students, rooms, _campuses = versioned_synthetic_data()
-    schema = default_schema()
-    paths = ProjectPaths(root=tmp_path_factory.mktemp("evaluate"))
-    paths.data_processed.mkdir(parents=True)
-    shutil.copyfile(REPO / "data" / "universities.csv", paths.universities_csv)
-    chosen_students = [item for item in students if item.profile.university_code in CODES]
-    chosen_rooms = [item for item in rooms if item.room.university_code in CODES]
-    students_frame(chosen_students, schema).to_parquet(paths.data_processed / STUDENTS_PARQUET, index=False)
-    rooms_frame(chosen_rooms, schema).to_parquet(paths.data_processed / ROOMS_PARQUET, index=False)
-    run_pairs(paths)
-    run_labels(paths)
+    paths: ProjectPaths = copy_project(two_campus_labels_template, tmp_path_factory.mktemp("evaluate") / "project")
     run_evaluate(paths)
     return paths
 

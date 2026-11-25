@@ -203,10 +203,55 @@ def test_future_work_and_traceability(card: str, inputs: ModelCardInputs) -> Non
         assert f"| `{name}` (`uv.lock`) | {version} |" in trace
     for model in _json("trained_metrics.json")["models"].values():
         assert model["sha256"] in trace
-    for pr in range(30, 36):
+    for pr in range(30, 37):
         assert f"#{pr}" in trace
-    for number in range(36, 43):
+    assert "| T06 model card (M-ML-042) | #36 | `docs/ml-05-model-card` |" in trace  # T06-H2
+    assert "| T07 pruebas, evidencia y cierre (M-ML-043) | pendiente | `feat/ml-05-cierre` |" in trace
+    for number in range(36, 44):
         assert f"M-ML-0{number}" in trace
+
+
+def test_distribution_and_examples_are_read_from_trained_metrics(card: str) -> None:
+    """ML-05 T07 (T06-H1): la ficha copia la distribución y los ejemplos de `trained_metrics.json`."""
+    section = _section(card, 6)
+    breakdown = _json("trained_metrics.json")["breakdown"]
+    score = breakdown["distribution"]["matchScore"]
+    row = " | ".join([str(score["min"]), *(f"{value:g}" for value in score["percentiles"].values()), str(score["max"])])
+    assert f"| {row} | {score['mean']:.1f} |" in section
+    assert "| Pares | " + " | ".join(f"{item['count']:,}" for item in score["histogram"]) + " |" in section
+    for item in breakdown["distribution"]["factor_points"]:
+        assert f"| {item['label']} (`{item['factor']}`) | {item['maxPoints']:g} | {item['mean']:.2f} |" in section
+    assert f"mediana de `matchScore` {score['percentiles']['p50']:g}" in section
+    for example in breakdown["examples"]:
+        assert f"`{example['student_id']}` — {example['university_code']}" in section
+        for item in example["top"]:
+            assert f"| `{item['room_id']}` | **{item['matchScore']}** |" in section
+    first = breakdown["examples"][0]["first_place"]["output"]
+    assert json.dumps(first, ensure_ascii=False, indent=2) in section
+    assert "no se copian aquí" not in card
+
+
+def test_a_changed_distribution_or_example_changes_the_card(inputs: ModelCardInputs) -> None:
+    trained = copy.deepcopy(dict(inputs.trained))
+    trained["breakdown"]["distribution"]["matchScore"]["percentiles"]["p50"] = 42.0
+    trained["breakdown"]["examples"][0]["student_id"] = "S9999"
+    text = render_model_card(replace(inputs, trained=trained))
+    assert "mediana de `matchScore` 42" in text
+    assert "`S9999` —" in text
+
+
+@pytest.mark.parametrize("block", ["distribution", "examples"])
+def test_without_distribution_or_examples_the_card_is_an_error(inputs: ModelCardInputs, block: str) -> None:
+    trained = copy.deepcopy(dict(inputs.trained))
+    del trained["breakdown"][block]
+    with pytest.raises(ModelCardError, match=f"breakdown.{block}"):
+        render_model_card(replace(inputs, trained=trained))
+
+
+def test_without_examples_the_card_says_so(inputs: ModelCardInputs) -> None:
+    trained = copy.deepcopy(dict(inputs.trained))
+    trained["breakdown"]["examples"] = []
+    assert "Ningún estudiante cumple la regla." in render_model_card(replace(inputs, trained=trained))
 
 
 def test_library_versions_come_from_uv_lock() -> None:
@@ -265,7 +310,7 @@ def test_two_generations_have_the_same_sha256(tmp_path: Path) -> None:
     digests = []
     for _ in range(2):
         message = run_model_card(paths)
-        assert message.startswith("model card (ML-05 T06): reports/model_card.md")
+        assert message.startswith("model card (ML-05 T06): reports/model_card.md")  # mensaje sin cambios en T07
         message.encode("cp1252")
         digests.append(hashlib.sha256((paths.reports / MODEL_CARD).read_bytes()).hexdigest())
     assert digests[0] == digests[1]

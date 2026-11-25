@@ -8,8 +8,9 @@ y los meses de las encuestas, de `thehouse_ml.inpc`. No hay métricas escritas a
 
 Las únicas constantes de trazabilidad (fecha de la promoción, PR y decisiones M-ML) están en
 este módulo porque no forman parte de ningún JSON (M-ML-042). La distribución de `matchScore` y
-los ejemplos explicados solo existen en `reports/trained_breakdown.md` (no en un JSON), así que
-la model card los enlaza sin copiar sus cifras: volver a puntuar test está prohibido (spec §6.2).
+los ejemplos explicados se leen del bloque `breakdown` de `reports/trained_metrics.json`
+(`distribution` y `examples`, agregados en T07 por T06-H1); la model card no vuelve a puntuar
+test (spec §6.2).
 
 Determinista (sin fechas de ejecución, tiempos ni rutas absolutas): dos generaciones con los
 mismos JSON escriben los mismos bytes. Todo es **sintético** (etiquetas de M-ML-032).
@@ -42,7 +43,7 @@ INPUT_REPORTS: tuple[str, ...] = (
 )
 UV_LOCK = "uv.lock"
 LIBRARIES: tuple[str, ...] = ("scikit-learn", "lightgbm", "numpy", "pandas", "scipy")
-SPEC = "ML-05 1.0.0, T06 (ML-05-R06)"
+SPEC = "ML-05 1.0.0, T06 (ML-05-R06) y T07"
 TITLE_BANNER = "DATOS SINTÉTICOS"
 MODEL_CARD_SKIP_MESSAGE = "model card: omitida (faltan reportes de evaluate o uv.lock; ejecute `evaluate`)"
 
@@ -56,8 +57,10 @@ PULL_REQUESTS: tuple[tuple[str, int, str], ...] = (
     ("T03 medición única en test (M-ML-039)", 33, "feat/ml-05-eval"),
     ("T04 ablación y segmentos (M-ML-040)", 34, "feat/ml-05-ablation"),
     ("T05 puntaje 0-100 y desglose (M-ML-041)", 35, "feat/ml-05-breakdown"),
+    ("T06 model card (M-ML-042)", 36, "docs/ml-05-model-card"),
 )
-MODEL_CARD_BRANCH = "docs/ml-05-model-card"
+CLOSING_WORK = "T07 pruebas, evidencia y cierre (M-ML-043)"
+CLOSING_BRANCH = "feat/ml-05-cierre"
 DECISIONS: tuple[tuple[str, str], ...] = (
     ("M-ML-029", "ML-04 aprobada: modelo base, esquema 2.0.0 y etiquetas sintéticas"),
     ("M-ML-031", "puntaje 0-100 con desglose y redondeo del baseline"),
@@ -71,6 +74,7 @@ DECISIONS: tuple[tuple[str, str], ...] = (
     ("M-ML-040", "T04: ablación, segmentos e hipótesis > $3,500"),
     ("M-ML-041", "T05: calibración, desglose, desviación T05-H1 y promoción"),
     ("M-ML-042", "T06: generación de esta model card (APROBADO)"),
+    ("M-ML-043", "T07: cierre de ML-05 y herencia para ML-06"),
 )
 METRICS: tuple[str, ...] = ("ndcg@10", "ndcg@5", "precision@5", "map")
 METRIC_LABELS: dict[str, str] = {"ndcg@10": "NDCG@10", "ndcg@5": "NDCG@5", "precision@5": "Precision@5", "map": "MAP"}
@@ -180,6 +184,10 @@ def check_inputs(inputs: ModelCardInputs) -> None:
             )
     if not trained_sha:
         problems.append(f"{TRAINED_METRICS_JSON}: sin modelos")
+    breakdown = inputs.trained.get("breakdown", {})
+    for block in ("distribution", "examples"):
+        if block not in breakdown:
+            problems.append(f"{TRAINED_METRICS_JSON}: falta breakdown.{block} (ejecute `evaluate`)")
     if problems:
         raise ModelCardError("; ".join(problems))
 
@@ -208,6 +216,14 @@ def _ci(stat: Mapping[str, float], digits: int = 3, signed: bool = False) -> str
 
 def _int(value: int) -> str:
     return f"{value:,}"
+
+
+def _money(value: float) -> str:
+    return f"${value:,.0f}"
+
+
+def _pct(count: int, total: int) -> str:
+    return f"{100 * count / total:.1f} %" if total else "0.0 %"
 
 
 def _months(months: Sequence[str]) -> str:
@@ -661,14 +677,18 @@ def _breakdown(inputs: ModelCardInputs) -> list[str]:
         f"{sums['matchScore_outside_0_100']} totales fuera de [0, 100]; orden idéntico al del logit en "
         f"{breakdown['order']['identical_order']}/{breakdown['order']['students']} estudiantes.",
         "",
+        *_distribution(inputs),
         "**T05-H2 — `maxPoints` no es importancia.** `maxPoints` mide cuánto puede mover el logit cada factor dentro "
         "de **todo** su `training_range`, no cuánto importa en los candidatos típicos; la medida de importancia es "
-        "la ablación (sección 6). La distancia recibe el mayor `maxPoints` porque su rango llega hasta los límites "
-        "del esquema mientras la mayoría de los candidatos están cerca: casi todos obtienen una parte grande de sus "
-        "puntos de distancia y **los cuartos cercanos tienden a puntajes altos**. La distribución de `matchScore` y "
-        "de los puntos por factor en test, y los ejemplos explicados con su JSON, están en "
-        "[`trained_breakdown.md`](trained_breakdown.md) §4 y §6 (no se copian aquí porque no forman parte de un JSON).",
+        f"la ablación (sección 6). El factor `{top_factor['factor']}` recibe el mayor `maxPoints` porque su rango "
+        "llega hasta los límites del esquema mientras la mayoría de los candidatos están cerca: casi todos obtienen "
+        "una parte grande de esos puntos y **los cuartos cercanos tienden a puntajes altos** (en test, mediana de "
+        f"`matchScore` {_median(inputs):g}; `{top_factor['factor']}` da en promedio el "
+        f"{_f(100 * _factor_share(inputs, top_factor['factor']), 0)} % de su máximo). Las tablas de arriba y los "
+        "ejemplos de abajo salen de `trained_metrics.json` (`breakdown.distribution` y `breakdown.examples`); "
+        "[`trained_breakdown.md`](trained_breakdown.md) §4 y §6 los muestra con el histograma de barras.",
         "",
+        *_examples(inputs),
         "**Nota para `TheHouse-GenAI` (cómo interpretar y explicar el `breakdown`):**",
         "",
         "1. Explicar cada factor como **«obtuvo `points` de `maxPoints` posibles»** (proporción lograda), nunca "
@@ -685,6 +705,132 @@ def _breakdown(inputs: ModelCardInputs) -> list[str]:
         "5. No recalcular ni modificar `matchScore` ni `points` (constitución §2.5); no mencionar `probability` ni "
         "`logit`, que no forman parte del contrato.",
         "6. Todo lo de esta ficha es **sintético**: no afirmar que el puntaje refleja preferencias reales.",
+        "",
+    ]
+    return lines
+
+
+def _median(inputs: ModelCardInputs) -> float:
+    return float(inputs.trained["breakdown"]["distribution"]["matchScore"]["percentiles"]["p50"])
+
+
+def _factor_share(inputs: ModelCardInputs, factor_id: str) -> float:
+    for item in inputs.trained["breakdown"]["distribution"]["factor_points"]:
+        if item["factor"] == factor_id:
+            return float(item["mean_share_of_max"])
+    raise ModelCardError(f"{TRAINED_METRICS_JSON}: falta el factor {factor_id!r} en breakdown.distribution")
+
+
+def _distribution(inputs: ModelCardInputs) -> list[str]:
+    distribution = inputs.trained["breakdown"]["distribution"]
+    score = distribution["matchScore"]
+    percentiles = score["percentiles"]
+    lines = [
+        f"**Distribución de `matchScore` en test** (DATOS SINTÉTICOS; {_int(distribution['pairs'])} pares candidatos "
+        "de la medición única de T03):",
+        "",
+        _row(("Mín.", *percentiles, "Máx.", "Media")),
+        _row(tuple("---:" for _ in range(len(percentiles) + 3))),
+        _row(
+            (
+                str(score["min"]),
+                *(f"{value:g}" for value in percentiles.values()),
+                str(score["max"]),
+                _f(score["mean"], 1),
+            )
+        ),
+        "",
+        _row(("`matchScore`", *(f"{item['low']}-{item['high']}" for item in score["histogram"]))),
+        _row(("---", *("---:" for _ in score["histogram"]))),
+        _row(("Pares", *(_int(item["count"]) for item in score["histogram"]))),
+        _row(("%", *(_pct(item["count"], distribution["pairs"]) for item in score["histogram"]))),
+        "",
+        "Puntos por factor (sin redondear) en los mismos pares:",
+        "",
+        _row(("Factor", "maxPoints", "Media", "p25", "Mediana", "p75", "Media / maxPoints")),
+        _row(("---", "---:", "---:", "---:", "---:", "---:", "---:")),
+    ]
+    for item in distribution["factor_points"]:
+        lines.append(
+            _row(
+                (
+                    f"{item['label']} (`{item['factor']}`)",
+                    f"{item['maxPoints']:g}",
+                    _f(item["mean"], 2),
+                    _f(item["p25"], 2),
+                    _f(item["p50"], 2),
+                    _f(item["p75"], 2),
+                    f"{_f(100 * item['mean_share_of_max'], 0)} %",
+                )
+            )
+        )
+    lines.append("")
+    return lines
+
+
+def _examples(inputs: ModelCardInputs) -> list[str]:
+    examples = inputs.trained["breakdown"]["examples"]
+    factors = _factors(inputs)
+    lines = [
+        "**Ejemplos explicados** (DATOS SINTÉTICOS; regla fija de M-ML-041, decisión 8: por rango de `budget.max`, el "
+        "primer estudiante de test por `student_id` de un campus verificado con suficientes candidatos, y su top por "
+        "`matchScore`; ids sintéticos, sin datos personales; «Baseline» es el `matchScore` de `baseline-1.0.0` para "
+        "el mismo par):",
+        "",
+    ]
+    if not examples:
+        return [*lines, "Ningún estudiante cumple la regla.", ""]
+    for number, example in enumerate(examples, start=1):
+        first = example["first_place"]
+        output = first["output"]
+        values = first["inputs"]
+        explained = ", ".join(
+            f"`{item['factor']}` {item['points']:g}/{item['maxPoints']:g}" for item in output["breakdown"]
+        )
+        lines += [
+            f"{number}. `{example['student_id']}` — {example['university_code']}, `budget.max` "
+            f"{_money(example['budget_max'])} ({example['budget_range_label']}), {example['candidates']} candidatos.",
+            "",
+            _row(
+                (
+                    "#",
+                    "Cuarto",
+                    "matchScore",
+                    *(f"`{f['factor']}` (/{f['maxPoints']:g})" for f in factors),
+                    "Relevancia sintética",
+                    "Baseline",
+                )
+            ),
+            _row(("---:", "---", "---:", *("---:" for _ in factors), "---:", "---:")),
+            *(
+                _row(
+                    (
+                        str(item["rank"]),
+                        f"`{item['room_id']}`",
+                        f"**{item['matchScore']}**",
+                        *(_f(item["points"][f["factor"]], 1) for f in factors),
+                        str(item["relevance"]),
+                        str(item["baseline_matchScore"]),
+                    )
+                )
+                for item in example["top"]
+            ),
+            "",
+            f"Primer lugar `{first['room_id']}`: {explained} → `matchScore` **{output['matchScore']}** (suma sin "
+            f"redondear {_f(first['raw_total'], 6)}). Renta = {values['price_to_budget']:.0%} de `budget.max`, "
+            f"{_f(values['distance_km'], 2)} km (efectiva {_f(values['effective_distance_km'], 2)} km), cobertura de "
+            f"servicios {values['services_coverage']:.0%}, extras {_f(values['extra_services_ratio'], 2)}.",
+            "",
+        ]
+    first_place = examples[0]["first_place"]
+    first_output = first_place["output"]
+    lines += [
+        f"**Desglose de ejemplo** (salida JSON del primer lugar del ejemplo 1, `{first_place['room_id']}`; "
+        "formato del contrato: `maxPoints` de la calibración y lista `features` en los factores de varias features):",
+        "",
+        "```json",
+        json.dumps(first_output, ensure_ascii=False, indent=2),
+        "```",
         "",
     ]
     return lines
@@ -726,7 +872,8 @@ def _limitations(inputs: ModelCardInputs) -> list[str]:
         "`placeType`, `propertyType`, mascotas, `livingWith` ni servicios como catálogo; sin ellos el modelo no se "
         "puede usar en producción.",
         "- **Timeout del CI (T05-H3):** el job `quality` necesitó un tiempo límite mayor porque las pruebas casi lo "
-        "agotaban (`.github/workflows/ci.yml`); queda pendiente optimizar las pruebas lentas.",
+        "agotaban (`.github/workflows/ci.yml`, 30 min); en T07 se optimizaron las pruebas más lentas (fixtures de "
+        "sesión y datos pequeños) sin cambiar ese límite.",
         "",
     ]
 
@@ -748,8 +895,8 @@ def _decision_and_future(inputs: ModelCardInputs) -> list[str]:
         "2. Revisar la calibración de `maxPoints` (T05-H2) para que refleje mejor el rango observado en los "
         "candidatos y no todo el `training_range`; requiere una versión nueva del modelo y coordinarlo con "
         "`TheHouse-GenAI` y NV-23.",
-        "3. Optimizar las pruebas lentas (fixtures de sesión, sin regenerar los datos completos) para volver a un "
-        "margen holgado en el CI (T05-H3, T07).",
+        "3. Vigilar el tiempo de la suite en el CI: las pruebas lentas se optimizaron en T07 (T05-H3); si vuelve a "
+        "acercarse al límite, separar las pruebas de integración pesadas en un job propio.",
         "4. LightGBM como candidato si se resuelve un desglose aditivo explicable y exportable (p. ej., "
         "contribuciones por factor); hoy queda como referencia del potencial.",
         "5. Medir el desempeño real con señales reales de TheHouse (ML-07).",
@@ -789,7 +936,7 @@ def _traceability(inputs: ModelCardInputs) -> list[str]:
         _row(("Trabajo", "PR", "Rama")),
         _row(("---", "---:", "---")),
         *(_row((work, f"#{number}", f"`{branch}`")) for work, number, branch in PULL_REQUESTS),
-        _row(("T06 model card (M-ML-042)", "pendiente", f"`{MODEL_CARD_BRANCH}`")),
+        _row((CLOSING_WORK, "pendiente", f"`{CLOSING_BRANCH}`")),
         "",
         "Decisiones:",
         "",

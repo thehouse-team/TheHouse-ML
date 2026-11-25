@@ -575,7 +575,662 @@
     "accepted_deviations": {
       "monotonicity_budget": "M-ML-041 (T05-H1): el coeficiente de price_below_min es negativo; por debajo de budget.min el factor presupuesto sube con la renta solo si budget.max / budget.min > 76.2 (máximo +0.124 puntos sobre 100; ningún par observado en esa zona). Aceptada por el responsable después de ver la verificación; corrección en logreg-1.1.0 (ML-07)"
     },
-    "passed": true
+    "passed": true,
+    "distribution": {
+      "scope": "pares candidatos de test de la medición única de T03 (DATOS SINTÉTICOS)",
+      "pairs": 30755,
+      "matchScore": {
+        "min": 8,
+        "max": 97,
+        "mean": 77.58533571776947,
+        "interpolation": "linear",
+        "percentiles": {
+          "p5": 50.0,
+          "p10": 61.0,
+          "p25": 74.0,
+          "p50": 81.0,
+          "p75": 85.0,
+          "p90": 88.0,
+          "p95": 90.0
+        },
+        "histogram": [
+          {
+            "low": 0,
+            "high": 9,
+            "count": 1
+          },
+          {
+            "low": 10,
+            "high": 19,
+            "count": 45
+          },
+          {
+            "low": 20,
+            "high": 29,
+            "count": 108
+          },
+          {
+            "low": 30,
+            "high": 39,
+            "count": 319
+          },
+          {
+            "low": 40,
+            "high": 49,
+            "count": 963
+          },
+          {
+            "low": 50,
+            "high": 59,
+            "count": 1444
+          },
+          {
+            "low": 60,
+            "high": 69,
+            "count": 2491
+          },
+          {
+            "low": 70,
+            "high": 79,
+            "count": 7407
+          },
+          {
+            "low": 80,
+            "high": 89,
+            "count": 16140
+          },
+          {
+            "low": 90,
+            "high": 100,
+            "count": 1837
+          }
+        ]
+      },
+      "factor_points_basis": "puntos sin redondear por par",
+      "factor_points": [
+        {
+          "factor": "budget",
+          "label": "Presupuesto",
+          "maxPoints": 9.6,
+          "raw_max_points": 9.569811954389692,
+          "mean": 4.269140521277519,
+          "p25": 2.485421630366352,
+          "p50": 4.404110676456006,
+          "p75": 6.03811057283896,
+          "mean_share_of_max": 0.4461049539556789
+        },
+        {
+          "factor": "distance",
+          "label": "Distancia",
+          "maxPoints": 72.6,
+          "raw_max_points": 72.60747294686455,
+          "mean": 63.42427375319086,
+          "p25": 60.54926116204956,
+          "p50": 68.03769706980819,
+          "p75": 70.90358210191181,
+          "mean_share_of_max": 0.8735226716898119
+        },
+        {
+          "factor": "essential_services",
+          "label": "Servicios esenciales",
+          "maxPoints": 6.7,
+          "raw_max_points": 6.733606109723173,
+          "mean": 4.941195848246133,
+          "p25": 4.040163665833903,
+          "p50": 4.809718649802266,
+          "p75": 5.771662379762718,
+          "mean_share_of_max": 0.7338112398809844
+        },
+        {
+          "factor": "place_type",
+          "label": "Tipo de lugar",
+          "maxPoints": 4.9,
+          "raw_max_points": 4.8542379171078585,
+          "mean": 1.5235883145453473,
+          "p25": 0.0,
+          "p50": 0.0,
+          "p75": 4.8542379171078585,
+          "mean_share_of_max": 0.3138676637945049
+        },
+        {
+          "factor": "property_type",
+          "label": "Tipo de inmueble",
+          "maxPoints": 1.7,
+          "raw_max_points": 1.7248277730510626,
+          "mean": 1.2549096488307778,
+          "p25": 0.0,
+          "p50": 1.7248277730510626,
+          "p75": 1.7248277730510626,
+          "mean_share_of_max": 0.7275564948788814
+        },
+        {
+          "factor": "extras",
+          "label": "Extras",
+          "maxPoints": 4.5,
+          "raw_max_points": 4.510043298863674,
+          "mean": 2.1716981121789356,
+          "p25": 1.5033477662878911,
+          "p50": 2.255021649431837,
+          "p75": 2.8700275538223377,
+          "mean_share_of_max": 0.4815248919508389
+        }
+      ]
+    },
+    "examples": [
+      {
+        "budget_range": "budget_le_2000",
+        "budget_range_label": "≤ $2,000",
+        "student_id": "S0031",
+        "university_code": "UTTT",
+        "budget_max": 1500,
+        "candidates": 112,
+        "top": [
+          {
+            "rank": 1,
+            "room_id": "R00261",
+            "matchScore": 94,
+            "points": {
+              "budget": 7.3,
+              "distance": 70.6,
+              "essential_services": 6.7,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 2.6
+            },
+            "relevance": 3,
+            "baseline_matchScore": 81
+          },
+          {
+            "rank": 2,
+            "room_id": "R00101",
+            "matchScore": 93,
+            "points": {
+              "budget": 6.4,
+              "distance": 72.2,
+              "essential_services": 5.1,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 3.2
+            },
+            "relevance": 3,
+            "baseline_matchScore": 82
+          },
+          {
+            "rank": 3,
+            "room_id": "R00069",
+            "matchScore": 93,
+            "points": {
+              "budget": 7.0,
+              "distance": 72.2,
+              "essential_services": 5.1,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 2.6
+            },
+            "relevance": 3,
+            "baseline_matchScore": 78
+          },
+          {
+            "rank": 4,
+            "room_id": "R00282",
+            "matchScore": 91,
+            "points": {
+              "budget": 6.1,
+              "distance": 70.7,
+              "essential_services": 5.1,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 2.6
+            },
+            "relevance": 3,
+            "baseline_matchScore": 83
+          },
+          {
+            "rank": 5,
+            "room_id": "R00193",
+            "matchScore": 90,
+            "points": {
+              "budget": 5.5,
+              "distance": 71.1,
+              "essential_services": 5.1,
+              "place_type": 4.9,
+              "property_type": 0.0,
+              "extras": 3.2
+            },
+            "relevance": 2,
+            "baseline_matchScore": 78
+          }
+        ],
+        "first_place": {
+          "room_id": "R00261",
+          "inputs": {
+            "distance_km": 0.8924504599656791,
+            "effective_distance_km": 0.8924504599656791,
+            "price_to_budget": 0.23333333333333334,
+            "services_coverage": 1.0,
+            "place_type_match": 1.0,
+            "property_type_match": 1.0,
+            "pets_compatible": 1.0,
+            "distance_ratio": 0.029748348665522634,
+            "price_below_min": 0.5625,
+            "extra_services_ratio": 0.5714285714285714
+          },
+          "raw_total": 93.7473519280626,
+          "probability": 0.9600038918934093,
+          "output": {
+            "modelVersion": "logreg-1.0.0",
+            "featureSchemaVersion": "2.0.0",
+            "matchScore": 94,
+            "breakdown": [
+              {
+                "factor": "budget",
+                "points": 7.3,
+                "maxPoints": 9.6,
+                "features": [
+                  {
+                    "feature": "price_to_budget",
+                    "value": 0.23333333333333334
+                  },
+                  {
+                    "feature": "price_below_min",
+                    "value": 0.5625
+                  }
+                ]
+              },
+              {
+                "factor": "distance",
+                "points": 70.6,
+                "maxPoints": 72.6,
+                "features": [
+                  {
+                    "feature": "distance_km",
+                    "value": 0.8924504599656791
+                  },
+                  {
+                    "feature": "effective_distance_km",
+                    "value": 0.8924504599656791
+                  },
+                  {
+                    "feature": "distance_ratio",
+                    "value": 0.029748348665522634
+                  }
+                ]
+              },
+              {
+                "factor": "essential_services",
+                "points": 6.7,
+                "maxPoints": 6.7,
+                "feature": "services_coverage",
+                "value": 1
+              },
+              {
+                "factor": "place_type",
+                "points": 4.9,
+                "maxPoints": 4.9,
+                "feature": "place_type_match",
+                "value": 1
+              },
+              {
+                "factor": "property_type",
+                "points": 1.7,
+                "maxPoints": 1.7,
+                "feature": "property_type_match",
+                "value": 1
+              },
+              {
+                "factor": "extras",
+                "points": 2.6,
+                "maxPoints": 4.5,
+                "feature": "extra_services_ratio",
+                "value": 0.5714285714285714
+              }
+            ]
+          }
+        }
+      },
+      {
+        "budget_range": "budget_2001_3500",
+        "budget_range_label": "$2,001–$3,500",
+        "student_id": "S0003",
+        "university_code": "UTTT",
+        "budget_max": 2200,
+        "candidates": 178,
+        "top": [
+          {
+            "rank": 1,
+            "room_id": "R00244",
+            "matchScore": 89,
+            "points": {
+              "budget": 6.3,
+              "distance": 70.7,
+              "essential_services": 3.8,
+              "place_type": 4.9,
+              "property_type": 0.0,
+              "extras": 3.4
+            },
+            "relevance": 3,
+            "baseline_matchScore": 44
+          },
+          {
+            "rank": 2,
+            "room_id": "R00088",
+            "matchScore": 88,
+            "points": {
+              "budget": 6.5,
+              "distance": 66.6,
+              "essential_services": 5.8,
+              "place_type": 4.9,
+              "property_type": 0.0,
+              "extras": 4.5
+            },
+            "relevance": 3,
+            "baseline_matchScore": 50
+          },
+          {
+            "rank": 3,
+            "room_id": "R00101",
+            "matchScore": 88,
+            "points": {
+              "budget": 7.4,
+              "distance": 72.2,
+              "essential_services": 3.8,
+              "place_type": 0.0,
+              "property_type": 0.0,
+              "extras": 4.5
+            },
+            "relevance": 3,
+            "baseline_matchScore": 54
+          },
+          {
+            "rank": 4,
+            "room_id": "R00193",
+            "matchScore": 88,
+            "points": {
+              "budget": 6.7,
+              "distance": 71.0,
+              "essential_services": 4.8,
+              "place_type": 0.0,
+              "property_type": 1.7,
+              "extras": 3.4
+            },
+            "relevance": 3,
+            "baseline_matchScore": 44
+          },
+          {
+            "rank": 5,
+            "room_id": "R00075",
+            "matchScore": 88,
+            "points": {
+              "budget": 5.0,
+              "distance": 70.6,
+              "essential_services": 4.8,
+              "place_type": 4.9,
+              "property_type": 0.0,
+              "extras": 2.3
+            },
+            "relevance": 3,
+            "baseline_matchScore": 53
+          }
+        ],
+        "first_place": {
+          "room_id": "R00244",
+          "inputs": {
+            "distance_km": 0.7822592077662694,
+            "effective_distance_km": 0.7822592077662694,
+            "price_to_budget": 0.3409090909090909,
+            "services_coverage": 0.5714285714285714,
+            "place_type_match": 1.0,
+            "property_type_match": 0.0,
+            "pets_compatible": 1.0,
+            "distance_ratio": 1.564518415532539,
+            "price_below_min": 0.375,
+            "extra_services_ratio": 0.75
+          },
+          "raw_total": 89.10190632927907,
+          "probability": 0.7454780942513416,
+          "output": {
+            "modelVersion": "logreg-1.0.0",
+            "featureSchemaVersion": "2.0.0",
+            "matchScore": 89,
+            "breakdown": [
+              {
+                "factor": "budget",
+                "points": 6.3,
+                "maxPoints": 9.6,
+                "features": [
+                  {
+                    "feature": "price_to_budget",
+                    "value": 0.3409090909090909
+                  },
+                  {
+                    "feature": "price_below_min",
+                    "value": 0.375
+                  }
+                ]
+              },
+              {
+                "factor": "distance",
+                "points": 70.7,
+                "maxPoints": 72.6,
+                "features": [
+                  {
+                    "feature": "distance_km",
+                    "value": 0.7822592077662694
+                  },
+                  {
+                    "feature": "effective_distance_km",
+                    "value": 0.7822592077662694
+                  },
+                  {
+                    "feature": "distance_ratio",
+                    "value": 1.564518415532539
+                  }
+                ]
+              },
+              {
+                "factor": "essential_services",
+                "points": 3.8,
+                "maxPoints": 6.7,
+                "feature": "services_coverage",
+                "value": 0.5714285714285714
+              },
+              {
+                "factor": "place_type",
+                "points": 4.9,
+                "maxPoints": 4.9,
+                "feature": "place_type_match",
+                "value": 1
+              },
+              {
+                "factor": "property_type",
+                "points": 0.0,
+                "maxPoints": 1.7,
+                "feature": "property_type_match",
+                "value": 0
+              },
+              {
+                "factor": "extras",
+                "points": 3.4,
+                "maxPoints": 4.5,
+                "feature": "extra_services_ratio",
+                "value": 0.75
+              }
+            ]
+          }
+        }
+      },
+      {
+        "budget_range": "budget_gt_3500",
+        "budget_range_label": "> $3,500",
+        "student_id": "S0044",
+        "university_code": "UTTT",
+        "budget_max": 5400,
+        "candidates": 200,
+        "top": [
+          {
+            "rank": 1,
+            "room_id": "R00088",
+            "matchScore": 94,
+            "points": {
+              "budget": 8.2,
+              "distance": 69.0,
+              "essential_services": 6.7,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 3.4
+            },
+            "relevance": 3,
+            "baseline_matchScore": 74
+          },
+          {
+            "rank": 2,
+            "room_id": "R00175",
+            "matchScore": 92,
+            "points": {
+              "budget": 6.0,
+              "distance": 72.5,
+              "essential_services": 4.8,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 2.3
+            },
+            "relevance": 3,
+            "baseline_matchScore": 78
+          },
+          {
+            "rank": 3,
+            "room_id": "R00235",
+            "matchScore": 92,
+            "points": {
+              "budget": 6.9,
+              "distance": 70.6,
+              "essential_services": 6.7,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 1.1
+            },
+            "relevance": 3,
+            "baseline_matchScore": 78
+          },
+          {
+            "rank": 4,
+            "room_id": "R00156",
+            "matchScore": 91,
+            "points": {
+              "budget": 7.0,
+              "distance": 72.0,
+              "essential_services": 5.8,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 0.0
+            },
+            "relevance": 3,
+            "baseline_matchScore": 74
+          },
+          {
+            "rank": 5,
+            "room_id": "R00269",
+            "matchScore": 91,
+            "points": {
+              "budget": 6.4,
+              "distance": 70.9,
+              "essential_services": 4.8,
+              "place_type": 4.9,
+              "property_type": 1.7,
+              "extras": 2.3
+            },
+            "relevance": 3,
+            "baseline_matchScore": 76
+          }
+        ],
+        "first_place": {
+          "room_id": "R00088",
+          "inputs": {
+            "distance_km": 2.481011923330055,
+            "effective_distance_km": 0.6202529808325138,
+            "price_to_budget": 0.12962962962962962,
+            "services_coverage": 1.0,
+            "place_type_match": 1.0,
+            "property_type_match": 1.0,
+            "pets_compatible": 1.0,
+            "distance_ratio": 0.16540079488867035,
+            "price_below_min": 0.8157894736842105,
+            "extra_services_ratio": 0.75
+          },
+          "raw_total": 93.93195172465872,
+          "probability": 0.9630928420607391,
+          "output": {
+            "modelVersion": "logreg-1.0.0",
+            "featureSchemaVersion": "2.0.0",
+            "matchScore": 94,
+            "breakdown": [
+              {
+                "factor": "budget",
+                "points": 8.2,
+                "maxPoints": 9.6,
+                "features": [
+                  {
+                    "feature": "price_to_budget",
+                    "value": 0.12962962962962962
+                  },
+                  {
+                    "feature": "price_below_min",
+                    "value": 0.8157894736842105
+                  }
+                ]
+              },
+              {
+                "factor": "distance",
+                "points": 69.0,
+                "maxPoints": 72.6,
+                "features": [
+                  {
+                    "feature": "distance_km",
+                    "value": 2.481011923330055
+                  },
+                  {
+                    "feature": "effective_distance_km",
+                    "value": 0.6202529808325138
+                  },
+                  {
+                    "feature": "distance_ratio",
+                    "value": 0.16540079488867035
+                  }
+                ]
+              },
+              {
+                "factor": "essential_services",
+                "points": 6.7,
+                "maxPoints": 6.7,
+                "feature": "services_coverage",
+                "value": 1
+              },
+              {
+                "factor": "place_type",
+                "points": 4.9,
+                "maxPoints": 4.9,
+                "feature": "place_type_match",
+                "value": 1
+              },
+              {
+                "factor": "property_type",
+                "points": 1.7,
+                "maxPoints": 1.7,
+                "feature": "property_type_match",
+                "value": 1
+              },
+              {
+                "factor": "extras",
+                "points": 3.4,
+                "maxPoints": 4.5,
+                "feature": "extra_services_ratio",
+                "value": 0.75
+              }
+            ]
+          }
+        }
+      }
+    ]
   },
   "per_student_test": [
     {
