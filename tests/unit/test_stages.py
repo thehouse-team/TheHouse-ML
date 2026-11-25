@@ -28,8 +28,12 @@ def test_get_stage_rejects_unknown_names() -> None:
         get_stage("deploy")
 
 
-def test_run_stage_returns_the_pending_message(tmp_path: Path) -> None:
-    assert run_stage("export", ProjectPaths(root=tmp_path)) == "export: pendiente de ML-06"
+def test_export_stage_skips_without_a_model(tmp_path: Path) -> None:
+    # ML-06 T01: `export` ya no es una etapa vacía; sin `models/logreg.json` se omite sin escribir nada.
+    message = run_stage("export", ProjectPaths(root=tmp_path))
+
+    assert message == "export: omitido; falta models/logreg.json (ejecute `train`)"
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_train_stage_skips_without_inputs(tmp_path: Path) -> None:

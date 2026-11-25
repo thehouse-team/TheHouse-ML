@@ -8,7 +8,8 @@ T05 el catálogo sintético de cuartos y T06 el conjunto de pares; ML-04 T04 agr
 las etiquetas sintéticas de relevancia y T06 implementa ``evaluate`` (métricas y
 reporte del modelo base). ML-05 T02 implementa ``train`` (validación cruzada y
 modelos candidatos) y T03 agrega a ``evaluate`` la medición única en test de los
-modelos entrenados y la decisión de promoción.
+modelos entrenados y la decisión de promoción. ML-06 T01 implementa ``export``
+(verificación de ``logreg.json`` y ``model.onnx``; el resto del paquete es de T05).
 """
 
 from __future__ import annotations
@@ -63,7 +64,7 @@ def run_stage(name: str, paths: ProjectPaths, source: str | None = None, fetcher
     ``source`` filtra la descarga por id; ``fetcher`` permite inyectar la red
     en las pruebas (la CLI usa el valor por defecto).
     """
-    stage = get_stage(name)
+    get_stage(name)  # KeyError si la etapa no existe.
     if name == "download":
         return run_download(paths, source_id=source, fetcher=fetcher)
     if name == "prepare":
@@ -87,5 +88,8 @@ def run_stage(name: str, paths: ProjectPaths, source: str | None = None, fetcher
         from thehouse_ml.models.trained_eval import run_trained_evaluate
 
         return f"{baseline}\n{run_trained_evaluate(paths)}"
-    del source, fetcher  # Las etapas vacías no leen ni escriben archivos.
-    return f"{stage.name}: pendiente de {stage.spec}"
+    # export (ML-06 T01): la única etapa que queda; `get_stage` ya rechazó los nombres desconocidos.
+    del source, fetcher  # La etapa export no usa red ni filtro de fuente.
+    from thehouse_ml.export.package import run_export  # Diferido: onnx y onnxruntime solo al exportar.
+
+    return run_export(paths)

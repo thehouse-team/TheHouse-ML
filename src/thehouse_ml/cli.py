@@ -11,6 +11,7 @@ from thehouse_ml import __version__
 from thehouse_ml.data_card import DataCardError
 from thehouse_ml.denue import DenueError
 from thehouse_ml.download import DownloadError
+from thehouse_ml.export import ExportError
 from thehouse_ml.manifests import ManifestError
 from thehouse_ml.models.baseline_report import EvaluationError
 from thehouse_ml.national import PrepareError
@@ -69,6 +70,7 @@ def main(argv: Sequence[str] | None = None) -> int:
         DenueError,
         DownloadError,
         EvaluationError,
+        ExportError,
         LabelInputError,
         LabelParamsError,
         LabelsError,
