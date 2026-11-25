@@ -4,9 +4,11 @@ Conjuntos de la spec ML-06 §6.3:
 
 1. los **pares de test** de ML-05 (30,755; solo se comparan puntajes, no se recalculan métricas);
 2. la **rejilla** determinista fuera del `training_range` (`out_of_range_grid`);
-3. los **casos dorados**: hasta que T03 entregue `tests/fixtures/logreg_golden_cases.json`, los
-   vectores `expected.features` de los casos puntuados de `baseline_golden_cases.json`, calculados
-   por el recuento independiente de ML-04 (`tests/golden_recount.py`, sin importar `thehouse_ml`).
+3. los **casos dorados** del baseline: los vectores `expected.features` de los casos puntuados de
+   `baseline_golden_cases.json`, calculados por el recuento independiente de ML-04
+   (`tests/golden_recount.py`, sin importar `thehouse_ml`). La paridad contra los casos dorados de
+   `logreg-1.0.0` (`tests/fixtures/logreg_golden_cases.json`, T03) está en
+   `tests/unit/test_logreg_golden_cases.py`.
 
 Tolerancia: |dif| ≤ 1e-4 sin redondear y 0 diferencias en puntos redondeados y `matchScore`.
 Sin el modelo oficial (fuera de git; p. ej. en CI, ML-06-RK05) o sin `data/processed/`, las pruebas
