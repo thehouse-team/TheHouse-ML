@@ -9,7 +9,7 @@ las etiquetas sintéticas de relevancia y T06 implementa ``evaluate`` (métricas
 reporte del modelo base). ML-05 T02 implementa ``train`` (validación cruzada y
 modelos candidatos) y T03 agrega a ``evaluate`` la medición única en test de los
 modelos entrenados y la decisión de promoción. ML-06 T01 implementa ``export``
-(verificación de ``logreg.json`` y ``model.onnx``; el resto del paquete es de T05).
+(verificación de ``logreg.json`` y ``model.onnx``) y T05 completa su paquete de entrega.
 """
 
 from __future__ import annotations

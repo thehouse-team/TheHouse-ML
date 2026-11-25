@@ -8,14 +8,14 @@
 | Fecha | 2026-11-24 |
 | Estado documental | **✅ APROBADA — 1.0.0** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-24 (M-ML-044) |
-| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02, T03 y T04 completas (4/7), 2026-11-24 y 2026-11-25 (M-ML-045, M-ML-046, M-ML-047, M-ML-048); T05–T07 ⛔ NO EJECUTAR HASTA «EJECUTA»; ver `evidence.md`** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01, T02, T03, T04 y T05 completas (5/7), 2026-11-24 y 2026-11-25 (M-ML-045, M-ML-046, M-ML-047, M-ML-048, M-ML-049); T06–T07 ⛔ NO EJECUTAR HASTA «EJECUTA»; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 4 |
+| Tasks completadas | 5 |
 
 ## Reglas de esta lista
 
-1. T01 (M-ML-045) y T02 (M-ML-046) completas (2026-11-24) y T03 (M-ML-047) y T04 (M-ML-048) completas (2026-11-25) con evidencia en `evidence.md`; T05–T07 abiertas. Escribir este documento no completa ninguna.
+1. T01 (M-ML-045) y T02 (M-ML-046) completas (2026-11-24) y T03 (M-ML-047), T04 (M-ML-048) y T05 (M-ML-049) completas (2026-11-25) con evidencia en `evidence.md`; T06–T07 abiertas. Escribir este documento no completa ninguna.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA». Las decisiones 1–5 de la spec §10 están APROBADAS (M-ML-044).
 4. Un control no ejecutado no se reporta como PASS (en particular, las pruebas que necesitan el modelo oficial y se omiten en CI).
@@ -33,7 +33,7 @@
 ## F3 — Calidad, seguridad y datos
 
 - [x] **T04 · Rendimiento** — Requisito: ML-06-R04 · Aceptación: 200 cuartos en onnxruntime CPU, mediana < 20 ms en 100 corridas tras 10 de calentamiento (sesión ya cargada), con p95, máximo, hilos y CPU/SO en la evidencia.
-- [ ] **T05 · Paquete de entrega** — Requisito: ML-06-R05 · Decisión: 4 · Aceptación: `dist/model-v1.0.0/` con los 7 archivos de la spec §6.6, `sha256sum -c SHA256SUMS` correcto, copias byte a byte, sección «Artefacto ONNX» en `model_card.md`, `/dist/` ignorado con prueba de higiene, mismos SHA-256 en dos ejecuciones y lista de verificación para que el responsable publique `model-v1.0.0`.
+- [x] **T05 · Paquete de entrega** — Requisito: ML-06-R05 · Decisión: 4 · Aceptación: `dist/model-v1.0.0/` con los 7 archivos de la spec §6.6, `sha256sum -c SHA256SUMS` correcto, copias byte a byte, sección «Artefacto ONNX» en `model_card.md`, `/dist/` ignorado con prueba de higiene, mismos SHA-256 en dos ejecuciones y lista de verificación para que el responsable publique `model-v1.0.0`.
 - [ ] **T06 · Guía de integración** — Requisito: ML-06-R06 · Decisiones: 2, 3, 4 · Aceptación: `docs/backend-integration.md` con contrato de entrada y salida, cálculo de features, orden de pasos (faltantes → incompleto → restricciones → features → ONNX → redondeo → JSON → ranking), redondeo en .NET, casos dorados con `Microsoft.ML.OnnxRuntime`, descarga y verificación del release y desviación T05-H1; prueba de coherencia con el ONNX y el esquema.
 
 ## F4 — Evidencia
@@ -48,6 +48,6 @@
 | T02 | R02 | 2 | F2 | COMPLETA — PASS WITH WARNINGS (M-ML-046; casos dorados de logreg en T03; `export` solo reporta y T05 debe marcar no publicable si la paridad falla; regla `-0` → `0` en la guía de T06; errata de la §6.4 en T07) |
 | T03 | R03 | 1, 3 | F2 | COMPLETA — PASS WITH WARNINGS (M-ML-047; 109 casos, 1 entrada del baseline reemplazada por la regla de margen; copia como `golden_cases.json` en T05; errata 9 → 6 excluidos de la §6.4 y 2 errores de mypy preexistentes en `tests/` en T07; gitleaks y suite completa en el CI del PR) |
 | T04 | R04 | — | F3 | COMPLETA — PASS WITH WARNINGS (M-ML-048; mediana 0.0477 ms con `logreg-1.0.0`; `export` debe medir y reportar el rendimiento y la sección «Artefacto ONNX» de la model card incluirlo en T05; gitleaks y suite completa en el CI del PR) |
-| T05 | R05 | 4 | F3 | ABIERTA |
+| T05 | R05 | 4 | F3 | COMPLETA — PASS WITH WARNINGS (M-ML-049; paquete de 7 archivos, reproducible, no publicable con árbol sucio, paridad o casos dorados en falla; el rendimiento se reporta y no bloquea; la publicación del release `model-v1.0.0` la hace el responsable a mano después del merge, desde `main` limpio, y se registra en T07) |
 | T06 | R06 | 2, 3, 4 | F3 | ABIERTA |
 | T07 | R07 | — | F4 | ABIERTA |

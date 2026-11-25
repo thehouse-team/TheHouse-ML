@@ -1,7 +1,8 @@
-# Datos y modelos (constitution §6 y §7): nunca en git
+# Datos, modelos y paquetes de entrega (constitution §6, §7 y §13; spec ML-06 §6.6): nunca en git
 data/raw/
 data/processed/
 /models/
+/dist/
 
 # Python
 __pycache__/

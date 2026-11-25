@@ -1,5 +1,7 @@
 """ML-01 R03: datos y modelos nunca entran a git (constitution §6 y §7).
 
+ML-06 T05 (spec ML-06 §6.6): el paquete de entrega `dist/` tampoco entra a git (va en el release).
+
 ML-05 T01 (M-ML-037): el código de `src/thehouse_ml/` no usa pickle (constitution §13.1).
 """
 
@@ -13,7 +15,7 @@ from pathlib import Path
 import pytest
 
 REPO = Path(__file__).resolve().parents[1]
-FORBIDDEN_PREFIXES = ("data/raw/", "data/processed/", "models/")
+FORBIDDEN_PREFIXES = ("data/raw/", "data/processed/", "models/", "dist/")
 FORBIDDEN_SUFFIXES = (".pkl", ".pickle", ".joblib", ".onnx")
 
 
@@ -36,7 +38,14 @@ def tracked_files() -> list[str]:
 
 @pytest.mark.parametrize(
     "path",
-    ["data/raw/listings.csv.gz", "data/processed/rooms.parquet", "models/model.onnx", "notas/modelo.pkl", "x.joblib"],
+    [
+        "data/raw/listings.csv.gz",
+        "data/processed/rooms.parquet",
+        "models/model.onnx",
+        "notas/modelo.pkl",
+        "x.joblib",
+        "dist/model-v1.0.0/SHA256SUMS",
+    ],
 )
 def test_detector_flags_forbidden_paths(path: str) -> None:
     assert forbidden_files([path]) == [path]
@@ -50,8 +59,8 @@ def test_detector_allows_versioned_paths(path: str) -> None:
 def test_gitignore_excludes_data_and_models() -> None:
     lines = {line.strip() for line in (REPO / ".gitignore").read_text(encoding="utf-8").splitlines()}
 
-    # `/models/` anclado a la raíz: solo la carpeta de artefactos (M-ML-030, H1).
-    assert {"data/raw/", "data/processed/", "/models/"} <= lines
+    # `/models/` y `/dist/` anclados a la raíz: solo las carpetas de artefactos (M-ML-030, H1; spec ML-06 §6.6).
+    assert {"data/raw/", "data/processed/", "/models/", "/dist/"} <= lines
 
 
 def _git_ignored(paths: list[str]) -> set[str]:
@@ -66,7 +75,22 @@ def _git_ignored(paths: list[str]) -> set[str]:
 
 @pytest.mark.parametrize(
     "path",
-    ["models/model.onnx", "models/baseline/model.onnx", "data/raw/censo.zip", "data/processed/pairs.parquet"],
+    [
+        "models/model.onnx",
+        "models/baseline/model.onnx",
+        "data/raw/censo.zip",
+        "data/processed/pairs.parquet",
+        # Paquete de entrega de ML-06 (spec §6.6): los 7 archivos y el aviso de no publicable.
+        "dist/model-v1.0.0/model.onnx",
+        "dist/model-v1.0.0/feature_schema.json",
+        "dist/model-v1.0.0/golden_cases.json",
+        "dist/model-v1.0.0/baseline_golden_cases.json",
+        "dist/model-v1.0.0/model_card.md",
+        "dist/model-v1.0.0/metrics.json",
+        "dist/model-v1.0.0/SHA256SUMS",
+        "dist/model-v1.0.0/NO_PUBLICABLE.txt",
+        "dist/ci/model.onnx",
+    ],
 )
 def test_artifacts_and_data_are_ignored_by_git(path: str) -> None:
     assert _git_ignored([path]) == {path}
@@ -78,6 +102,8 @@ def test_artifacts_and_data_are_ignored_by_git(path: str) -> None:
         "src/thehouse_ml/models/baseline_params.json",
         "src/thehouse_ml/models/baseline_config.py",
         "src/thehouse_ml/models/__init__.py",
+        # `/dist/` está anclado: el código de exportación no se ignora.
+        "src/thehouse_ml/export/package.py",
     ],
 )
 def test_the_models_package_of_the_code_is_not_ignored(path: str) -> None:

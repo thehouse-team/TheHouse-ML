@@ -3,8 +3,8 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-06 1.0.0 (M-ML-044) |
-| Tareas ejecutadas | T01 · Dependencias y exportación verificada (ML-06-R01); T02 · Paridad Python ↔ ONNX (ML-06-R02); T03 · Casos dorados de `logreg-1.0.0` (ML-06-R03); T04 · Rendimiento (ML-06-R04) |
-| Estado | **T01 completa — PASS WITH WARNINGS** (M-ML-045, APROBADO 2026-11-24); **T02 completa — PASS WITH WARNINGS** (M-ML-046, APROBADO 2026-11-24); **T03 completa — PASS WITH WARNINGS** (M-ML-047, APROBADO 2026-11-25); **T04 completa — PASS WITH WARNINGS** (M-ML-048, APROBADO 2026-11-25) |
+| Tareas ejecutadas | T01 · Dependencias y exportación verificada (ML-06-R01); T02 · Paridad Python ↔ ONNX (ML-06-R02); T03 · Casos dorados de `logreg-1.0.0` (ML-06-R03); T04 · Rendimiento (ML-06-R04); T05 · Paquete de entrega (ML-06-R05) |
+| Estado | **T01 completa — PASS WITH WARNINGS** (M-ML-045, APROBADO 2026-11-24); **T02 completa — PASS WITH WARNINGS** (M-ML-046, APROBADO 2026-11-24); **T03 completa — PASS WITH WARNINGS** (M-ML-047, APROBADO 2026-11-25); **T04 completa — PASS WITH WARNINGS** (M-ML-048, APROBADO 2026-11-25); **T05 completa — PASS WITH WARNINGS** (M-ML-049, APROBADO 2026-11-25) |
 | Autorización (T01) | «EJECUTA ML-06 1.0.0, task T01. Rama: feat/ml-06-export (ya creada desde main actualizado, con la spec ML-06 1.0.0 aprobada en M-ML-044). Se autoriza modificar pyproject.toml y uv.lock SOLO para agregar las dependencias onnx y onnxruntime que pide la spec (respetando exclude-newer 2026-10-27 de uv). Se autoriza crear/modificar los archivos de código y pruebas que la task T01 indique en el plan de ML-06. Ninguna otra ruta fuera de las listadas en el plan» — César Yael López Trujillo, 2026-11-24 |
 | Rama | `feat/ml-06-export` (commit base `a046abf`, merge del PR #38) |
 | Commit | Sin commit ni push, por instrucción del responsable |
@@ -559,3 +559,166 @@ No se modificaron `pyproject.toml`, `uv.lock`, `.gitignore`, `memoria.md`, `task
 | M-ML-045 / M-ML-046 / M-ML-047 | `onnx_graph.py`, `parity.py` y `package.py` intactos; mide el `model.onnx` de `export` con el SHA-256 de `logreg.json` verificado; RK05 (omisión con motivo) como en T02/T03 |
 
 **Resultado T04: PASS WITH WARNINGS** — criterio cumplido con margen amplio; advertencias: T04-H5 (rendimiento en la model card pendiente para T05), T04-H8 (gitleaks y suite completa no ejecutados localmente) y las decisiones técnicas T04-H1–H4 (aprobadas). T04 completa con M-ML-048 (APROBADO, César Yael López Trujillo, 2026-11-25).
+
+## T05 · Paquete de entrega
+
+| Campo | Valor |
+| --- | --- |
+| Autorización | «EJECUTA ML-06 1.0.0, task T05» — César Yael López Trujillo, 2026-11-25. Rama `feat/ml-06-t05` (desde `main` con T01–T04 mezcladas, PR #39–#42). Lo que T05 indica en el plan, incluidos `.gitignore` (`/dist/`) y `tests/test_repo_hygiene.py`, más `evidence.md` y `task.md`; **no** `pyproject.toml`, `uv.lock`, `memoria.md`, `onnx_graph.py` ni `.github/workflows/`; **no** publicar el release, crear tags ni usar `gh` / la API de GitHub |
+| Commit base | `e2e6211` (merge del PR #42) |
+| Commit | Sin commit ni push, por instrucción del responsable |
+| Fecha de ejecución | 2026-11-25 |
+| Estado | **PASS WITH WARNINGS** — T05 completa |
+| Aprobación (T05) | «Apruebo ML-06 T05 (César Yael López Trujillo, 2026-11-25)», con decisiones: seguir la spec (7 archivos, sin manifiesto; metadatos en `model.onnx` y en la model card); T05-H1, H2, H3 y H6 aprobados tal como se describieron; T05-H5: el rendimiento no bloquea la publicación, solo se reporta; T05-H7 aceptado (`git status` limpio antes de generar el paquete publicable); T05-H9 aceptado; corrección del texto del release sobre la desviación ML-05 T05-H1; autoriza `memoria.md` y `task.md` |
+| Decisión | **M-ML-049 (APROBADO, 2026-11-25)**, registrada en `memoria.md` |
+
+Lecturas previas: `constitution.md` → `AGENTS.md` → `memoria.md` (M-ML-045 a M-ML-048) → `spec.md` (§6.1, §6.4, §6.5, §6.6, §7, §9 R05), `plan.md` (F3, T05), `task.md` y esta evidencia (T01–T04); `src/thehouse_ml/export/` (`package.py`, `parity.py`, `benchmark.py`, `onnx_graph.py`), `stages.py`, `tests/test_repo_hygiene.py`, `tests/integration/test_export_stage.py`, `tests/integration/test_onnx_parity_official.py`, `.gitattributes` y `reports/model_card.md`.
+
+**Prompt ↔ spec:** el prompt menciona «manifest/metadatos»; la spec §6.6 fija **7 archivos** y ninguno es un manifiesto. Se siguió la spec: los metadatos van en `metadata_props` de `model.onnx` y en la sección «Artefacto ONNX» de `model_card.md`; no se agregó un manifiesto. El aviso de no publicable (T05-H1) es un archivo aparte que **no** forma parte del paquete publicable. Sin otras contradicciones.
+
+### Qué se hizo
+
+1. **`src/thehouse_ml/export/package.py`** (la etapa `export` ya existía; `stages.py` solo cambia su docstring):
+   - `export_model` sin cambios de comportamiento; nuevo parámetro opcional `test_features` (evita leer dos veces los pares de test) y el `BreakdownModel` en `ExportResult` (campo opcional al final; las llamadas existentes no cambian).
+   - `check_golden_cases` / `GoldenResult` (**casos dorados en verde**, spec §6.6): lee `tests/fixtures/logreg_golden_cases.json`, exige que su `derived_from.sha256` y `modelVersion` sean los del `logreg.json` exportado (si no, «no ejecutado»), corre en onnxruntime los 98 casos puntuados (vector `input.features` o `expected.features`) y compara con el esperado del recuento independiente: \|dif\| ≤ 1e-4 contra `expected.onnx` y 0 diferencias en puntos redondeados y `matchScore` con la regla del backend (`backend_factor_points`, `backend_match_score`: AwayFromZero, `-0` → `0`). Además, la paridad Python ↔ ONNX de la spec §6.3 sobre los mismos 98 vectores (conjunto 1 de la §6.3).
+   - **Rendimiento en `export`** (M-ML-048 / T04-H5): `run_benchmark` de `benchmark.py` sobre los primeros 200 pares de test, con la medición de la spec §6.5 sin cambios; la consola imprime mediana, p95 y máximo exactos; la model card lleva el veredicto y una cota (T05-H2).
+   - `build_package`: escribe junto a `model.onnx` los otros 6 archivos de la spec §6.6 (`feature_schema.json`, `golden_cases.json`, `baseline_golden_cases.json`, `model_card.md`, `metrics.json`, `SHA256SUMS`). Antes borra solo esos nombres y el aviso (sin restos de corridas anteriores; no borra el directorio). Las copias son el **contenido versionado** (CRLF → LF, T05-H3). `model_card.md` = `reports/model_card.md` + «## 11. Artefacto ONNX» (`onnx_section`): paquete, **publicable sí/no con motivos**, modelo y esquema, `gitCommit`, SHA-256 de `logreg.json` y de `model.onnx`, opset/IR, productor, entradas y salidas, todos los `metadata_props`, tabla de paridad (pares de test, rejilla, casos dorados), casos dorados contra el esperado, rendimiento (criterio, cota de la mediana, CPU, SO, Python, onnxruntime, hilos), archivos y origen, desviación **ML-05 T05-H1** (signo de `price_below_min`; no confundir con T05-H1 de ML-06) y nota de publicación. `reports/model_card.md` no cambia.
+   - `SHA256SUMS` en formato `sha256sum` (`<hex>`, dos espacios, `<archivo>`; LF; orden de la tabla de la spec §6.6); `verify_sha256sums` equivale a `sha256sum -c`.
+   - **Publicable** (`publishability`), solo si se cumplen todas: perfil `full`; `logreg.json` con el SHA-256 de la spec §1; paridad en pares de test **ejecutada** y PASS (sin `data/processed/` no cuenta como verde: un control no ejecutado no es PASS); paridad en la rejilla PASS; casos dorados ejecutados y PASS (esperado y paridad); los 5 archivos de origen presentes; `gitCommit` conocido y **sin `-dirty`** (M-ML-045). Si falta alguna, el paquete se escribe igual, la model card dice **NO** con los motivos, la consola los lista y se escribe `NO_PUBLICABLE.txt` (T05-H1). La paridad que falla (M-ML-046 / T02-H5) y el árbol sucio (M-ML-045) quedan cubiertos.
+   - `run_export`: además de lo de T01/T02, imprime la paridad en los casos dorados, el resultado contra el esperado, el rendimiento, los 6 SHA-256 del paquete y `PUBLICABLE: si` o `PUBLICABLE: NO` con los motivos (texto compatible con cp1252).
+   - Perfil `ci`: mismo paquete en `dist/ci/` con los reportes de `profiles.ci.output_dir`; **nunca** publicable.
+2. **`.gitignore`:** `/dist/` (anclado a la raíz, como `/models/`).
+3. **`tests/test_repo_hygiene.py`:** `/dist/` exigido en `.gitignore`; `dist/` en los prefijos prohibidos del detector de archivos versionados; `git check-ignore` de los 7 archivos del paquete, del aviso y de `dist/ci/model.onnx`; `src/thehouse_ml/export/package.py` no ignorado.
+4. **`tests/integration/test_export_package.py`** (nuevo, 18 pruebas): 17 con modelo sintético (corren en CI) — 7 archivos y publicable desde un commit limpio; copias = contenido LF de origen; model card = reporte + sección; **reproducible** (mismos bytes y SHA-256 en dos exportaciones); árbol sucio → NO con aviso fuera de `SHA256SUMS`; una reconstrucción limpia borra el aviso viejo; paridad que falla → NO; caso dorado que no coincide → NO; sin pares de test → NO y rendimiento «NO EJECUTADO»; archivos de origen faltantes y casos dorados de otro modelo → NO; perfil `ci` → NO; lista completa de motivos; `verify_sha256sums` detecta un archivo alterado; 4 cotas de latencia. 1 con el **modelo oficial** (se omite con motivo sin él, RK05): los 109 casos dorados reales contra el `model.onnx` exportado, copias idénticas a las fuentes y `SHA256SUMS` verificable.
+5. **`tests/integration/test_onnx_parity_official.py`:** la aserción `message.rstrip().endswith("-> PASS")` pasa a buscar la línea de la rejilla, porque el mensaje de `export` ahora sigue con casos dorados, rendimiento y paquete (T05-H9).
+
+### Paquete generado (árbol sin commit → NO publicable, como se esperaba)
+
+`uv run python -m thehouse_ml export` sobre `e2e6211` con los cambios de T05 sin commit (`gitCommit` `e2e6211ead8791507edaa3cde2fe3f6ede5209f5-dirty`):
+
+| Archivo | SHA-256 | Comprobación |
+| --- | --- | --- |
+| `model.onnx` | `38ef199443ac326736689bc2658db866a41d2f18029322d6a133a7144d4fa510` | Lleva `gitCommit` `…-dirty`: **no es el hash que fijará el backend** (T05-H6) |
+| `feature_schema.json` | `67af2e487e2b34c6bc5943e0eca4c209e9812a165f30698246c2f2090ffaa8bb` | = `git show HEAD:src/thehouse_ml/features/feature_schema.json` |
+| `golden_cases.json` | `38a589205b29801761b0ab89ca17c82f53f0152c3035043d468794d4849da48a` | = `git show HEAD:tests/fixtures/logreg_golden_cases.json` (el `38a58920…49da48a` de M-ML-047) |
+| `baseline_golden_cases.json` | `a92852c7dd289d1040e4f8e5d0b134d23eab8f3a7798c04439b787f9f85ae3f2` | = `git show HEAD:tests/fixtures/baseline_golden_cases.json` |
+| `model_card.md` | `b66d687e08f413fe459abcc467083b106a18771e8e940710f37c3e67b04faa43` | Empieza byte a byte con `git show HEAD:reports/model_card.md` y sigue con «## 11. Artefacto ONNX» |
+| `metrics.json` | `50c1a0c69fbe9aa662b79c5428ed9acc9d07b0708b9e794ee0668d91574bd54a` | = `git show HEAD:reports/trained_metrics.json` |
+| `SHA256SUMS` | — | `sha256sum -c SHA256SUMS`: 6 × `OK` |
+| `NO_PUBLICABLE.txt` | — (fuera de `SHA256SUMS`) | «arbol de git sucio (gitCommit con -dirty)», único motivo |
+
+Resultados de la corrida (modelo oficial `logreg-1.0.0`, SHA-256 `341ea3ec…0b27fa` verificado):
+
+| Control | Resultado |
+| --- | --- |
+| Paridad en pares de test | 30,755 vectores; máx. \|dif\| 2.8e-14 / 4.3e-14; 0 dif. redondeados y `matchScore` → **PASS** |
+| Paridad en la rejilla | 380 vectores; máx. \|dif\| 1.4e-14 / 1.4e-14; 0 / 0 → **PASS** |
+| Paridad en los casos dorados | 98 vectores; máx. \|dif\| 1.4e-14 / 1.4e-14; 0 / 0 → **PASS** |
+| Casos dorados contra el esperado | 109 casos, 98 puntuados; máx. \|dif\| 1.4e-14 (`factor_points`) / 2.8e-14 (`raw_total`); 0 / 0 → **PASS** |
+| Rendimiento (corrida 1) | mediana **0.0914 ms**, p95 0.0966 ms, máx. 0.2600 ms → **PASS** (model card: «< 1 ms») |
+| Rendimiento (corrida 2) | mediana **0.0673 ms**, p95 0.1349 ms, máx. 0.1493 ms → **PASS** |
+| Reproducibilidad | `SHA256SUMS` idéntico byte a byte en las 2 corridas (los 6 SHA-256 iguales), aunque la latencia cambió |
+| `git status` | `dist/` no aparece (ignorado); `git check-ignore -v dist/model-v1.0.0/model.onnx` → `.gitignore:5:/dist/` |
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `uv run ruff check src tests/integration/test_export_package.py tests/test_repo_hygiene.py tests/integration/test_onnx_parity_official.py` | All checks passed |
+| `uv run ruff format --check src tests` | 127 files already formatted |
+| `uv run mypy --strict src tests/integration/test_export_package.py tests/test_repo_hygiene.py` | Success: no issues found in 58 source files |
+| `uv run pytest tests/integration/test_export_package.py tests/test_repo_hygiene.py tests/integration/test_export_stage.py tests/integration/test_onnx_parity_official.py tests/unit/test_stages.py tests/unit/test_onnx_benchmark.py -q -rs` | **118 passed**, 0 omitidas |
+| La anterior más `tests/unit/test_logreg_golden_cases.py tests/integration/test_onnx_benchmark_official.py`, con `--cov=thehouse_ml.export` | **541 passed**, 0 omitidas; cobertura `thehouse_ml.export` 93 % (`package.py` 96 %) |
+| `uv run python -m thehouse_ml export` (×2) | Salida resumida arriba; código 0; `PUBLICABLE: NO` por `-dirty` |
+| `cd dist/model-v1.0.0 && sha256sum -c SHA256SUMS` | 6 × `OK` |
+| `git show HEAD:<origen> \| sha256sum` contra cada copia | 4 copias idénticas; `model_card.md` con prefijo idéntico |
+
+**No ejecutados** (no se reportan como PASS): suite completa (por instrucción del responsable; queda para el CI del PR y T07), gitleaks local (CI del PR), pip-audit (sin cambios de dependencias) y el paquete **publicable** (requiere el commit limpio de `main` después del merge; lo genera el responsable con las instrucciones de abajo).
+
+### Archivos
+
+| Archivo | Cambio |
+| --- | --- |
+| `src/thehouse_ml/export/package.py` | Paquete completo, casos dorados, rendimiento, model card, `SHA256SUMS` y condiciones de publicable |
+| `src/thehouse_ml/stages.py` | Solo el docstring (T05 completa el paquete) |
+| `.gitignore` | `/dist/` y comentario |
+| `tests/test_repo_hygiene.py` | `/dist/` en `.gitignore`, detector y `git check-ignore` |
+| `tests/integration/test_export_package.py` | Nuevo (18 pruebas) |
+| `tests/integration/test_onnx_parity_official.py` | Una aserción del mensaje de `export` (T05-H9) |
+| `specs/ml-06-onnx-export/evidence.md` | Esta sección y el encabezado |
+
+Sin cambios: `pyproject.toml`, `uv.lock`, `memoria.md`, `onnx_graph.py`, `parity.py`, `benchmark.py`, `.github/workflows/`, `reports/`, `tests/fixtures/`, modelos, `feature_schema.json` y params. `task.md` sin marcar.
+
+### Aceptación de T05 (ML-06-R05)
+
+| Criterio | Resultado |
+| --- | --- |
+| `export` (perfil `full`) escribe en `dist/model-v1.0.0/` los 7 archivos de la §6.6 | ✅ |
+| `SHA256SUMS` verificable con `sha256sum -c` | ✅ 6 × `OK` |
+| Copias byte a byte donde aplica | ✅ idénticas al contenido versionado (`git show HEAD:…`) (T05-H3) |
+| Sección «Artefacto ONNX» en `model_card.md` (opset, entradas, salidas, metadatos, paridad, rendimiento, commit, SHA-256 de `logreg.json`, desviación ML-05 T05-H1) | ✅ |
+| `/dist/` ignorado por git con prueba de higiene | ✅ |
+| Paquete reproducible (mismos SHA-256 en dos ejecuciones) | ✅ en las pruebas y en la corrida real (mismo commit) |
+| No publicable si falla la paridad (M-ML-046), si el árbol está sucio (M-ML-045) o en perfil `ci` | ✅ probado; la corrida real sale NO por `-dirty` |
+| Rendimiento medido en `export` y en la model card (M-ML-048) | ✅ (cota en la model card, T05-H2) |
+| Instrucciones para que el responsable publique el release | ✅ sección siguiente |
+| Paquete **publicable** generado y verificado | ⏳ después del merge, desde `main` limpio (responsable) |
+
+### Instrucciones para publicar `model-v1.0.0` (responsable)
+
+1. Después del merge del PR de T05: `git switch main`, `git pull`, `git status` sin cambios.
+2. `uv run python -m thehouse_ml export` → debe terminar con `PUBLICABLE: si`, `commit <hash de main>` **sin** `-dirty`, y no debe existir `dist/model-v1.0.0/NO_PUBLICABLE.txt`.
+3. Verificar `SHA256SUMS` (6 × OK) y que `model_card.md` diga `| Publicable | **SÍ** |`.
+4. Repetir el paso 2 y comprobar que `SHA256SUMS` no cambia.
+5. Release en GitHub: tag **`model-v1.0.0`** sobre el commit de `main` del paso 2; título `model-v1.0.0 — logreg-1.0.0 (ONNX)`; adjuntar **solo** los 7 archivos (no `NO_PUBLICABLE.txt`); en la descripción, la línea de la desviación dice «Desviación conocida ML-05 T05-H1 (signo de price_below_min, máx. +0.124 puntos): ver model_card.md» (no es el T05-H1 de ML-06); no marcar como pre-release; no editar ni reemplazar archivos después (inmutable, constitución §13.3).
+6. Registrar en T07 el commit, la URL del release y el SHA-256 de `model.onnx` de `SHA256SUMS`, que es el valor que NV-23 fija en el backend.
+
+### Hallazgos
+
+| ID | Clasificación | Hallazgo | Acción |
+| --- | --- | --- | --- |
+| T05-H1 | Decisión técnica | La spec define 7 archivos y no dice **cómo** se marca el no publicable. Se marca en tres lugares: la fila «Publicable» de la model card (**NO** + motivos, dentro de `SHA256SUMS`), la consola (`PUBLICABLE: NO` + motivos) y el archivo **`NO_PUBLICABLE.txt`**, que solo existe cuando no es publicable, queda fuera de `SHA256SUMS` y no se sube al release. Una reconstrucción publicable lo borra | Aprobar en M-ML-049 |
+| T05-H2 | Decisión técnica | M-ML-048 pide el rendimiento en la model card y R05 pide un paquete reproducible; la latencia exacta cambia en cada corrida (0.0914 vs 0.0673 ms). La model card lleva el **criterio y su veredicto** (mediana < 20 ms: PASS), una **cota** de la mediana (`< 1 ms`; cortes 1, 5 y 20 ms), el método, los hilos y el entorno; las cifras exactas van a la consola y a esta evidencia. Con medianas de ~0.05–0.09 ms la cota no oscila | Aprobar en M-ML-049 |
+| T05-H3 | Decisión técnica | «Copia byte a byte» se implementa como copia del **contenido versionado en git** (CRLF → LF; `.gitattributes` `eol=lf`), para que el paquete tenga los mismos SHA-256 en cualquier clon de Windows o Linux. Hoy el árbol de trabajo ya está en LF, así que las copias son idénticas byte a byte al archivo de origen **y** al blob de `HEAD` (verificado) | Aprobar en M-ML-049 |
+| T05-H4 | Decisión técnica | «Casos dorados en verde» = (a) los 98 casos puntuados contra el esperado del recuento independiente (1e-4 y 0 en redondeados) **y** (b) paridad Python ↔ ONNX en esos 98 vectores. Los casos de otro modelo (SHA-256 distinto, p. ej. perfil `ci`) cuentan como no ejecutados | Aprobar en M-ML-049 |
+| T05-H5 | Decisión pendiente | El rendimiento **no** es condición de publicable porque la spec §6.6 no lo lista (solo perfil, SHA-256, paridad, casos dorados y árbol limpio); se reporta siempre. Si el responsable quiere que una mediana ≥ 20 ms bloquee el release, es un cambio de una línea en `publishability` | Decidido en M-ML-049: no bloquea, solo se reporta |
+| T05-H6 | Advertencia | El SHA-256 de `model.onnx` depende de `gitCommit` (metadato): el `38ef1994…` de esta corrida (`-dirty`) **no** es el del release. El hash que el backend debe fijar es el de `model.onnx` en `SHA256SUMS` del paquete **publicable** generado desde `main` después del merge | Instrucciones de publicación (paso 6); registrar en T07 |
+| T05-H7 | Advertencia | `git_commit` no cuenta los archivos **sin versionar** (M-ML-045 decisión 7): un archivo nuevo no ignorado (p. ej. en `src/`) cambiaría el código sin marcar `-dirty`. Ahora que `/dist/` está ignorado se podría contar también lo no versionado, pero cambiaría una decisión aprobada; no se tocó. Mitigación: `git status` limpio antes de generar el paquete publicable (paso 1) | Aceptado en M-ML-049: `git status` limpio obligatorio antes de generar el paquete publicable |
+| T05-H8 | Informativo | Los enlaces relativos de las secciones 1-10 de `model_card.md` (p. ej. `data_card.md`) apuntan a `reports/` del repositorio y no existen dentro del paquete; la sección 11 lo aclara. No se reescriben para no alterar la copia del reporte | Ninguna |
+| T05-H9 | Desviación menor | Se modificó una aserción de `tests/integration/test_onnx_parity_official.py` (el mensaje de `export` ya no termina en la línea de la rejilla) y el docstring de `stages.py`; ninguna de las dos rutas está en la lista explícita del «EJECUTA», pero son efecto directo de T05 | Aceptado en M-ML-049 |
+| T05-H10 | Control no ejecutado | Suite completa, gitleaks local y pip-audit (sin cambios de dependencias); el paquete publicable y la verificación del release | CI del PR; responsable después del merge; T07 |
+
+### Decisión registrada (APROBADO, `memoria.md`)
+
+**M-ML-049 — ML-06 T05: paquete de entrega `model-v1.0.0` y condiciones de publicación**
+
+- **Decisión:** completar **ML-06 T05** (ML-06-R05) con estas elecciones:
+  1. **Paquete** en `dist/model-v1.0.0/` (perfil `full`) o `dist/ci/` (perfil `ci`) escrito por `python -m thehouse_ml export` (`src/thehouse_ml/export/package.py`: `build_package`, `check_golden_cases`, `publishability`, `onnx_section`, `verify_sha256sums`): `model.onnx`, `feature_schema.json`, `golden_cases.json`, `baseline_golden_cases.json`, `model_card.md` (reporte + «## 11. Artefacto ONNX»), `metrics.json` y `SHA256SUMS` (formato `sha256sum`, LF, orden de la spec §6.6).
+  2. **Copias (T05-H3):** contenido versionado en git (CRLF → LF), idéntico al blob de `HEAD`.
+  3. **Publicable** solo con perfil `full`, `logreg.json` `341ea3ec…0b27fa`, paridad en pares de test (ejecutada), rejilla y casos dorados en PASS, casos dorados contra el esperado en PASS (T05-H4), los archivos de origen presentes y `gitCommit` conocido sin `-dirty` (M-ML-045; M-ML-046 / T02-H5). El rendimiento se reporta pero **no** bloquea la publicación (T05-H5; la spec §6.6 no lo exige).
+  4. **Marca de no publicable (T05-H1):** fila «Publicable» de la model card, consola y `NO_PUBLICABLE.txt` fuera de `SHA256SUMS` (no se sube al release).
+  5. **Rendimiento en `export` (M-ML-048 / T04-H5, T05-H2):** `run_benchmark` en cada exportación; cifras exactas en la consola; veredicto, cota de la mediana (< 1 / 5 / 20 ms), método, hilos y entorno en la model card, para que el paquete sea reproducible.
+  6. **`/dist/`** en `.gitignore` y en `tests/test_repo_hygiene.py`.
+  7. **Release `model-v1.0.0`:** lo publica el responsable a mano con los 7 archivos sobre el commit de `main` que generó el paquete publicable; el SHA-256 de `model.onnx` de ese `SHA256SUMS` es el que fija NV-23 (T05-H6).
+- **Evidencia:** `specs/ml-06-onnx-export/evidence.md` (T05): paquete con los 7 archivos y `sha256sum -c` correcto; copias idénticas a `HEAD`; dos exportaciones con `SHA256SUMS` idéntico; paridad (30,755 + 380 + 98) y 109 casos dorados en PASS; mediana 0.0914 / 0.0673 ms; NO publicable en el árbol sin commit, únicamente por `-dirty`; 118 pruebas nuevas o afectadas en verde (541 con las que llaman a `export_model`), 0 omitidas; cobertura de `package.py` 96 %; ruff y mypy estricto sin errores.
+- **Pendientes:** paquete publicable desde `main` y release `model-v1.0.0` (responsable, a mano después del merge y con `git status` limpio, T05-H7); verificación del release y registro del SHA-256 de `model.onnx` (T07); guía de integración (T06); suite completa y gitleaks en el CI del PR.
+- **Estado:** APROBADO — César Yael López Trujillo — 2026-11-25 (texto completo en `memoria.md`).
+- **Fecha:** 2026-11-25.
+- **Impacto:** T05 de ML-06 completa (5/7) — PASS WITH WARNINGS; la publicación del release `model-v1.0.0` la hace el responsable a mano después del merge y se registra en T07; T06–T07 siguen sin ejecutar hasta su «EJECUTA». Sin cambios en el grafo, modelos, `feature_schema.json`, params, dependencias ni CI; sin commit ni push, por instrucción del responsable.
+
+### Seguridad, datos y licencias
+
+- Sin pickle, joblib ni dill (el paquete es ONNX, JSON y Markdown; `test_no_module_of_the_package_uses_pickle` cubre `package.py`); sin dependencias nuevas; sin red ni secretos; sin `gh` ni API de GitHub; sin servicios de pago (COST-001 $0).
+- `dist/`, `models/` y `data/` fuera de git (prueba de higiene). El paquete no contiene datos personales: parámetros del modelo, esquema, entradas inventadas de los casos dorados y métricas agregadas **sintéticas** (`metrics.json` y la model card dicen «DATOS SINTÉTICOS»). La consola y la model card no muestran filas de los pares de test.
+- Sin nombres de variables tipo credencial con literales (nota de gitleaks del «EJECUTA»).
+
+### Coherencia
+
+| Documento | Comprobación |
+| --- | --- |
+| `constitution.md` §13.1, §13.3, §8, §14.3, §15 | Sin pickle; release inmutable y publicado por el responsable; métricas etiquetadas como sintéticas; `SHA256SUMS` + hash fijado en el backend; $0 |
+| `AGENTS.md` | Cada artefacto con `feature_schema.json`, `model_card.md`, `metrics.json` y SHA-256; sin commit ni push; sin publicar release ni crear tags; controles no ejecutados declarados; M-ML-049 registrado como APROBADO y T05 marcada en `task.md` solo tras el «Apruebo» |
+| Spec §6.6 / §7 / R05 | 7 archivos, copias, sección «Artefacto ONNX», publicable con sus condiciones, `/dist/` ignorado con prueba, reproducible, instrucciones de publicación |
+| M-ML-045 / M-ML-046 / M-ML-047 / M-ML-048 | `-dirty` → no publicable; paridad que falla → no publicable; `golden_cases.json` = fixture de T03 (`38a58920…`); rendimiento en `export` y en la model card |
+
+**Resultado T05: PASS WITH WARNINGS** — aceptación cumplida salvo lo que por diseño ocurre después del merge (paquete publicable y release, a cargo del responsable); advertencias: T05-H6 (el hash del backend sale del paquete publicable), T05-H7 (`git status` limpio obligatorio), T05-H10 (controles no ejecutados) y las decisiones T05-H1–H5 y T05-H9 (aprobadas). T05 completa con M-ML-049 (APROBADO, César Yael López Trujillo, 2026-11-25); el release `model-v1.0.0` lo publica el responsable a mano después del merge y se verifica en T07.
