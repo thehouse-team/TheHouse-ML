@@ -43,4 +43,20 @@ No contienen datos reales del INEGI.
   `violatedConstraints` o `incomplete` con `missingFields` (perfil sin `budget.max`, `livingWith` o `placeType`). Entradas **sintéticas**. Los esperados salen de un recuento independiente
   (`tests/golden_recount.py`, fracciones exactas, sin importar `thehouse_ml`) y se regeneran con
   `uv run python tests/build_baseline_golden_cases.py`; la prueba exige que el archivo sea idéntico a esa salida.
-  En ML-06 se empaquetan como `golden_cases.json` junto al ONNX.
+  En ML-06 van en el paquete como `baseline_golden_cases.json` (respaldo en C#).
+
+# Casos dorados de ML-06 T03
+
+- `logreg_golden_cases.json`: 109 casos dorados del modelo promovido `logreg-1.0.0` (esquema 2.0.0) para la paridad
+  Python ↔ onnxruntime ↔ backend (.NET, NV-23): las entradas de los 81 casos del baseline (una reemplazada por la
+  regla de margen: `null_all_optional_partial_room_margin`, M-ML-047) más recorte, extremos, factores en su mínimo
+  (`-0`), bordes de redondeo, zona T05-H1 y término fijo; algunos casos son solo vector (`input.features`). Cada caso
+  trae las features sin recortar y recortadas, las salidas esperadas del ONNX sin redondear (`factor_points`,
+  `raw_total`) y el JSON del backend (`breakdown` redondeado y `matchScore`, o `excluded`/`incomplete`). El encabezado
+  lo identifica como derivado de `logreg-1.0.0` (`derived_from`: id, archivo y SHA-256 de `models/logreg.json`).
+  Entradas **sintéticas**; modelo entrenado con datos sintéticos. Los esperados salen de un recuento independiente
+  (`tests/build_logreg_golden_cases.py`: reutiliza `tests/golden_recount.py`, lee `models/logreg.json` como datos y
+  usa fracciones exactas, sin importar `thehouse_ml`) y se regeneran con
+  `cd tests && uv run python build_logreg_golden_cases.py` (requiere el modelo oficial, fuera de git); la prueba
+  `tests/unit/test_logreg_golden_cases.py` exige que el archivo sea idéntico a esa salida y lo omite con motivo sin el
+  modelo. En ML-06 se empaqueta como `golden_cases.json` junto al ONNX (T05).
