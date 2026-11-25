@@ -3,8 +3,8 @@
 | Campo | Valor |
 | --- | --- |
 | Spec | ML-06 1.0.0 (M-ML-044) |
-| Tareas ejecutadas | T01 · Dependencias y exportación verificada (ML-06-R01); T02 · Paridad Python ↔ ONNX (ML-06-R02); T03 · Casos dorados de `logreg-1.0.0` (ML-06-R03); T04 · Rendimiento (ML-06-R04); T05 · Paquete de entrega (ML-06-R05) |
-| Estado | **T01 completa — PASS WITH WARNINGS** (M-ML-045, APROBADO 2026-11-24); **T02 completa — PASS WITH WARNINGS** (M-ML-046, APROBADO 2026-11-24); **T03 completa — PASS WITH WARNINGS** (M-ML-047, APROBADO 2026-11-25); **T04 completa — PASS WITH WARNINGS** (M-ML-048, APROBADO 2026-11-25); **T05 completa — PASS WITH WARNINGS** (M-ML-049, APROBADO 2026-11-25) |
+| Tareas ejecutadas | T01 · Dependencias y exportación verificada (ML-06-R01); T02 · Paridad Python ↔ ONNX (ML-06-R02); T03 · Casos dorados de `logreg-1.0.0` (ML-06-R03); T04 · Rendimiento (ML-06-R04); T05 · Paquete de entrega (ML-06-R05); T06 · Guía de integración (ML-06-R06) |
+| Estado | **T01 completa — PASS WITH WARNINGS** (M-ML-045, APROBADO 2026-11-24); **T02 completa — PASS WITH WARNINGS** (M-ML-046, APROBADO 2026-11-24); **T03 completa — PASS WITH WARNINGS** (M-ML-047, APROBADO 2026-11-25); **T04 completa — PASS WITH WARNINGS** (M-ML-048, APROBADO 2026-11-25); **T05 completa — PASS WITH WARNINGS** (M-ML-049, APROBADO 2026-11-25); **T06 completa — PASS WITH WARNINGS** (M-ML-050, APROBADO 2026-11-25) |
 | Autorización (T01) | «EJECUTA ML-06 1.0.0, task T01. Rama: feat/ml-06-export (ya creada desde main actualizado, con la spec ML-06 1.0.0 aprobada en M-ML-044). Se autoriza modificar pyproject.toml y uv.lock SOLO para agregar las dependencias onnx y onnxruntime que pide la spec (respetando exclude-newer 2026-10-27 de uv). Se autoriza crear/modificar los archivos de código y pruebas que la task T01 indique en el plan de ML-06. Ninguna otra ruta fuera de las listadas en el plan» — César Yael López Trujillo, 2026-11-24 |
 | Rama | `feat/ml-06-export` (commit base `a046abf`, merge del PR #38) |
 | Commit | Sin commit ni push, por instrucción del responsable |
@@ -722,3 +722,153 @@ Sin cambios: `pyproject.toml`, `uv.lock`, `memoria.md`, `onnx_graph.py`, `parity
 | M-ML-045 / M-ML-046 / M-ML-047 / M-ML-048 | `-dirty` → no publicable; paridad que falla → no publicable; `golden_cases.json` = fixture de T03 (`38a58920…`); rendimiento en `export` y en la model card |
 
 **Resultado T05: PASS WITH WARNINGS** — aceptación cumplida salvo lo que por diseño ocurre después del merge (paquete publicable y release, a cargo del responsable); advertencias: T05-H6 (el hash del backend sale del paquete publicable), T05-H7 (`git status` limpio obligatorio), T05-H10 (controles no ejecutados) y las decisiones T05-H1–H5 y T05-H9 (aprobadas). T05 completa con M-ML-049 (APROBADO, César Yael López Trujillo, 2026-11-25); el release `model-v1.0.0` lo publica el responsable a mano después del merge y se verifica en T07.
+
+## T06 · Guía de integración
+
+| Campo | Valor |
+| --- | --- |
+| Autorización | «EJECUTA ML-06 1.0.0, task T06» — César Yael López Trujillo, 2026-11-25. Rama `docs/ml-06-t06` (desde `main` con T01–T05 mezcladas, PR #39–#43). Se autoriza crear `docs/` y los archivos que T06 indica en el plan, más `evidence.md` y `task.md`; **no** `src/`, pruebas, `pyproject.toml`, `uv.lock`, `.gitignore`, `memoria.md` ni `.github/workflows/`. Ampliada en la aprobación: `tests/unit/test_backend_integration_doc.py` (T06-H1), `memoria.md` y `task.md` |
+| Commit base | `59f07bc` (merge del PR #43; el mismo commit del release `model-v1.0.0`) |
+| Commit | Sin commit ni push, por instrucción del responsable |
+| Fecha de ejecución | 2026-11-25 |
+| Estado | **PASS WITH WARNINGS** — T06 completa |
+| Aprobación (T06) | «Apruebo ML-06 T06 (César Yael López Trujillo, 2026-11-25)», con las decisiones: T06-H1, autoriza la prueba de R06 (omitida con motivo sin el paquete o el modelo, como las otras pruebas oficiales), corrida con `test_repo_hygiene`, ruff y mypy estricto; T06-H2, criterio de rendimiento < 20 ms (0.05–0.09 ms solo como lo medido en Python); T06-H3, incidencia aceptada como parte de la publicación inicial; T06-H6, el release no se modifica, `baseline_params.json` se obtiene del repositorio fijado al commit del release con su SHA-256; T06-H5, el modo de redondeo de `Property.Price` queda para la spec de NV-23; autoriza `memoria.md` y `task.md`; T06 completa cuando pase la prueba de R06 |
+| Decisión | **M-ML-050 (APROBADO, 2026-11-25)**, registrada en `memoria.md` |
+
+Lecturas previas: `constitution.md` (§8, §11, §13, §14, §18) → `AGENTS.md` → `memoria.md` (M-ML-022, M-ML-031, M-ML-033, M-ML-041, M-ML-044 a M-ML-049) → `spec.md` (§5, §6.1, §6.4–§6.7, §9 R06, §12), `plan.md` (F3, T06), `task.md` y esta evidencia (T01–T05); `src/thehouse_ml/features/feature_schema.json` 2.0.0, `src/thehouse_ml/universities.py` (`haversine_m`), `src/thehouse_ml/features/pairs.py`, `reports/model_card.md` (§7) y el paquete `dist/model-v1.0.0/` (metadatos, entradas y salidas de `model.onnx`, encabezados y casos de `golden_cases.json` y `baseline_golden_cases.json`, sección 11 de `model_card.md`). NV-12 y NV-23 se citan solo donde aparecen en la spec, el esquema y la model card.
+
+**Prompt ↔ spec:**
+
+1. La spec R06 (§9) pide «una prueba comprueba que los nombres de entradas, salidas, factores y la regla de redondeo citados coinciden con el ONNX y el esquema»; el «EJECUTA» inicial no autorizaba pruebas. En la primera entrega T06 quedó **BLOCKED** (T06-H1); el responsable autorizó la prueba en la aprobación y se agregó.
+2. El prompt pedía «mediana < 1 ms para 200 cuartos»; la spec §6.5 y la constitución §13.5 fijan **< 20 ms**. La guía usa el criterio del contrato y presenta 0.05–0.09 ms como lo medido en Python (T06-H2, confirmado).
+
+### Qué se hizo
+
+1. **`docs/backend-integration.md`** (nuevo, en español, para desarrolladores del backend sin experiencia en ML), 17 secciones:
+   1. Resumen en una página (diagrama del flujo y cinco reglas clave).
+   2. Reparto backend ↔ ONNX (spec §6.1, pasos 1–8).
+   3. Descargar el release por tag, `sha256sum -c SHA256SUMS` y **fijar** el SHA-256 de `model.onnx` en el backend (rechazo si no coincide; ejemplo C#).
+   4. Cargar la `InferenceSession` **una sola vez** y comprobar `metadata_props` (`modelVersion`, `featureSchemaVersion`, `profile`; tabla con los 10 metadatos reales).
+   5. Faltantes, perfil incompleto y HC01–HC03 (texto literal del esquema; ejemplos JSON reales de `golden_cases.json`).
+   6. Las 10 features en el orden de `feature_order`, fórmulas, `range`/`training_range`, factores de transporte, haversine (radio 6371 km) y coordenadas de campus; validación del vector; no recortar en el backend.
+   7. Inferencia: `features` `[N, 10]` double → `factor_points` `[N, 6]` y `raw_total` `[N]` sin redondear (ejemplo C# con `DenseTensor<double>`).
+   8. Redondeo oficial: round6, 1 decimal por factor, `matchScore = floor(round6(raw_total) + 0.5)`, `MidpointRounding.AwayFromZero` (nunca `ToEven`, con los dos casos dorados que lo demuestran), `-0` → `0` (M-ML-046), `maxPoints` desde `maxPointsRaw` (tabla 9.6 / 72.6 / 6.7 / 4.9 / 1.7 / 4.5).
+   9. JSON de respuesta (`matchScore` + `breakdown`) que consume `TheHouse-GenAI`, con el caso real `perfect_100`.
+   10. Ranking por `raw_total` descendente y `room_id` ascendente.
+   11. Casos dorados en .NET: `golden_cases.json` (109: 89 crudos puntuados, 9 solo vector, 6 excluidos, 5 incompletos) y `baseline_golden_cases.json` (81: 70 / 6 / 5), tolerancias, algoritmo y ejemplo xUnit; criterio 0 diferencias en `matchScore` y `points`. El respaldo en C# obtiene `baseline_params.json` de la URL raw fijada al commit `59f07bcfe1fa6cf4a0f183b568c56913980175ee` y verifica su SHA-256 `51b663e840eb0b5d12592802093050e28091bf91279db6aece7c237dd5737111` (T06-H6).
+   12. Desviación conocida **ML-05 T05-H1** (signo de `price_below_min`, cociente > 76.2, máx. +0.124 puntos; no se compensa en el backend).
+   13. Rendimiento esperado (criterio < 20 ms; lo medido en Python; .NET sin medir).
+   14. Qué hacer ante una versión nueva del modelo.
+   15. Nota para `TheHouse-GenAI` (sección 7 de la model card: `maxPoints` no es importancia).
+   16. Lista de verificación final para el backend (incluye la verificación de `baseline_params.json`).
+   17. Lo que la guía no define (modo de redondeo de `Property.Price` → spec de NV-23; latencia en .NET; versión del paquete NuGet; campos del cuarto de NV-12).
+2. **`tests/unit/test_backend_integration_doc.py`** (nuevo, 17 pruebas; R06):
+   - **Sin el paquete (14, corren siempre, también en CI):** tabla de features = `feature_order` del esquema (orden, índices, `range` sin máximo y `training_range`); nombres, tipos y formas de entrada y salida = constantes de `onnx_graph.py` (`INPUT_NAME`, `FACTOR_OUTPUT`, `TOTAL_OUTPUT`, `OPSET`, `IR_VERSION`); orden de factores y sus features, `maxPoints`, conteos por categoría y por tipo, tolerancias, contraejemplos de `ToEven`, caso `-0` y casos `t05_h1_zone` = `tests/fixtures/logreg_golden_cases.json` (y conteos de `baseline_golden_cases.json`); HC01–HC03, campos obligatorios y factores de transporte = esquema; regla de redondeo (`floor(round6(raw_total) + 0.5)`, ningún `Math.Round` sin `AwayFromZero`); el JSON de ejemplo es **igual** a `expected.result` de `perfect_100`; archivos del release y criterio < 20 ms citados; URL raw y SHA-256 de `baseline_params.json` = SHA-256 del blob en `59f07bc` (`git show`; se omite con motivo si el commit no está en el clon).
+   - **Con el paquete del release (3):** entradas y salidas de `model.onnx` (nombres, `tensor(double)`, formas, IR, opset); los 10 `metadata_props` citados con su valor (y `roundingRule` con `half_up` y `AwayFromZero`); `maxPointsRaw` de la tabla = metadato y su redondeo = `maxPoints`; las 6 líneas de `SHA256SUMS` citadas, el SHA-256 de `model.onnx` en `ExpectedModelSha256` y en la tabla fijada, y el tamaño en bytes. Se **omiten con motivo** si `dist/model-v1.0.0/model.onnx` no existe (CI, ML-06-RK05) o si el paquete local no es el del release (`gitCommit` ≠ `59f07bc…` o `profile` ≠ `full`).
+3. Los ejemplos de C# están marcados como **referencia** (no se compilan en este repositorio) y usan nombres genéricos; el único nombre del backend es el puerto `ICompatibilityModel` de la spec.
+4. Todos los valores numéricos se tomaron de archivos: SHA-256 de `SHA256SUMS` del paquete; metadatos, opset, IR, nombres y formas de `model.onnx`; fórmulas, catálogos, reglas para faltantes, HC y `feature_order` de `feature_schema.json`; conteos, tolerancias, ejemplos y casos de redondeo de los casos dorados; SHA-256 de `baseline_params.json` con `git show 59f07bc…:src/thehouse_ml/models/baseline_params.json | sha256sum` (igual al del árbol de trabajo); latencias de M-ML-048/M-ML-049; T05-H1 de M-ML-041.
+
+### Release `model-v1.0.0` e incidencia de publicación
+
+| Campo | Valor |
+| --- | --- |
+| URL | https://github.com/thehouse-team/TheHouse-ML/releases/tag/model-v1.0.0 |
+| Tag / commit | `model-v1.0.0` / `59f07bcfe1fa6cf4a0f183b568c56913980175ee` |
+| SHA-256 de `model.onnx` | `36c867188232a6cfedd949171121f3273f606ba5057dc5d3eb24cafd672bdcc5` (4,380 bytes) — el valor que NV-23 fija |
+| Assets | `model.onnx`, `feature_schema.json`, `golden_cases.json`, `baseline_golden_cases.json`, `model_card.md`, `metrics.json`, `SHA256SUMS` |
+| Verificación por descarga (responsable, 2026-11-25) | Descarga desde GitHub y `SHA256SUMS`: **6/6 OK** |
+| Comprobación local del agente (sin red) | `dist/model-v1.0.0/` en este clon: `sha256sum -c SHA256SUMS` 6 × OK; `model.onnx` = `36c86718…bdcc5` (el mismo del release); metadatos `gitCommit` = `59f07bc…` (sin `-dirty`) y `profile` = `full`; `model_card.md` con «Publicable: **SÍ**» |
+
+**Incidencia de publicación (aceptada, M-ML-050):** al publicar el release, **5 de los 7 assets fallaron al subir desde el navegador**. El responsable los completó **editando el release el mismo día**, sin cambiar el tag, el commit, el título ni la descripción y **sin reemplazar ningún archivo** ya subido; solo se agregaron los 5 que fallaron. La verificación por descarga desde GitHub dio 6/6 OK en `SHA256SUMS` (responsable, 2026-11-25). El responsable **acepta la incidencia como parte de la publicación inicial** del release `model-v1.0.0` (no como una modificación de un release publicado, spec §6.6 y constitución §13.3).
+
+### Comandos y resultados
+
+| Comando | Resultado |
+| --- | --- |
+| `cd dist/model-v1.0.0 && sha256sum -c SHA256SUMS` | 6 × `OK` |
+| `uv run python -c "import onnx; …"` (lectura de `model.onnx` del paquete) | IR 8, opset 17, productor `thehouse-ml` 0.1.0; entrada `features` double `[N, 10]`; salidas `factor_points` double `[N, 6]` y `raw_total` double `[N]`; 10 `metadata_props` |
+| `git show 59f07bc…:src/thehouse_ml/models/baseline_params.json \| sha256sum` | `51b663e840eb0b5d12592802093050e28091bf91279db6aece7c237dd5737111` (igual al archivo del árbol de trabajo) |
+| `uv run pytest tests/unit/test_backend_integration_doc.py tests/test_repo_hygiene.py -q -rs` | **78 passed** (17 de la guía + 61 de higiene), 0 omitidas, con el paquete del release presente |
+| La misma prueba de la guía **sin** `dist/` (movido temporalmente fuera del repositorio y restaurado; simula CI) | **14 passed, 3 skipped** con motivo «`dist/model-v1.0.0/model.onnx` ausente (fuera de git; se genera con `export`, ML-06-RK05)» |
+| `uv run ruff check tests/unit/test_backend_integration_doc.py` | All checks passed (tras quitar un guion largo del docstring, RUF002, y usar `shutil.which("git")` como el resto del repositorio, S607) |
+| `uv run ruff format --check tests/unit/test_backend_integration_doc.py` | 1 file already formatted |
+| `uv run mypy --strict tests/unit/test_backend_integration_doc.py` | Success: no issues found in 1 source file |
+
+Correcciones durante la ejecución: la comprobación provisional de la primera entrega detectó HC02/HC03 parafraseadas (se pasaron al texto literal del esquema); la prueba detectó un formato de tolerancia (`1e-06` vs `1e-6`) que se resolvió en la prueba, no en la guía.
+
+**No ejecutados** (no se reportan como PASS): suite completa (por instrucción del responsable; CI del PR y T07); gitleaks local (no instalado en esta máquina; CI del PR; la guía no contiene tokens, contraseñas ni cadenas de conexión: búsqueda de `password|secret|token|apikey|api_key|connectionstring` sin resultados); verificación del release por descarga hecha por el agente (no se usó la red; consta la del responsable); compilación de los ejemplos de C# (por diseño son referencia).
+
+### Archivos
+
+| Archivo | Cambio |
+| --- | --- |
+| `docs/backend-integration.md` | Nuevo (guía de integración para NV-23) |
+| `tests/unit/test_backend_integration_doc.py` | Nuevo (17 pruebas de coherencia, R06) |
+| `specs/ml-06-onnx-export/evidence.md` | Encabezado y esta sección |
+| `specs/ml-06-onnx-export/task.md` | T06 marcada como completa |
+| `memoria.md` | M-ML-050 (APROBADO) |
+
+Sin cambios: `src/`, otras pruebas, `pyproject.toml`, `uv.lock`, `.gitignore`, `.github/workflows/`, `reports/`, modelos, `feature_schema.json`, params y el release.
+
+### Aceptación de T06 (ML-06-R06)
+
+| Criterio (spec §6.7 y §9 R06) | Resultado |
+| --- | --- |
+| Contrato de entrada (`features` `[N, 10]` double, orden de `feature_order`) y de salida (`factor_points`, `raw_total`, metadatos) | ✅ §4, §6, §7 |
+| Cálculo de las 10 features con el esquema 2.0.0 (fórmulas, faltantes, transporte) | ✅ §5.1, §6 |
+| Orden de los pasos (faltantes → incompleto → restricciones → features → ONNX → redondeo → JSON → ranking) | ✅ §1, §2 |
+| Redondeo en .NET (round6 y `Math.Round(x, d, MidpointRounding.AwayFromZero)`, con los bordes de los casos dorados) y `-0` → `0` (M-ML-046) | ✅ §8 |
+| Correr `golden_cases.json` y `baseline_golden_cases.json` en .NET con `Microsoft.ML.OnnxRuntime` (ejemplo xUnit/NUnit sin dependencias de pago) | ✅ §11 |
+| Descarga y verificación del release; SHA-256 de `model.onnx` fijado en el backend | ✅ §3 |
+| Desviación ML-05 T05-H1 (zona, magnitud, no se corrige en `logreg-1.0.0`) | ✅ §12 |
+| Nota de la §7 de la model card sobre `maxPoints` para `TheHouse-GenAI` | ✅ §15 |
+| **Una prueba** comprueba que los nombres de entradas, salidas, factores y la regla de redondeo citados coinciden con el ONNX y el esquema | ✅ `tests/unit/test_backend_integration_doc.py`: 17/17 con el paquete; 14 + 3 omitidas con motivo sin él |
+
+### Hallazgos
+
+| ID | Clasificación | Hallazgo | Acción |
+| --- | --- | --- | --- |
+| T06-H1 | Resuelto | R06 exige una prueba de coherencia; el «EJECUTA» inicial no autorizaba `tests/` | Autorizada en la aprobación; `tests/unit/test_backend_integration_doc.py` en verde |
+| T06-H2 | Desviación prompt ↔ spec | El prompt pedía «mediana < 1 ms»; el contrato es < 20 ms (spec §6.5, constitución §13.5) | Confirmado: criterio < 20 ms; 0.05–0.09 ms solo como lo medido en Python |
+| T06-H3 | Advertencia | Incidencia de publicación del release (5 de 7 assets fallaron; completados editando el release el mismo día, sin reemplazar archivos; 6/6 OK) | Aceptada como parte de la publicación inicial (M-ML-050) |
+| T06-H4 | Informativo | `maxPointsRaw` difiere en el último dígito entre el metadato del ONNX (p. ej. 6.733606109723173) y `golden_cases.json` (6.733606109723172, recuento exacto); los `maxPoints` redondeados son idénticos. La guía indica leerlos del metadato y la prueba lo comprueba | Ninguna |
+| T06-H5 | Pendiente fuera de alcance | El modo de redondeo de `Property.Price` a `price_mxn` no está fijado en el esquema | Spec de NV-23 del backend (guía §17) |
+| T06-H6 | Advertencia | `baseline_params.json` no está entre los 7 archivos del release; el release **no se modifica** | La guía fija la URL raw al commit `59f07bc…` y el SHA-256 `51b663e8…37111`; si debe ir dentro del paquete, será `model-v1.0.1` (pendiente para T07) |
+| T06-H7 | Advertencia | Los ejemplos de C# no se compilan ni se prueban aquí (referencia, por instrucción); la latencia en .NET no está medida | Validación en el backend (NV-23) |
+| T06-H8 | Control no ejecutado | Suite completa, gitleaks local y verificación del release por descarga hecha por el agente | CI del PR; T07 |
+
+### Decisión registrada (APROBADO, `memoria.md`)
+
+**M-ML-050 — ML-06 T06: guía de integración para el backend (NV-23)**
+
+- **Decisión:** completar **ML-06 T06** (ML-06-R06) con estas elecciones:
+  1. **Guía** `docs/backend-integration.md` en español, 17 secciones; ejemplos de C# marcados como referencia, con nombres genéricos (solo `ICompatibilityModel` viene de la spec).
+  2. **Valores fijados para NV-23:** tag `model-v1.0.0`; SHA-256 de `model.onnx` `36c867188232a6cfedd949171121f3273f606ba5057dc5d3eb24cafd672bdcc5`; `modelVersion` `logreg-1.0.0`; `featureSchemaVersion` `2.0.0`; `profile` `full`. El backend verifica `SHA256SUMS` en el build y rechaza el modelo si el hash fijado no coincide.
+  3. **Redondeo en .NET:** round6 y 1 decimal por factor, `matchScore = floor(round6(raw_total) + 0.5)`, siempre `MidpointRounding.AwayFromZero`; `maxPoints` desde `maxPointsRaw`; `-0` → `0` (M-ML-046).
+  4. **Rendimiento (T06-H2):** criterio < 20 ms (spec §6.5, constitución §13.5); 0.05–0.09 ms solo como lo medido en Python.
+  5. **Prueba de R06 (T06-H1):** `tests/unit/test_backend_integration_doc.py`; las comprobaciones del paquete se omiten con motivo sin `dist/model-v1.0.0/` o si no es el paquete del release.
+  6. **Incidencia del release (T06-H3):** aceptada como parte de la publicación inicial de `model-v1.0.0` (mismo día, ningún archivo reemplazado, solo se completaron los 5 assets que fallaron; verificación por descarga del responsable 6/6 OK, 2026-11-25).
+  7. **`baseline_params.json` (T06-H6):** el release no se modifica; el respaldo en C# lo obtiene de la URL raw fijada al commit `59f07bcfe1fa6cf4a0f183b568c56913980175ee` y verifica su SHA-256 `51b663e840eb0b5d12592802093050e28091bf91279db6aece7c237dd5737111`. Si en el futuro debe ir dentro del paquete, será en una versión nueva (`model-v1.0.1`).
+  8. **`Property.Price` (T06-H5):** el modo de redondeo a `price_mxn` queda para la spec de NV-23 del backend.
+- **Evidencia:** `specs/ml-06-onnx-export/evidence.md` (T06): 78 pruebas en verde (17 de la guía + 61 de higiene) con el paquete; 14 + 3 omitidas con motivo sin él; ruff y mypy estricto sin errores; `SHA256SUMS` del paquete 6 × OK.
+- **Pendientes (T07):** suite completa y gitleaks en el CI del PR; decidir si `baseline_params.json` entra en el paquete en `model-v1.0.1`; actualizar `specs/README.md` y `specs/ARQUITECTURA.md`; errata de la §6.4 y mypy preexistente en `tests/` (heredados).
+- **Estado:** APROBADO — César Yael López Trujillo — 2026-11-25.
+- **Fecha:** 2026-11-25.
+- **Impacto:** T06 de ML-06 completa (6/7) — PASS WITH WARNINGS; T07 sigue sin ejecutar hasta su «EJECUTA». Sin cambios en código de `src/`, modelos, `feature_schema.json`, params, dependencias, CI ni el release.
+
+### Seguridad, datos y licencias
+
+- Sin datos personales: la guía y la prueba usan entradas inventadas de los casos dorados, parámetros del modelo y coordenadas públicas de campus. Etiquetadas como **DATOS SINTÉTICOS**.
+- Sin secretos, tokens, contraseñas ni cadenas de conexión de ejemplo (nota de gitleaks); los SHA-256 son hashes públicos de archivos.
+- Sin red, sin `gh` ni API de GitHub; sin dependencias nuevas (la prueba usa `onnx`, ya en `uv.lock`, y `git`). Las bibliotecas que la guía menciona para el backend son de código abierto y gratuitas (`Microsoft.ML.OnnxRuntime` MIT, xUnit Apache-2.0, NUnit MIT); COST-001 $0.
+
+### Coherencia
+
+| Documento | Comprobación |
+| --- | --- |
+| `constitution.md` §8, §11.1, §13, §14.3, §18 | Etiqueta sintética; excluidos no se puntúan; casos dorados para .NET, 200 cuartos < 20 ms, release no modificado (la incidencia se aceptó como publicación inicial); SHA-256 verificado y fijado, también para `baseline_params.json`; cambio de esquema = versión mayor |
+| `AGENTS.md` | Documento en español, código en inglés; sin commit ni push; controles no ejecutados declarados; M-ML-050 y T06 registrados solo tras el «Apruebo» |
+| Spec §6.1, §6.6, §6.7, R06 | Pasos y reparto; descarga por tag y hash fijado; contenidos de la §6.7; prueba de coherencia en verde |
+| M-ML-041 / M-ML-046 / M-ML-047 / M-ML-048 / M-ML-049 | Formato y `maxPoints`; `-0` → `0`; 109 casos y tolerancias; latencia; paquete de 7 archivos y SHA-256 del release |
+
+**Resultado T06: PASS WITH WARNINGS** — aceptación de R06 cumplida (guía y prueba de coherencia en verde). Advertencias: T06-H3 (incidencia del release, aceptada), T06-H6 (`baseline_params.json` fuera del release, fijado por commit y SHA-256), T06-H7 (C# de referencia; latencia .NET sin medir) y T06-H8 (controles no ejecutados: suite completa, gitleaks). T06 completa con M-ML-050 (APROBADO, César Yael López Trujillo, 2026-11-25).
