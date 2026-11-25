@@ -8,14 +8,14 @@
 | Fecha | 2026-11-24 |
 | Estado documental | **✅ APROBADA — 1.0.0** |
 | Aprobación humana | César Yael López Trujillo — 2026-11-24 (M-ML-044) |
-| Estado de ejecución | **⛔ NO EJECUTAR HASTA «EJECUTA»** |
+| Estado de ejecución | **🟡 EN EJECUCIÓN — T01 completa (1/7), 2026-11-24 (M-ML-045); T02–T07 ⛔ NO EJECUTAR HASTA «EJECUTA»; ver `evidence.md`** |
 | Autoridad | `constitution.md` → `AGENTS.md` → `memoria.md` |
 | Tasks totales | 7 |
-| Tasks completadas | 0 |
+| Tasks completadas | 1 |
 
 ## Reglas de esta lista
 
-1. Todas las tasks están abiertas; escribir este documento no completa ninguna.
+1. T01 completa (2026-11-24, M-ML-045) con evidencia en `evidence.md`; T02–T07 abiertas. Escribir este documento no completa ninguna.
 2. Una task solo se completa con aceptación, evidencia reproducible y revisión.
 3. Ninguna task se ejecuta sin «EJECUTA». Las decisiones 1–5 de la spec §10 están APROBADAS (M-ML-044).
 4. Un control no ejecutado no se reporta como PASS (en particular, las pruebas que necesitan el modelo oficial y se omiten en CI).
@@ -23,7 +23,7 @@
 
 ## F1 — Diseño y contrato
 
-- [ ] **T01 · Dependencias y exportación verificada** — Requisito: ML-06-R01 · Decisiones: 1, 2, 5 · Aceptación: `onnx` y `onnxruntime` en `pyproject.toml` y `uv.lock` (`uv lock --check`, pip-audit limpio, decisión M-ML con versiones, licencias y opset); `export` verifica el SHA-256 de `logreg.json` y construye el grafo de la spec §6.2 en double con sus metadatos; `onnx.checker` sin errores; onnxruntime CPU lo ejecuta sobre los pares de test; `model.onnx` idéntico en dos ejecuciones.
+- [x] **T01 · Dependencias y exportación verificada** — Requisito: ML-06-R01 · Decisiones: 1, 2, 5 · Aceptación: `onnx` y `onnxruntime` en `pyproject.toml` y `uv.lock` (`uv lock --check`, pip-audit limpio, decisión M-ML con versiones, licencias y opset); `export` verifica el SHA-256 de `logreg.json` y construye el grafo de la spec §6.2 en double con sus metadatos; `onnx.checker` sin errores; onnxruntime CPU lo ejecuta sobre los pares de test; `model.onnx` idéntico en dos ejecuciones.
 
 ## F2 — Implementación
 
@@ -44,7 +44,7 @@
 
 | Task | Requisito | Decisiones | Fase | Estado |
 | --- | --- | --- | --- | --- |
-| T01 | R01 | 1, 2, 5 | F1 | ABIERTA |
+| T01 | R01 | 1, 2, 5 | F1 | COMPLETA — PASS WITH WARNINGS (M-ML-045; `/dist/` en `.gitignore` y paquete publicable en T05; gitleaks y suite completa en el CI del PR) |
 | T02 | R02 | 2 | F2 | ABIERTA |
 | T03 | R03 | 1, 3 | F2 | ABIERTA |
 | T04 | R04 | — | F3 | ABIERTA |

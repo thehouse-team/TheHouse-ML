@@ -32,4 +32,6 @@ def test_console_script_runs_a_stage(tmp_path: Path) -> None:
     )
 
     assert result.returncode == 0
-    assert result.stdout.strip() == "export: pendiente de ML-06"
+    # ML-06 T01: sin `models/logreg.json`, `export` se omite sin escribir archivos.
+    assert result.stdout.strip() == "export: omitido; falta models/logreg.json (ejecute `train`)"
+    assert list(tmp_path.iterdir()) == []

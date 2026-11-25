@@ -11,6 +11,8 @@ authors = [{ name = "TheHouse team" }]
 # desde la tabla de la constitution §5.
 dependencies = [
     "lightgbm>=4.7.0",
+    "onnx>=1.23.2",
+    "onnxruntime>=1.31.1",
     "pandas>=3.1.0",
     "pyarrow>=26.0.0",
     "scikit-learn>=1.9.1",
@@ -76,6 +78,12 @@ ignore_missing_imports = true
 # constitution §5); lightgbm sí lo publica y no necesita excepción (ML-05 T01).
 [[tool.mypy.overrides]]
 module = ["sklearn", "sklearn.*"]
+ignore_missing_imports = true
+
+# onnxruntime no publica py.typed (sin stubs en la tabla de stack de la constitution §5);
+# onnx sí lo publica y no necesita excepción (ML-06 T01, M-ML-045).
+[[tool.mypy.overrides]]
+module = ["onnxruntime", "onnxruntime.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
