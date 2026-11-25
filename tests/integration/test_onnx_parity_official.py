@@ -152,6 +152,6 @@ def test_export_stage_reports_formal_parity(official_root: Path) -> None:
 
     assert "paridad Python <-> onnxruntime CPU" in message
     assert "pares de test: omitido; faltan los datos de data/processed/" in message  # raíz temporal sin datos
-    assert "rejilla fuera del training_range: 380 vectores" in message
-    assert message.rstrip().endswith("-> PASS")
+    grid = next(line for line in message.splitlines() if "rejilla fuera del training_range: 380 vectores" in line)
+    assert grid.rstrip().endswith("-> PASS")  # T05: el mensaje sigue con casos dorados, rendimiento y paquete
     message.encode("cp1252")  # consola de Windows (M-ML-045)
